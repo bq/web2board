@@ -36,10 +36,21 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
 
-    grunt.registerTask('build', [
-        'clean',
-        'copy:winx86'
-    ]);
+    grunt.registerTask('build', function(target) {
+
+        if (target) {
+            return grunt.task.run([
+                'clean',
+                'copy:' + target
+            ]);
+        } else {
+            return grunt.task.run([
+                'clean',
+                'copy:winx86',
+                'copy:macx86'
+            ]);
+        }
+    });
 
     grunt.registerTask('mac', [
         'clean',
@@ -47,6 +58,6 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask('default', function() {
-        grunt.log.write('use build ').ok();
+        grunt.log.write('use build or build:<platform> ').ok();
     });
 };
