@@ -15,21 +15,21 @@ module.exports = function(grunt) {
                     dest: 'dist/windows/x86/'
                 }]
             },
-            macx86: {
+            macx64: {
                 files: [{
                     expand: true,
-                    src: 'app.js',
-                    dest: 'dist/mac/x86/'
+                    cwd: 'distResources/mac/x64/',
+                    src: '**',
+                    dest: 'dist/mac/x64/',
                 }, {
                     expand: true,
-                    cwd: 'distResources/mac/x86/',
-                    src: 'node',
-                    dest: 'dist/mac/x86/',
+                    cwd: 'app/',
+                    src: '**',
+                    dest: 'dist/mac/x64/Bitbloq.app/Contents/Resources/app/'
                 }],
                 options: {
-                    mode: 0755
+                    mode: true
                 }
-
             }
         }
     });
@@ -47,15 +47,10 @@ module.exports = function(grunt) {
             return grunt.task.run([
                 'clean',
                 'copy:winx86',
-                'copy:macx86'
+                'copy:macx64'
             ]);
         }
     });
-
-    grunt.registerTask('mac', [
-        'clean',
-        'copy:macx86'
-    ]);
 
     grunt.registerTask('default', function() {
         grunt.log.write('use build or build:<platform> ').ok();
