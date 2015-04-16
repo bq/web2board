@@ -6,13 +6,56 @@ module.exports = function(grunt) {
             winx86: {
                 files: [{
                     expand: true,
-                    src: 'app.js',
-                    dest: 'dist/windows/x86/'
+                    cwd: 'distResources/windows/x86/',
+                    src: '**',
+                    dest: 'dist/windows/x86/',
                 }, {
                     expand: true,
-                    cwd: 'distResources/windows/x86/',
-                    src: '*',
-                    dest: 'dist/windows/x86/'
+                    cwd: 'app/',
+                    src: ['**', '!appResources/**'],
+                    dest: 'dist/windows/x86/resources/app/'
+                }]
+            },
+            macx86: {
+                files: [{
+                    expand: true,
+                    cwd: 'distResources/mac/x86/',
+                    src: '**',
+                    dest: 'dist/mac/x86/',
+                }, {
+                    expand: true,
+                    cwd: 'app/',
+                    src: ['**', '!appResources/**'],
+                    dest: 'dist/mac/x86/Bitbloq.app/Contents/Resources/app/'
+                }],
+                options: {
+                    mode: true
+                }
+            },
+            linuxx86: {
+                files: [{
+                    expand: true,
+                    cwd: 'distResources/linux/x86/',
+                    src: '**',
+                    dest: 'dist/linux/x86/',
+                }, {
+                    expand: true,
+                    cwd: 'app/',
+                    src: ['**', '!appResources/**'],
+                    dest: 'dist/linux/x86/resources/app/'
+                }]
+            },
+            winx64: {
+                files: [{
+                    expand: true,
+                    cwd: 'distResources/windows/x64/',
+                    src: '**',
+                    dest: 'dist/windows/x64/',
+                }, {
+                    expand: true,
+                    cwd: 'app/',
+                    src: ['**', '!appResources/**'],
+                    dest: 'dist/windows/x64/resources/app/'
                 }]
             },
             macx64: {
@@ -24,12 +67,25 @@ module.exports = function(grunt) {
                 }, {
                     expand: true,
                     cwd: 'app/',
-                    src: '**',
+                    src: ['**', '!appResources/**'],
                     dest: 'dist/mac/x64/Bitbloq.app/Contents/Resources/app/'
                 }],
                 options: {
                     mode: true
                 }
+            },
+            linuxx64: {
+                files: [{
+                    expand: true,
+                    cwd: 'distResources/linux/x64/',
+                    src: '**',
+                    dest: 'dist/linux/x64/',
+                }, {
+                    expand: true,
+                    cwd: 'app/',
+                    src: ['**', '!appResources/**'],
+                    dest: 'dist/linux/x64/resources/app/'
+                }]
             }
         }
     });
@@ -47,7 +103,11 @@ module.exports = function(grunt) {
             return grunt.task.run([
                 'clean',
                 'copy:winx86',
-                'copy:macx64'
+                'copy:macx86',
+                'copy:linuxx86',
+                'copy:winx64',
+                'copy:macx64',
+                'copy:linuxx64'
             ]);
         }
     });
