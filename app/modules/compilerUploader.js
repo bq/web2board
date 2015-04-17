@@ -8,79 +8,137 @@
     var exec = require('child_process').exec;
     var mkdirp = require('mkdirp');
     var fs = require('fs');
+    var commonMakefile = '';
+    fs.readFile('app/res/makefile', 'utf8', function(err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        commonMakefile = data;
+    });
+    //Quick hack to resolve the absolute path of the app/ dir
+    var appDir = __dirname.substr(0, __dirname.length - 7);
+    var arduino_dir = appDir + "/res/arduino-1.0.6";
+
+    function getIndicesOf(searchStr, str, caseSensitive) {
+        var startIndex = 0,
+            searchStrLen = searchStr.length;
+        var index, indices = [];
+        if (!caseSensitive) {
+            str = str.toLowerCase();
+            searchStr = searchStr.toLowerCase();
+        }
+        while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+            indices.push(index);
+            startIndex = index + searchStrLen;
+        }
+        return indices;
+    }
+
+    function parseLibs(code) {
+        var initIndex = getIndicesOf("#include", code, false);
+        var dummy = [];
+        for (var i in initIndex) {
+            var finalIndex = code.indexOf(".h>", initIndex[i]);
+            var a = code.substr(initIndex[i], finalIndex - initIndex[i]);
+            a = a.substr(a.indexOf("<") + 1, a.length);
+            dummy.push(a);
+        }
+        return dummy.join(' ');
+    };
 
     function createEnvironment(board, port, program, callback) {
-        //Create the folder if it does not exist
-        mkdirp('/tmp/web2board', function(err) {
+        //Perform operations on program.code so it compiles correctly
+        var libs = parseLibs(program.code);
+        var programCode = program.code;
+        programCode = programCode.replace(new RegExp('\\n', 'g'), '\r\n', function() {});
+        // Create the /tmp folder if it does not exist
+        mkdirp('tmp', function(err) {
             if (err) console.error(err)
             else {
                 //Once the folder is created, create the sketch file
-                fs.writeFile("/tmp/web2board/sketch.ino", program.code, function(err) {
+                fs.writeFile("tmp/tmp.ino", programCode, function(err) {
                     if (err) {
                         return console.log(err);
                     }
-                    console.log("The file was saved!");
+                    //Then, create the makeFile
+                    var initMakefile = "ARDLIBS = " + libs + "\nMODEL = " + board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + arduino_dir + "/sketchbook/libraries\n\n";
+                    fs.writeFile("tmp/Makefile", initMakefile + commonMakefile, function(err) {
+                        if (err) {
+                            return console.log(err);
+                        }
+                        callback();
+                    });
                 });
-                //Then, create the makeFile
-                var makefileContent = "BOARD_TAG = " + board + "\n" + "ARDUINO_LIBS = \n" + "ARDUINO_PORT = " + port + "\n" + "include /usr/share/arduino/Arduino.mk";
-                fs.writeFile("/tmp/web2board/Makefile", makefileContent, function(err) {
-                    if (err) {
-                        return console.log(err);
-                    }
-                    console.log("The file was saved!");
-                });
-                callback();
             }
         });
     };
+
+    function parseError(error, stdout, stderr) {
+        var error = {
+            compilation: [],
+            uploading: ''
+        };
+        //Parse errors comming from stderr regarding the compilation:
+        // console.log('error:\n', error);
+        // console.log('stdout:\n', stdout);
+        stderr = stderr.substr(0, stderr.indexOf("make:"));
+        stderr = stderr.split("applet/tmp.cpp:");
+        // console.log('stderr:\n', stderr);
+        for (var i in stderr) {
+            var line, func, err;
+            var index = stderr[i].indexOf(":");
+            if (index > 0) {
+                if (!isNaN(parseInt(stderr[i].substr(0, index), 10))) {
+                    line = parseInt(stderr[i].substr(0, index));
+                    err = stderr[i].substr(stderr[i].indexOf("error:") + 6, stderr[i].length);
+                } else {
+                    func = stderr[i];
+                }
+            }
+            if (line && func && index) {
+                error.compilation.push({
+                    line: line,
+                    func: func,
+                    error: err
+                });
+                line = undefined;
+                err = undefined;
+                index = undefined;
+                // console.log('line--->', line, '\nerror--->', err, '\nfunc--->', func);
+                console.log('---------------------------------------------------');
+            }
+        }
+        //Parse errors comming from stderr regarding the uploading (AVRDUDE):
+        console.log('error', error);
+        if (error.compilation.length === 0) {
+            console.log('NO ERRORS, COMPILATION SUCCESSFUL');
+        }
+        return error;
+    }
 
     function compile(board, port, program) {
         createEnvironment(board, port, program, function() {
             //Finally, execute the "make" command on the given directory
             exec('make', {
-                cwd: '/tmp/web2board',
+                cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('compiling...\n');
-                console.log('error:\n', error);
-                console.log('stdout:\n', stdout);
-                console.log('stderr:\n', stderr);
+                return parseError(error, stdout, stderr);
             });
         });
     };
 
     function upload(board, port, program) {
         createEnvironment(board, port, program, function() {
-            //Finally, execute the "make" command on the given directory
+            // //Finally, execute the "make" command on the given directory
             exec('make upload', {
-                cwd: '/tmp/web2board',
+                cwd: '/tmp',
             }, function(error, stdout, stderr) {
                 console.log('uploading...\n');
-                console.log('error:\n', error);
-                console.log('stdout:\n', stdout);
-                console.log('stderr:\n', stderr);
+                return parseError(error, stdout, stderr);
             });
         });
     };
     module.exports.compile = compile;
     module.exports.upload = upload;
 })();
-// class Compiler:
-//  def __init__(self, board='bt328',port='/dev/ttyUSB0', baudRate=19200):
-//      self.board = board
-//      self.port = port
-//      self.baudRate = baudRate
-//      self.pathToMain = os.path.dirname(os.path.realpath("main.py"))
-//      self.createMakefile()
-//  def createMakefile(self):
-//  def compile(self):
-//      os.chdir("tmp")
-//      call(["make"])
-//  def upload(self):
-//      os.chdir("tmp")
-//      call(["make", "upload"])
-//      self.removeTmp()
-//  def removeTmp(self):
-//      print 'path:', self.pathToMain
-//      call(["cd", self.pathToMain+"/"])
-//      call(["ls"])
-//      call(["rm", "-rf", "tmp"])

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello World!</title>
+    </head>
+    <body>
+        <h1>Hello World2!</h1>
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="bower_components/socket.io-client/socket.io.js"></script>
+        <script>
+        var socket = io('http://localhost:9999');
+        socket.on('news', function (data) {
+            console.log(data);
+                socket.emit('compile', { code: '/*\n Renacuajo\n*/\n#include <Servo.h>\n\nServo left; \nServo right; \n\nvoid setup() {\n left.attach(12); \n right.attach(13); \n     \n //forward: \n left.write(0); \n right.write(180);\n delay(1300); \n \n for (int i=0; i<2;i++){\n   //left\n   left.write(180); \n   right.write(180);\n   delay(300); \n    //forward: \n   left.write(0); \n   right.write(180);\n   delay(300); \n } \n \n //stop & think\n left.write(0); \n right.write(180);\n delay(10); \n \n    //left\n   left.write(180); \n   right.write(180);\n   delay(2900); \n   \n   //forward: \n left.write(0); \n right.write(180);\n delay(800); \n\n\n    //right\n   left.write(0); \n   right.write(0);\n   delay(4400); \n\n\n\n //stop & think\n left.write(0); \n right.write(180);\n delay(10); \n \n //backwards: \n left.write(180); \n right.write(0);\n delay(500); \n     //right\n left.write(0); \n right.write(0);\n delay(480); \n \n    //backwards: \n left.write(180); \n right.write(0);\n delay(1000); \n   \n   \n left.detach(); \n right.detach();\n}\n\n// the loop routine runs over and over again forever:\nvoid loop() {\n}' });
+            });
+            </script>
+        </body>
+    </html>
