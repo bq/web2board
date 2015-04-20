@@ -37,11 +37,20 @@ app.on('ready', function() {
             hello: 'world'
         });
         socket.on('compile', function(data) {
-            compilerUploader.compile(data, socket);
+            compilerUploader.compile(data, function(response) {
+                socket.emit('compileResponse', {
+                    stdout: response.stdout,
+                    stderr: response.stderr
+                });
+            });
         });
         socket.on('upload', function(data) {
-            compilerUploader.upload(data, socket);
-        });
+            compilerUploader.upload(data, function(response) {
+                socket.emit('uploadResponse', {
+                    stdout: response.stdout,
+                    stderr: response.stderr
+                });
+            });        });
         socket.on('serialMonitor', function(data) {
             serialMonitor.start('/dev/ttyUSB0');
         });

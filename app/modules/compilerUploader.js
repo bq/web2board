@@ -62,11 +62,11 @@
             var a = code.substr(initIndex[i], finalIndex - initIndex[i]);
             a = a.substr(a.indexOf("<") + 1, a.length);
             //If the library is official, we push it in libs.arduino.
-            if (arduinoLibs.indexOf(a) >= 0) {  //If the library is one of the Arduino's official libraries:
+            if (arduinoLibs.indexOf(a) >= 0) { //If the library is one of the Arduino's official libraries:
                 libs.arduino.push(a);
             }
             //Otherwise, push it in libs.user
-            else{
+            else {
                 libs.user.push(a);
             }
         }
@@ -150,7 +150,7 @@
         return error;
     }
 
-    function compile(data, socket) {
+    function compile(data, callback) {
         createEnvironment(data, function() {
             // Finally, execute the "make" command on the given directory
             exec(makeCommand, {
@@ -160,7 +160,7 @@
                 // console.log('stderr', stderr);
                 // console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
-                socket.emit('compileResponse', {
+                callback( {
                     stdout: stdout,
                     stderr: stderr
                 });
@@ -168,17 +168,17 @@
         });
     };
 
-    function upload(data, socket) {
+    function upload(data, callback) {
         createEnvironment(data, function() {
             // //Finally, execute the "make" command on the given directory
             exec(makeUploadCommand, {
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('uploading...\n');
-                //  console.log('stderr', stderr);
-                // console.log('stdout', stdout);
+                console.log('stderr', stderr);
+                console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
-                socket.emit('uploadResponse', {
+                callback( {
                     stdout: stdout,
                     stderr: stderr
                 });
