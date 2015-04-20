@@ -28,6 +28,7 @@ else
  endif
 endif
 
+#Set the ports depending on the OS and the type of board we are using
 ifeq "$(UNAME)" "Windows"
  PORT ?= COM1 #XXX needs to be checked !
 else

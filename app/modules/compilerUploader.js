@@ -46,10 +46,10 @@
         return dummy.join(' ');
     };
 
-    function createEnvironment(board, port, program, callback) {
+    function createEnvironment(data, callback) {
         //Perform operations on program.code so it compiles correctly
-        var libs = parseLibs(program.code);
-        var programCode = program.code;
+        var libs = parseLibs(data.code);
+        var programCode = data.code;
         programCode = programCode.replace(new RegExp('\\n', 'g'), '\r\n', function() {});
         // Create the /tmp folder if it does not exist
         mkdirp('tmp', function(err) {
@@ -61,7 +61,7 @@
                         return console.log(err);
                     }
                     //Then, create the makeFile
-                    var initMakefile = "ARDLIBS = " + libs + "\nMODEL = " + board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + arduino_dir + "/sketchbook/libraries\n\n";
+                    var initMakefile = "ARDLIBS = " + libs + "\nMODEL = " + data.board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + arduino_dir + "/sketchbook/libraries\n\n";
                     fs.writeFile("tmp/Makefile", initMakefile + commonMakefile, function(err) {
                         if (err) {
                             return console.log(err);
@@ -81,18 +81,18 @@
         //Parse errors comming from stderr regarding the compilation:
         // console.log('error:\n', error);
         // console.log('stdout:\n', stdout);
-        stderr = stderr.substr(0, stderr.indexOf("make:"));
-        stderr = stderr.split("applet/tmp.cpp:");
-        // console.log('stderr:\n', stderr);
-        for (var i in stderr) {
+        var compileStderr = stderr.substr(0, stderr.indexOf("make:"));
+        compileStderr = compileStderr.split("applet/tmp.cpp:");
+        // console.log('compileStderr:\n', compileStderr);
+        for (var i in compileStderr) {
             var line, func, err;
-            var index = stderr[i].indexOf(":");
+            var index = compileStderr[i].indexOf(":");
             if (index > 0) {
-                if (!isNaN(parseInt(stderr[i].substr(0, index), 10))) {
-                    line = parseInt(stderr[i].substr(0, index));
-                    err = stderr[i].substr(stderr[i].indexOf("error:") + 6, stderr[i].length);
+                if (!isNaN(parseInt(compileStderr[i].substr(0, index), 10))) {
+                    line = parseInt(compileStderr[i].substr(0, index));
+                    err = compileStderr[i].substr(compileStderr[i].indexOf("error:") + 6, compileStderr[i].length);
                 } else {
-                    func = stderr[i];
+                    func = compileStderr[i];
                 }
             }
             if (line && func && index) {
@@ -109,33 +109,47 @@
             }
         }
         //Parse errors comming from stderr regarding the uploading (AVRDUDE):
-        console.log('error', error);
-        if (error.compilation.length === 0) {
-            console.log('NO ERRORS, COMPILATION SUCCESSFUL');
+        var uploadStderr = stderr.split("avrdude:");
+        if (uploadStderr[uploadStderr.length - 1].search('bytes of flash written') > 0) {
+            console.log('UPLOADED CORRECTLY');
+        } else {
+            error.uploading = uploadStderr.join('');
         }
+        console.log('error', error);
+        // if (error.compilation.length === 0) {
+        //     console.log('NO ERRORS, COMPILATION SUCCESSFUL');
+        // }
         return error;
     }
 
-    function compile(board, port, program) {
-        createEnvironment(board, port, program, function() {
+    function compile(data, socket) {
+        createEnvironment(data, function() {
             //Finally, execute the "make" command on the given directory
             exec('make', {
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('compiling...\n');
-                return parseError(error, stdout, stderr);
+                // return parseError(error, stdout, stderr);
+                socket.emit('compileResponse', {
+                    stdout: stdout,
+                    stderr: stderr
+                });
             });
         });
     };
 
-    function upload(board, port, program) {
-        createEnvironment(board, port, program, function() {
+    function upload(data, socket) {
+        createEnvironment(data, function() {
             // //Finally, execute the "make" command on the given directory
             exec('make upload', {
-                cwd: '/tmp',
+                cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('uploading...\n');
-                return parseError(error, stdout, stderr);
+                // return parseError(error, stdout, stderr);
+                socket.emit('uploadResponse', {
+                    stdout: stdout,
+                    stderr: stderr
+                });
             });
         });
     };
