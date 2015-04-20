@@ -8,6 +8,7 @@
     var exec = require('child_process').exec;
     var mkdirp = require('mkdirp');
     var fs = require('fs');
+    //Store the contents of the common part of the makefile in the commonMakefile variable
     var commonMakefile = '';
     fs.readFile('app/res/makefile', 'utf8', function(err, data) {
         if (err) {
@@ -17,10 +18,17 @@
     });
     //Quick hack to resolve the absolute path of the app/ dir
     var appDir = __dirname.substr(0, __dirname.length - 7);
+    //Store in home_dir the home directory
+    var home_dir = getUserHome();
+    //Store in arduino_dir the arduino core directory
     var arduino_dir = appDir + "res/arduino-1.0.6";
     //Commands to make and make upload the sketch:
     var makeCommand = appDir + 'res/' + 'make';
     var makeUploadCommand = makeCommand + ' upload';
+
+    function getUserHome() {
+        return process.env.HOME || process.env.USERPROFILE;
+    }
 
     function getIndicesOf(searchStr, str, caseSensitive) {
         var startIndex = 0,
@@ -38,20 +46,41 @@
     }
 
     function parseLibs(code) {
+        //Get all coincidences of #include to take all the libraries in the code
         var initIndex = getIndicesOf("#include", code, false);
-        var dummy = [];
+        //Array of the official arduino libs
+        var arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
+        var libs = {
+            arduino: [],
+            user: []
+        };
+        //For all the #includes in the code
         for (var i in initIndex) {
+            //Get the ending of the include
             var finalIndex = code.indexOf(".h>", initIndex[i]);
+            //Create the substring with the library include
             var a = code.substr(initIndex[i], finalIndex - initIndex[i]);
             a = a.substr(a.indexOf("<") + 1, a.length);
-            dummy.push(a);
+            //If the library is official, we push it in libs.arduino.
+            if (arduinoLibs.indexOf(a) >= 0) {  //If the library is one of the Arduino's official libraries:
+                libs.arduino.push(a);
+            }
+            //Otherwise, push it in libs.user
+            else{
+                libs.user.push(a);
+            }
         }
-        return dummy.join(' ');
+        //Return the libs variable with all the libraries in the code
+        return {
+            arduino: libs.arduino.join(' '),
+            user: libs.user.join(' ')
+        };
     };
 
     function createEnvironment(data, callback) {
         //Perform operations on program.code so it compiles correctly
         var libs = parseLibs(data.code);
+        console.log('libs:', libs);
         var programCode = data.code;
         programCode = programCode.replace(new RegExp('\\n', 'g'), '\r\n', function() {});
         // Create the /tmp folder if it does not exist
@@ -64,7 +93,7 @@
                         return console.log(err);
                     }
                     //Then, create the makeFile
-                    var initMakefile = "ARDLIBS = " + libs + "\nMODEL = " + data.board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + arduino_dir + "/sketchbook/libraries\n\n";
+                    var initMakefile = "ARDLIBS = " + libs.arduino + "\nUSERLIBS = " + libs.user + "\nMODEL = " + data.board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + home_dir + "/sketchbook/libraries\n\n";
                     fs.writeFile("tmp/Makefile", initMakefile + commonMakefile, function(err) {
                         if (err) {
                             return console.log(err);
@@ -82,11 +111,8 @@
             uploading: ''
         };
         //Parse errors comming from stderr regarding the compilation:
-        // console.log('error:\n', error);
-        // console.log('stdout:\n', stdout);
         var compileStderr = stderr.substr(0, stderr.indexOf("make:"));
         compileStderr = compileStderr.split("applet/tmp.cpp:");
-        // console.log('compileStderr:\n', compileStderr);
         for (var i in compileStderr) {
             var line, func, err;
             var index = compileStderr[i].indexOf(":");
@@ -107,7 +133,6 @@
                 line = undefined;
                 err = undefined;
                 index = undefined;
-                // console.log('line--->', line, '\nerror--->', err, '\nfunc--->', func);
                 console.log('---------------------------------------------------');
             }
         }
@@ -127,7 +152,7 @@
 
     function compile(data, socket) {
         createEnvironment(data, function() {
-            //Finally, execute the "make" command on the given directory
+            // Finally, execute the "make" command on the given directory
             exec(makeCommand, {
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
@@ -150,6 +175,8 @@
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('uploading...\n');
+                //  console.log('stderr', stderr);
+                // console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
                 socket.emit('uploadResponse', {
                     stdout: stdout,
