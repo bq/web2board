@@ -18,6 +18,9 @@
     //Quick hack to resolve the absolute path of the app/ dir
     var appDir = __dirname.substr(0, __dirname.length - 7);
     var arduino_dir = appDir + "res/arduino-1.0.6";
+    //Commands to make and make upload the sketch:
+    var makeCommand = appDir + 'res/' + 'make';
+    var makeUploadCommand = makeCommand + ' upload';
 
     function getIndicesOf(searchStr, str, caseSensitive) {
         var startIndex = 0,
@@ -125,10 +128,12 @@
     function compile(data, socket) {
         createEnvironment(data, function() {
             //Finally, execute the "make" command on the given directory
-            exec('make', {
+            exec(makeCommand, {
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('compiling...\n');
+                // console.log('stderr', stderr);
+                // console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
                 socket.emit('compileResponse', {
                     stdout: stdout,
@@ -141,7 +146,7 @@
     function upload(data, socket) {
         createEnvironment(data, function() {
             // //Finally, execute the "make" command on the given directory
-            exec('make upload', {
+            exec(makeUploadCommand, {
                 cwd: 'tmp',
             }, function(error, stdout, stderr) {
                 console.log('uploading...\n');
