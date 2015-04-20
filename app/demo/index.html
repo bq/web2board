@@ -14,7 +14,7 @@
                     socket.emit('compile', {board : 'uno', code: '/*\n Renacuajo\n*/\n#include <Servo.h>\n\nServo left; \nServo right; \n\nvoid setup() {\n pinMode(13,OUTPUT);}\nvoid loop() {\ndigitalWrite(13,HIGH);\n}' });
                     socket.on('compileResponse', function(data){
                         console.log('compileResponse:::', data);
-                        socket.emit('upload', {board : 'uno', code: '/*\n Renacuajo\n*/\n#include <Servo.h>\n\nServo left; \nServo right; \n\nvoid setup() {\n pinMode(13,OUTPUT);}\nvoid loop() {\ndigitalWrite(13,HIGH);\n}' });
+                        socket.emit('upload', {board : 'uno', code: '/*\n Renacuajo\n*/\n#include <Servo.h>\n\nServo left; \nServo right; \n\nvoid setup() {\n pinMode(13,OUTPUT);}\nvoid loop() {\ndigitalWrite(13,LOW);\n}' });
                     socket.on('uploadResponse', function(data){
                         console.log('uploadResponse:::', data);
                     });

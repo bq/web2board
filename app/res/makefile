@@ -18,15 +18,16 @@ endif
 
 
 # Where are tools like avr-gcc located on your system?
-ifeq "$(UNAME)" "Windows"
-  AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin #XXX needs to be checked !
-else
- ifeq "$(UNAME)" "Darwin"
-  AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin
- else
-  AVR_TOOLS_PATH = /usr/bin
- endif
-endif
+AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin
+#ifeq "$(UNAME)" "Windows"
+#  AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin #XXX needs to be checked !
+#else
+# ifeq "$(UNAME)" "Darwin"
+#  AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin
+# else
+#  AVR_TOOLS_PATH = /usr/bin
+# endif
+#endif
 
 #Set the ports depending on the OS and the type of board we are using
 ifeq "$(UNAME)" "Windows"
@@ -175,11 +176,13 @@ LDFLAGS = -Os -Wl,--gc-sections -mmcu=$(MCU) -lm
 
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_WRITE_FLASH = -U flash:w:applet/$(TARGET).hex
-ifeq "$(UNAME)" "Darwin"
-AVRDUDE_CONF = -V -F -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf
-else
-AVRDUDE_CONF = -V -F -C /etc/avrdude.conf
-endif
+#ifeq "$(UNAME)" "Darwin"
+#AVRDUDE_CONF = -V -F -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf
+#else
+#AVRDUDE_CONF = -V -F -C /etc/avrdude.conf
+#endif
+AVRDUDE_CONF = -V -F -C $(ARDUINO_DIR)/hardware/tools/avrdude.conf
+
 AVRDUDE_FLAGS = $(AVRDUDE_CONF) \
     -p $(MCU) -P $(PORT) -c $(AVRDUDE_PROGRAMMER) \
     -b $(DOWNLOAD_RATE)
@@ -192,7 +195,7 @@ OBJDUMP = $(AVR_TOOLS_PATH)/avr-objdump
 AR  = $(AVR_TOOLS_PATH)/avr-ar
 SIZE = $(AVR_TOOLS_PATH)/avr-size
 NM = $(AVR_TOOLS_PATH)/avr-nm
-AVRDUDE = $(AVR_TOOLS_PATH)/avrdude
+AVRDUDE = $(ARDUINO_DIR)/hardware/tools/avrdude
 REMOVE = rm -f
 MV = mv -f
 

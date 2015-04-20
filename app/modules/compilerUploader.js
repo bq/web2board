@@ -17,7 +17,7 @@
     });
     //Quick hack to resolve the absolute path of the app/ dir
     var appDir = __dirname.substr(0, __dirname.length - 7);
-    var arduino_dir = appDir + "/res/arduino-1.0.6";
+    var arduino_dir = appDir + "res/arduino-1.0.6";
 
     function getIndicesOf(searchStr, str, caseSensitive) {
         var startIndex = 0,
