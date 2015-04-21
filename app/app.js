@@ -50,9 +50,10 @@ app.on('ready', function() {
                     stdout: response.stdout,
                     stderr: response.stderr
                 });
-            });        });
-        socket.on('serialMonitor', function(data) {
-            serialMonitor.start('/dev/ttyUSB0');
+            });
+        });
+        socket.on('serialMonitor', function() {
+            serialMonitor.start('/dev/ttyACM1');
         });
     });
 });

@@ -11,7 +11,7 @@
                 var socket = io('http://localhost:9999');
                 socket.on('news', function (data) {
                     console.log(data);
-                    socket.emit('upload', {board : 'uno', code: 'void setup(){}void loop(){}'});
+                    socket.emit('upload', {board : 'uno', code: '#include <Servo.h>\n#include "Oscillator.h"\n\n\n\nOscillator osc;\nint SERVO2 = 2;\nvoid setup()\n{\n  osc.attach(SERVO2);\n}\n\nvoid loop()\n{\n  osc.refresh();\n}\n\n' });
                 //     socket.on('compileResponse', function(data){
                 //         console.log('compileResponse:::', data);
                 //         socket.emit('upload', {board : 'uno', code: '#include <Servo.h>\n#include <Oscillator.h>\n\n\n\nOscillator osc;\nint SERVO2 = 2;\nvoid setup()\n{\n  osc.attach(SERVO2);\n}\n\nvoid loop()\n{\n  osc.refresh();\n}\n\n' });

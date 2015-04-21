@@ -57,10 +57,14 @@
         //For all the #includes in the code
         for (var i in initIndex) {
             //Get the ending of the include
-            var finalIndex = code.indexOf(".h>", initIndex[i]);
+            var finalIndex = code.indexOf(".h", initIndex[i]);
             //Create the substring with the library include
             var a = code.substr(initIndex[i], finalIndex - initIndex[i]);
-            a = a.substr(a.indexOf("<") + 1, a.length);
+            if (a.indexOf("<") < 0) {
+                a = a.substr(a.indexOf("\"") + 1, a.length);
+            } else {
+                a = a.substr(a.indexOf("<") + 1, a.length);
+            }
             //If the library is official, we push it in libs.arduino.
             if (arduinoLibs.indexOf(a) >= 0) { //If the library is one of the Arduino's official libraries:
                 libs.arduino.push(a);
@@ -160,7 +164,7 @@
                 // console.log('stderr', stderr);
                 // console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
-                callback( {
+                callback({
                     stdout: stdout,
                     stderr: stderr
                 });
@@ -178,7 +182,7 @@
                 console.log('stderr', stderr);
                 console.log('stdout', stdout);
                 // return parseError(error, stdout, stderr);
-                callback( {
+                callback({
                     stdout: stdout,
                     stderr: stderr
                 });
