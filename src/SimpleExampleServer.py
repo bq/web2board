@@ -11,9 +11,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 '''
 
 import signal, sys, ssl, logging
-from SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
+#from SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
+from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
-from utils import SerialMonitor
+#from utils import SerialMonitor
+from libs.utils import SerialMonitor
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 serialMonitor = SerialMonitor()
