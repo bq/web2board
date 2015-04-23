@@ -1,8 +1,1 @@
-node_modules/
-app/appResources/
-dist/
-
-# Editor File Ignore
-*.sublime-project
-*.sublime-workspace
-.idea/
+*.pyc
