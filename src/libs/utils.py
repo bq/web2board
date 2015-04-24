@@ -9,17 +9,22 @@ import binascii
 import math
 import sys
 from collections import defaultdict
-
+import subprocess
 
 STK_ENTER_PROGMODE= 	0x50  # 'P'
 CRC_EOP=				0x20  # 'SPACE'
 
 class BoardConfig :
 	def __init__ (self, args):
-		self.name=args[0]
-		self.upload_protocol=args[1]
-		self.upload_maximum_size=args[2]
-		self.upload_speed=args[3]
+		for arg in args:
+			if 'build.mcu' in arg[0]:
+				self.build_mcu= arg[1]
+			if 'upload.speed' in arg[0]:
+				self.upload_speed= arg[1]
+		# self.name=args[0]
+		# self.upload_protocol=args[1]
+		# self.upload_maximum_size=args[2]
+		# self.upload_speed=args[3]
 		# self.bootloader_low_fuses=args[4]
 		# self.bootloader_high_fuses=args[5]
 		# self.bootloader_extended_fuses=args[6]
@@ -31,10 +36,13 @@ class BoardConfig :
 		# self.build_f_cpu=args[12]
 		# self.build_core=args[13]
 		# self.build_variant=args[14]
+
 	def getBaudRate(self):
 		return self.upload_speed
 	def getMaxSize (self):
 		return self.upload_maximum_size
+	def getMCU (self):
+		return self.build_mcu
 
 class SerialMonitor:
 	def __init__(self):
@@ -65,20 +73,22 @@ class SerialMonitor:
 		availablePorts = self.getAvailablePorts()
 		for port in availablePorts:
 			print 'trying to open port:',port, 'with baudRate', self.getBoardBaudRate()
-			self.initializeSerial(port,self.getBoardBaudRate())
-			self.resetBoard(4)
-			self.serial.setDTR(False) 
-			sleep(0.5)
-			#Send Enter Progmode
-			self.enter_progmode()
-			response = binascii.hexlify(self.read())
-			if response == '1410':
-				print 'FOUND PORT : ', port
+			# call(["avrdude", "-P","/dev/ttyACM0", "-p","atmega328p", "-c","arduino"])
+			cmd = "avrdude -P "+port+" -p "+self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
+			print cmd
+			p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+			output = p.stdout.read()
+			print 'AVRDUDE OUTPUT :',output
+			if 'Device signature =' in output:
+				print 'PORT FOUND'
 				self.setPort(port)
-				break;
+				break
 
 	def getBoardBaudRate(self):
 		return self.boardSettings[self.board].getBaudRate()
+
+	def getBoardMCU(self):
+		return self.boardSettings[self.board].getMCU()
 
 	def parseBoardSettings (self, path):
 		file=open(path,'r')
@@ -87,43 +97,11 @@ class SerialMonitor:
 		a.pop(0) #Remove first element which is only a url
 		for line in a:
 			boardName = line.split('.')[0]
-			boardConfig = line.split('=')
-			boardConfig= [i.split('\n')[0] for i in boardConfig]
+			boardConfig = line.split('\n')
+			boardConfig= [i.split('=')for i in boardConfig]
+			# print boardConfig
 			boardConfig.pop(0) #Remove empty first element
 			self.boardSettings[boardName]=BoardConfig(boardConfig)
-			print boardName, self.boardSettings[boardName].name
-
-	def resetBoard (self, number):
-		for i in range(number):
-			self.serial.setDTR(True) 
-			sleep(0.05)
-			self.serial.setDTR(False) 
-			sleep(0.05)
-
-	#Set Enter Progmode
-	def enter_progmode (self):
-		enter_progmode=[]
-		enter_progmode.append(STK_ENTER_PROGMODE)
-		enter_progmode.append(CRC_EOP)
-		print '\n*******   Sending enter progmode   *******'
-		sys.stdout.flush()
-		self.write_command(enter_progmode)
-		sleep(0.07)
-		sys.stdout.flush()
-
-	def write_command (self,command) : 
-		hex_str=[]
-		dec_str=[]
-		for i in command: 
-			self.serial.flush()
-			self.serial.write(str(chr(i)))
-	#		print 'Sent : '+str(chr(i))+' ----> '+str(i)
-			hex_str.append(str(chr(i)))
-			dec_str.append(str(i))
-			
-		print hex_str
-		print dec_str
-		sys.stdout.flush()
 
 	def getAvailablePorts (self):
 		if platform.system() =='Windows':
@@ -190,7 +168,7 @@ class Compiler:
 
 	def upload(self):
 		os.chdir("tmp")
-		call(["make", "upload"])
+		call(["make", "upload"])	#avrdude -P /dev/ttyACM0 -p atmega328p -c arduino -U flash:w:sketches/1.hex -vvvv
 		self.removeTmp()
 
 	def removeTmp(self):
