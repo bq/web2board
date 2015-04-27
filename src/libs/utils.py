@@ -74,15 +74,19 @@ class SerialMonitor:
 		for port in availablePorts:
 			print 'trying to open port:',port, 'with baudRate', self.getBoardBaudRate()
 			# call(["avrdude", "-P","/dev/ttyACM0", "-p","atmega328p", "-c","arduino"])
-			cmd = "avrdude -P "+port+" -p "+self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
-			print cmd
-			p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
-			output = p.stdout.read()
-			print 'AVRDUDE OUTPUT :',output
+			cmd = "-P "+port+" -p "+self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
+			output = self.callAvrdude(cmd);
 			if 'Device signature =' in output:
-				print 'PORT FOUND'
+				print 'PORT FOUND -->',port
 				self.setPort(port)
 				break
+
+	def callAvrdude(self, args):
+		cmd = "avrdude "+args
+		p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+		output = p.stdout.read()
+		# print 'AVRDUDE OUTPUT :',output
+		return output
 
 	def getBoardBaudRate(self):
 		return self.boardSettings[self.board].getBaudRate()
