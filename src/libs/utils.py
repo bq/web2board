@@ -47,7 +47,10 @@ class BoardConfig :
 class SerialMonitor:
 	def __init__(self):
 		self.boardSettings = defaultdict(BoardConfig)
-		self.parseBoardSettings('/home/irene-sanz/repos/web2board/res/boards.txt')
+		script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+		rel_path = "../../res/boards.txt"
+		abs_file_path = os.path.join(script_dir, rel_path)
+		self.parseBoardSettings(abs_file_path)
 
 	def setBoard (self, board):
 		self.board = board
