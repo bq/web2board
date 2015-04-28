@@ -17,10 +17,9 @@ from SerialCommunication import SerialCommunication
 
 class Web2board:
 	def __init__(self):
-		self.compiler = Compiler()
-		# self.uploader = 
-		self.serialCom = SerialCommunication()
 		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
+		self.compiler = Compiler(pathToMain)
+		self.serialCom = SerialCommunication()
 
 
 	def setBoard (self, board):

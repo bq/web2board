@@ -11,14 +11,12 @@ import sys
 from collections import defaultdict
 import subprocess
 
-
-
 class Compiler:
-	def __init__(self):
-		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
-		print 'pathToMain :: ', self.pathToMain
+	def __init__(self, pathToMain):
+		self.pathToMain = pathToMain
 		self.arduinoLibs = ''
 		self.userLibs = ''
+		self.arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
 	def createMakefile(self, board, port, arduinoDir, sketchbookDir):
 		if not os.path.exists("tmp"):
@@ -29,7 +27,7 @@ class Compiler:
 		fo.close()
 		fo = open(self.pathToMain+"/tmp/Makefile", "w")
 		fo.write("MODEL = "+board+"\n")
-		fo.write("PORT = "+port+"\n")
+		# fo.write("PORT = "+port+"\n")
 		fo.write("ARDLIBS = "+self.getArduinoLibs()+"\n")
 		fo.write("USERLIBS = "+self.getUserLibs()+"\n")
 		fo.write("ARDUINO_DIR = "+arduinoDir+"\n")
@@ -47,63 +45,43 @@ class Compiler:
 	def getUserLibs (self):
 		return self.userLibs
 
+	def setArduinoLibs(self, arduinoLibs):
+		self.arduinoLibs = arduinoLibs
+	def setUserLibs (self, userLibs):
+		self.userLibs = userLibs
+
+	def find_all(self,a_str, sub):
+		start = 0
+		while True:
+			start = a_str.find(sub, start)
+			if start == -1: return
+			yield start
+			start += len(sub) # use start += 1 to find overlapping matches
+
+
 	def parseLibs(self, code):
-		print 'extracting libs'
-			# function getUserHome() {
-	#     return process.env.HOME || process.env.USERPROFILE;
-	# }
+		arduinoLibs = []
+		userLibs = []
+		initIndexes= list(self.find_all(code,'#include'))
+		finalIndexes= list(self.find_all(code,'\n'))
+		for i in range(len(initIndexes)):
+			lib = code[initIndexes[i]: finalIndexes[i]]
+			#remove all spaces, #include ,< & >,",.h
+			lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
+			if lib in self.arduinoLibs:
+				arduinoLibs.append(lib)
+			else:
+				userLibs.append(lib)
 
-	# function getIndicesOf(searchStr, str, caseSensitive) {
-	#     var startIndex = 0,
-	#         searchStrLen = searchStr.length;
-	#     var index, indices = [];
-	#     if (!caseSensitive) {
-	#         str = str.toLowerCase();
-	#         searchStr = searchStr.toLowerCase();
-	#     }
-	#     while ((index = str.indexOf(searchStr, startIndex)) > -1) {
-	#         indices.push(index);
-	#         startIndex = index + searchStrLen;
-	#     }
-	#     return indices;
-	# }
+		#remove duplicates from lists of libs
+		arduinoLibs = sorted(set(arduinoLibs))
+		userLibs = sorted(set(userLibs))
+		#join lists into strings
+		self.setArduinoLibs(','.join(arduinoLibs))
+		self.setUserLibs(','.join(userLibs))
 
-	# function parseLibs(code) {
-	#     //Get all coincidences of #include to take all the libraries in the code
-	#     var initIndex = getIndicesOf("#include", code, false);
-	#     //Array of the official arduino libs
-	#     var arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
-	#     var libs = {
-	#         arduino: [],
-	#         user: []
-	#     };
-	#     //For all the #includes in the code
-	#     for (var i in initIndex) {
-	#         //Get the ending of the include
-	#         var finalIndex = code.indexOf(".h", initIndex[i]);
-	#         //Create the substring with the library include
-	#         var a = code.substr(initIndex[i], finalIndex - initIndex[i]);
-	#         if (a.indexOf("<") < 0) {
-	#             a = a.substr(a.indexOf("\"") + 1, a.length);
-	#         } else {
-	#             a = a.substr(a.indexOf("<") + 1, a.length);
-	#         }
-	#         //If the library is official, we push it in libs.arduino.
-	#         if (arduinoLibs.indexOf(a) >= 0) { //If the library is one of the Arduino's official libraries:
-	#             libs.arduino.push(a);
-	#         }
-	#         //Otherwise, push it in libs.user
-	#         else {
-	#             libs.user.push(a);
-	#         }
-	#     }
-	#     //Return the libs variable with all the libraries in the code
-	#     return {
-	#         arduino: libs.arduino.join(' '),
-	#         user: libs.user.join(' ')
-	#     };
-	# };
 	def compile(self, code, board, port, arduinoDir, sketchbookDir):
+		self.parseLibs(code)
 		self.createMakefile(board, port, arduinoDir, sketchbookDir)
 		self.createSketchFile(code)
 		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, cwd=self.pathToMain+'/tmp')
@@ -111,6 +89,7 @@ class Compiler:
 		outputErr = p.stderr.read()
 		# print output, outputErr
 		print 'outputErr',outputErr
+		print 'output',output
 		return output
 
 
@@ -121,37 +100,6 @@ class Compiler:
 		call(["rm", "-rf", "tmp"])
 
 
-
-
-
-
-	# function createEnvironment(data, callback) {
-	#     //Perform operations on program.code so it compiles correctly
-	#     var libs = parseLibs(data.code);
-	#     console.log('libs:', libs);
-	#     var programCode = data.code;
-	#     programCode = programCode.replace(new RegExp('\\n', 'g'), '\r\n', function() {});
-	#     // Create the /tmp folder if it does not exist
-	#     mkdirp('tmp', function(err) {
-	#         if (err) console.error(err)
-	#         else {
-	#             //Once the folder is created, create the sketch file
-	#             fs.writeFile("tmp/tmp.ino", programCode, function(err) {
-	#                 if (err) {
-	#                     return console.log(err);
-	#                 }
-	#                 //Then, create the makeFile
-	#                 var initMakefile = "ARDLIBS = " + libs.arduino + "\nUSERLIBS = " + libs.user + "\nMODEL = " + data.board + "\n" + "ARDUINO_DIR = " + arduino_dir + "\n" + "HOME_LIB = " + home_dir + "/sketchbook/libraries\n\n";
-	#                 fs.writeFile("tmp/Makefile", initMakefile + commonMakefile, function(err) {
-	#                     if (err) {
-	#                         return console.log(err);
-	#                     }
-	#                     callback();
-	#                 });
-	#             });
-	#         }
-	#     });
-	# };
 
 	# function parseError(error, stdout, stderr) {
 	#     var error = {
