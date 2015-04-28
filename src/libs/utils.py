@@ -13,15 +13,24 @@ import subprocess
 
 from Compiler import Compiler
 from SerialCommunication import SerialCommunication
-# import Compiler, SerialCommunication, BoardConfig
+import json
+
+
 
 class Web2board:
 	def __init__(self):
 		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
-		self.compiler = Compiler(pathToMain)
+		self.compiler = Compiler(self.pathToMain)
 		self.serialCom = SerialCommunication()
+		self.readConfigFile()
 
+	def readConfigFile(self):
+		with open(self.pathToMain+'/config.json') as json_data_file:
+			data = json.load(json_data_file)
+			self.version = str(data['version'])
 
+	def getVersion (self):
+		return self.version
 	def setBoard (self, board):
 		self.serialCom.setBoard(board)
 		return 	self.searchPort()

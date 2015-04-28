@@ -19,9 +19,10 @@ class messageHandler (WebSocket):
    def handleMessage(self):
       if self.data is None:
          self.data = ''
+      if 'version' in self.data:
+         self.sendMessage_('VERSION '+web2board.getVersion())
 
-      # print 'self.data.find(self.data, 0,len(self.data))',self.data.find('write', 0,len(self.data))
-      if self.data.find('setBoard', 0,len(self.data))>=0:
+      if 'setBoard' in self.data:
          message = self.data.replace('setBoard','')
          message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('SETTING BOARD')
