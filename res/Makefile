@@ -1,4 +1,3 @@
-# PORT = /dev/ttyUSB0
 # ARDLIBS = 
 # USERLIBS = 
 # MODEL = bt328
@@ -26,28 +25,6 @@ endif
 
 # Where are tools like avr-gcc located on your system?
 AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin
-
-# How to reset the device before downloading a new program.
-# These don't always work; if the default one doesn't work,
-# try uncommenting one of the others instead.
-ifeq "$(RESET_MODE)" "python"
- RESET_DEVICE = python -c "import serial; s = serial.SERIAL('/dev/ttyUSB0', 57600); s.setDTR(True); sleep(1); s.setDTR(False)"
-else
- ifeq "$(RESET_MODE)" "perl"
-  RESET_DEVICE = perl -MDevice::SerialPort -e 'Device::SerialPort->new("/dev/ttyUSB0")->pulse_dtr_on(1000)'
- else
-  ifeq "$(UNAME)" "Windows"
-   RESET_DEVICE = echo "CAN'T RESET DEVICE ON WINDOWS !"
-  else
-   ifeq "$(UNAME)" "Linux"
-    RESET_DEVICE = stty -F $(PORT) hupcl
-   else
-    # BSD uses small f
-    RESET_DEVICE = stty -f $(PORT) hupcl
-   endif
-  endif
- endif
-endif
 
 #
 # Set up values according to what the IDE uses:

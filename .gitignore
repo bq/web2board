@@ -3,7 +3,8 @@ node_modules/
 nbproject
 win_dist/
 deb_dist/
-
+*.o
+src/serial_poc.py
 # Editor File Ignore
 *.sublime-project
 *.sublime-workspace

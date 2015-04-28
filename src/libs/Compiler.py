@@ -18,7 +18,7 @@ class Compiler:
 		self.userLibs = ''
 		self.arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
-	def createMakefile(self, board, port, arduinoDir, sketchbookDir):
+	def createMakefile(self, board,  arduinoDir, sketchbookDir):
 		if not os.path.exists("tmp"):
 			os.makedirs("tmp")
 		fo = open(self.pathToMain+"/res/Makefile", "r")
@@ -27,7 +27,6 @@ class Compiler:
 		fo.close()
 		fo = open(self.pathToMain+"/tmp/Makefile", "w")
 		fo.write("MODEL = "+board+"\n")
-		# fo.write("PORT = "+port+"\n")
 		fo.write("ARDLIBS = "+self.getArduinoLibs()+"\n")
 		fo.write("USERLIBS = "+self.getUserLibs()+"\n")
 		fo.write("ARDUINO_DIR = "+arduinoDir+"\n")
@@ -77,12 +76,12 @@ class Compiler:
 		arduinoLibs = sorted(set(arduinoLibs))
 		userLibs = sorted(set(userLibs))
 		#join lists into strings
-		self.setArduinoLibs(','.join(arduinoLibs))
-		self.setUserLibs(','.join(userLibs))
+		self.setArduinoLibs(' '.join(arduinoLibs))
+		self.setUserLibs(' '.join(userLibs))
 
-	def compile(self, code, board, port, arduinoDir, sketchbookDir):
+	def compile(self, code, board,  arduinoDir, sketchbookDir):
 		self.parseLibs(code)
-		self.createMakefile(board, port, arduinoDir, sketchbookDir)
+		self.createMakefile(board,  arduinoDir, sketchbookDir)
 		self.createSketchFile(code)
 		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, cwd=self.pathToMain+'/tmp')
 		output = p.stdout.read()
