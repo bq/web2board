@@ -11,175 +11,67 @@ import sys
 from collections import defaultdict
 import subprocess
 
-STK_ENTER_PROGMODE= 	0x50  # 'P'
-CRC_EOP=				0x20  # 'SPACE'
+from Compiler import Compiler
+from SerialCommunication import SerialCommunication
+# import Compiler, SerialCommunication, BoardConfig
 
-class BoardConfig :
-	def __init__ (self, args):
-		for arg in args:
-			if 'build.mcu' in arg[0]:
-				self.build_mcu= arg[1]
-			if 'upload.speed' in arg[0]:
-				self.upload_speed= arg[1]
-		# self.name=args[0]
-		# self.upload_protocol=args[1]
-		# self.upload_maximum_size=args[2]
-		# self.upload_speed=args[3]
-		# self.bootloader_low_fuses=args[4]
-		# self.bootloader_high_fuses=args[5]
-		# self.bootloader_extended_fuses=args[6]
-		# self.bootloader_path=args[7]
-		# self.bootloader_file=args[8]
-		# self.bootloader_unlock_bits=args[9]
-		# self.bootloader_lock_bits=args[10]
-		# self.build_mcu=args[11]
-		# self.build_f_cpu=args[12]
-		# self.build_core=args[13]
-		# self.build_variant=args[14]
-
-	def getBaudRate(self):
-		return self.upload_speed
-	def getMaxSize (self):
-		return self.upload_maximum_size
-	def getMCU (self):
-		return self.build_mcu
-
-class SerialMonitor:
+class Web2board:
 	def __init__(self):
-		self.boardSettings = defaultdict(BoardConfig)
-		script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-		rel_path = "../../res/boards.txt"
-		abs_file_path = os.path.join(script_dir, rel_path)
-		self.parseBoardSettings(abs_file_path)
+		self.compiler = Compiler()
+		# self.uploader = 
+		self.serialCom = SerialCommunication()
+		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
+
 
 	def setBoard (self, board):
-		self.board = board
-		self.searchPort()
-
+		self.serialCom.setBoard(board)
+		return 	self.searchPort()
 	def setPort (self,port=''):
-		self.port = port
+		self.serialCom.setPort(port)
+	def getPort (self):
+		return self.serialCom.getPort()
+	def getBoard(self):
+		return self.serialCom.getBoard()
 
-	def setBaudrate (self, baudRate):
-		self.baudRate = baudRate
-
-	def initializeSerial (self, port, baudRate):
-		self.serial = serial.Serial(
-			port=port,
-			baudrate=baudRate,
-			parity=serial.PARITY_ODD,
-			stopbits=serial.STOPBITS_TWO,
-			bytesize=serial.SEVENBITS
-		)
-		# self.close()
 
 	def searchPort (self):
-		availablePorts = self.getAvailablePorts()
+		availablePorts = self.serialCom.getAvailablePorts()
+		if len(availablePorts) <=0:
+			return None
 		for port in availablePorts:
-			print 'trying to open port:',port, 'with baudRate', self.getBoardBaudRate()
-			# call(["avrdude", "-P","/dev/ttyACM0", "-p","atmega328p", "-c","arduino"])
-			cmd = "-P "+port+" -p "+self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
-			output = self.callAvrdude(cmd);
-			if 'Device signature =' in output:
-				print 'PORT FOUND -->',port
-				self.setPort(port)
-				break
+			args = "-P "+port+" -p "+self.serialCom.getBoardMCU() +" -b "+ self.serialCom.getBoardBaudRate()+" -c arduino"
+			output, err = self.callAvrdude(args);
+			if 'Device signature =' in output or 'Device signature =' in err:
+				self.serialCom.setPort(port)
+				return port
 
 	def callAvrdude(self, args):
 		cmd = "avrdude "+args
-		p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+		p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
 		output = p.stdout.read()
-		# print 'AVRDUDE OUTPUT :',output
-		return output
+		err = p.stderr.read()
+		print 'AVRDUDE OUTPUT :',output
+		print 'AVRDUDE stderr :',err
 
-	def getBoardBaudRate(self):
-		return self.boardSettings[self.board].getBaudRate()
+		return output, err
 
-	def getBoardMCU(self):
-		return self.boardSettings[self.board].getMCU()
+	def openSerialPort(self):
+		self.serialCom.open()
 
-	def parseBoardSettings (self, path):
-		file=open(path,'r')
-		#Split the file using the separator in boards.txt to separate the config of the different boards
-		a = file.read().split('\n\n##############################################################\n\n');
-		a.pop(0) #Remove first element which is only a url
-		for line in a:
-			boardName = line.split('.')[0]
-			boardConfig = line.split('\n')
-			boardConfig= [i.split('=')for i in boardConfig]
-			# print boardConfig
-			boardConfig.pop(0) #Remove empty first element
-			self.boardSettings[boardName]=BoardConfig(boardConfig)
+	def closeSerialPort (self):
+		self.serialCom.close()
 
-	def getAvailablePorts (self):
-		if platform.system() =='Windows':
-			print 'windows'
-			availablePorts = glob.glob('COM*')
-		if platform.system() =='Darwin':
-			print 'Darwin'
-			if self.board == 'uno':
-				availablePorts = glob.glob('/dev/tty.usbmodem*')
-			elif self.board == 'bt328':
-				availablePorts = glob.glob('/dev/tty.usbserial-*')
-			else:
-				availablePorts = glob.glob('/dev/tty*')
+	def writeSerialPort (self, data):
+		self.serialCom.write(data)
 
-		if platform.system() =='Linux':
-			print 'Linux'
-			if self.board == 'uno':
-				availablePorts = glob.glob('/dev/ttyACM*')
-			elif self.board == 'bt328':
-				availablePorts = glob.glob('/dev/ttyUSB*')
-			else:
-				availablePorts = glob.glob('/dev/tty*')
-		return availablePorts
+	def readSerialPort (self):
+		return self.serialCom.read()
 
-	def open(self):
-		self.serial.open()
-		self.serial.isOpen()
+	def compile (self, code):
+		self.compiler.compile(code,self.getBoard(), self.getPort(), self.pathToMain+'/res/arduino','')
 
-	def close (self):
-		self.serial.close()
-
-	def write (self, data):
-		self.serial.write(data)
-
-	def read (self):
-		out = ''
-		while self.serial.inWaiting() > 0:
-			out += self.serial.read(1)
-		if out != '':
-			return out
-
-class Compiler:
-	def __init__(self, board='bt328',port='/dev/ttyUSB0', baudRate=19200):
-		self.board = board
-		self.port = port
-		self.baudRate = baudRate
-		self.pathToMain = os.path.dirname(os.path.realpath("main.py"))
-		self.createMakefile()
-
-
-	def createMakefile(self):
-		if not os.path.exists("tmp"):
-			os.makedirs("tmp")
-		fo = open("tmp/Makefile", "w")
-		fo.write("BOARD_TAG = "+self.board+"\n")
-		fo.write("ARDUINO_LIBS = \n")
-		fo.write("ARDUINO_PORT = "+self.port+"\n")
-		fo.write("include /usr/share/arduino/Arduino.mk")
-		fo.close()
-
-	def compile(self):
-		os.chdir("tmp")
-		call(["make"])
-
-	def upload(self):
-		os.chdir("tmp")
-		call(["make", "upload"])	#avrdude -P /dev/ttyACM0 -p atmega328p -c arduino -U flash:w:sketches/1.hex -vvvv
-		self.removeTmp()
-
-	def removeTmp(self):
-		print 'path:', self.pathToMain
-		call(["cd", self.pathToMain+"/"])
-		call(["ls"])
-		call(["rm", "-rf", "tmp"])
+	def upload (self, code):
+		self.compiler.compile(code,self.getBoard(), self.getPort(), self.pathToMain+'/res/arduino','')
+		args = "-v -F "+"-P "+self.getPort()+" -p "+self.serialCom.getBoardMCU() +" -b "+ self.serialCom.getBoardBaudRate()+" -c arduino " + "-U flash:w:"+ self.pathToMain+'/tmp/applet/tmp.hex'
+		print 'AVRDUDE ARGS UPLOAD', args
+		self.callAvrdude(args)

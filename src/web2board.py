@@ -1,10 +1,11 @@
 import signal, sys, ssl, logging
 from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
-from libs.utils import SerialMonitor
+from libs.utils import Web2board
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
-serialMonitor = SerialMonitor()
+web2board = Web2board()
+
 class messageHandler (WebSocket):
    # def __init__(self):
    #    print 'aaa'
@@ -20,18 +21,32 @@ class messageHandler (WebSocket):
          self.data = ''
 
       # print 'self.data.find(self.data, 0,len(self.data))',self.data.find('write', 0,len(self.data))
+      if self.data.find('setBoard', 0,len(self.data))>=0:
+         message = self.data.replace('setBoard','')
+         message = message.replace(' ', '') #remove white spaces that make the command readable
+         self.sendMessage_('SETTING BOARD')
+         port = web2board.setBoard(str(message))
+         if port != None:
+            self.sendMessage_('SETTING PORT : '+port)
+         else :
+            self.sendMessage_('NO PORT FOUND')
       if self.data == 'open':
          self.sendMessage_('OPENNING PORT')
-         serialMonitor.open()
+         web2board.openSerialPort()
       if self.data == 'close':
          self.sendMessage_('CLOSING PORT')
-         serialMonitor.close()
+         web2board.closeSerialPort()
       if self.data.find('write', 0,len(self.data))>=0: #self.data == 'write':
          message = self.data.replace('write','')
          print 'serial Writting :', message
-         serialMonitor.write(message)
+         web2board.writeSerialPort(message)
       if self.data == 'read':
-         self.sendMessage_(serialMonitor.read())
+         self.sendMessage_(web2board.readSerialPort())
+      if self.data.find('compile', 0,len(self.data))>=0:
+         message = self.data.replace('compile','')
+         message = message.replace(' ', '') #remove white spaces that make the command readable
+         self.sendMessage_('COMPILING ...')
+         web2board.compile(message)
 
    def handleConnected(self):
       print self.address, 'connected'
