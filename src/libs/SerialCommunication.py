@@ -14,12 +14,11 @@ import subprocess
 from BoardConfig import BoardConfig
 
 class SerialCommunication:
-	def __init__(self):
+	def __init__(self, pathToMain):
 		self.boardSettings = defaultdict(BoardConfig)
-		script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-		rel_path = "../../res/boards.txt"
-		abs_file_path = os.path.join(script_dir, rel_path)
-		self.parseBoardSettings(abs_file_path)
+		self.pathToMain = pathToMain;
+		rel_path = "/src/res/boards.txt"
+		self.parseBoardSettings(self.pathToMain+rel_path)
 		self.board = None
 		self.port = None
 

@@ -3,6 +3,9 @@ node_modules/
 nbproject
 win_dist/
 deb_dist/
+debian/
+build/
+web2board.egg-info/
 *.o
 src/serial_poc.py
 # Editor File Ignore

@@ -1,13 +1,15 @@
 Source: web2board
-Maintainer: Sergio Morcuende <sergio.morcuende@bq.com>
-Section: misc
+Section: main
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
-Standards-Version: 3.9.1
+Maintainer: bitbloq Team <support-bitbloq@bq.com>
+Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 9)
+Standards-Version: 3.9.7
+Homepage: http://bitbloq.bq.com
 
 Package: web2board
 Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, avrdude
-Description: Native program that connects a website and a Arduino compatible board. It compiles Arduino sketches and uploads them onto a board.
+Description: Daemon that connects a webapp and a Arduino compatible board. 
+ It compiles Arduino sketches and uploads them onto a board.
 
 

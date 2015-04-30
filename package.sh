@@ -102,10 +102,10 @@ rm -rf win_dist
 
 if [ $BUILD_TARGET = "debian" ]; then
 	# Generate Debian source package
-	python setup.py --command-packages=stdeb.command sdist_dsc \
+	python setup.py --command-packages=stdeb.command sdist_dsc debianize \
 	#--debian-version 1 \
 	#--suite 'trusty' \
-	#--section 'misc' \
+	#--section 'main' \
 	#--package 'web2board' \
 	#--depends 'python,
 	#           python-serial,
@@ -127,30 +127,13 @@ if [ $BUILD_TARGET = "debian" ]; then
 			debuild -S -sa
 		elif [ $EXTRA_ARGS = "-i" ]; then
 			# Install Debian package
-			dpkg-buildpackage
+			dpkg-buildpackage -b -us -uc
 			sudo dpkg -i ../web2board*.deb
 			sudo apt-get -f install
-		elif [ $EXTRA_ARGS = "-u" ]; then
-			# Upload to launchpad
-			debuild -S -sa
-			PPA=${PPA:="ppa:jesus-arroyo/web2board"}
-			RELEASES="trusty utopic"
-			ORIG_RELEASE=`head -1 pkg/linux/debian/changelog | sed 's/.*) \(.*\);.*/\1/'`
-			cd .. ; mv web2board-${VERSION} web2board-${VERSION}${VEXT}
-			mv web2board_${VERSION}.orig.tar.gz web2board_${VERSION}${VEXT}.orig.tar.gz
-			cd web2board-${VERSION}${VEXT}
-			for RELEASE in $RELEASES ;
-			do
-			  cp debian/changelog debian/changelog.backup
-			  sed -i "s/${ORIG_RELEASE}/${RELEASE}/;s/${VERSION}/${VERSION}${VEXT}/;s/bq1/bq1~${RELEASE}1/" debian/changelog
-			  debuild -S -sa
-			  dput -f ${PPA} ../web2board_${VERSION}${VEXT}-bq1~${RELEASE}1_source.changes
-			  mv debian/changelog.backup debian/changelog
-			done
 		fi
 		else
 			# Build and sign Debian package
-			dpkg-buildpackage
+			dpkg-buildpackage -b -us -uc
 		fi
 
 	# Clean directory

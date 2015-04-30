@@ -21,11 +21,11 @@ class Web2board:
 	def __init__(self):
 		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
 		self.compiler = Compiler(self.pathToMain)
-		self.serialCom = SerialCommunication()
+		self.serialCom = SerialCommunication(self.pathToMain)
 		self.readConfigFile()
 
 	def readConfigFile(self):
-		with open(self.pathToMain+'/config.json') as json_data_file:
+		with open(self.pathToMain+'/src/res/config.json') as json_data_file:
 			data = json.load(json_data_file)
 			self.version = str(data['version'])
 

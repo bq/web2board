@@ -2,7 +2,7 @@
 # coding=utf-8
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 def package_data_dirs(source, sub_folders):
 	dirs = []
@@ -13,20 +13,23 @@ def package_data_dirs(source, sub_folders):
 			for f in files:
 				dirs.append(os.path.join(dirname, f))
 	return dirs
-
-setup(name='Web2board',
-      version='0.0.1',
+      
+setup(
+      name='web2board',
+      version='0.0.3',
       author='bitbloq team',
-      author_email='bitbloq@bq.com',
+      author_email='support-bitbloq@bq.com',
+      platforms=['any'],
       description='Native program that connects a website and a board.',
-
       license='GPLv2',
       keywords = "bitbloq web2board arduino robotics",
-      url='https://www.diwo.bq.com',
+      url='https://github.com/bq/web2board',
 
-      packages = ['web2board'],
-      package_dir = {'web2board': '.'},
-      package_data = {'web2board': package_data_dirs('.', ['doc', 'res', 'src'])},
+      packages =['web2board'],
+      package_dir = {'web2board': 'src'},
+      package_data = {
+        'web2board': package_data_dirs('src', ['.'])
+      },
       
       scripts=['pkg/linux/web2board'],
       data_files=[('/usr/share/applications', ['pkg/linux/web2board.desktop'])]
