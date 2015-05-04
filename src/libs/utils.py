@@ -76,10 +76,10 @@ class Web2board:
 		return self.serialCom.read()
 
 	def compile (self, code):
-		self.compiler.compile(code,self.getBoard(), self.getPort(), self.pathToMain+'/res/arduino','')
+		return self.compiler.compile(code,self.getBoard(), self.pathToMain+'/res/arduino','')
 
 	def upload (self, code):
-		self.compiler.compile(code,self.getBoard(), self.getPort(), self.pathToMain+'/res/arduino','')
+		self.compiler.compile(code,self.getBoard(), self.pathToMain+'/res/arduino','')
 		args = "-v -F "+"-P "+self.getPort()+" -p "+self.serialCom.getBoardMCU() +" -b "+ self.serialCom.getBoardBaudRate()+" -c arduino " + "-U flash:w:"+ self.pathToMain+'/tmp/applet/tmp.hex'
 		print 'AVRDUDE ARGS UPLOAD', args
-		self.callAvrdude(args)
+		return self.callAvrdude(args)

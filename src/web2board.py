@@ -31,23 +31,30 @@ class messageHandler (WebSocket):
             self.sendMessage_('SETTING PORT : '+port)
          else :
             self.sendMessage_('NO PORT FOUND')
-      if self.data == 'open':
+      elif self.data == 'open':
          self.sendMessage_('OPENNING PORT')
          web2board.openSerialPort()
-      if self.data == 'close':
+      elif self.data == 'close':
          self.sendMessage_('CLOSING PORT')
          web2board.closeSerialPort()
-      if self.data.find('write', 0,len(self.data))>=0: #self.data == 'write':
+      elif self.data.find('write', 0,len(self.data))>=0: #self.data == 'write':
          message = self.data.replace('write','')
          print 'serial Writting :', message
          web2board.writeSerialPort(message)
-      if self.data == 'read':
+      elif self.data == 'read':
          self.sendMessage_(web2board.readSerialPort())
-      if self.data.find('compile', 0,len(self.data))>=0:
+      elif self.data.find('compile', 0,len(self.data))>=0:
          message = self.data.replace('compile','')
-         message = message.replace(' ', '') #remove white spaces that make the command readable
-         self.sendMessage_('COMPILING ...')
-         web2board.compile(message)
+         # message = message.replace(' ', '') #remove white spaces that make the command readable
+         self.sendMessage_('COMPILING')
+         compilation = web2board.compile(message)
+         self.sendMessage_('COMPILED')
+      elif self.data.find('upload', 0,len(self.data))>=0:
+         message = self.data.replace('upload','')
+         # message = message.replace(' ', '') #remove white spaces that make the command readable
+         self.sendMessage_('UPLOADING')
+         output, err= web2board.upload(message)
+         self.sendMessage_('UPLOADED')
 
    def handleConnected(self):
       print self.address, 'connected'

@@ -5,6 +5,7 @@ win_dist/
 deb_dist/
 debian/
 build/
+tmp/
 web2board.egg-info/
 *.o
 src/serial_poc.py
