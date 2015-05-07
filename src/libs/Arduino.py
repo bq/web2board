@@ -4,7 +4,6 @@ import os
 from subprocess import call
 import platform
 import glob
-from time import sleep
 import binascii
 import math
 from collections import defaultdict
