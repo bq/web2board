@@ -1,10 +1,11 @@
 import signal, sys, ssl, logging
 from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
-from libs.utils import Web2board
+from libs.CompilerUploader import CompilerUploader
+import json
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
-web2board = Web2board()
+compilerUploader = CompilerUploader()
 
 class messageHandler (WebSocket):
    # def __init__(self):
@@ -20,41 +21,40 @@ class messageHandler (WebSocket):
       if self.data is None:
          self.data = ''
       if 'version' in self.data:
-         self.sendMessage_('VERSION '+web2board.getVersion())
-
-      if 'setBoard' in self.data:
+         self.sendMessage_('VERSION '+compilerUploader.getVersion())
+      elif 'setBoard' in self.data:
          message = self.data.replace('setBoard','')
          message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('SETTING BOARD')
-         port = web2board.setBoard(str(message))
+         port = compilerUploader.setBoard(str(message))
          if port != None:
             self.sendMessage_('SETTING PORT : '+port)
          else :
             self.sendMessage_('NO PORT FOUND')
       elif self.data == 'open':
          self.sendMessage_('OPENNING PORT')
-         web2board.openSerialPort()
+         compilerUploader.openSerialPort()
       elif self.data == 'close':
          self.sendMessage_('CLOSING PORT')
-         web2board.closeSerialPort()
+         compilerUploader.closeSerialPort()
       elif self.data.find('write', 0,len(self.data))>=0: #self.data == 'write':
          message = self.data.replace('write','')
          print 'serial Writting :', message
-         web2board.writeSerialPort(message)
+         compilerUploader.writeSerialPort(message)
       elif self.data == 'read':
-         self.sendMessage_(web2board.readSerialPort())
+         self.sendMessage_(compilerUploader.readSerialPort())
       elif self.data.find('compile', 0,len(self.data))>=0:
          message = self.data.replace('compile','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('COMPILING')
-         compilation = web2board.compile(message)
-         self.sendMessage_('COMPILED')
+         report = compilerUploader.compile(message)
+         self.sendMessage_('COMPILED'+json.dumps(report))
       elif self.data.find('upload', 0,len(self.data))>=0:
          message = self.data.replace('upload','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('UPLOADING')
-         output, err= web2board.upload(message)
-         self.sendMessage_('UPLOADED')
+         report= compilerUploader.upload(message)
+         self.sendMessage_('UPLOADED'+json.dumps(report))
 
    def handleConnected(self):
       print self.address, 'connected'
