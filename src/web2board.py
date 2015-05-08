@@ -1,16 +1,28 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#-----------------------------------------------------------------------#
+#                                                                       #
+# This file is part of the web2board project                            #
+#                                                                       #
+# Copyright (C) 2015 Mundo Reader S.L.                                  #
+#                                                                       #
+# Date: April - May 2015                                                #
+# Authors: Irene Sanz Nieto <irene.sanz@bq.com>,                        #
+#          Sergio Morcuende <sergio.morcuende@bq.com>                   #
+#                                                                       #
+#-----------------------------------------------------------------------#
+
 import signal, sys, ssl, logging
 from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
 import json
+import os
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 compilerUploader = CompilerUploader()
 
 class messageHandler (WebSocket):
-   # def __init__(self):
-   #    print 'aaa'
-
    def sendMessage_(self,message):
       try:
          self.sendMessage(message);
@@ -31,30 +43,21 @@ class messageHandler (WebSocket):
             self.sendMessage_('SETTING PORT : '+port)
          else :
             self.sendMessage_('NO PORT FOUND')
-      elif self.data == 'open':
-         self.sendMessage_('OPENNING PORT')
-         compilerUploader.openSerialPort()
-      elif self.data == 'close':
-         self.sendMessage_('CLOSING PORT')
-         compilerUploader.closeSerialPort()
-      elif self.data.find('write', 0,len(self.data))>=0: #self.data == 'write':
-         message = self.data.replace('write','')
-         print 'serial Writting :', message
-         compilerUploader.writeSerialPort(message)
-      elif self.data == 'read':
-         self.sendMessage_(compilerUploader.readSerialPort())
-      elif self.data.find('compile', 0,len(self.data))>=0:
+      elif 'compile' in self.data:
          message = self.data.replace('compile','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('COMPILING')
          report = compilerUploader.compile(message)
          self.sendMessage_('COMPILED'+json.dumps(report))
-      elif self.data.find('upload', 0,len(self.data))>=0:
+      elif 'upload' in self.data:
          message = self.data.replace('upload','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('UPLOADING')
          report= compilerUploader.upload(message)
          self.sendMessage_('UPLOADED'+json.dumps(report))
+      elif 'SerialMonitor' in self.data:
+         message = str(self.data.replace('SerialMonitor','').replace(' ',''))
+         os.system("python src/SerialMonitor.py "+ message)
 
    def handleConnected(self):
       print self.address, 'connected'
@@ -76,8 +79,6 @@ if __name__ == "__main__":
    (options, args) = parser.parse_args()
 
    cls = messageHandler
-   # if options.example == 'chat':
-   #    cls = SimpleChat	
 
    if options.ssl == 1:
       server = SimpleSSLWebSocketServer(options.host, options.port, cls, options.cert, options.cert, version=options.ver)

@@ -1,25 +1,26 @@
 #!/usr/bin/python
-import serial
+# -*- coding: utf-8 -*-
+#-----------------------------------------------------------------------#
+#                                                                       #
+# This file is part of the web2board project                            #
+#                                                                       #
+# Copyright (C) 2015 Mundo Reader S.L.                                  #
+#                                                                       #
+# Date: April - May 2015                                                #
+# Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
+#                                                                       #
+#-----------------------------------------------------------------------#
+
+from Arduino.CompilerUploader import ArduinoCompilerUploader
 import os
-import platform
-import glob
-from time import sleep
-import binascii
-import math
-import sys
-from collections import defaultdict
 import json
-
-
-from Arduino import ArduinoCompilerUploader
-from SerialCommunication import SerialCommunication
-
-
+##
+# Class CompilerUploader, created to support different compilers & uploaders
+#
 class CompilerUploader:
 	def __init__(self):
 		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
 		self.arduino = ArduinoCompilerUploader(self.pathToMain)
-		self.serialCom = SerialCommunication()
 		self.readConfigFile()
 
 	def readConfigFile(self):
@@ -30,32 +31,17 @@ class CompilerUploader:
 	def getVersion (self):
 		return self.version
 	def setBoard (self, board):
-		self.serialCom.setBoard(board)
-		return 	self.searchPort()
+		# print 'setting board', 
+		return self.searchPort()
 	def setPort (self,port=''):
-		self.serialCom.setPort(port)
+		self.arduino.setPort(port)
 	def getPort (self):
-		return self.serialCom.getPort()
+		return self.arduino.getPort()
 	def getBoard(self):
-		return self.serialCom.getBoard()
-
+		return self.arduino.getBoard()
 	def searchPort (self):
-		port = self.arduino.searchPort()
-
-	def openSerialPort(self):
-		self.serialCom.open()
-
-	def closeSerialPort (self):
-		self.serialCom.close()
-
-	def writeSerialPort (self, data):
-		self.serialCom.write(data)
-
-	def readSerialPort (self):
-		return self.serialCom.read()
-
+		return self.arduino.searchPort()
 	def compile (self, code):
 		return self.arduino.compile(code)
-
 	def upload (self, code):
 		return self.arduino.upload(code)
