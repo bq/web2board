@@ -35,6 +35,7 @@ class ArduinoCompilerUploader:
 
 	def setBoard (self, board):
 		self.board = board
+		return self.searchPort()
 	def setPort (self,port=''):
 		self.port = port
 	def getPort (self):
@@ -58,16 +59,13 @@ class ArduinoCompilerUploader:
 			boardName = line.split('.')[0]
 			boardConfig = line.split('\n')
 			boardConfig= [i.split('=')for i in boardConfig]
-			# print boardConfig
 			boardConfig.pop(0) #Remove empty first element
 			self.boardSettings[boardName]=BoardConfig(boardConfig)
 
 	def getAvailablePorts (self):
 		if platform.system() =='Windows':
-			# print 'Windows'
 			availablePorts = glob.glob('COM*')
 		if platform.system() =='Darwin':
-			# print 'Darwin'
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/tty.usbmodem*')
 			elif self.board == 'bt328':
@@ -76,7 +74,6 @@ class ArduinoCompilerUploader:
 				availablePorts = glob.glob('/dev/tty*')
 
 		if platform.system() =='Linux':
-			# print 'Linux'
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/ttyACM*')
 			elif self.board == 'bt328':
@@ -96,7 +93,6 @@ class ArduinoCompilerUploader:
 			output, err = callAvrdude(args);
 			if 'Device signature =' in output or 'Device signature =' in err:
 				ports.append(port)
-		print ports
 		if len(ports)==1:
 			self.setPort(ports[0])
 			return port

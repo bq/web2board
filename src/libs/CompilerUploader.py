@@ -31,8 +31,7 @@ class CompilerUploader:
 	def getVersion (self):
 		return self.version
 	def setBoard (self, board):
-		# print 'setting board', 
-		return self.searchPort()
+		return self.arduino.setBoard(board)
 	def setPort (self,port=''):
 		self.arduino.setPort(port)
 	def getPort (self):
