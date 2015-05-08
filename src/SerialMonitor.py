@@ -25,6 +25,10 @@ import subprocess
 import wx._core
 import threading
 from Queue import Queue
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
+import unicodedata
 
 qBoard = Queue()
 qMonitor = Queue()
@@ -140,12 +144,12 @@ class SerialMonitorUI(wx.Dialog):
 	def update(self, event):
 		if not qBoard.empty():
 			message = qBoard.get()
-			self.response.AppendText(message+self.newLine)
+			self.response.AppendText('\t'+message+self.newLine)
 
 	def onSend(self, event):
 		message = self.inputTextBox.GetValue()
 		self.response.AppendText(message+self.newLine)
-		qMonitor.put(message)
+		qMonitor.put(unicode(message))
 		self.inputTextBox.SetValue('')
 
 	def onBoxChanged (self, event):
