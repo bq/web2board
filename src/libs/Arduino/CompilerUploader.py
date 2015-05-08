@@ -32,6 +32,7 @@ class ArduinoCompilerUploader:
 		self.parseBoardSettings(self.pathToMain+"/src/res/boards.txt")
 		self.board = 'uno'
 		self.port = None
+
 	def setBoard (self, board):
 		self.board = board
 	def setPort (self,port=''):
@@ -84,6 +85,26 @@ class ArduinoCompilerUploader:
 				availablePorts = glob.glob('/dev/tty*')
 		return availablePorts
 
+
+	def searchPort (self):
+		availablePorts = self.getAvailablePorts()
+		if len(availablePorts) <=0:
+			return None
+		ports = []
+		for port in availablePorts:
+			args = "-P "+port+" -p "+ self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
+			output, err = callAvrdude(args);
+			if 'Device signature =' in output or 'Device signature =' in err:
+				ports.append(port)
+		print ports
+		if len(ports)==1:
+			self.setPort(ports[0])
+			return port
+		else:
+			return ports
+
+
+
 	def compile (self, code):
 		return self.compiler.compile( code, self.getBoard() or 'uno', self.pathToArduinoDir, self.pathToSketchbook)
 
@@ -94,14 +115,3 @@ class ArduinoCompilerUploader:
 			return uploadErrorReport
 		else:
 			return compilationErrorReport
-	def searchPort (self):
-		availablePorts = self.getAvailablePorts()
-		if len(availablePorts) <=0:
-			return None
-		for port in availablePorts:
-			args = "-P "+port+" -p "+ self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
-			output, err = callAvrdude(args);
-			if 'Device signature =' in output or 'Device signature =' in err:
-				self.setPort(port)
-				return port
-		return None

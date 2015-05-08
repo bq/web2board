@@ -39,10 +39,17 @@ class messageHandler (WebSocket):
          message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('SETTING BOARD')
          port = compilerUploader.setBoard(str(message))
-         if port != None:
+         if port != None and type(port)!= type([]):
             self.sendMessage_('SETTING PORT : '+port)
+         elif type(port)==type([]):
+            self.sendMessage_('SETTING PORT : '+json.dumps(port))
          else :
             self.sendMessage_('NO PORT FOUND')
+      elif 'setPort' in self.data:
+         message = self.data.replace('setPort','').replace(' ','')
+         compilerUploader.setPort(message)
+         print 'compilerUploader.getPort()',compilerUploader.getPort()
+         self.sendMessage_('SETTED PORT '+str(compilerUploader.getPort()))
       elif 'compile' in self.data:
          message = self.data.replace('compile','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
