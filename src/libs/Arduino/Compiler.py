@@ -95,7 +95,7 @@ class Compiler:
 		stdOut = p.stdout.read()
 		stdErr = p.stderr.read()
 		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':self.compilerStderr(stdErr)}
-		if len(errorReport['errorReport'])>0:
+		if len(errorReport['errorReport'])>0 or len(stdErr)>0:
 			errorReport['status'] = 'KO'
 		else:
 			errorReport['status'] = 'OK'
@@ -109,30 +109,35 @@ class Compiler:
 		stdErrSplitted = stdErr.split('\n')
 		errorReport = []
 		errorNum = -1
-		for error in stdErrSplitted:
-			error = self.createUnicodeString(error)
-			#These characters are the report of in which function the error is happening 
-			if 'In function' in error:
-				errorNum +=1
-				error = re.sub('^(.*?): In function ', '',error)
-				error = error.replace(':', '')
-				errorReport.append({'function': error, 'error':[]})
-			else:
-				#Remove non important parts of the string
-				error = re.sub('^(.*?)applet/tmp.cpp', '', error)
-				error = re.sub(r'error', '', error)
-				#Find the line number in the error report
-				line = re.findall(':\d*:', error)
-				#If there is a line, there is an error to report
-				if len(line)>0:
-					line = line[0]
-					line = line.replace(':','')
-					#Replace everything but the error info
-					error = re.sub(':\d*:', '',error)
-					#If there appears this characters, there is no error, is the final line of the error report
-					if 'make: *** [applet/tmp.o]' in error:
-						error = ''
-					#Append the error report
-					errorReport[errorNum]['error'].append({'line':line, 'error':error})
-
+		try:
+			for error in stdErrSplitted:
+				error = self.createUnicodeString(error)
+				#These characters are the report of in which function the error is happening 
+				if 'In function' in error:
+					errorNum +=1
+					error = re.sub('^(.*?): In function ', '',error)
+					error = error.replace(':', '')
+					errorReport.append({'function': error, 'error':[]})
+				elif 'error: expected initializer before' in error:
+					error = re.sub('^(.*?)error: expected initializer before ', '', error)
+					errorReport.append({'function': error, 'error':'expected initializer before function'})
+				else:
+					#Remove non important parts of the string
+					error = re.sub('^(.*?)applet/tmp.cpp', '', error)
+					error = re.sub(r'error', '', error)
+					#Find the line number in the error report
+					line = re.findall(':\d*:', error)
+					#If there is a line, there is an error to report
+					if len(line)>0:
+						line = line[0]
+						line = line.replace(':','')
+						#Replace everything but the error info
+						error = re.sub(':\d*:', '',error)
+						#If there appears this characters, there is no error, is the final line of the error report
+						if 'make: *** [applet/tmp.o]' in error:
+							error = ''
+						#Append the error report
+						errorReport[errorNum]['error'].append({'line':line, 'error':error})
+		except :
+			print 'Compiler parsing exception'
 		return errorReport
