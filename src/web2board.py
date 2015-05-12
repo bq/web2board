@@ -40,9 +40,9 @@ class messageHandler (WebSocket):
          self.sendMessage_('SETTING BOARD')
          port = compilerUploader.setBoard(str(message))
          if port != None and type(port)!= type([]):
-            self.sendMessage_('SETTING PORT : '+port)
+            self.sendMessage_('SETTING PORT -> '+port)
          elif type(port)==type([]):
-            self.sendMessage_('SETTING PORT : '+json.dumps(port))
+            self.sendMessage_('SETTING PORT -> '+json.dumps(port))
          else :
             self.sendMessage_('NO PORT FOUND')
       elif 'setPort' in self.data:
@@ -55,13 +55,13 @@ class messageHandler (WebSocket):
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('COMPILING')
          report = compilerUploader.compile(message)
-         self.sendMessage_('COMPILED'+json.dumps(report))
+         self.sendMessage_('COMPILED -> '+json.dumps(report))
       elif 'upload' in self.data:
          message = self.data.replace('upload','')
          # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('UPLOADING')
          report= compilerUploader.upload(message)
-         self.sendMessage_('UPLOADED'+json.dumps(report))
+         self.sendMessage_('UPLOADED -> '+json.dumps(report))
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
          os.system("python src/SerialMonitor.py "+ message)
