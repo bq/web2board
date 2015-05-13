@@ -17,7 +17,7 @@ from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleS
 from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
 import json
-import os
+import subprocess
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 compilerUploader = CompilerUploader()
@@ -35,6 +35,10 @@ class messageHandler (WebSocket):
       if 'version' in self.data:
          self.sendMessage_('VERSION '+compilerUploader.getVersion())
       elif 'setBoard' in self.data:
+         try:
+            self.proc.terminate()
+         except:
+            print 'No SerialMonitor process found'
          message = self.data.replace('setBoard','')
          message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('SETTING BOARD')
@@ -48,23 +52,24 @@ class messageHandler (WebSocket):
       elif 'setPort' in self.data:
          message = self.data.replace('setPort','').replace(' ','')
          compilerUploader.setPort(message)
-         print 'compilerUploader.getPort()',compilerUploader.getPort()
          self.sendMessage_('SETTED PORT '+str(compilerUploader.getPort()))
       elif 'compile' in self.data:
          message = self.data.replace('compile','')
-         # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('COMPILING')
          report = compilerUploader.compile(message)
          self.sendMessage_('COMPILED -> '+json.dumps(report))
       elif 'upload' in self.data:
+         try:
+            self.proc.terminate()
+         except:
+            print 'No SerialMonitor process found'
          message = self.data.replace('upload','')
-         # message = message.replace(' ', '') #remove white spaces that make the command readable
          self.sendMessage_('UPLOADING')
          report= compilerUploader.upload(message)
          self.sendMessage_('UPLOADED -> '+json.dumps(report))
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
-         os.system("python src/SerialMonitor.py "+ message)
+         self.proc = subprocess.Popen(['python', 'src/SerialMonitor.py', message], shell=False)
 
    def handleConnected(self):
       print self.address, 'connected'
