@@ -1,9 +1,3 @@
-# ARDLIBS = 
-# USERLIBS = 
-# MODEL = bt328
-# ARDUINO_DIR = path_to_arduino
-# HOME_LIB = path_to_sketchbook (optional)
-
 ############################################################################
 # Platform's settings
 ############################################################################
@@ -64,7 +58,7 @@ SRC = \
     $(ARDUINO_CORE)/wiring_analog.c $(ARDUINO_CORE)/wiring_digital.c \
     $(ARDUINO_CORE)/wiring_pulse.c \
     $(ARDUINO_CORE)/wiring_shift.c $(ARDUINO_CORE)/WInterrupts.c \
-    $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/$l/*.c)) \
+    $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/*/$l.c)) \
     $(foreach l,$(ARDLIBS),$(wildcard $(ARDUINO_DIR)/libraries/$l/*.c))
 
 # From ARDUINO_CORE we may only need HardwareSerial, WMath, WString, Print
@@ -72,7 +66,10 @@ SRC = \
 CXXSRC = \
     $(wildcard $(ARDUINO_CORE)/*.cpp) \
     $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/$l/*.cpp)) \
+    $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/BQ/$l.cpp)) \
     $(foreach l,$(ARDLIBS),$(wildcard $(ARDUINO_DIR)/libraries/$l/*.cpp))
+
+$(info --> [${CXXSRC}])
 
 FORMAT = ihex
 
@@ -90,8 +87,8 @@ OPT = s
 CDEFS = -DF_CPU=$(F_CPU)
 
 # Include directories
-CINCS = -I$(ARDUINO_CORE) -I$(ARDUINO_VARIANT) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS)) $(patsubst %,-I$(HOME_LIB)/%/,$(USERLIBS))
-
+CINCS = -I$(ARDUINO_CORE) -I$(ARDUINO_VARIANT) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS)) -I$(HOME)/sketchbook/libraries/BQ $(patsubst %,-I$(HOME_LIB)/%/,$(USERLIBS))
+$(info ---> [${CINCS}])
 # Compiler flag to set the C Standard level.
 # c89   - "ANSI" C
 # gnu89 - c89 plus GCC extensions
