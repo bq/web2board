@@ -29,7 +29,7 @@ class ArduinoCompilerUploader:
 		self.uploader = Uploader(pathToMain)
 		self.compiler = Compiler(pathToMain)
 		self.boardSettings = defaultdict(BoardConfig)
-		self.parseBoardSettings(self.pathToMain+"/src/res/boards.txt")
+		self.parseBoardSettings(self.pathToMain+"/res/boards.txt")
 		self.board = 'uno'
 		self.port = None
 
