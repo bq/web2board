@@ -13,6 +13,8 @@
 import os
 import subprocess
 import re
+from os.path import expanduser
+import platform
 
 import sys
 reload(sys)
@@ -23,26 +25,28 @@ class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		self.userLibs = ''
+		self.tmpPath = expanduser("~")+'/.web2board/'
 		self.arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
 	def createMakefile(self, board,  arduinoDir, sketchbookDir):
-		if not os.path.exists("tmp"):
-			os.makedirs("tmp")
+		if not os.path.exists(self.tmpPath):
+			os.makedirs(self.tmpPath)
 		fo = open(self.pathToMain+"/res/Makefile", "r")
 		makefile = fo.read()
 		# print 'makefile', makefile
 		fo.close()
-		fo = open(self.pathToMain+"/tmp/Makefile", "w")
+		fo = open(self.tmpPath+"Makefile", "w")
 		fo.write("MODEL = "+board+"\n")
 		fo.write("ARDLIBS = "+self.getArduinoLibs()+"\n")
 		fo.write("USERLIBS = "+self.getUserLibs()+"\n")
 		fo.write("ARDUINO_DIR = "+arduinoDir+"\n")
 		fo.write("HOME_LIB = "+sketchbookDir+"\n")
+		fo.write("TARGET = tmp\n")
 		fo.write(makefile)
 		fo.close()
 
 	def createSketchFile (self, code):
-		fo = open(self.pathToMain+"/tmp/tmp.ino", "w")
+		fo = open(self.tmpPath+"tmp.ino", "w")
 		fo.write(code)
 		fo.close()
 
@@ -91,7 +95,7 @@ class Compiler:
 		self.parseLibs(code)
 		self.createMakefile(board,  arduinoDir, sketchbookDir)
 		self.createSketchFile(code)
-		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, cwd=self.pathToMain+'/tmp')
+		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'), cwd=self.tmpPath)
 		stdOut = p.stdout.read()
 		stdErr = p.stderr.read()
 		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':self.compilerStderr(stdErr)}

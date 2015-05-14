@@ -12,14 +12,17 @@
 #-----------------------------------------------------------------------#
 import re
 from utils import callAvrdude
+from os.path import expanduser
 
 class Uploader :
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
+		self.tmpPath = expanduser("~")+'/.web2board/'
+
 
 	def upload (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):
 		if port != None:
-			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ '/tmp/applet/tmp.hex'
+			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ self.tmpPath+'applet/tmp.hex'
 			stdOut, stdErr = callAvrdude(args)
 			errorReport = self.avrdudeStderr(stdErr)
 			return {'status':errorReport['status'],'errorReport':errorReport,'stdOut':stdOut,'stdErr':stdErr}
