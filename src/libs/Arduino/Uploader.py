@@ -19,7 +19,7 @@ class Uploader :
 
 	def upload (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):
 		if port != None:
-			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ self.pathToMain+'/tmp/applet/tmp.hex'
+			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ '/tmp/applet/tmp.hex'
 			stdOut, stdErr = callAvrdude(args)
 			errorReport = self.avrdudeStderr(stdErr)
 			return {'status':errorReport['status'],'errorReport':errorReport,'stdOut':stdOut,'stdErr':stdErr}
