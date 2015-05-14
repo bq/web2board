@@ -11,10 +11,11 @@
 #                                                                       #
 #-----------------------------------------------------------------------#
 import subprocess
+import platform
 
 def callAvrdude(args):
 	cmd = "avrdude "+args
-	p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'))
 	output = p.stdout.read()
 	err = p.stderr.read()
 	return output, err

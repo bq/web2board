@@ -15,6 +15,7 @@ import os
 import platform
 import glob
 from collections import defaultdict
+import serial.tools.list_ports
 
 from Compiler import Compiler
 from Uploader import Uploader
@@ -29,7 +30,7 @@ class ArduinoCompilerUploader:
 		self.uploader = Uploader(pathToMain)
 		self.compiler = Compiler(pathToMain)
 		self.boardSettings = defaultdict(BoardConfig)
-		self.parseBoardSettings(self.pathToMain+"/src/res/boards.txt")
+		self.parseBoardSettings(self.pathToMain+"/res/boards.txt")
 		self.board = 'uno'
 		self.port = None
 
@@ -64,8 +65,12 @@ class ArduinoCompilerUploader:
 
 	def getAvailablePorts (self):
 		if platform.system() =='Windows':
-			availablePorts = glob.glob('COM*')
-		if platform.system() =='Darwin':
+			comPorts = list(serial.tools.list_ports.comPorts())
+			availablePorts = []
+			for port in comPorts:
+				availablePorts.append(port[0])
+
+		elif platform.system() =='Darwin':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/tty.usbmodem*')
 			elif self.board == 'bt328':
@@ -73,7 +78,7 @@ class ArduinoCompilerUploader:
 			else:
 				availablePorts = glob.glob('/dev/tty*')
 
-		if platform.system() =='Linux':
+		elif platform.system() =='Linux':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/ttyACM*')
 			elif self.board == 'bt328':

@@ -69,7 +69,7 @@ class messageHandler (WebSocket):
          self.sendMessage_('UPLOADED -> '+json.dumps(report))
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
-         self.proc = subprocess.Popen(['python', 'src/SerialMonitor.py', message], shell=False)
+         self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
 
    def handleConnected(self):
       print self.address, 'connected'

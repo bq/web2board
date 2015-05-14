@@ -156,6 +156,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 	# Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.7/pyserial-2.7.win32.exe
+	downloadURL http://sourceforge.net/projects/winavr/files/WinAVR/20100110/WinAVR-20100110-install.exe
+
 fi
 
 #############################

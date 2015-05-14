@@ -12,19 +12,21 @@
 #-----------------------------------------------------------------------#
 
 from Arduino.CompilerUploader import ArduinoCompilerUploader
-import os
+# import os
+import sys
 import json
 ##
 # Class CompilerUploader, created to support different compilers & uploaders
 #
 class CompilerUploader:
 	def __init__(self):
-		self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
+		# self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
+		self.pathToMain = sys.path[0]
 		self.arduino = ArduinoCompilerUploader(self.pathToMain)
 		self.readConfigFile()
 
 	def readConfigFile(self):
-		with open(self.pathToMain+'/src/res/config.json') as json_data_file:
+		with open(self.pathToMain+'/res/config.json') as json_data_file:
 			data = json.load(json_data_file)
 			self.version = str(data['version'])
 

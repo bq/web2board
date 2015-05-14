@@ -26,7 +26,7 @@ SetCompressor /SOLID lzma
 !include "MUI2.nsh"
 !include Library.nsh
 
-!define MUI_ICON "dist/res/Web2board.ico"
+!define MUI_ICON "dist/src/res/Web2board.ico"
 !define MUI_BGCOLOR FFFFFF
 
 ; Directory page defines
