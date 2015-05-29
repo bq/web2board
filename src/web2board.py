@@ -54,7 +54,7 @@ class messageHandler (WebSocket):
          compilerUploader.setPort(message)
          self.sendMessage_('SETTED PORT '+str(compilerUploader.getPort()))
       elif 'compile' in self.data:
-         message = self.data.replace('compile','')
+         message = str(self.data.replace('compile',''))
          self.sendMessage_('COMPILING')
          report = compilerUploader.compile(message)
          self.sendMessage_('COMPILED -> '+json.dumps(report))
@@ -63,7 +63,8 @@ class messageHandler (WebSocket):
             self.proc.terminate()
          except:
             print 'No SerialMonitor process found'
-         message = self.data.replace('upload','')
+
+         message = str(self.data.replace('upload',''))
          self.sendMessage_('UPLOADING')
          report= compilerUploader.upload(message)
          self.sendMessage_('UPLOADED -> '+json.dumps(report))

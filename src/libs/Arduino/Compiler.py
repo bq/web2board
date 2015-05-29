@@ -15,6 +15,8 @@ import subprocess
 import re
 from os.path import expanduser
 import platform
+import shutil
+import time 
 
 import sys
 reload(sys)
@@ -28,12 +30,14 @@ class Compiler:
 		self.tmpPath = expanduser("~")+'/.web2board/'
 		self.arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
+	def removePreviousFiles (self):
+		shutil.rmtree(self.tmpPath)
+
 	def createMakefile(self, board,  arduinoDir, sketchbookDir):
 		if not os.path.exists(self.tmpPath):
 			os.makedirs(self.tmpPath)
 		fo = open(self.pathToMain+"/res/Makefile", "r")
 		makefile = fo.read()
-		# print 'makefile', makefile
 		fo.close()
 		fo = open(self.tmpPath+"Makefile", "w")
 		fo.write("MODEL = "+board+"\n")
@@ -92,6 +96,7 @@ class Compiler:
 		self.setUserLibs(' '.join(userLibs))
 
 	def compile(self, code, board,  arduinoDir, sketchbookDir):
+		self.removePreviousFiles();
 		self.parseLibs(code)
 		self.createMakefile(board,  arduinoDir, sketchbookDir)
 		self.createSketchFile(code)
@@ -99,7 +104,7 @@ class Compiler:
 		stdOut = p.stdout.read()
 		stdErr = p.stderr.read()
 		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':self.compilerStderr(stdErr)}
-		if len(errorReport['errorReport'])>0 or len(stdErr)>0:
+		if len(errorReport['errorReport'])> 1 or len(stdErr)>0:
 			errorReport['status'] = 'KO'
 		else:
 			errorReport['status'] = 'OK'
@@ -140,8 +145,9 @@ class Compiler:
 						#If there appears this characters, there is no error, is the final line of the error report
 						if 'make: *** [applet/tmp.o]' in error:
 							error = ''
-						#Append the error report
-						errorReport[errorNum]['error'].append({'line':line, 'error':error})
+						if 'warning:' not in error:
+							#Append the error report
+							errorReport[errorNum]['error'].append({'line':line, 'error':error})
 		except :
 			print 'Compiler parsing exception'
 		return errorReport

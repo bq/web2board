@@ -66,7 +66,7 @@ SRC = \
 CXXSRC = \
     $(wildcard $(ARDUINO_CORE)/*.cpp) \
     $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/$l/*.cpp)) \
-    $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/BQ/$l.cpp)) \
+    $(foreach l,$(USERLIBS),$(wildcard $(HOME)/sketchbook/libraries/bitbloqLibs/$l.cpp)) \
     $(foreach l,$(ARDLIBS),$(wildcard $(ARDUINO_DIR)/libraries/$l/*.cpp))
 
 # $(info --> [${CXXSRC}])
@@ -87,7 +87,7 @@ OPT = s
 CDEFS = -DF_CPU=$(F_CPU)
 
 # Include directories
-CINCS = -I$(ARDUINO_CORE) -I$(ARDUINO_VARIANT) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS)) -I$(HOME)/sketchbook/libraries/BQ $(patsubst %,-I$(HOME_LIB)/%/,$(USERLIBS)) -I/tmp/
+CINCS = -I$(ARDUINO_CORE) -I$(ARDUINO_VARIANT) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS)) -I$(HOME)/sketchbook/libraries/bitbloqLibs $(patsubst %,-I$(HOME_LIB)/%/,$(USERLIBS)) -I/tmp/
 # $(info ---> [${CINCS}])
 # Compiler flag to set the C Standard level.
 # c89   - "ANSI" C
