@@ -86,6 +86,8 @@ class Compiler:
 			if lib in self.arduinoLibs:
 				arduinoLibs.append(lib)
 			else:
+				if (lib == 'bqLiquidCrystal'):
+					userLibs.append('MCP23008')
 				userLibs.append(lib)
 
 		#remove duplicates from lists of libs
