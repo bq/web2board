@@ -112,7 +112,9 @@ class ArduinoCompilerUploader:
 	def upload (self, code):
 		compilationErrorReport = self.compiler.compile( code, self.getBoard() or 'uno', self.pathToArduinoDir, self.pathToSketchbook)
 		if compilationErrorReport['status'] == 'OK':
+			print 'compilation OK'
 			uploadErrorReport = self.uploader.upload( code, self.getPort(), self.getBoard(), self.getBoardMCU(), self.getBoardBaudRate(), self.pathToMain, self.pathToSketchbook)
+			print uploadErrorReport
 			return uploadErrorReport
 		else:
 			return compilationErrorReport

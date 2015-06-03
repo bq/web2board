@@ -28,7 +28,7 @@ class Compiler:
 		self.pathToMain = pathToMain
 		self.userLibs = ''
 		self.tmpPath = expanduser("~")+'/.web2board/'
-		self.arduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
+		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
 	def removePreviousFiles (self):
 		shutil.rmtree(self.tmpPath)
@@ -77,13 +77,21 @@ class Compiler:
 	def parseLibs(self, code):
 		arduinoLibs = []
 		userLibs = []
+		lib = ''
 		initIndexes= list(self.find_all(code,'#include'))
 		finalIndexes= list(self.find_all(code,'\n'))
 		for i in range(len(initIndexes)):
 			lib = code[initIndexes[i]: finalIndexes[i]]
 			#remove all spaces, #include ,< & >,",.h
 			lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
-			if lib in self.arduinoLibs:
+			print '----------------------------------------------------------------------------------------'
+			print 'lib in self.oficialArduinoLibs', lib in self.oficialArduinoLibs
+			print 'lib', lib
+			print 'len(lib)', len(lib)
+			print 'self.oficialArduinoLibs', self.oficialArduinoLibs
+			print 'len(self.oficialArduinoLibs)', len(self.oficialArduinoLibs)
+			print '----------------------------------------------------------------------------------------'
+			if lib in self.oficialArduinoLibs:
 				arduinoLibs.append(lib)
 			else:
 				if (lib == 'bqLiquidCrystal'):
@@ -147,9 +155,9 @@ class Compiler:
 						#If there appears this characters, there is no error, is the final line of the error report
 						if 'make: *** [applet/tmp.o]' in error:
 							error = ''
-						if 'warning:' not in error:
-							#Append the error report
-							errorReport[errorNum]['error'].append({'line':line, 'error':error})
+						# if 'warning:' not in error:
+						#Append the error report
+						errorReport[errorNum]['error'].append({'line':line, 'error':error})
 		except :
 			print 'Compiler parsing exception'
 		return errorReport
