@@ -84,13 +84,13 @@ class Compiler:
 			lib = code[initIndexes[i]: finalIndexes[i]]
 			#remove all spaces, #include ,< & >,",.h
 			lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
-			print '----------------------------------------------------------------------------------------'
-			print 'lib in self.oficialArduinoLibs', lib in self.oficialArduinoLibs
-			print 'lib', lib
-			print 'len(lib)', len(lib)
-			print 'self.oficialArduinoLibs', self.oficialArduinoLibs
-			print 'len(self.oficialArduinoLibs)', len(self.oficialArduinoLibs)
-			print '----------------------------------------------------------------------------------------'
+			# print '----------------------------------------------------------------------------------------'
+			# print 'lib in self.oficialArduinoLibs', lib in self.oficialArduinoLibs
+			# print 'lib', lib
+			# print 'len(lib)', len(lib)
+			# print 'self.oficialArduinoLibs', self.oficialArduinoLibs
+			# print 'len(self.oficialArduinoLibs)', len(self.oficialArduinoLibs)
+			# print '----------------------------------------------------------------------------------------'
 			if lib in self.oficialArduinoLibs:
 				arduinoLibs.append(lib)
 			else:
@@ -113,8 +113,9 @@ class Compiler:
 		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'), cwd=self.tmpPath)
 		stdOut = p.stdout.read()
 		stdErr = p.stderr.read()
-		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':self.compilerStderr(stdErr)}
-		if len(errorReport['errorReport'])> 1 or len(stdErr)>0:
+		parsingError, compilerStderr = self.compilerStderr(stdErr)
+		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':compilerStderr}
+		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:
 			errorReport['status'] = 'KO'
 		else:
 			errorReport['status'] = 'OK'
@@ -128,6 +129,7 @@ class Compiler:
 		stdErrSplitted = stdErr.split('\n')
 		errorReport = []
 		errorNum = -1
+		parsingError = False
 		try:
 			for error in stdErrSplitted:
 				error = self.createUnicodeString(error)
@@ -155,9 +157,11 @@ class Compiler:
 						#If there appears this characters, there is no error, is the final line of the error report
 						if 'make: *** [applet/tmp.o]' in error:
 							error = ''
-						# if 'warning:' not in error:
-						#Append the error report
-						errorReport[errorNum]['error'].append({'line':line, 'error':error})
+						if 'warning:' not in error:
+							#Append the error report
+							errorReport[errorNum]['error'].append({'line':line, 'error':error})
 		except :
 			print 'Compiler parsing exception'
-		return errorReport
+			parsingError = True
+
+		return parsingError, errorReport
