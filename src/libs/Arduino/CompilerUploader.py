@@ -16,6 +16,7 @@ import platform
 import glob
 from collections import defaultdict
 import serial.tools.list_ports
+from os.path import expanduser
 
 from Compiler import Compiler
 from Uploader import Uploader
@@ -25,7 +26,7 @@ class ArduinoCompilerUploader:
 
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
-		self.pathToSketchbook = '/home/irene-sanz/sketchbook'
+		self.pathToSketchbook = expanduser("~")+'/sketchbook'
 		self.pathToArduinoDir = pathToMain+'/res/arduino/'
 		self.uploader = Uploader(pathToMain)
 		self.compiler = Compiler(pathToMain)
