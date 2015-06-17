@@ -51,6 +51,8 @@ class ArduinoCompilerUploader:
 	def getBoardMCU(self):
 		return self.boardSettings[self.board].getMCU()
 
+	def getBoardFCPU(self):
+		return self.boardSettings[self.board].getFCPU()
 
 	def parseBoardSettings (self, path):
 		file=open(path,'r')
@@ -108,12 +110,11 @@ class ArduinoCompilerUploader:
 
 
 	def compile (self, code):
-		return self.compiler.compile( code, self.getBoard() or 'uno', self.pathToArduinoDir, self.pathToSketchbook)
+		return self.compiler.compile( code, self.getBoard() or 'uno', self.pathToArduinoDir, self.pathToSketchbook, self.getBoardMCU(), self.getBoardFCPU())
 
 	def upload (self, code):
-		compilationErrorReport = self.compiler.compile( code, self.getBoard() or 'uno', self.pathToArduinoDir, self.pathToSketchbook)
+		compilationErrorReport = self.compile(code)
 		if compilationErrorReport['status'] == 'OK':
-			print 'compilation OK'
 			uploadErrorReport = self.uploader.upload( code, self.getPort(), self.getBoard(), self.getBoardMCU(), self.getBoardBaudRate(), self.pathToMain, self.pathToSketchbook)
 			print uploadErrorReport
 			return uploadErrorReport

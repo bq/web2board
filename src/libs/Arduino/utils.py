@@ -28,9 +28,13 @@ class BoardConfig :
 				self.build_mcu= arg[1]
 			if 'upload.speed' in arg[0]:
 				self.upload_speed= arg[1]
+			if 'f_cpu' in arg[0]:
+				self.f_cpu = arg[1]
 	def getBaudRate(self):
 		return self.upload_speed
 	def getMaxSize (self):
 		return self.upload_maximum_size
 	def getMCU (self):
 		return self.build_mcu
+	def getFCPU (self):
+		return self.f_cpu

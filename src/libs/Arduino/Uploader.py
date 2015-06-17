@@ -13,16 +13,26 @@
 import re
 from utils import callAvrdude
 from os.path import expanduser
+import base
 
 class Uploader :
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
-		self.tmpPath = expanduser("~")+'/.web2board/'
+		self.tmpPath = base.sys_path.get_tmp_path()+'/Stino_build/.web2board/.web2board.hex'
 
+
+	def uploadFromWeb2boardFolder (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):
+		if port != None:
+			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ self.tmpPath+'applet/tmp.hex'
+			stdOut, stdErr = callAvrdude(args)
+			errorReport = self.avrdudeStderr(stdErr)
+			return {'status':errorReport['status'],'errorReport':errorReport,'stdOut':stdOut,'stdErr':stdErr}
+		else:
+			return {'status':'KO','error':'no port'}
 
 	def upload (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):
 		if port != None:
-			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ self.tmpPath+'applet/tmp.hex'
+			args = "-v -F "+"-P "+ port +" -p "+ boardMCU +" -b "+ boardBaudRate+" -c arduino " + "-U flash:w:"+ self.tmpPath
 			stdOut, stdErr = callAvrdude(args)
 			errorReport = self.avrdudeStderr(stdErr)
 			return {'status':errorReport['status'],'errorReport':errorReport,'stdOut':stdOut,'stdErr':stdErr}

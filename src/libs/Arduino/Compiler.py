@@ -23,6 +23,8 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import unicodedata
 
+import arduino_compiler
+
 class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
@@ -50,6 +52,8 @@ class Compiler:
 		fo.close()
 
 	def createSketchFile (self, code):
+		if not os.path.exists(self.tmpPath):
+			os.makedirs(self.tmpPath)
 		fo = open(self.tmpPath+"tmp.ino", "w")
 		fo.write(code)
 		fo.close()
@@ -84,13 +88,6 @@ class Compiler:
 			lib = code[initIndexes[i]: finalIndexes[i]]
 			#remove all spaces, #include ,< & >,",.h
 			lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
-			# print '----------------------------------------------------------------------------------------'
-			# print 'lib in self.oficialArduinoLibs', lib in self.oficialArduinoLibs
-			# print 'lib', lib
-			# print 'len(lib)', len(lib)
-			# print 'self.oficialArduinoLibs', self.oficialArduinoLibs
-			# print 'len(self.oficialArduinoLibs)', len(self.oficialArduinoLibs)
-			# print '----------------------------------------------------------------------------------------'
 			if lib in self.oficialArduinoLibs:
 				arduinoLibs.append(lib)
 			else:
@@ -104,22 +101,7 @@ class Compiler:
 		#join lists into strings
 		self.setArduinoLibs(' '.join(arduinoLibs))
 		self.setUserLibs(' '.join(userLibs))
-
-	def compile(self, code, board,  arduinoDir, sketchbookDir):
-		self.removePreviousFiles();
-		self.parseLibs(code)
-		self.createMakefile(board,  arduinoDir, sketchbookDir)
-		self.createSketchFile(code)
-		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'), cwd=self.tmpPath)
-		stdOut = p.stdout.read()
-		stdErr = p.stderr.read()
-		parsingError, compilerStderr = self.compilerStderr(stdErr)
-		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':compilerStderr}
-		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:
-			errorReport['status'] = 'KO'
-		else:
-			errorReport['status'] = 'OK'
-		return errorReport
+		return arduinoLibs+userLibs
 
 	def createUnicodeString(self, input_str):
 		return  unicodedata.normalize('NFKD', unicode(input_str)).encode('ASCII','ignore')
@@ -165,3 +147,48 @@ class Compiler:
 			parsingError = True
 
 		return parsingError, errorReport
+
+	def compileWithMakefile(self, code, board,  arduinoDir, sketchbookDir):
+		self.removePreviousFiles();
+		self.parseLibs(code)
+		self.createMakefile(board,  arduinoDir, sketchbookDir)
+		self.createSketchFile(code)
+		p = subprocess.Popen('make', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'), cwd=self.tmpPath)
+		stdOut = p.stdout.read()
+		stdErr = p.stderr.read()
+		parsingError, compilerStderr = self.compilerStderr(stdErr)
+		errorReport =  {'stdOut':stdOut,'stdErr':stdErr, 'errorReport':compilerStderr}
+		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:
+			errorReport['status'] = 'KO'
+		else:
+			errorReport['status'] = 'OK'
+		return errorReport
+
+
+	def compile(self, code, board, arduinoDir, sketchbookDir, target_board_mcu, build_f_cpu):
+		self.parseLibs(code)
+		self.createSketchFile(code)
+		libs = ''
+		for lib in self.getArduinoLibs().split(' '): 
+				libs+= ' -I /usr/share/arduino/libraries/'+lib+' '
+		for lib in self.getUserLibs().split(' '): 
+				libs+= ' -I /home/irene-sanz/sketchbook/libraries/bitbloqLibs/ '
+
+		ide_path = os.path.abspath('src/res/arduino')
+		core_path = ide_path+'/hardware/arduino/cores/arduino'
+		# build_f_cpu = '16000000L'
+		# target_board_mcu = 'atmega328p'
+
+		# libs += '-I /usr/share/arduino/hardware/arduino/variants/standard'
+		libs += '-I '+ide_path+'/hardware/arduino/variants/standard'
+ 
+		compiler = arduino_compiler.Compiler(self.tmpPath, libs, core_path, ide_path, build_f_cpu, target_board_mcu)
+		stdErr = compiler.build()
+		parsingError, compilerStderr = self.compilerStderr(stdErr)
+		errorReport =  {'stdOut':'','stdErr':stdErr, 'errorReport':compilerStderr}
+		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:
+			errorReport['status'] = 'KO'
+		else:
+			errorReport['status'] = 'OK'
+		return errorReport
+
