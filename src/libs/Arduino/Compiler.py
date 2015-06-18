@@ -33,7 +33,10 @@ class Compiler:
 		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
 		self.ide_path = os.path.realpath(__file__)
-		self.ide_path = self.ide_path[:-24]
+		if self.ide_path[len(self.ide_path)-1] == 'c':
+			self.ide_path = self.ide_path[:-25]
+		else:
+			self.ide_path = self.ide_path[:-24]
 		self.ide_path +='res/arduino'
 		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
 
@@ -90,16 +93,17 @@ class Compiler:
 		lib = ''
 		initIndexes= list(self.find_all(code,'#include'))
 		finalIndexes= list(self.find_all(code,'\n'))
-		for i in range(len(initIndexes)):
-			lib = code[initIndexes[i]: finalIndexes[i]]
-			#remove all spaces, #include ,< & >,",.h
-			lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
-			if lib in self.oficialArduinoLibs:
-				arduinoLibs.append(lib)
-			else:
-				if (lib == 'bqLiquidCrystal'):
-					userLibs.append('MCP23008')
-				userLibs.append(lib)
+		if len(initIndexes) > 1:
+			for i in range(len(initIndexes)):
+				lib = code[initIndexes[i]: finalIndexes[i]]
+				#remove all spaces, #include ,< & >,",.h
+				lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
+				if lib in self.oficialArduinoLibs:
+					arduinoLibs.append(lib)
+				else:
+					if (lib == 'bqLiquidCrystal'):
+						userLibs.append('MCP23008')
+					userLibs.append(lib)
 
 		#remove duplicates from lists of libs
 		arduinoLibs = sorted(set(arduinoLibs))

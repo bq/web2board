@@ -425,7 +425,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
     error_occured = False
     for cmd in cmds:
         return_code, stdout, stderr = exec_cmd(working_dir, cmd)
-        print(cmd + '\n')
+        # print(cmd + '\n')
         # if is_verbose:
         #     # message_queue.put(cmd + '\n')
         #     if stdout:
