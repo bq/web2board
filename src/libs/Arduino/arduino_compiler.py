@@ -355,12 +355,15 @@ class Compiler(object):
         error_occured = False
 
         total_file_number = len(self.build_files)
+        #print('enumerate(self.build_files)',self.build_files)
         for index, build_file in enumerate(self.build_files):
-            # percent = str(int(100 * (index + 1) / total_file_number )).rjust(3)
-            # print('['+percent+'%] \\n')
+            percent = str(int(100 * (index + 1) / total_file_number )).rjust(3)
+            print('['+percent+'%] \\n')
             cmds = self.file_cmds_dict.get(build_file)
-            self.stderr += exec_cmds(self.ide_path, cmds, show_compilation_output)
-
+            result = exec_cmds(self.ide_path, cmds, show_compilation_output)
+            if (result == -1):
+                break
+            self.stderr += result
     def has_error(self):
         print("error")
         return self.error_occured
@@ -413,7 +416,7 @@ def gen_obj_paths(src_path, build_path, sub_dir, cpp_files):
         obj_paths.append(obj_path)
 
         obj_dir_name = os.path.dirname(obj_path)
-        if not os.path.isdir(obj_dir_name):
+        if not os.path.exists(obj_dir_name):
             os.makedirs(obj_dir_name)
     return obj_paths
 
@@ -422,7 +425,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
     error_occured = False
     for cmd in cmds:
         return_code, stdout, stderr = exec_cmd(working_dir, cmd)
-        # print(cmd + '\n')
+        print(cmd + '\n')
         # if is_verbose:
         #     # message_queue.put(cmd + '\n')
         #     if stdout:
@@ -433,7 +436,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         if return_code != 0:
             print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
             error_occured = True
-            break
+            return -1
     return stderr
 
 
@@ -441,7 +444,6 @@ def exec_cmd(working_dir, cmd):
     os.environ['CYGWIN'] = 'nodosfilewarning'
     if cmd:
         # print ("exec_cmd -->", cmd)
-
         os.chdir(working_dir)
         compile_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         result = compile_proc.communicate()
@@ -482,6 +484,7 @@ def gen_core_objs(core_path, folder_prefix, build_path, is_new_build = True):
     core_cpp_files = core_dir.recursive_list_files(
         arduino_src.CPP_EXTS, ['libraries'])
     sub_dir_name = folder_prefix + core_dir.get_name()
+
     core_obj_paths = gen_obj_paths(core_path, build_path,
                                    sub_dir_name, core_cpp_files)
     core_cpp_obj_pairs = gen_cpp_obj_pairs(

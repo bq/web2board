@@ -32,6 +32,12 @@ class Compiler:
 		self.tmpPath = expanduser("~")+'/.web2board/'
 		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
+		self.ide_path = os.path.realpath(__file__)
+		self.ide_path = self.ide_path[:-24]
+		self.ide_path +='res/arduino'
+		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
+
+
 	def removePreviousFiles (self):
 		shutil.rmtree(self.tmpPath)
 
@@ -168,21 +174,23 @@ class Compiler:
 	def compile(self, code, board, arduinoDir, sketchbookDir, target_board_mcu, build_f_cpu):
 		self.parseLibs(code)
 		self.createSketchFile(code)
-		libs = ''
+
+		self.libs = ''
 		for lib in self.getArduinoLibs().split(' '): 
-				libs+= ' -I /usr/share/arduino/libraries/'+lib+' '
+				self.libs+= ' -I /usr/share/arduino/libraries/'+lib+' '
 		for lib in self.getUserLibs().split(' '): 
-				libs+= ' -I /home/irene-sanz/sketchbook/libraries/bitbloqLibs/ '
+				self.libs+= ' -I /home/irene-sanz/sketchbook/libraries/bitbloqLibs/ '
 
-		ide_path = os.path.abspath('src/res/arduino')
-		core_path = ide_path+'/hardware/arduino/cores/arduino'
-		# build_f_cpu = '16000000L'
-		# target_board_mcu = 'atmega328p'
+		self.libs += '-I '+self.ide_path+'/hardware/arduino/variants/standard'
 
-		# libs += '-I /usr/share/arduino/hardware/arduino/variants/standard'
-		libs += '-I '+ide_path+'/hardware/arduino/variants/standard'
+
+		if platform.system() == 'Windows':
+			self.ide_path = self.ide_path.replace('/', '\\')
+			self.core_path = self.core_path.replace('/', '\\')
+			self.libs = self.libs.replace('/', '\\')
+
  
-		compiler = arduino_compiler.Compiler(self.tmpPath, libs, core_path, ide_path, build_f_cpu, target_board_mcu)
+		compiler = arduino_compiler.Compiler(self.tmpPath, self.libs, self.core_path, self.ide_path, build_f_cpu, target_board_mcu)
 		stdErr = compiler.build()
 		parsingError, compilerStderr = self.compilerStderr(stdErr)
 		errorReport =  {'stdOut':'','stdErr':stdErr, 'errorReport':compilerStderr}

@@ -14,7 +14,11 @@ import subprocess
 import platform
 
 def callAvrdude(args):
-	cmd = "avrdude "+args
+	if platform.system() =='Windows':
+		cmd = "E:\web2board\\avrdude\\avrdude.exe "+args
+	else:
+		cmd = "avrdude "+args
+	print ('--->', cmd)
 	p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'))
 	output = p.stdout.read()
 	err = p.stderr.read()

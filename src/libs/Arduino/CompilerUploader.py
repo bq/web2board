@@ -15,12 +15,12 @@ import os
 import platform
 import glob
 from collections import defaultdict
-import serial.tools.list_ports
 from os.path import expanduser
 
 from Compiler import Compiler
 from Uploader import Uploader
 from utils import BoardConfig, callAvrdude
+from serial.tools.list_ports import comports
 
 class ArduinoCompilerUploader:
 
@@ -68,11 +68,10 @@ class ArduinoCompilerUploader:
 
 	def getAvailablePorts (self):
 		if platform.system() =='Windows':
-			comPorts = list(serial.tools.list_ports.comPorts())
+			comPorts = list(comports())
 			availablePorts = []
 			for port in comPorts:
 				availablePorts.append(port[0])
-
 		elif platform.system() =='Darwin':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/tty.usbmodem*')
@@ -115,7 +114,7 @@ class ArduinoCompilerUploader:
 	def upload (self, code):
 		compilationErrorReport = self.compile(code)
 		if compilationErrorReport['status'] == 'OK':
-			uploadErrorReport = self.uploader.upload( code, self.getPort(), self.getBoard(), self.getBoardMCU(), self.getBoardBaudRate(), self.pathToMain, self.pathToSketchbook)
+			uploadErrorReport = self.uploader.upload(code, self.getPort(), self.getBoard(), self.getBoardMCU(), self.getBoardBaudRate(), self.pathToMain, self.pathToSketchbook)
 			print uploadErrorReport
 			return uploadErrorReport
 		else:
