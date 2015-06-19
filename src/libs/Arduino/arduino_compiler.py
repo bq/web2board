@@ -241,7 +241,7 @@ class Compiler(object):
         project_path = self.project.get_path()
         include_paths = [project_path] + self.core_paths
 
-        includes = ['-I %s' % path for path in include_paths]
+        includes = ['-I "%s"' % path for path in include_paths]
         self.params['includes'] = ' '.join(includes)
 
         ide_path = self.ide_path
@@ -252,6 +252,7 @@ class Compiler(object):
         compiler_path = compiler_path.replace('{runtime.ide.path}', ide_path)
         if not os.path.isdir(compiler_path):
             self.params['compiler.path'] = ''
+
 
         #my intervention!
         compiler_c_cmd='avr-gcc'
@@ -273,13 +274,13 @@ class Compiler(object):
         self.params['build.f_cpu'] = self.build_f_cpu
 
         self.params['includes']+= self.libraries
-        self.params['recipe.c.o.pattern'] = compiler_path+ compiler_c_cmd + '  '+ compiler_c_flags +' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+self.params['includes'] +' {source_file} -o {object_file}'
-        self.params['recipe.cpp.o.pattern'] = compiler_path+compiler_cpp_cmd+' '+ compiler_cpp_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+ self.params['includes'] +' {source_file} -o {object_file}'
-        self.params['recipe.S.o.pattern'] = compiler_path+ compiler_S_cmd+' '+ compiler_S_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+ ' '+self.params['includes'] +' {source_file} -o {object_file}'
-        self.params['recipe.ar.pattern'] = compiler_path+ compiler_ar_cmd+' '+ compiler_ar_flags + ' '+ self.params['build.path']+'/{archive_file} {object_file}'
-        self.params['recipe.c.combine.pattern'] = compiler_path+ compiler_c_elf_cmd+' '+compiler_c_elf_flags + ' -mmcu='+self.params['build.mcu']+' -o '+self.params['build.path']+'/'+self.params['build.project_name']+'.elf {object_files} '+self.params['build.path']+'/{archive_file} -L'+self.params['build.path']+' -lm'
-        self.params['recipe.objcopy.eep.pattern'] = compiler_path+ compiler_objcopy_cmd+' '+ compiler_objcopy_eep_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.eep'
-        self.params['recipe.objcopy.hex.pattern'] = compiler_path+compiler_elf2hex_cmd+' '+ compiler_elf2hex_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.hex'
+        self.params['recipe.c.o.pattern'] = '"'+compiler_path+ compiler_c_cmd + '"'+'  '+ compiler_c_flags +' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
+        self.params['recipe.cpp.o.pattern'] = '"'+compiler_path+compiler_cpp_cmd+'"'+' '+ compiler_cpp_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+ self.params['includes'] +' "{source_file}" -o "{object_file}"'
+        self.params['recipe.S.o.pattern'] = '"'+compiler_path+ compiler_S_cmd+'"'+' '+ compiler_S_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+ ' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
+        self.params['recipe.ar.pattern'] = '"'+compiler_path+ compiler_ar_cmd+'"'+' '+ compiler_ar_flags + ' "'+ self.params['build.path']+'/{archive_file}" "{object_file}"'
+        self.params['recipe.c.combine.pattern'] = '"'+compiler_path+ compiler_c_elf_cmd+'"'+' '+compiler_c_elf_flags + ' -mmcu='+self.params['build.mcu']+' -o '+'"'+self.params['build.path']+'/'+self.params['build.project_name']+'.elf" "{object_files}" '+' "'+self.params['build.path']+'/{archive_file}" -L"'+self.params['build.path']+'" -lm'
+        self.params['recipe.objcopy.eep.pattern'] = '"'+compiler_path+ compiler_objcopy_cmd+'"'+' '+ compiler_objcopy_eep_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.eep'
+        self.params['recipe.objcopy.hex.pattern'] = '"'+compiler_path+compiler_elf2hex_cmd+'"'+' '+ compiler_elf2hex_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.hex'
         self.params = self.replace_param_values(self.params)
 
     def prepare_cmds(self):
@@ -425,7 +426,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
     error_occured = False
     for cmd in cmds:
         return_code, stdout, stderr = exec_cmd(working_dir, cmd)
-        # print(cmd + '\n')
+        print(cmd)
         # if is_verbose:
         #     # message_queue.put(cmd + '\n')
         #     if stdout:
