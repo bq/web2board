@@ -9,7 +9,7 @@ Homepage: http://bitbloq.bq.com
 Package: web2board
 Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, avrdude
-Description: Daemon that connects a webapp and a Arduino compatible board. 
+Description: Program that connects a webapp and a Arduino compatible board. 
  It compiles Arduino sketches and uploads them onto a board.
 
 
