@@ -37,7 +37,10 @@ class Compiler:
 			self.ide_path = self.ide_path[:-25]
 		else:
 			self.ide_path = self.ide_path[:-24]
-		self.ide_path = os.path.join(self.ide_path ,'res','arduino')
+		arduino_name = 'arduinoLinux'
+		if platform.system() == 'Windows':
+			arduino_name = 'arduinoWin'
+		self.ide_path = os.path.join(self.ide_path ,'res',arduino_name)
 		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
 
 
@@ -93,7 +96,7 @@ class Compiler:
 		lib = ''
 		initIndexes= list(self.find_all(code,'#include'))
 		finalIndexes= list(self.find_all(code,'\n'))
-		if len(initIndexes) > 1:
+		if len(initIndexes) >= 1:
 			for i in range(len(initIndexes)):
 				lib = code[initIndexes[i]: finalIndexes[i]]
 				#remove all spaces, #include ,< & >,",.h
@@ -179,13 +182,26 @@ class Compiler:
 		self.parseLibs(code)
 		self.createSketchFile(code)
 
-		self.libs = ''
-		for lib in self.getArduinoLibs().split(' '): 
-				self.libs+= ' -I "/usr/share/arduino/libraries/'+lib+'" '
-		for lib in self.getUserLibs().split(' '): 
-				self.libs+= ' -I "/home/irene-sanz/sketchbook/libraries/bitbloqLibs/" '
+		self.libs = []
+		# for lib in self.getArduinoLibs().split(' '): 
+		# 	self.libs+= ' -I "'+self.ide_path+'/libraries/'+lib+'" '
+		# for lib in self.getUserLibs().split(' '):
+		# 	self.libs+= ' -I "'+sketchbookDir+'/libraries/'+lib+'" '
+		# self.libs+= ' -I "'+sketchbookDir+'/libraries/bitbloqLibs/" '
+		# self.libs += '-I "'+self.ide_path+'/hardware/arduino/variants/standard"'
 
-		self.libs += '-I "'+self.ide_path+'/hardware/arduino/variants/standard"'
+		for lib in self.getArduinoLibs().split(' '):
+			if lib != '':
+				self.libs.append(self.ide_path+'/libraries/'+lib)
+		for lib in self.getUserLibs().split(' '):
+			if lib != '':
+				self.libs.append(sketchbookDir+'/libraries/'+lib)
+				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
+			self.libs.append(self.ide_path+'/libraries/Servo')
+			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
+			self.libs.append(self.ide_path+'/libraries/Wire')
+		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/')
+		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
 
 
 		if platform.system() == 'Windows':
@@ -193,7 +209,6 @@ class Compiler:
 			self.core_path = self.core_path.replace('/', '\\')
 			self.libs = self.libs.replace('/', '\\')
 
- 
 		compiler = arduino_compiler.Compiler(self.tmpPath, self.libs, self.core_path, self.ide_path, build_f_cpu, target_board_mcu)
 		stdErr = compiler.build()
 		parsingError, compilerStderr = self.compilerStderr(stdErr)

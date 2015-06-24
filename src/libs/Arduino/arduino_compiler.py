@@ -19,9 +19,20 @@ import threading
 import subprocess
 import re
 import time
+import platform
+import ntpath
+import fnmatch
 
 from . import base
 from . import arduino_src
+
+
+def list_cpp_files(path):
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+      for filename in fnmatch.filter(filenames, '*.cpp'):
+        matches.append(os.path.join(root, filename))
+    return matches
 
 
 class Project(base.abs_file.Dir):
@@ -63,7 +74,11 @@ class Project(base.abs_file.Dir):
 
 class Compiler(object):
     def __init__(self, path, libraries, core_path, ide_path, build_f_cpu, target_board_mcu):
-        self.libraries = libraries
+        self.myLibraries = libraries
+        self.libraries =''
+        for lib in self.myLibraries:
+            self.libraries+=' -I "'+lib+'" '
+
         self.need_to_build = True
         self.params = {}
 
@@ -150,25 +165,25 @@ class Compiler(object):
             self.project_src_changed = True
         self.need_to_build = bool(self.project_obj_paths)
 
-    def prepare_lib_src_files(self):
-        ino_files = []
-        if not self.bare_gcc:
-            ino_files = self.project.list_ino_files()
-        cpp_files = self.project.list_cpp_files(self.is_big_project)
-        h_files = self.project.list_h_files(self.is_big_project)
-        src_files = ino_files + cpp_files + h_files
-        last_build_path = os.path.join(self.build_path, 'last_build.txt')
-        last_build_file = base.settings.Settings(last_build_path)
-        last_lib_paths = last_build_file.get('lib_paths', [])
-        lib_paths = [lib.get_path() for lib in self.libraries]
-        last_build_file.set('lib_paths', lib_paths)
 
     def prepare_core_src_files(self):
         self.core_obj_paths = []
         self.core_cpp_obj_pairs = []
         self.core_src_changed = False
 
-        # target_arch = TODO_target_arch
+        for library in self.myLibraries:
+            library_path, library_name = ntpath.split(library)
+            print('------------->', library_path,library_name)
+            sub_dir_name = 'lib_' + library_name
+            lib_cpp_files = list_cpp_files(library)
+            lib_obj_paths = gen_obj_paths(library_path, self.build_path,
+                                          sub_dir_name, lib_cpp_files)
+            lib_cpp_obj_pairs = gen_cpp_obj_pairs(
+                library_path, self.build_path, sub_dir_name, lib_cpp_files,
+                True)
+            self.core_obj_paths += lib_obj_paths
+            self.core_cpp_obj_pairs += lib_cpp_obj_pairs
+
         self.core_paths = []
         if not self.bare_gcc:
             # core_path = TODO_core_path
@@ -195,6 +210,7 @@ class Compiler(object):
 
         if self.core_cpp_obj_pairs:
             self.core_src_changed = True
+
 
 ####################################################################
     def gen_replaced_text_list(self, text):
@@ -250,8 +266,13 @@ class Compiler(object):
             self.params['compiler.path'] = compiler_path
         compiler_path = self.params.get('compiler.path')
         compiler_path = compiler_path.replace('{runtime.ide.path}', ide_path)
+
         if not os.path.isdir(compiler_path):
             self.params['compiler.path'] = ''
+
+
+        if platform.system() == 'Linux':
+            compiler_path = ''
 
 
         #my intervention!
@@ -272,8 +293,8 @@ class Compiler(object):
 
         self.params['build.mcu'] = self.target_board_mcu
         self.params['build.f_cpu'] = self.build_f_cpu
-
         self.params['includes']+= self.libraries
+
         self.params['recipe.c.o.pattern'] = '"'+compiler_path+ compiler_c_cmd + '"'+'  '+ compiler_c_flags +' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
         self.params['recipe.cpp.o.pattern'] = '"'+compiler_path+compiler_cpp_cmd+'"'+' '+ compiler_cpp_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+ self.params['includes'] +' "{source_file}" -o "{object_file}"'
         self.params['recipe.S.o.pattern'] = '"'+compiler_path+ compiler_S_cmd+'"'+' '+ compiler_S_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+ ' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
@@ -293,20 +314,27 @@ class Compiler(object):
         hex_cmd = self.params.get('recipe.objcopy.hex.pattern', '')
 
         self.build_files = []
+
         self.file_cmds_dict = {}
         for cpp_path, obj_path in (self.project_cpp_obj_pairs +
                                    self.core_cpp_obj_pairs):
             cmd = compile_cpp_cmd
+            cpp_path = str(cpp_path)
+            if cpp_path.find('(')>=0:
+                cpp_path = cpp_path[cpp_path.find('(')+1:cpp_path.find(')', cpp_path.find('('))]
+
             ext = os.path.splitext(cpp_path)[1]
             if ext == '.c':
                 cmd = compile_c_cmd
             elif ext == '.S':
                 cmd = compile_asm_cmd
+            obj_path = str(obj_path)
+            if obj_path.find('(')>=0:
+                obj_path = obj_path[obj_path.find('(')+1:obj_path.find(')', obj_path.find('('))]
             cmd = cmd.replace('{source_file}', cpp_path)
             cmd = cmd.replace('{object_file}', obj_path)
             self.build_files.append(obj_path)
             self.file_cmds_dict[obj_path] = [cmd]
-
         core_changed = False
         core_archive_path = os.path.join(self.build_path,
                                          self.archive_file_name)
@@ -402,7 +430,7 @@ def gen_cpp_obj_pairs(src_path, build_path, sub_dir,
     path_pairs = []
     for cpp_file, obj_file in zip(cpp_files, obj_files):
         if new_build or cpp_file.get_mtime() > obj_file.get_mtime():
-            path_pair = (cpp_file.get_path(), obj_file.get_path())
+            path_pair = (cpp_file, obj_file)
             path_pairs.append(path_pair)
     return path_pairs
 
@@ -411,7 +439,11 @@ def gen_obj_paths(src_path, build_path, sub_dir, cpp_files):
     obj_paths = []
     build_path = os.path.join(build_path, sub_dir)
     for cpp_file in cpp_files:
-        cpp_file_path = cpp_file.get_path()
+        cpp_file = str(cpp_file)
+        if cpp_file.find('(')>=0:
+            cpp_file = cpp_file[cpp_file.find('(')+1:cpp_file.find(')', cpp_file.find('('))]
+
+        cpp_file_path = cpp_file#.get_path()
         sub_path = cpp_file_path.replace(src_path, '')[1:] + '.o'
         obj_path = os.path.join(build_path, sub_path)
         obj_paths.append(obj_path)

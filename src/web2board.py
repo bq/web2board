@@ -18,6 +18,7 @@ from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
 import json
 import subprocess
+
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 compilerUploader = CompilerUploader()
@@ -71,7 +72,6 @@ class messageHandler (WebSocket):
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
          self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
       elif self.data == 'exit':
-         import sys
          sys.exit()
 
    def handleConnected(self):
@@ -105,5 +105,4 @@ if __name__ == "__main__":
       sys.exit()
 
    signal.signal(signal.SIGINT, close_sig_handler)
-
    server.serveforever()
