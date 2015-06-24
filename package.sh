@@ -15,7 +15,9 @@ BUILD_TARGET=${1:-none}
 EXTRA_ARGS=${2}
 
 ##Which version name are we appending to the final archive
-VERSION=`head -1 pkg/linux/debian/changelog | grep -o '\(([^\)]*\)' | tr -d '()' | head -1`
+# VERSION=`head -1 pkg/linux/debian/changelog | grep -o '\(([^\)]*\)' | tr -d '()' | head -1`
+VERSION=0.0.1
+
 VEXT=${VEXT:=""}
 TARGET_DIR=web2board-${VERSION}-${BUILD_TARGET}
 

@@ -16,7 +16,7 @@ def package_data_dirs(source, sub_folders):
       
 setup(
       name='web2board',
-      version='0.0.3',
+      version='0.0.1',
       author='bitbloq team',
       author_email='support-bitbloq@bq.com',
       platforms=['any'],
