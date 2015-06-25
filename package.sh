@@ -152,8 +152,11 @@ if [ $BUILD_TARGET = "debian" ]; then
 	#Copy .deb to final destination:
 	mkdir -p deb_dist/DIST-web2board-${VERSION}/res
 	cp -a deb_dist/*.deb deb_dist/DIST-web2board-${VERSION}/res
-	cp -a res/INSTALL.sh deb_dist/DIST-web2board-${VERSION}/
-	chmod ugo+x deb_dist/DIST-web2board-${VERSION}/INSTALL.sh
+	cp -a res/INSTALL deb_dist/DIST-web2board-${VERSION}/
+	chmod +x deb_dist/DIST-web2board-${VERSION}/INSTALL
+	#Set ask when double clicking executable
+	gsettings set org.gnome.nautilus.preferences executable-text-activation ask
+
 fi
 
 
