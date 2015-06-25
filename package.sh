@@ -103,6 +103,11 @@ rm -rf win_dist
 #############################
 
 if [ $BUILD_TARGET = "debian" ]; then
+	#Remove all possible arduino files:
+	rm -rf src/res/arduino*
+	#Copy the ones we need
+	cp -a res/arduinoLinux src/res/
+
 	# Generate Debian source package
 	python setup.py --command-packages=stdeb.command sdist_dsc debianize \
 	#--debian-version 1 \
@@ -121,6 +126,8 @@ if [ $BUILD_TARGET = "debian" ]; then
 	# Modify changelog and control files
 	cp -a pkg/linux/debian/changelog deb_dist/web2board-${VERSION}/debian/changelog
 	cp -a pkg/linux/debian/control deb_dist/web2board-${VERSION}/debian/control
+
+
 
 	cd deb_dist/web2board-${VERSION}
 	if [ $EXTRA_ARGS ]; then
@@ -141,6 +148,12 @@ if [ $BUILD_TARGET = "debian" ]; then
 	# Clean directory
 	cd ../..
 	rm -rf "Web2board.egg-info"
+
+	#Copy .deb to final destination:
+	mkdir -p deb_dist/DIST-web2board-${VERSION}/res
+	cp -a deb_dist/*.deb deb_dist/DIST-web2board-${VERSION}/res
+	cp -a res/INSTALL.sh deb_dist/DIST-web2board-${VERSION}/
+	chmod ugo+x deb_dist/DIST-web2board-${VERSION}/INSTALL.sh
 fi
 
 
@@ -153,6 +166,10 @@ fi
 #############################
 
 if [ $BUILD_TARGET = "win32" ]; then
+	#Remove all possible arduino files:
+	rm -rf src/res/arduino*
+	#Copy the ones we need
+	cp -a res/arduinoLinux src/res/
 	mkdir -p win_dist
 	cd win_dist
 	# Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)

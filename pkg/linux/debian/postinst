@@ -2,33 +2,6 @@
  
 set -e
 
-u=$(who am i | awk '{print $1}')
-sudo adduser $u dialout
-
-echo "[Desktop Entry]
-Version=0.0.1
-Type=Application
-Exec= xterm -iconic -e web2board
-Icon=vncviewer
-StartupNotify=true
-Terminal=false
-Categories=Utility;X-XFCE;X-Xfce-Toplevel;
-MimeType=x-scheme-handler/vnc
-Name=web2board Launcher
-Comment=Launch web2board
-Name[en_US]=web2board-handler
-" > ~/.local/share/applications/web2board-handler.desktop
-
-echo "
-
-#custom handler for bitbloq's web2board:
-x-scheme-handler/web2board=web2board-handler.desktop
-" >> ~/.local/share/applications/mimeapps.list
-
-
-# sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
-
-
 case "$1" in
    configure)
       rm -rf ~/.web2board/

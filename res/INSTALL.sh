@@ -1,0 +1,46 @@
+#!/bin/bash
+
+################# DEPENDENCIES #################
+sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
+
+################# REGISTER #################
+u=$(who am i | awk '{print $1}')
+sudo adduser $u dialout
+
+sudo rm ~/.local/share/applications/web2board-handler.desktop
+echo "[Desktop Entry]
+Version=0.0.1
+Type=Application
+Exec= xterm -iconic -e web2board
+Icon=vncviewer
+StartupNotify=true
+Terminal=false
+Categories=Utility;X-XFCE;X-Xfce-Toplevel;
+MimeType=x-scheme-handler/vnc
+Name=web2board Launcher
+Comment=Launch web2board
+Name[en_US]=web2board-handler" > ~/.local/share/applications/web2board-handler.desktop
+echo "
+
+#custom handler for bitbloq's web2board:
+x-scheme-handler/web2board=web2board-handler.desktop
+" >> ~/.local/share/applications/mimeapps.list
+
+################# DPKG WEB2BOARD.DEB #################
+cd res
+ls
+sudo dpkg -i web2board_0.0.1_amd64.deb
+
+################# LIBRARIES #################
+#Remove previous bitbloqLibs library:
+echo $HOME'/sketchbook/libraries/bitbloqLibs'
+rm -rf $HOME'/sketchbook/libraries/bitbloqLibs'
+
+cd $HOME'/sketchbook/libraries/'
+sudo apt-get install wget
+
+#Download the new version:
+wget https://github.com/bq/bitbloqLibs/archive/master.zip
+unzip master.zip -d .
+rm -rf master.zip*
+mv bitbloqLibs-master bitbloqLibs

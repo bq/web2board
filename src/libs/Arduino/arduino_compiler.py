@@ -173,7 +173,6 @@ class Compiler(object):
 
         for library in self.myLibraries:
             library_path, library_name = ntpath.split(library)
-            print('------------->', library_path,library_name)
             sub_dir_name = 'lib_' + library_name
             lib_cpp_files = list_cpp_files(library)
             lib_obj_paths = gen_obj_paths(library_path, self.build_path,
@@ -384,7 +383,6 @@ class Compiler(object):
         error_occured = False
 
         total_file_number = len(self.build_files)
-        #print('enumerate(self.build_files)',self.build_files)
         for index, build_file in enumerate(self.build_files):
             percent = str(int(100 * (index + 1) / total_file_number )).rjust(3)
             print('['+percent+'%] \\n')
