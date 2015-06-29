@@ -200,17 +200,18 @@ class Compiler:
 			self.libs.append(self.ide_path+'/libraries/Servo')
 			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
 			self.libs.append(self.ide_path+'/libraries/Wire')
-		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/')
+		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
 		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
 
 
 		if platform.system() == 'Windows':
-			self.ide_path = self.ide_path.replace('/', '\\')
-			self.core_path = self.core_path.replace('/', '\\')
-			self.libs = self.libs.replace('/', '\\')
-
+		 	self.ide_path = self.ide_path.replace('/', '\\')
+		 	self.core_path = self.core_path.replace('/', '\\')
+			for i in range(len(self.libs)):
+		 		self.libs[i] = self.libs[i].replace('/', '\\')
 		compiler = arduino_compiler.Compiler(self.tmpPath, self.libs, self.core_path, self.ide_path, build_f_cpu, target_board_mcu)
 		stdErr = compiler.build()
+		print ('stdErr', stdErr)
 		parsingError, compilerStderr = self.compilerStderr(stdErr)
 		errorReport =  {'stdOut':'','stdErr':stdErr, 'errorReport':compilerStderr}
 		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:

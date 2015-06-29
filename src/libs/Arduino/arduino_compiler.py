@@ -177,12 +177,13 @@ class Compiler(object):
             lib_cpp_files = list_cpp_files(library)
             lib_obj_paths = gen_obj_paths(library_path, self.build_path,
                                           sub_dir_name, lib_cpp_files)
+
             lib_cpp_obj_pairs = gen_cpp_obj_pairs(
                 library_path, self.build_path, sub_dir_name, lib_cpp_files,
                 True)
             self.core_obj_paths += lib_obj_paths
             self.core_cpp_obj_pairs += lib_cpp_obj_pairs
-
+        
         self.core_paths = []
         if not self.bare_gcc:
             # core_path = TODO_core_path
@@ -318,18 +319,15 @@ class Compiler(object):
         for cpp_path, obj_path in (self.project_cpp_obj_pairs +
                                    self.core_cpp_obj_pairs):
             cmd = compile_cpp_cmd
-            cpp_path = str(cpp_path)
-            if cpp_path.find('(')>=0:
-                cpp_path = cpp_path[cpp_path.find('(')+1:cpp_path.find(')', cpp_path.find('('))]
-
             ext = os.path.splitext(cpp_path)[1]
             if ext == '.c':
                 cmd = compile_c_cmd
             elif ext == '.S':
                 cmd = compile_asm_cmd
-            obj_path = str(obj_path)
-            if obj_path.find('(')>=0:
-                obj_path = obj_path[obj_path.find('(')+1:obj_path.find(')', obj_path.find('('))]
+
+            if type(obj_path)!= type('unicode'):
+                obj_path = obj_path.get_path()
+
             cmd = cmd.replace('{source_file}', cpp_path)
             cmd = cmd.replace('{object_file}', obj_path)
             self.build_files.append(obj_path)
@@ -437,18 +435,19 @@ def gen_obj_paths(src_path, build_path, sub_dir, cpp_files):
     obj_paths = []
     build_path = os.path.join(build_path, sub_dir)
     for cpp_file in cpp_files:
-        cpp_file = str(cpp_file)
-        if cpp_file.find('(')>=0:
-            cpp_file = cpp_file[cpp_file.find('(')+1:cpp_file.find(')', cpp_file.find('('))]
-
-        cpp_file_path = cpp_file#.get_path()
+        print('1.-', cpp_file)
+        cpp_file_path = cpp_file
+        print('2.-', src_path)
         sub_path = cpp_file_path.replace(src_path, '')[1:] + '.o'
+        print('3.-', sub_path)
         obj_path = os.path.join(build_path, sub_path)
+        print('3.-', obj_path)
         obj_paths.append(obj_path)
-
         obj_dir_name = os.path.dirname(obj_path)
         if not os.path.exists(obj_dir_name):
             os.makedirs(obj_dir_name)
+        print('-------------------')
+
     return obj_paths
 
 
@@ -462,12 +461,13 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         #     if stdout:
         #         # message_queue.put(stdout + '\n')
         #         print(stdout + '\n')
-        # if stderr:
-        #     print(stderr + '\n')
-        if return_code != 0:
-            print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
-            error_occured = True
-            return -1
+        if stderr:
+            print(stderr + '\n')
+            return stderr
+        # if return_code != 0:
+        #     print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
+        #     error_occured = True
+        #     return -1
     return stderr
 
 
@@ -514,8 +514,13 @@ def gen_core_objs(core_path, folder_prefix, build_path, is_new_build = True):
     core_dir = base.abs_file.Dir(core_path)
     core_cpp_files = core_dir.recursive_list_files(
         arduino_src.CPP_EXTS, ['libraries'])
+   
     sub_dir_name = folder_prefix + core_dir.get_name()
 
+    for i in range(len(core_cpp_files)):
+        core_cpp_files[i] = core_cpp_files[i].get_path()
+
+    
     core_obj_paths = gen_obj_paths(core_path, build_path,
                                    sub_dir_name, core_cpp_files)
     core_cpp_obj_pairs = gen_cpp_obj_pairs(

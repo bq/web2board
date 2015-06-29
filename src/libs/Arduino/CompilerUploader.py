@@ -26,7 +26,12 @@ class ArduinoCompilerUploader:
 
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
-		self.pathToSketchbook = expanduser("~")+'/sketchbook'
+		if platform.system() == 'Linux':
+			self.pathToSketchbook = expanduser("~")+'/sketchbook'
+		if platform.system() == 'Windows':
+			self.pathToSketchbook = expanduser("~")+'/Documents/Arduino'
+		
+
 		self.pathToArduinoDir = pathToMain+'/res/arduino/'
 		self.uploader = Uploader(pathToMain)
 		self.compiler = Compiler(pathToMain)

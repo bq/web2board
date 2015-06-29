@@ -147,6 +147,9 @@ class File(AbstractFile):
     def get_basename(self):
         return os.path.splitext(self.name)[0]
 
+    def get_name (self):
+        return self.name
+
     def get_encoding(self):
         return self.encoding
 
