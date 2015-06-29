@@ -14,3 +14,4 @@ src/serial_poc.py
 *.sublime-workspace
 .idea/
 
+src/res/

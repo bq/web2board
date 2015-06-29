@@ -8,6 +8,9 @@ sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
 u=$(who am i | awk "{print $1}")
 sudo adduser $u dialout
 
+#Create route if it does not exist previously 
+mkdir -p ~/.local/share/applications/
+
 sudo rm ~/.local/share/applications/web2board-handler.desktop
 echo "[Desktop Entry]
 Version=0.0.1
@@ -33,8 +36,10 @@ ls
 sudo dpkg -i web2board_0.0.1_amd64.deb
 
 ################# LIBRARIES #################
-#Remove previous bitbloqLibs library:
-echo $HOME"/sketchbook/libraries/bitbloqLibs"
+#Create route if it does not exist previously 
+mkdir -p $HOME"/sketchbook/libraries/
+
+#Remove previous bitbloqLibs library if it exists:
 rm -rf $HOME"/sketchbook/libraries/bitbloqLibs"
 
 cd $HOME"/sketchbook/libraries/"

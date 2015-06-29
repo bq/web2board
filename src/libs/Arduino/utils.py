@@ -12,13 +12,27 @@
 #-----------------------------------------------------------------------#
 import subprocess
 import platform
+import os
+
+def find_all(a_str, sub):
+	start = 0
+	while True:
+		start = a_str.find(sub, start)
+		if start == -1: return
+		yield start
+		start += len(sub)
 
 def callAvrdude(args):
 	if platform.system() =='Windows':
-		cmd = "E:\web2board\\avrdude\\avrdude.exe "+args
+		avrdude_path = os.path.join(os.path.realpath(__file__))
+
+		indexes = list(find_all(avrdude_path,'\\'))
+		index = indexes[len(indexes)-3]
+		avrdude_path = avrdude_path[:index]
+
+		cmd ='"'+avrdude_path+'\\res\\avrdude.exe" '+args
 	else:
 		cmd = "avrdude "+args
-	print ('--->', cmd)
 	p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'))
 	output = p.stdout.read()
 	err = p.stderr.read()

@@ -131,21 +131,14 @@ Section "Install Arduino Drivers"
   ${EndIf}
 SectionEnd
 
-;Section "Open PLY files with Web2board"
-;	WriteRegStr HKCR .ply "" "Web2board PLY model file"
-;	DeleteRegValue HKCR .ply "Content Type"
-;	WriteRegStr HKCR "Web2board PLY model file\DefaultIcon" "" "$INSTDIR\res\stl.ico,0"
-;	WriteRegStr HKCR "Web2board PLY model file\shell" "" "open"
-;	WriteRegStr HKCR "Web2board PLY model file\shell\open\command" "" '"$INSTDIR\python\pythonw.exe" -c "import os; os.chdir(\"$INSTDIR\"); import Web2board; Web2board.main()" "%1"'
-;SectionEnd
-;
-;Section "Open STL files with Web2board"
-;	WriteRegStr HKCR .stl "" "Web2board STL model file"
-;	DeleteRegValue HKCR .stl "Content Type"
-;	WriteRegStr HKCR "Web2board STL model file\DefaultIcon" "" "$INSTDIR\res\stl.ico,0"
-;	WriteRegStr HKCR "Web2board STL model file\shell" "" "open"
-;	WriteRegStr HKCR "Web2board STL model file\shell\open\command" "" '"$INSTDIR\python\pythonw.exe" -c "import os; os.chdir(\"$INSTDIR\"); import Web2board; Web2board.main()" "%1"'
-;SectionEnd
+Section "PostInstallation script"
+  ; Add the libraries and the register.
+  ExecWait '"$INSTDIR\afterInstall.bat" /lm'
+
+SectionEnd
+
+
+
 
 ;--------------------------------
 
