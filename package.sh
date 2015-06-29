@@ -103,17 +103,23 @@ rm -rf win_dist
 #############################
 
 if [ $BUILD_TARGET = "debian" ]; then
-	#Remove .reg file if present (needed only for windows)
-	rm src/res/web2board.reg
+	#Remove everything inside src/res
+	rm -rf src/res
+	#Copy everything inside res/
+	cp -a res/linux src/res
+	cp -a res/common/* src/res
 
-	#Remove all possible arduino files:
-	rm -rf src/res/arduino*
-	#Copy the ones we need
-	cp -a res/arduinoLinux src/res/
+	# #Remove .reg file if present (needed only for windows)
+	# rm src/res/web2board.reg
 
-	#Remove last avrdude (needed only for windows)
-	rm src/res/avrdude*
-	rm libusb0.dll
+	# #Remove all possible arduino files:
+	# rm -rf src/res/arduino*
+	# #Copy the ones we need
+	# cp -a res/arduinoLinux src/res/
+
+	# #Remove last avrdude (needed only for windows)
+	# rm src/res/avrdude*
+	# rm libusb0.dll
 
 	# Generate Debian source package
 	python setup.py --command-packages=stdeb.command sdist_dsc debianize \
@@ -176,20 +182,25 @@ fi
 #############################
 
 if [ $BUILD_TARGET = "win32" ]; then
-	#Remove all possible arduino files:
-	rm -rf src/res/arduino*
-	#Copy the ones we need
-	cp -a res/arduinoWin src/res/
+	#Remove everything inside src/res
+	rm -rf src/res
+	#Copy everything inside res/
+	cp -a res/linux src/res
+	cp -a res/common/* src/res
+	# #Remove all possible arduino files:
+	# rm -rf src/res/arduino*
+	# #Copy the ones we need
+	# cp -a res/arduinoWin src/res/
 
-	#Remove last .reg file and copy it
-	rm src/res/web2board.reg
-	cp -a res/web2board.reg src/res/
+	# #Remove last .reg file and copy it
+	# rm src/res/web2board.reg
+	# cp -a res/web2board.reg src/res/
 
-	#Remove last avrdude and copy new one
-	rm src/res/avrdude*
-	rm libusb0.dll
-	cp -a res/avrdude* src/res
-	cp -a res/libusb0.dll src/res
+	# #Remove last avrdude and copy new one
+	# rm src/res/avrdude*
+	# rm libusb0.dll
+	# cp -a res/avrdude* src/res
+	# cp -a res/libusb0.dll src/res
 
 	mkdir -p win_dist
 	cd win_dist

@@ -435,18 +435,13 @@ def gen_obj_paths(src_path, build_path, sub_dir, cpp_files):
     obj_paths = []
     build_path = os.path.join(build_path, sub_dir)
     for cpp_file in cpp_files:
-        print('1.-', cpp_file)
         cpp_file_path = cpp_file
-        print('2.-', src_path)
         sub_path = cpp_file_path.replace(src_path, '')[1:] + '.o'
-        print('3.-', sub_path)
         obj_path = os.path.join(build_path, sub_path)
-        print('3.-', obj_path)
         obj_paths.append(obj_path)
         obj_dir_name = os.path.dirname(obj_path)
         if not os.path.exists(obj_dir_name):
             os.makedirs(obj_dir_name)
-        print('-------------------')
 
     return obj_paths
 
