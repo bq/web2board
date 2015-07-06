@@ -17,4 +17,3 @@ DEL 7zxa.*
 
 ::Add the .reg file
 regedit.exe /S src/res/web2board.reg
-timeout 300

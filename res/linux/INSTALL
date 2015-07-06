@@ -1,5 +1,15 @@
-#!/bin/bash
+###########################################################
+###
+### Please, if you are unable to execute this file double clicking on it, open a terminal on this directory and execute this file using this command:
+###./INSTALL
+###
+###########################################################
 
+
+
+
+
+#!/bin/bash
 gnome-terminal -x sh -c '
 ################# DEPENDENCIES #################
 sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
