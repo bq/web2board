@@ -47,12 +47,12 @@ sudo dpkg -i web2board_0.0.1_amd64.deb
 
 ################# LIBRARIES #################
 #Create route if it does not exist previously 
-mkdir -p $HOME"/sketchbook/libraries/
+mkdir -p $HOME/sketchbook/libraries/
 
 #Remove previous bitbloqLibs library if it exists:
-rm -rf $HOME"/sketchbook/libraries/bitbloqLibs"
+rm -rf $HOME/sketchbook/libraries/bitbloqLibs
 
-cd $HOME"/sketchbook/libraries/"
+cd $HOME/sketchbook/libraries/
 sudo apt-get install wget
 
 #Download the new version:

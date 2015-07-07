@@ -185,7 +185,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Remove everything inside src/res
 	rm -rf src/res
 	#Copy everything inside res/
-	cp -a res/linux src/res
+	cp -a res/windows src/res
 	cp -a res/common/* src/res
 	# #Remove all possible arduino files:
 	# rm -rf src/res/arduino*
