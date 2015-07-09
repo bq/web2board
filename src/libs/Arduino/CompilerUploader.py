@@ -20,7 +20,6 @@ from os.path import expanduser
 from Compiler import Compiler
 from Uploader import Uploader
 from utils import BoardConfig, callAvrdude
-from serial.tools.list_ports import comports
 
 class ArduinoCompilerUploader:
 
@@ -28,9 +27,8 @@ class ArduinoCompilerUploader:
 		self.pathToMain = pathToMain
 		if platform.system() == 'Linux':
 			self.pathToSketchbook = expanduser("~")+'/sketchbook'
-		if platform.system() == 'Windows':
+		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
 			self.pathToSketchbook = expanduser("~")+'/Documents/Arduino'
-		
 
 		self.pathToArduinoDir = pathToMain+'/res/arduino/'
 		self.uploader = Uploader(pathToMain)
@@ -73,6 +71,7 @@ class ArduinoCompilerUploader:
 
 	def getAvailablePorts (self):
 		if platform.system() =='Windows':
+			from serial.tools.list_ports import comports
 			comPorts = list(comports())
 			availablePorts = []
 			for port in comPorts:

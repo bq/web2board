@@ -11,6 +11,8 @@
 BUILD_TARGET=${1:-none}
 #BUILD_TARGET=win32
 #BUILD_TARGET=debian
+#BUILD_TARGET=darwin
+
 
 EXTRA_ARGS=${2}
 
@@ -79,6 +81,8 @@ if [ "$BUILD_TARGET" = "none" ]; then
 	echo "You need to specify a build target with:"
 	echo "$0 win32"
 	echo "$0 debian"
+	echo "$0 darwin"
+
 	exit 0
 fi
 
@@ -171,6 +175,43 @@ if [ $BUILD_TARGET = "debian" ]; then
 	gsettings set org.gnome.nautilus.preferences executable-text-activation ask
 
 fi
+
+
+
+#############################
+# Darwin packaging
+#############################
+
+if [ $BUILD_TARGET = "darwin" ]; then
+
+	mkdir -p dar_dist
+
+	# sed -i '' 's|\"../res\"|\"res\"|g' src/horus.py
+
+	python setup_mac.py py2app -b dar_dist/build -d dar_dist/dist
+
+	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/avrdude
+	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/avrdude_bin
+	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/lib/
+
+	pkg/darwin/create-dmg/create-dmg \
+		--volname "Horus Installer" \
+		--volicon "res/horus.icns" \
+		--background "res/images/installer_background.png" \
+		--window-pos 200 120 \
+		--window-size 700 400 \
+		--icon-size 100 \
+		--icon Horus.app 180 280 \
+		--hide-extension Horus.app \
+		--app-drop-link 530 275 \
+		dar_dist/Horus_${VERSION}${VEXT}.dmg \
+		dar_dist/dist/Horus.app
+
+	sed -i '' 's|\"res\"|\"../res\"|g' src/horus.py
+
+	rm -rf .eggs
+fi
+
 
 
 #############################

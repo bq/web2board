@@ -40,6 +40,8 @@ class Compiler:
 		arduino_name = 'arduinoLinux'
 		if platform.system() == 'Windows':
 			arduino_name = 'arduinoWin'
+		if platform.system() == 'Darwin':
+			arduino_name = 'arduinoDarwin'
 		self.ide_path = os.path.join(self.ide_path ,'res',arduino_name)
 		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
 
