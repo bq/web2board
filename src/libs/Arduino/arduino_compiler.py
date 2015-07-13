@@ -396,10 +396,10 @@ class Compiler(object):
             percent = str(int(100 * (index + 1) / total_file_number )).rjust(3)
             print('['+percent+'%] \\n')
             cmds = self.file_cmds_dict.get(build_file)
-            result = exec_cmds(self.ide_path, cmds, show_compilation_output)
-            if (result == -1):
+            result, stderr = exec_cmds(self.ide_path, cmds, show_compilation_output)
+            self.stderr += stderr
+            if (result != 0):
                 break
-            self.stderr += result
     def has_error(self):
         print("error")
         return self.error_occured
@@ -469,11 +469,11 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         if return_code != 0:
             print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
             error_occured = True
-            return -1
         if stderr:
             print(stderr + '\n')
-            return stderr
-    return stderr
+        return return_code, stderr
+    return return_code, stderr
+
 
 
 def exec_cmd(working_dir, cmd):
