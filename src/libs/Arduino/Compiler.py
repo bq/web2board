@@ -185,13 +185,6 @@ class Compiler:
 		self.createSketchFile(code)
 
 		self.libs = []
-		# for lib in self.getArduinoLibs().split(' '): 
-		# 	self.libs+= ' -I "'+self.ide_path+'/libraries/'+lib+'" '
-		# for lib in self.getUserLibs().split(' '):
-		# 	self.libs+= ' -I "'+sketchbookDir+'/libraries/'+lib+'" '
-		# self.libs+= ' -I "'+sketchbookDir+'/libraries/bitbloqLibs/" '
-		# self.libs += '-I "'+self.ide_path+'/hardware/arduino/variants/standard"'
-
 		for lib in self.getArduinoLibs().split(' '):
 			if lib != '':
 				self.libs.append(self.ide_path+'/libraries/'+lib)
@@ -201,7 +194,6 @@ class Compiler:
 				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
 			self.libs.append(self.ide_path+'/libraries/Servo')
 			self.libs.append(self.ide_path+'/libraries/Wire')
-			# self.libs.append(self.ide_path+'/libraries/Wire/utility')
 			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
 			self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/bqLiquidCrystal')
 		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
@@ -215,7 +207,6 @@ class Compiler:
 		 		self.libs[i] = self.libs[i].replace('/', '\\')
 		compiler = arduino_compiler.Compiler(self.tmpPath, self.libs, self.core_path, self.ide_path, build_f_cpu, target_board_mcu)
 		stdErr = compiler.build()
-		print ('stdErr', stdErr)
 		parsingError, compilerStderr = self.compilerStderr(stdErr)
 		errorReport =  {'stdOut':'','stdErr':stdErr, 'errorReport':compilerStderr}
 		if len(errorReport['errorReport'])>= 1 or parsingError:#or len(stdErr)>0:

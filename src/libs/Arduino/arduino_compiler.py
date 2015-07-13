@@ -22,6 +22,7 @@ import time
 import platform
 import ntpath
 import fnmatch
+import shutil
 
 from . import base
 from . import arduino_src
@@ -102,6 +103,8 @@ class Compiler(object):
         project_name = self.project.get_name()
 
         build_path = get_build_path()
+        shutil.rmtree(build_path)
+        os.makedirs(build_path)
         build_path = os.path.join(build_path, project_name)
         self.set_build_path(build_path)
 
@@ -364,7 +367,6 @@ class Compiler(object):
         if not os.path.isfile(elf_file_path):
             obj_paths = ' '.join(['"%s"' % p for p in self.project_obj_paths])
             # obj_paths +=' "/tmp/build973759286239835554.tmp/Wire/utility/twi.c.o" '
-            print('object_files --->', obj_paths)
             cmd = combine_cmd.replace('{object_files}', obj_paths)
             if not self.core_obj_paths:
                 core_archive_path = \
