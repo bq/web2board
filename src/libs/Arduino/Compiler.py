@@ -200,8 +200,10 @@ class Compiler:
 				self.libs.append(sketchbookDir+'/libraries/'+lib)
 				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
 			self.libs.append(self.ide_path+'/libraries/Servo')
-			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
 			self.libs.append(self.ide_path+'/libraries/Wire')
+			# self.libs.append(self.ide_path+'/libraries/Wire/utility')
+			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
+			self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/bqLiquidCrystal')
 		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
 		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
 

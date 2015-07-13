@@ -35,6 +35,13 @@ def list_cpp_files(path):
     return matches
 
 
+def list_c_files(path):
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+      for filename in fnmatch.filter(filenames, '*.c'):
+        matches.append(os.path.join(root, filename))
+    return matches
+
 class Project(base.abs_file.Dir):
     def __init__(self, path):
         super(Project, self).__init__(path)
@@ -78,6 +85,9 @@ class Compiler(object):
         self.libraries =''
         for lib in self.myLibraries:
             self.libraries+=' -I "'+lib+'" '
+            if 'Wire' in lib:
+                self.libraries+=' -I "'+lib+'/utility" '
+
 
         self.need_to_build = True
         self.params = {}
@@ -137,7 +147,6 @@ class Compiler(object):
             combined_file = base.abs_file.File(combined_file_path)
             combined_obj_path = combined_file_path + '.o'
             self.project_obj_paths.append(combined_obj_path)
-
             ino_changed = check_ino_change(ino_files, combined_file)
             # if self.is_new_build or ino_changed:
             core_path = self.params.get('build.core.path', '')
@@ -159,6 +168,7 @@ class Compiler(object):
         cpp_obj_pairs = gen_cpp_obj_pairs(self.project.get_path(),
                                           self.build_path, sub_dir_name,
                                           cpp_files)
+
         self.project_cpp_obj_pairs += cpp_obj_pairs
 
         if self.project_cpp_obj_pairs:
@@ -175,15 +185,14 @@ class Compiler(object):
             library_path, library_name = ntpath.split(library)
             sub_dir_name = 'lib_' + library_name
             lib_cpp_files = list_cpp_files(library)
+            lib_c_files = list_c_files(library)
             lib_obj_paths = gen_obj_paths(library_path, self.build_path,
-                                          sub_dir_name, lib_cpp_files)
-
+                                          sub_dir_name, lib_cpp_files+lib_c_files)
             lib_cpp_obj_pairs = gen_cpp_obj_pairs(
-                library_path, self.build_path, sub_dir_name, lib_cpp_files,
+                library_path, self.build_path, sub_dir_name, lib_cpp_files+lib_c_files,
                 True)
             self.core_obj_paths += lib_obj_paths
             self.core_cpp_obj_pairs += lib_cpp_obj_pairs
-        
         self.core_paths = []
         if not self.bare_gcc:
             # core_path = TODO_core_path
@@ -299,7 +308,7 @@ class Compiler(object):
         self.params['recipe.cpp.o.pattern'] = '"'+compiler_path+compiler_cpp_cmd+'"'+' '+ compiler_cpp_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+ self.params['includes'] +' "{source_file}" -o "{object_file}"'
         self.params['recipe.S.o.pattern'] = '"'+compiler_path+ compiler_S_cmd+'"'+' '+ compiler_S_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+ ' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
         self.params['recipe.ar.pattern'] = '"'+compiler_path+ compiler_ar_cmd+'"'+' '+ compiler_ar_flags + ' "'+ self.params['build.path']+'/{archive_file}" "{object_file}"'
-        self.params['recipe.c.combine.pattern'] = '"'+compiler_path+ compiler_c_elf_cmd+'"'+' '+compiler_c_elf_flags + ' -mmcu='+self.params['build.mcu']+' -o '+'"'+self.params['build.path']+'/'+self.params['build.project_name']+'.elf" "{object_files}" '+' "'+self.params['build.path']+'/{archive_file}" -L"'+self.params['build.path']+'" -lm'
+        self.params['recipe.c.combine.pattern'] = '"'+compiler_path+ compiler_c_elf_cmd+'"'+' '+compiler_c_elf_flags + ' -mmcu='+self.params['build.mcu']+' -o '+'"'+self.params['build.path']+'/'+self.params['build.project_name']+'.elf" {object_files} '+' "'+self.params['build.path']+'/{archive_file}" -L"'+self.params['build.path']+'" -lm'
         self.params['recipe.objcopy.eep.pattern'] = '"'+compiler_path+ compiler_objcopy_cmd+'"'+' '+ compiler_objcopy_eep_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.eep'
         self.params['recipe.objcopy.hex.pattern'] = '"'+compiler_path+compiler_elf2hex_cmd+'"'+' '+ compiler_elf2hex_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.hex'
         self.params = self.replace_param_values(self.params)
@@ -314,7 +323,7 @@ class Compiler(object):
         hex_cmd = self.params.get('recipe.objcopy.hex.pattern', '')
 
         self.build_files = []
-
+        self.project_obj_paths = []
         self.file_cmds_dict = {}
         for cpp_path, obj_path in (self.project_cpp_obj_pairs +
                                    self.core_cpp_obj_pairs):
@@ -327,8 +336,8 @@ class Compiler(object):
 
             if type(obj_path)!= type('unicode'):
                 obj_path = obj_path.get_path()
-
             cmd = cmd.replace('{source_file}', cpp_path)
+            self.project_obj_paths.append(obj_path)
             cmd = cmd.replace('{object_file}', obj_path)
             self.build_files.append(obj_path)
             self.file_cmds_dict[obj_path] = [cmd]
@@ -354,6 +363,8 @@ class Compiler(object):
 
         if not os.path.isfile(elf_file_path):
             obj_paths = ' '.join(['"%s"' % p for p in self.project_obj_paths])
+            # obj_paths +=' "/tmp/build973759286239835554.tmp/Wire/utility/twi.c.o" '
+            print('object_files --->', obj_paths)
             cmd = combine_cmd.replace('{object_files}', obj_paths)
             if not self.core_obj_paths:
                 core_archive_path = \
@@ -422,7 +433,6 @@ def gen_cpp_obj_pairs(src_path, build_path, sub_dir,
                       cpp_files, new_build=False):
     obj_paths = gen_obj_paths(src_path, build_path, sub_dir, cpp_files)
     obj_files = [base.abs_file.File(path) for path in obj_paths]
-
     path_pairs = []
     for cpp_file, obj_file in zip(cpp_files, obj_files):
         if new_build or cpp_file.get_mtime() > obj_file.get_mtime():
@@ -456,13 +466,13 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         #     if stdout:
         #         # message_queue.put(stdout + '\n')
         #         print(stdout + '\n')
+        if return_code != 0:
+            print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
+            error_occured = True
+            return -1
         if stderr:
             print(stderr + '\n')
             return stderr
-        # if return_code != 0:
-        #     print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
-        #     error_occured = True
-        #     return -1
     return stderr
 
 
