@@ -101,6 +101,7 @@ fi
 # Clean sources
 rm -rf deb_dist
 rm -rf win_dist
+rm -rf dar_dist
 
 #############################
 # Debian packaging
@@ -167,10 +168,15 @@ if [ $BUILD_TARGET = "debian" ]; then
 	rm -rf "web2board.egg-info"
 
 	#Copy .deb to final destination:
-	mkdir -p deb_dist/DIST-web2board-${VERSION}/.res
-	cp -a deb_dist/*.deb deb_dist/DIST-web2board-${VERSION}/.res
-	cp -a res/linux/INSTALL deb_dist/DIST-web2board-${VERSION}/
-	chmod +x deb_dist/DIST-web2board-${VERSION}/INSTALL
+	mkdir -p deb_dist/web2board/.res
+	cp -a deb_dist/*.deb deb_dist/web2board/.res
+	cp -a res/linux/INSTALL deb_dist/web2board/
+	chmod +x deb_dist/web2board/INSTALL
+	echo ${VERSION} >> deb_dist/web2board/.res/version.txt
+	cd deb_dist
+	tar -czpf web2board.tar.gz web2board
+	rm -rf web2board_*
+	rm -rf web2board-*
 	#Set ask when double clicking executable
 	gsettings set org.gnome.nautilus.preferences executable-text-activation ask
 
@@ -308,6 +314,6 @@ if [ $BUILD_TARGET = "win32" ]; then
 	ln -sf `pwd`/${TARGET_DIR} ../pkg/win32/dist
 	makensis -DVERSION=${VERSION}${VEXT} ../pkg/win32/installer.nsi
 	if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
-	mv ../pkg/win32/Web2board_${VERSION}${VEXT}.exe .
+	mv ../pkg/win32/Web2board.exe .
 	rm -rf ../pkg/win32/dist
 fi

@@ -26,7 +26,7 @@ class ArduinoCompilerUploader:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		if platform.system() == 'Linux':
-			self.pathToSketchbook = expanduser("~")+'/sketchbook'
+			self.pathToSketchbook = expanduser("~")+'/Arduino'
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
 			self.pathToSketchbook = expanduser("~")+'/Documents/Arduino'
 

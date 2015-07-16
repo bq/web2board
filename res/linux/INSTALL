@@ -46,13 +46,33 @@ ls
 sudo dpkg -i web2board_0.0.1_amd64.deb
 
 ################# LIBRARIES #################
-#Create route if it does not exist previously 
-mkdir -p $HOME/sketchbook/libraries/
+
+#OLDER VERSIONS  --> if home/sketchbook exists, we copy the libraries so they can be used in the old sketchbook directory
+if [ -d "$HOME/sketchbook" ]; then
+	#Create route if it does not exist previously
+	mkdir -p $HOME/sketchbook/libraries/
+
+	#Remove previous bitbloqLibs library if it exists:
+	rm -rf $HOME/sketchbook/libraries/bitbloqLibs
+
+	cd $HOME/sketchbook/libraries/
+	sudo apt-get install wget
+
+	#Download the new version:
+	wget https://github.com/bq/bitbloqLibs/archive/master.zip
+	unzip master.zip -d .
+	rm -rf master.zip*
+	mv bitbloqLibs-master bitbloqLibs
+fi
+
+#NEWER VERSIONS
+#Create route if it does not exist previously
+mkdir -p $HOME/Arduino/libraries/
 
 #Remove previous bitbloqLibs library if it exists:
-rm -rf $HOME/sketchbook/libraries/bitbloqLibs
+rm -rf $HOME/Arduino/libraries/bitbloqLibs
 
-cd $HOME/sketchbook/libraries/
+cd $HOME/Arduino/libraries/
 sudo apt-get install wget
 
 #Download the new version:

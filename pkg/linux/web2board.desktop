@@ -2,7 +2,7 @@
 Type=Application
 Name=web2board
 Comment=web2board
-Icon=/usr/lib/python2.7/dist-packages/web2board/res/web2board.ico
+Icon=/usr/lib/python2.7/dist-packages/web2board/res/Web2board.ico
 Exec=/usr/bin/python /usr/lib/python2.7/dist-packages/web2board/web2board.py
 Path=/usr/lib/python2.7/dist-packages/web2board/
 StartupNotify=true
