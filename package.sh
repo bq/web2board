@@ -56,15 +56,16 @@ function downloadURL
 function extract
 {
 	if [ $1 != ${1%%.exe} ] || [ $1 != ${1%%.zip} ] || [ $1 != ${1%%.msi} ]; then
-		echo "Extracting $*"
+		echo "1.-Extracting $*"
 		echo "7z x -y $*" >> log.txt
 		7z x -y $* >> log.txt
+		echo $?
 		if [ $? != 0 ]; then
 			echo "Failed to extract $*"
 			exit 1
 		fi
 	elif [ $1 != ${1%%.tar.gz} ]; then
-		echo "Extracting $*"
+		echo "2.-Extracting $*"
 		echo "tar -zxvf $*" >> log.txt
 		tar -zxvf $* >> log.txt
 		if [ $? != 0 ]; then
@@ -166,19 +167,17 @@ if [ $BUILD_TARGET = "debian" ]; then
 	# Clean directory
 	cd ../..
 	rm -rf "web2board.egg-info"
-
+	mv deb_dist/*.deb deb_dist/web2board.deb
 	#Copy .deb to final destination:
-	mkdir -p deb_dist/web2board/.res
-	cp -a deb_dist/*.deb deb_dist/web2board/.res
-	cp -a res/linux/INSTALL deb_dist/web2board/
-	chmod +x deb_dist/web2board/INSTALL
-	echo ${VERSION} >> deb_dist/web2board/.res/version.txt
-	cd deb_dist
-	tar -czpf web2board.tar.gz web2board
-	rm -rf web2board_*
-	rm -rf web2board-*
-	#Set ask when double clicking executable
-	gsettings set org.gnome.nautilus.preferences executable-text-activation ask
+	# mkdir -p deb_dist/web2board/.res
+	# cp -a deb_dist/*.deb deb_dist/web2board/.res
+	# cp -a res/linux/INSTALL deb_dist/web2board/
+	# chmod +x deb_dist/web2board/INSTALL
+	# echo ${VERSION} >> deb_dist/web2board/.res/version.txt
+	# cd deb_dist
+	# tar -czpf web2board.tar.gz web2board
+	rm -rf deb_dist/web2board-*
+	rm -rf deb_dist/web2board_*
 
 fi
 
@@ -314,6 +313,6 @@ if [ $BUILD_TARGET = "win32" ]; then
 	ln -sf `pwd`/${TARGET_DIR} ../pkg/win32/dist
 	makensis -DVERSION=${VERSION}${VEXT} ../pkg/win32/installer.nsi
 	if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
-	mv ../pkg/win32/Web2board.exe .
+	mv ../pkg/win32/Web2board_${VERSION}${VEXT}.exe web2board.exe
 	rm -rf ../pkg/win32/dist
 fi

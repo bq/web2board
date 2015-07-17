@@ -8,8 +8,11 @@ Homepage: http://bitbloq.bq.com
 
 Package: web2board
 Architecture: any
-Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, avrdude
-Description: Program that connects a webapp and a Arduino compatible board. 
- It compiles Arduino sketches and uploads them onto a board.
+Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, avrdude, gcc-avr, binutils-avr, gdb-avr, avr-libc, wget
+Description: WEB2BOARD 
+ Program that connects a webapp and an Arduino compatible board. It is able to compile and upload Arduino sketches as well as open a custom serial monitor.
+ PLEASE REBOOT YOUR COMPUTER AFTER THE INSTALLATION. / 
+ POR FAVOR REINICIA EL ORDENADOR DESPUÉS DE LA INSTALACIÓN.
+
 
 
