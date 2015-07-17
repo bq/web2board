@@ -97,7 +97,7 @@ class ArduinoCompilerUploader:
 	def searchPort (self):
 		availablePorts = self.getAvailablePorts()
 		if len(availablePorts) <=0:
-			return None
+			return []
 		ports = []
 		for port in availablePorts:
 			args = "-P "+port+" -p "+ self.getBoardMCU() +" -b "+ self.getBoardBaudRate()+" -c arduino"
