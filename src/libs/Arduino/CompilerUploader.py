@@ -106,9 +106,7 @@ class ArduinoCompilerUploader:
 				ports.append(port)
 		if len(ports)==1:
 			self.setPort(ports[0])
-			return port
-		else:
-			return ports
+		return ports
 
 
 
