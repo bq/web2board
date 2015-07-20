@@ -42,13 +42,15 @@ class messageHandler (WebSocket):
             print 'No SerialMonitor process found'
          message = self.data.replace('setBoard','')
          message = message.replace(' ', '') #remove white spaces that make the command readable
-         self.sendMessage_('SETTING BOARD')
-         port = compilerUploader.setBoard(str(message))
-         if len(port)>0:
-            self.sendMessage_('SETTING PORT -> '+json.dumps(port))
-         else :
-            self.sendMessage_('NO PORT FOUND')
-         print('setBoard finished', json.dumps(port))
+         if message == 'undefined':
+            self.sendMessage_('BOARD UNDEFINED')
+         else:
+            self.sendMessage_('SETTING BOARD')
+            port = compilerUploader.setBoard(str(message))
+            if len(port)>0:
+               self.sendMessage_('SETTING PORT -> '+json.dumps(port))
+            else :
+               self.sendMessage_('NO PORT FOUND')
       elif 'setPort' in self.data:
          message = self.data.replace('setPort','').replace(' ','')
          compilerUploader.setPort(message)
