@@ -140,6 +140,7 @@ if [ $BUILD_TARGET = "debian" ]; then
 
 	# Copy postinst and postrm files
 	cp -a pkg/linux/debian/postinst deb_dist/web2board-${VERSION}/debian/postinst
+	# cp -a pkg/linux/debian/preinst deb_dist/web2board-${VERSION}/debian/preinst
 	cp -a pkg/linux/debian/postrm deb_dist/web2board-${VERSION}/debian/postrm
 
 	# Modify changelog and control files
@@ -169,15 +170,17 @@ if [ $BUILD_TARGET = "debian" ]; then
 	rm -rf "web2board.egg-info"
 	mv deb_dist/*.deb deb_dist/web2board.deb
 	#Copy .deb to final destination:
-	# mkdir -p deb_dist/web2board/.res
-	# cp -a deb_dist/*.deb deb_dist/web2board/.res
-	# cp -a res/linux/INSTALL deb_dist/web2board/
+	mkdir -p deb_dist/web2board/
+	cp -a deb_dist/*.deb deb_dist/web2board/
+	cp -a res/linux/README deb_dist/web2board/
 	# chmod +x deb_dist/web2board/INSTALL
-	# echo ${VERSION} >> deb_dist/web2board/.res/version.txt
-	# cd deb_dist
-	# tar -czpf web2board.tar.gz web2board
-	rm -rf deb_dist/web2board-*
-	rm -rf deb_dist/web2board_*
+	# echo ${VERSION} >> deb_dist/web2board/version.txt
+	cd deb_dist
+	tar -czpf web2board.tar.gz web2board
+	rm -rf web2board
+	rm -rf web2board.deb
+	rm -rf web2board-*
+	rm -rf web2board_*
 
 fi
 

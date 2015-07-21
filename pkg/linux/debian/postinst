@@ -1,13 +1,17 @@
 #!/bin/bash
+ 
+set -e
+
+
 
 ################# REGISTER #################
-u=$(who am i | awk "{print $1}")
-sudo adduser $u dialout
+# echo $USERNAME
+# sudo adduser $USERNAME dialout
 
 #Create route if it does not exist previously 
 mkdir -p ~/.local/share/applications/
 
-sudo rm ~/.local/share/applications/web2board-handler.desktop
+
 echo "[Desktop Entry]
 Version=0.0.1
 Type=Application
@@ -20,11 +24,17 @@ MimeType=x-scheme-handler/vnc
 Name=web2board Launcher
 Comment=Launch web2board
 Name[en_US]=web2board-handler" > ~/.local/share/applications/web2board-handler.desktop
+
+echo "here"
+ls  ~/.local/share/applications/web2board-handler.desktop
+
 echo "
+
 
 #custom handler for bitbloqs web2board:
 x-scheme-handler/web2board=web2board-handler.desktop
 " >> ~/.local/share/applications/mimeapps.list
+
 
 ################# LIBRARIES #################
 
@@ -59,3 +69,5 @@ wget https://github.com/bq/bitbloqLibs/archive/master.zip
 unzip master.zip -d .
 rm -rf master.zip*
 mv bitbloqLibs-master bitbloqLibs
+
+exit 0

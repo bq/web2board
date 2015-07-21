@@ -11,6 +11,7 @@ Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, avrdude, gcc-avr, binutils-avr, gdb-avr, avr-libc, wget
 Description: WEB2BOARD 
  Program that connects a webapp and an Arduino compatible board. It is able to compile and upload Arduino sketches as well as open a custom serial monitor.
+ After installing this package, open a terminal and enter the following command, substituting [your-user] with your username: sudo adduser [your-user] dialout 
  PLEASE REBOOT YOUR COMPUTER AFTER THE INSTALLATION. / 
  POR FAVOR REINICIA EL ORDENADOR DESPUÉS DE LA INSTALACIÓN.
 
