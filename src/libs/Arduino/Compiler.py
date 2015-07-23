@@ -29,7 +29,7 @@ class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		self.userLibs = ''
-		self.tmpPath = expanduser("~")+'/.web2board/'
+		self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
 		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 
 		self.ide_path = os.path.realpath(__file__)
