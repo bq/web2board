@@ -34,7 +34,7 @@ class messageHandler (WebSocket):
       if self.data is None:
          self.data = ''
       if 'version' in self.data:
-         self.sendMessage_('VERSION '+compilerUploader.getVersion())
+         self.sendMessage_('VERSION -> '+compilerUploader.getVersion())
       elif 'setBoard' in self.data:
          try:
             self.proc.terminate()
@@ -73,6 +73,7 @@ class messageHandler (WebSocket):
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
          self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
+         self.sendMessage_('SERIALMONITOROPENED')
       elif self.data == 'exit':
          sys.exit()
 
