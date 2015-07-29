@@ -30,6 +30,8 @@ class ArduinoCompilerUploader:
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
 			self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino'
 
+		self.pathToSketchbook = self.pathToSketchbook.decode('latin1')
+
 		self.pathToArduinoDir = pathToMain+'/res/arduino/'
 		self.uploader = Uploader(pathToMain)
 		self.compiler = Compiler(pathToMain)
@@ -75,7 +77,8 @@ class ArduinoCompilerUploader:
 			comPorts = list(comports())
 			availablePorts = []
 			for port in comPorts:
-				availablePorts.append(port[0])
+				if not 'Bluetooth' in port[1]: #discard bluetooth ports
+					availablePorts.append(port[0])
 		elif platform.system() =='Darwin':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/tty.usbmodem*')

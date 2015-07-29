@@ -115,18 +115,6 @@ if [ $BUILD_TARGET = "debian" ]; then
 	cp -a res/linux src/res
 	cp -a res/common/* src/res
 
-	# #Remove .reg file if present (needed only for windows)
-	# rm src/res/web2board.reg
-
-	# #Remove all possible arduino files:
-	# rm -rf src/res/arduino*
-	# #Copy the ones we need
-	# cp -a res/arduinoLinux src/res/
-
-	# #Remove last avrdude (needed only for windows)
-	# rm src/res/avrdude*
-	# rm libusb0.dll
-
 	# Generate Debian source package
 	python setup.py --command-packages=stdeb.command sdist_dsc debianize \
 	#--debian-version 1 \
@@ -168,16 +156,32 @@ if [ $BUILD_TARGET = "debian" ]; then
 	# Clean directory
 	cd ../..
 	rm -rf "web2board.egg-info"
-	mv deb_dist/*.deb deb_dist/web2board.deb
+
+
 	#Copy .deb to final destination:
 	mkdir -p deb_dist/web2board/
-	cp -a deb_dist/*.deb deb_dist/web2board/
-	cp -a res/linux/README deb_dist/web2board/
-	# chmod +x deb_dist/web2board/INSTALL
-	# echo ${VERSION} >> deb_dist/web2board/version.txt
+
+	echo [Desktop Entry] >> deb_dist/web2board/INSTALL.desktop
+	echo Encoding=UTF-8 >> deb_dist/web2board/INSTALL.desktop
+	echo Name=INSTALL >> deb_dist/web2board/INSTALL.desktop
+	echo Comment=Install >> deb_dist/web2board/INSTALL.desktop
+	echo "Exec=xterm -T "\""Web2board bitbloq installation"\"" -n "\""Web2board bitbloq installation"\"" -hold -e  "\""echo $'--------------------------------------------------' && echo '  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR' && echo '  INSTALLING BITBLOQ'S WEB2BOARD. DO NOT CLOSE && echo $'--------------------------------------------------\n\n\n' && echo 'Instalando...' && echo 'Installing...' && sudo apt-get -y install gdebi && a=\$(find ~ -name '".web2board-${VERSION}.deb"' 2>&1 | grep -v 'Permission denied' | head -1) && echo \$a && sudo gdebi --non-interactive \$a && echo $'\n\n\n--------------------------------------------------' && echo 'INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA' && echo 'INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW' && echo 'REINICIE EL ORDENADOR' && echo 'REBOOT THE COMPUTER'echo $'--------------------------------------------------\n\n\n' "\">> deb_dist/web2board/INSTALL.desktop
+	echo "Terminal=false">> deb_dist/web2board/INSTALL.desktop
+	echo "Icon=/usr/share/icons/gnome/48x48/mimetypes/application-x-executable.png
+		Type=Application" >> deb_dist/web2board/INSTALL.desktop
+
+
+	echo "Name[en_US]=INSTALL BITBLOQS WEB2BOARD">> deb_dist/web2board/INSTALL.desktop
+	echo "Name[es_ES]=INSTALLAR WEB2BOARD (BITBLOQ)" >>deb_dist/web2board/INSTALL.desktop
+	mv deb_dist/*.deb deb_dist/web2board/.web2board-${VERSION}.deb
+
+	# cp -a deb_dist/*.deb deb_dist/web2board/
+	# cp -a res/linux/README deb_dist/web2board/
+	chmod +x deb_dist/web2board/INSTALL.desktop
+
 	cd deb_dist
 	tar -czpf web2board.tar.gz web2board
-	rm -rf web2board
+	# rm -rf web2board
 	rm -rf web2board.deb
 	rm -rf web2board-*
 	rm -rf web2board_*
