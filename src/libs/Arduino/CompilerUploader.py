@@ -14,6 +14,7 @@
 import os
 import platform
 import glob
+import logging
 from collections import defaultdict
 from os.path import expanduser
 
@@ -24,7 +25,23 @@ from utils import BoardConfig, callAvrdude
 class ArduinoCompilerUploader:
 
 	def __init__(self, pathToMain):
-		self.pathToMain = pathToMain
+		#Get path on mac
+		if platform.system() == 'Darwin':
+			# logging.debug('self.pathToMain');
+			# logging.debug(self.pathToMain);
+			# logging.debug('PWD=');
+			# logging.debug(os.environ.get('PWD'));
+			#logging.debug('PYTHONPATH=');
+			#logging.debug(os.environ.get('PYTHONPATH'));
+			# logging.debug('ENVIRON=');
+			# logging.debug(os.environ);
+			if os.environ.get('PYTHONPATH') != None:
+				self.pathToMain = os.environ.get('PYTHONPATH')
+			else:
+				self.pathToMain = pathToMain
+		elif platform.system() == 'Windows' or platform.system() == 'Linux':
+			self.pathToMain = pathToMain
+
 		if platform.system() == 'Linux':
 			self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino'
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':

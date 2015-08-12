@@ -18,7 +18,9 @@ import platform
 
 class Uploader :
 	def __init__(self, pathToMain):
+
 		self.pathToMain = pathToMain
+
 		self.tmpPath = base.sys_path.get_tmp_path()+'/Stino_build/.web2board/.web2board.hex'
 
 	def uploadFromWeb2boardFolder (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):

@@ -17,6 +17,7 @@ from os.path import expanduser
 import platform
 import shutil
 import time 
+import logging
 
 import sys
 reload(sys)
@@ -42,6 +43,22 @@ class Compiler:
 			arduino_name = 'arduinoWin'
 		if platform.system() == 'Darwin':
 			arduino_name = 'arduinoDarwin'
+
+	
+		if platform.system() == 'Darwin':
+			# logging.debug('darwin self.ide_path');
+			# logging.debug(self.ide_path);	
+			# logging.debug('PWD=');
+			# logging.debug(os.environ.get('PWD'));
+			# logging.debug('PYTHONPATH=');
+			# logging.debug(os.environ.get('PYTHONPATH'));
+			# logging.debug('ENVIRON=');
+			# logging.debug(os.environ);
+			if os.environ.get('PYTHONPATH') != None:
+				self.ide_path = os.environ.get('PYTHONPATH')
+		
+		# logging.debug('self.ide_path');
+		# logging.debug(self.ide_path);	
 		self.ide_path = os.path.join(self.ide_path ,'res',arduino_name)
 		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
 

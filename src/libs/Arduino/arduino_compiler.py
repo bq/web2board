@@ -23,6 +23,8 @@ import platform
 import ntpath
 import fnmatch
 import shutil
+import logging
+import sys
 
 from . import base
 from . import arduino_src
@@ -127,7 +129,15 @@ class Compiler(object):
             self.prepare_core_src_files()
             self.prepare_params()
             self.prepare_cmds()
-            self.exec_build_cmds()
+            try:
+                self.exec_build_cmds()
+            except IOError as (errno, strerror):
+                logging.debug("IOError")
+                logging.debug(errno);
+                logging.debug(strerror);
+            except:
+                logging.debug("Caught it!")
+                logging.debug(sys.exc_info()[0]);
             if not self.error_occured:
                 end_time = time.time()
                 diff_time = end_time - start_time
@@ -462,33 +472,47 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
     error_occured = False
     for cmd in cmds:
         return_code, stdout, stderr = exec_cmd(working_dir, cmd)
-        print(cmd)
+        logging.debug(cmd)
         # if is_verbose:
         #     # message_queue.put(cmd + '\n')
         #     if stdout:
         #         # message_queue.put(stdout + '\n')
         #         print(stdout + '\n')
         if return_code != 0:
-            print('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
+            logging.debug('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
             error_occured = True
         if stderr:
-            print(stderr + '\n')
+            logging.debug(stderr + '\n')
         return return_code, stderr
     return return_code, stderr
 
 
 
 def exec_cmd(working_dir, cmd):
+    
+    
     os.environ['CYGWIN'] = 'nodosfilewarning'
+    logging.debug('step 0');
     if cmd:
-        # print ("exec_cmd -->", cmd)
+        #print ("exec_cmd -->", cmd)
         os.chdir(working_dir)
+        logging.debug('step 1');
+        #logging.debug(cmd);
         compile_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        logging.debug('step 2');
+        logging.debug(compile_proc.poll());
         result = compile_proc.communicate()
+        logging.debug('step 3');
+        logging.debug(compile_proc.poll());
         return_code = compile_proc.returncode
+        logging.debug('step 4');
+        logging.debug(compile_proc.poll());
         stdout = result[0].decode(base.sys_info.get_sys_encoding())
+        logging.debug('step 5');
+        logging.debug(compile_proc.poll());
         stderr = result[1].decode(base.sys_info.get_sys_encoding())
     else:
+        logging.debug('step 6');
         return_code = 0
         stdout = ''
         stderr = ''

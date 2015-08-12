@@ -12,16 +12,34 @@
 #-----------------------------------------------------------------------#
 
 from Arduino.CompilerUploader import ArduinoCompilerUploader
-# import os
+
 import sys
 import json
+import os
+import logging
+import platform
 ##
 # Class CompilerUploader, created to support different compilers & uploaders
 #
 class CompilerUploader:
 	def __init__(self):
 		# self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
-		self.pathToMain = sys.path[0]
+		
+		if platform.system() == 'Darwin':
+			# logging.debug('sys.path[0]');
+			# logging.debug(sys.path[0]);
+			# logging.debug('PWD=');
+			# logging.debug(os.environ.get('PWD'));
+			# logging.debug('PYTHONPATH=');
+			# logging.debug(os.environ.get('PYTHONPATH'));
+			# logging.debug('ENVIRON=');
+			# logging.debug(os.environ);
+			if os.environ.get('PYTHONPATH') != None:
+				self.pathToMain = os.environ.get('PYTHONPATH')
+			else:
+				self.pathToMain = sys.path[0]
+		elif platform.system() == 'Windows' or platform.system() == 'Linux':
+			self.pathToMain = sys.path[0]
 		self.arduino = ArduinoCompilerUploader(self.pathToMain)
 		self.readConfigFile()
 
