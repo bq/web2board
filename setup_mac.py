@@ -1,37 +1,36 @@
 # coding=utf-8
-
 import os
 from setuptools import setup
 
-version = os.environ.get('VERSION')
+def package_data_dirs(source, sub_folders):
+	dirs = []
 
-APP = ['src/horus.py']
-DATA_FILES = ['res']
+	for d in sub_folders:
+		for dirname, _, files in os.walk(os.path.join(source, d)):
+			dirname = os.path.relpath(dirname, source)
+			for f in files:
+				dirs.append(os.path.join(dirname, f))
+	return dirs
 
-PLIST = {
-    u'CFBundleName': u'Horus',
-    u'CFBundleShortVersionString': '0.0.1',
-    u'CFBundleVersion': '0.0.1',
-    u'CFBundleIdentifier': u'com.bq.Horus-0.0.1',
-    u'LSMinimumSystemVersion': u'10.8',
-    u'LSApplicationCategoryType': u'public.app-category.graphics-design'
-  }
+APP = ['src/web2board.py']
+DATA_FILES = ['src/res']
 
-OPTIONS = {
-    'argv_emulation': False,
-    'iconfile': 'res/horus.icns',
-    'plist': PLIST
-  }
-
-setup(name='Horus',
-      version=version,
-      author='Jesús Arroyo Torrens',
-      author_email='jesus.arroyo@bq.com',
-      description='Horus is a full software solution for 3D scanning',
-      license='GPLv2',
-      keywords="horus ciclop scanning 3d",
-      url='https://www.diwo.bq.com/tag/ciclop',
-      app=APP,
-      data_files=DATA_FILES,
-      options={'py2app': OPTIONS},
-      setup_requires=['py2app'])
+setup(
+    author='bq',
+    author_email='support-bitbloq@bq.com',
+    description='Native program that connects a web and a board. It compiles Arduino sketches and uploads them onto an Arduino board.',
+    license='GNU GPL',
+    keywords="web2board bitbloq arduino compile upload",
+    url='https://github.com/bq/web2board',
+    app=APP,
+    data_files=DATA_FILES,
+    options=dict(py2app=dict(
+    					plist='Info.plist')
+    ),
+    packages =['web2board'],
+    package_dir = {'web2board': 'src'},
+    package_data = {
+      'web2board': package_data_dirs('src', ['.'])
+    },
+    setup_requires=['py2app']
+)

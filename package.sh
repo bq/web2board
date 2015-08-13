@@ -196,32 +196,31 @@ fi
 
 if [ $BUILD_TARGET = "darwin" ]; then
 
-	mkdir -p dar_dist
+	#Remove everything inside src/res
+	rm -rf src/res
+	#Copy everything inside res/
+	cp -a res/darwin src/res
+	cp -a res/common/* src/res
 
-	# sed -i '' 's|\"../res\"|\"res\"|g' src/horus.py
+	python setup_mac.py py2app -b build_mac -d dist/mac/x64
 
-	python setup_mac.py py2app -b dar_dist/build -d dar_dist/dist
-
-	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/avrdude
-	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/avrdude_bin
-	chmod 755 dar_dist/dist/Horus.app/Contents/Resources/res/tools/darwin/lib/
+	chmod -R 755 dist/mac/x64/web2board.app/Contents/Resources/res/arduinoDarwin/hardware
 
 	pkg/darwin/create-dmg/create-dmg \
-		--volname "Horus Installer" \
-		--volicon "res/horus.icns" \
-		--background "res/images/installer_background.png" \
+		--volname "Web2board Installer" \
+		--volicon "src/res/web2board.icns" \
+		--background "src/res/installer_background.png" \
 		--window-pos 200 120 \
 		--window-size 700 400 \
 		--icon-size 100 \
-		--icon Horus.app 180 280 \
-		--hide-extension Horus.app \
+		--icon web2board.app 180 280 \
+		--hide-extension web2board.app \
 		--app-drop-link 530 275 \
-		dar_dist/Horus_${VERSION}${VEXT}.dmg \
-		dar_dist/dist/Horus.app
+		dist/mac/x64/web2board_${VERSION}${VEXT}.dmg \
+		dist/mac/x64/web2board.app
 
-	sed -i '' 's|\"res\"|\"../res\"|g' src/horus.py
+	rm -rf build_mac
 
-	rm -rf .eggs
 fi
 
 
