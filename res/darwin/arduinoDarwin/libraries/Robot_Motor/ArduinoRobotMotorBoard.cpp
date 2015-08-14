@@ -170,20 +170,20 @@ void RobotMotorBoard::motorsWrite(int speedL, int speedR){
 		speedL*=(1-motorAdjustment);
 	}
 	
-	if(speedR>0){
-		analogWrite(IN_A1,speedR);
+	if(speedL>0){
+		analogWrite(IN_A1,speedL);
 		analogWrite(IN_A2,0);
 	}else{
 		analogWrite(IN_A1,0);
-		analogWrite(IN_A2,-speedR);
+		analogWrite(IN_A2,-speedL);
 	}
 	
-	if(speedL>0){
-		analogWrite(IN_B1,speedL);
+	if(speedR>0){
+		analogWrite(IN_B1,speedR);
 		analogWrite(IN_B2,0);
 	}else{
 		analogWrite(IN_B1,0);
-		analogWrite(IN_B2,-speedL);
+		analogWrite(IN_B2,-speedR);
 	}
 }
 void RobotMotorBoard::motorsWritePct(int speedLpct, int speedRpct){
@@ -230,20 +230,16 @@ void RobotMotorBoard::_analogRead(uint8_t codename){
 	messageOut.sendData();
 }
 int RobotMotorBoard::IRread(uint8_t num){
-	return _IRread(num-1); //To make consistant with the pins labeled on the board
-}
-
-int RobotMotorBoard::_IRread(uint8_t num){
-	IRs.selectPin(num); 
+	IRs.selectPin(num-1); //To make consistant with the pins labeled on the board
 	return IRs.getAnalogValue();
 }
 
-
 void RobotMotorBoard::_readIR(){
+	//Serial.println("readIR");
 	int value;
 	messageOut.writeByte(COMMAND_READ_IR_RE);
-	for(int i=0;i<5;i++){
-		value=_IRread(i);
+	for(int i=1;i<6;i++){
+		value=IRread(i);
 		messageOut.writeInt(value);
 	}
 	messageOut.sendData();

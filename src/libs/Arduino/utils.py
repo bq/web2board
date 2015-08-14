@@ -31,11 +31,26 @@ def callAvrdude(args):
 		avrdude_path = avrdude_path[:index]
 
 		cmd ='"'+avrdude_path+'\\res\\avrdude.exe" '+args
+	elif platform.system() == 'Darwin':
+		if os.environ.get('PYTHONPATH') != None:
+			avrdude_path = os.environ.get('PYTHONPATH')
+		else:
+			avrdude_path = os.path.join(os.path.realpath(__file__))
+			print avrdude_path
+			indexes = list(find_all(avrdude_path,'/'))
+			print indexes
+			index = indexes[len(indexes)-3]
+			avrdude_path = avrdude_path[:index]
+
+		cmd = avrdude_path + "/res/arduinoDarwin/hardware/tools/avr/bin/avrdude -C "+ avrdude_path + "/res/arduinoDarwin/hardware/tools/avr/etc/avrdude.conf "+args
 	else:
 		cmd = "avrdude "+args
+	print cmd
 	p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=(platform.system() != 'Windows'))
 	output = p.stdout.read()
 	err = p.stderr.read()
+	print output
+	print err
 	return output, err
 
 

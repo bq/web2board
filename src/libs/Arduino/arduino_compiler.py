@@ -492,27 +492,20 @@ def exec_cmd(working_dir, cmd):
     
     
     os.environ['CYGWIN'] = 'nodosfilewarning'
-    logging.debug('step 0');
+    
     if cmd:
-        #print ("exec_cmd -->", cmd)
         os.chdir(working_dir)
-        logging.debug('step 1');
         #logging.debug(cmd);
         compile_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        logging.debug('step 2');
         logging.debug(compile_proc.poll());
         result = compile_proc.communicate()
-        logging.debug('step 3');
         logging.debug(compile_proc.poll());
         return_code = compile_proc.returncode
-        logging.debug('step 4');
         logging.debug(compile_proc.poll());
         stdout = result[0].decode(base.sys_info.get_sys_encoding())
-        logging.debug('step 5');
         logging.debug(compile_proc.poll());
         stderr = result[1].decode(base.sys_info.get_sys_encoding())
     else:
-        logging.debug('step 6');
         return_code = 0
         stdout = ''
         stderr = ''

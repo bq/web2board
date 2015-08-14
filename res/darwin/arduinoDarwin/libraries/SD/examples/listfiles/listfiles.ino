@@ -1,9 +1,7 @@
 /*
-  Listfiles
+  SD card basic file example
  
- This example shows how print out the files in a 
- directory on a SD card 
- 	
+ This example shows how to create and destroy an SD card file 	
  The circuit:
  * SD card attached to SPI bus as follows:
  ** MOSI - pin 11
@@ -15,8 +13,6 @@
  by David A. Mellis
  modified 9 Apr 2012
  by Tom Igoe
- modified 2 Feb 2014
- by Scott Fitzgerald
  
  This example code is in the public domain.
  	 
@@ -33,6 +29,7 @@ void setup()
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
+
   Serial.print("Initializing SD card...");
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
   // Note that even if it's not used as the CS pin, the hardware SS pin 
@@ -40,7 +37,7 @@ void setup()
   // or the SD library functions will not work. 
   pinMode(10, OUTPUT);
 
-  if (!SD.begin(4)) {
+  if (!SD.begin(10)) {
     Serial.println("initialization failed!");
     return;
   }
@@ -64,6 +61,7 @@ void printDirectory(File dir, int numTabs) {
      File entry =  dir.openNextFile();
      if (! entry) {
        // no more files
+       //Serial.println("**nomorefiles**");
        break;
      }
      for (uint8_t i=0; i<numTabs; i++) {

@@ -23,8 +23,6 @@
  */
 
 #include <ArduinoRobot.h> // include the robot library
-#include <Wire.h>
-#include <SPI.h>
 
 int commands[20];  //  array for storing commands
 

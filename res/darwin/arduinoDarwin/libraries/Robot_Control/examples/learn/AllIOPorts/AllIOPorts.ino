@@ -5,9 +5,9 @@
  reads/writes from/to them. Uncomment the different lines inside 
  the loop to test the different possibilities.
 
- The M inputs on the Control Board are multiplexed and therefore 
- it is not recommended to use them as outputs. The D pins on the
- Control Board as well as the D pins on the Motor Board go directly
+ The TK inputs on the Control Board are multiplexed and therefore 
+ it is not recommended to use them as outputs. The TKD pins on the
+ Control Board as well as the TK pins on the Motor Board go directly
  to the microcontroller and therefore can be used both as inputs 
  and outputs.
  
@@ -23,13 +23,11 @@
  */
 
 #include <ArduinoRobot.h>
-#include <Wire.h>
-#include <SPI.h>
 
 // use arrays to store the names of the pins to be read
-uint8_t arr[]  = { M0, M1, M2, M3, M4, M5, M6, M7 };
-uint8_t arr2[] = { D0, D1, D2, D3, D4, D5 };
-uint8_t arr3[] = { D7, D8, D9, D10 };
+uint8_t arr[]  = { TK0, TK1, TK2, TK3, TK4, TK5, TK6, TK7 };
+uint8_t arr2[] = { TKD0, TKD1, TKD2, TKD3, TKD4, TKD5 };
+uint8_t arr3[] = { B_TK1, B_TK2, B_TK3, B_TK4 };
 
 void setup(){
   // initialize the robot
@@ -40,34 +38,34 @@ void setup(){
 }
 
 void loop(){
-  // read all the D inputs at the Motor Board as analog 
-  //analogReadB_Ds();
+  // read all the TK inputs at the Motor Board as analog 
+  analogReadB_TKs();
 
-  // read all the D inputs at the Motor Board as digital
-  //digitalReadB_Ds();
+  // read all the TK inputs at the Motor Board as digital
+  //digitalReadB_TKs();
 
-  // read all the M inputs at the Control Board as analog
-  //analogReadMs();
+  // read all the TK inputs at the Control Board as analog
+  //analogReadTKs();
 
-  // read all the M inputs at the Control Board as digital
-  //digitalReadMs();
+  // read all the TK inputs at the Control Board as digital
+  //digitalReadTKs();
 
-  // read all the D inputs at the Control Board as analog
-  analogReadT_Ds();
+  // read all the TKD inputs at the Control Board as analog
+  //analogReadTKDs();
 
-  // read all the D inputs at the Control Board as digital
-  //digitalReadT_Ds();
+  // read all the TKD inputs at the Control Board as digital
+  //digitalReadTKDs();
 
-  // write all the D outputs at the Motor Board as digital
-  //digitalWriteB_Ds();
+  // write all the TK outputs at the Motor Board as digital
+  //digitalWriteB_TKs();
 
-  // write all the D outputs at the Control Board as digital
-  //digitalWriteT_Ds();
-  delay(40);  
+  // write all the TKD outputs at the Control Board as digital
+  //digitalWriteTKDs();
+  delay(5);  
 }
 
-// read all M inputs on the Control Board as analog inputs
-void analogReadMs() {
+// read all TK inputs on the Control Board as analog inputs
+void analogReadTKs() {
   for(int i=0;i<8;i++) {
     Serial.print(Robot.analogRead(arr[i]));
     Serial.print(",");
@@ -75,8 +73,8 @@ void analogReadMs() {
   Serial.println("");
 }
 
-// read all M inputs on the Control Board as digital inputs
-void digitalReadMs() {
+// read all TK inputs on the Control Board as digital inputs
+void digitalReadTKs() {
   for(int i=0;i<8;i++) {
     Serial.print(Robot.digitalRead(arr[i]));
     Serial.print(",");
@@ -84,8 +82,8 @@ void digitalReadMs() {
   Serial.println("");
 }
 
-// read all D inputs on the Control Board as analog inputs
-void analogReadT_Ds() {
+// read all TKD inputs on the Control Board as analog inputs
+void analogReadTKDs() {
   for(int i=0; i<6; i++) {
     Serial.print(Robot.analogRead(arr2[i]));
     Serial.print(",");
@@ -93,8 +91,8 @@ void analogReadT_Ds() {
   Serial.println("");
 }
 
-// read all D inputs on the Control Board as digital inputs
-void digitalReadT_Ds() {
+// read all TKD inputs on the Control Board as digital inputs
+void digitalReadTKDs() {
   for(int i=0; i<6; i++) {
     Serial.print(Robot.digitalRead(arr2[i]));
     Serial.print(",");
@@ -102,8 +100,8 @@ void digitalReadT_Ds() {
   Serial.println("");
 }
 
-// write all D outputs on the Control Board as digital outputs
-void digitalWriteT_Ds() {
+// write all TKD outputs on the Control Board as digital outputs
+void digitalWriteTKDs() {
   // turn all the pins on
   for(int i=0; i<6; i++) {
     Robot.digitalWrite(arr2[i], HIGH);
@@ -117,8 +115,8 @@ void digitalWriteT_Ds() {
   delay(500);
 }
 
-// write all D outputs on the Motor Board as digital outputs
-void digitalWriteB_Ds() {
+// write all TK outputs on the Motor Board as digital outputs
+void digitalWriteB_TKs() {
   // turn all the pins on
   for(int i=0; i<4; i++) {
     Robot.digitalWrite(arr3[i], HIGH);
@@ -132,8 +130,8 @@ void digitalWriteB_Ds() {
   delay(500);
 }
 
-// read all D inputs on the Motor Board as analog inputs
-void analogReadB_Ds() {
+// read all TK inputs on the Motor Board as analog inputs
+void analogReadB_TKs() {
   for(int i=0; i<4; i++) {
     Serial.print(Robot.analogRead(arr3[i]));
     Serial.print(",");
@@ -141,8 +139,8 @@ void analogReadB_Ds() {
   Serial.println("");
 }
 
-// read all D inputs on the Motor Board as digital inputs
-void digitalReadB_Ds() {
+// read all TKD inputs on the Motor Board as digital inputs
+void digitalReadB_TKs() {
   for(int i=0; i<4; i++) {
     Serial.print(Robot.digitalRead(arr3[i]));
     Serial.print(",");

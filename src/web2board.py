@@ -72,7 +72,10 @@ class messageHandler (WebSocket):
          self.sendMessage_('UPLOADED -> '+json.dumps(report))
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
-         self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
+         try:
+            self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
+         except:
+            print "caught this"
          self.sendMessage_('SERIALMONITOROPENED')
       elif self.data == 'exit':
          sys.exit()

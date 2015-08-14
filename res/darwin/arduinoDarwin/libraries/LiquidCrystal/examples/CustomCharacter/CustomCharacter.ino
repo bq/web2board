@@ -22,11 +22,8 @@
  * wiper to LCD VO pin (pin 3)
  * 10K poterntiometer on pin A0
  
- created 21 Mar 2011
+ created21 Mar 2011
  by Tom Igoe
- modified 11 Nov 2013
- by Scott Fitzgerald
- 
  Based on Adafruit's example at
  https://github.com/adafruit/SPI_VFD/blob/master/examples/createChar/createChar.pde
  
@@ -99,11 +96,7 @@ byte armsUp[8] = {
   0b00100,
   0b01010
 };
-
 void setup() {
-  // initialize LCD and set up the number of columns and rows: 
-  lcd.begin(16, 2);
-  
   // create a new character
   lcd.createChar(0, heart);
   // create a new character
@@ -115,9 +108,11 @@ void setup() {
   // create a new character
   lcd.createChar(4, armsUp);  
 
+  // set up the lcd's number of columns and rows: 
+  lcd.begin(16, 2);
   // Print a message to the lcd.
   lcd.print("I "); 
-  lcd.write(byte(0)); // when calling lcd.write() '0' must be cast as a byte
+  lcd.write(0);
   lcd.print(" Arduino! ");
   lcd.write(1);
 
@@ -138,3 +133,6 @@ void loop() {
   lcd.write(4);
   delay(delayTime); 
 }
+
+
+

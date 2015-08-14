@@ -216,7 +216,7 @@ if [ $BUILD_TARGET = "darwin" ]; then
 		--icon web2board.app 180 280 \
 		--hide-extension web2board.app \
 		--app-drop-link 530 275 \
-		dist/mac/x64/web2board_${VERSION}${VEXT}.dmg \
+		dist/mac/x64/web2board.dmg \
 		dist/mac/x64/web2board.app
 
 	rm -rf build_mac

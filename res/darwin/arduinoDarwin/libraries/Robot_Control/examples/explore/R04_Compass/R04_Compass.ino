@@ -21,8 +21,6 @@
 
 // include the robot library
 #include <ArduinoRobot.h>
-#include <Wire.h>
-#include <SPI.h>
 
 int speedLeft;
 int speedRight;

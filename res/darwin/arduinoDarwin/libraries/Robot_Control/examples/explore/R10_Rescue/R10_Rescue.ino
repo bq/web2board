@@ -23,8 +23,6 @@
  */
 
 #include <ArduinoRobot.h> // include the robot library
-#include <Wire.h>
-#include <SPI.h>
 
 void setup(){
   // initialize the Robot, SD card, display, and speaker 
@@ -57,18 +55,23 @@ void setup(){
   // use this to calibrate the line following algorithm
   // uncomment one or the other to see the different behaviors of the robot
   // Robot.lineFollowConfig(11, 5, 50, 10);
-  Robot.lineFollowConfig(11, 7, 60, 5);
+  Robot.lineFollowConfig(14, 9, 50, 10);
   
   // run the rescue sequence  
   rescueSequence();
+  Robot.text("Found obstacle", 5, 12);
   // find the track again
   goToNext();
+  Robot.text("Found track", 5, 19);
   // run the rescue sequence a second time
   rescueSequence();
+  Robot.text("Found obstacle", 5, 26);
   
   // here you could go on ...
  
-  
+  // write status on the screen
+  Robot.stroke(0, 0, 0);
+  Robot.text("Done!", 5, 25);
 }
 
 void loop(){
