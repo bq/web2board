@@ -198,26 +198,27 @@ if [ $BUILD_TARGET = "darwin" ]; then
 
 	#Remove everything inside src/res
 	rm -rf src/res
+	rm -rf dist/mac/x64
 	#Copy everything inside res/
 	cp -a res/darwin src/res
 	cp -a res/common/* src/res
 
 	python setup_mac.py py2app -b build_mac -d dist/mac/x64
 
-	chmod -R 755 dist/mac/x64/web2board.app/Contents/Resources/res/arduinoDarwin/hardware
+	chmod -R 755 dist/mac/x64/Web2Board.app/Contents/Resources/res/arduinoDarwin/hardware
 
 	pkg/darwin/create-dmg/create-dmg \
 		--volname "Web2board Installer" \
 		--volicon "src/res/web2board.icns" \
-		--background "src/res/installer_background.png" \
+		--background "src/res/installer_background.jpg" \
 		--window-pos 200 120 \
 		--window-size 700 400 \
 		--icon-size 100 \
 		--icon web2board.app 180 280 \
-		--hide-extension web2board.app \
+		--hide-extension Web2Board.app \
 		--app-drop-link 530 275 \
-		dist/mac/x64/web2board.dmg \
-		dist/mac/x64/web2board.app
+		dist/mac/x64/Web2Board.dmg \
+		dist/mac/x64/Web2Board.app
 
 	rm -rf build_mac
 
