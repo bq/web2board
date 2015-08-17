@@ -157,32 +157,25 @@ if [ $BUILD_TARGET = "debian" ]; then
 	cd ../..
 	rm -rf "web2board.egg-info"
 
-
-	#Copy .deb to final destination:
-	mkdir -p deb_dist/web2board/
-
-	echo [Desktop Entry] >> deb_dist/web2board/INSTALL.desktop
-	echo Encoding=UTF-8 >> deb_dist/web2board/INSTALL.desktop
-	echo Name=INSTALL >> deb_dist/web2board/INSTALL.desktop
-	echo Comment=Install >> deb_dist/web2board/INSTALL.desktop
-	echo "Exec=xterm -T "\""Web2board bitbloq installation"\"" -n "\""Web2board bitbloq installation"\"" -hold -e  "\""echo $'--------------------------------------------------' && echo '  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR' && echo '  INSTALLING BITBLOQ'S WEB2BOARD. DO NOT CLOSE && echo $'--------------------------------------------------\n\n\n' && echo 'Instalando...' && echo 'Installing...' && sudo apt-get -y install gdebi && a=\$(find ~ -name '".web2board-${VERSION}.deb"' 2>/dev/null | head -1) && echo \$a && sudo gdebi --non-interactive \$a && echo $'\n\n\n--------------------------------------------------' && echo 'INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA' && echo 'INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW' && echo 'REINICIE EL ORDENADOR' && echo 'REBOOT THE COMPUTER' && echo $'--------------------------------------------------\n\n\n' "\">> deb_dist/web2board/INSTALL.desktop
-	echo "Terminal=false">> deb_dist/web2board/INSTALL.desktop
+	echo [Desktop Entry] >> deb_dist/INSTALL.desktop
+	echo Encoding=UTF-8 >> deb_dist/INSTALL.desktop
+	echo Name=Web2Board >> deb_dist/INSTALL.desktop
+	echo Comment=Install >> deb_dist/INSTALL.desktop
+	echo "Exec=xterm -T "\""Web2Board bitbloq installation"\"" -n "\""Web2Board bitbloq installation"\"" -hold -e  "\""echo $'--------------------------------------------------' && echo '  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR' && echo '  INSTALLING BITBLOQ'S WEB2BOARD. DO NOT CLOSE && echo $'--------------------------------------------------\n\n\n' && echo 'Instalando...' && echo 'Installing...' && userName=\$( who | head -1| cut -d ' ' -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/web2board/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo $'\n\n\n--------------------------------------------------' && echo 'INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA' && echo 'INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW' && echo 'REINICIE EL ORDENADOR' && echo 'REBOOT THE COMPUTER' && echo $'--------------------------------------------------\n\n\n' "\">> deb_dist/INSTALL.desktop
+	echo "Terminal=false">> deb_dist/INSTALL.desktop
 	echo "Icon=/usr/share/icons/gnome/48x48/mimetypes/application-x-executable.png
-		Type=Application" >> deb_dist/web2board/INSTALL.desktop
+		Type=Application" >> deb_dist/INSTALL.desktop
 
 
-	echo "Name[en_US]=INSTALL BITBLOQS WEB2BOARD">> deb_dist/web2board/INSTALL.desktop
-	echo "Name[es_ES]=INSTALLAR WEB2BOARD (BITBLOQ)" >>deb_dist/web2board/INSTALL.desktop
-	mv deb_dist/*.deb deb_dist/web2board/.web2board-${VERSION}.deb
+	mv deb_dist/*.deb deb_dist/web2board.deb
 
-	# cp -a deb_dist/*.deb deb_dist/web2board/
-	# cp -a res/linux/README deb_dist/web2board/
-	chmod +x deb_dist/web2board/INSTALL.desktop
+	mv deb_dist/INSTALL.desktop deb_dist/Web2Board.desktop
+	chmod +x deb_dist/Web2Board.desktop
 
 	cd deb_dist
-	tar -czpf web2board.tar.gz web2board
+	tar -czpf web2board.tar.gz Web2Board.desktop
 	# rm -rf web2board
-	rm -rf web2board.deb
+	rm -rf Web2Board.desktop
 	rm -rf web2board-*
 	rm -rf web2board_*
 
