@@ -59,7 +59,7 @@ if [ -d "$HOME/sketchbook" ]; then
 	sudo apt-get install wget
 
 	#Download the new version:
-	wget https://github.com/bq/bitbloqLibs/archive/master.zip
+	wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
 	unzip master.zip -d .
 	rm -rf master.zip*
 	mv bitbloqLibs-master bitbloqLibs
@@ -76,7 +76,7 @@ cd $HOME/Arduino/libraries/
 sudo apt-get install wget
 
 #Download the new version:
-wget https://github.com/bq/bitbloqLibs/archive/master.zip
+wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
 unzip master.zip -d .
 rm -rf master.zip*
 mv bitbloqLibs-master bitbloqLibs

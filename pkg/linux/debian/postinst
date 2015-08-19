@@ -49,7 +49,7 @@ if [ -d "$HOME/sketchbook" ]; then
   cd $HOME/sketchbook/libraries/
 
   #Download the new version:
-  wget https://github.com/bq/bitbloqLibs/archive/master.zip
+  wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
   unzip master.zip -d .
   rm -rf master.zip*
   mv bitbloqLibs-master bitbloqLibs
@@ -65,7 +65,7 @@ rm -rf $HOME/Arduino/libraries/bitbloqLibs
 cd $HOME/Arduino/libraries/
 
 #Download the new version:
-wget https://github.com/bq/bitbloqLibs/archive/master.zip
+wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
 unzip master.zip -d .
 rm -rf master.zip*
 mv bitbloqLibs-master bitbloqLibs

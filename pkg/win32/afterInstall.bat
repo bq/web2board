@@ -4,7 +4,7 @@ mkdir -p "C:\%HOMEPATH%\Documents\Arduino\libraries"
 RD /S /q "C:\%HOMEPATH%\Documents\Arduino\libraries\bitbloqLibs"
 
 ::INSTALL WGET FIRST!!! / ADD it in this path 
-"%~dp0\wget64.exe" https://github.com/bq/bitbloqLibs/archive/master.zip --no-check-certificate
+"%~dp0\wget64.exe" https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip --no-check-certificate
 "%~dp0\7za.exe" x master.zip
 DEL master.zip
 rename bitbloqLibs-master bitbloqLibs
