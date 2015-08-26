@@ -44,21 +44,11 @@ class Compiler:
 		if platform.system() == 'Darwin':
 			arduino_name = 'arduinoDarwin'
 
-	
+
 		if platform.system() == 'Darwin':
-			# logging.debug('darwin self.ide_path');
-			# logging.debug(self.ide_path);	
-			# logging.debug('PWD=');
-			# logging.debug(os.environ.get('PWD'));
-			# logging.debug('PYTHONPATH=');
-			# logging.debug(os.environ.get('PYTHONPATH'));
-			# logging.debug('ENVIRON=');
-			# logging.debug(os.environ);
 			if os.environ.get('PYTHONPATH') != None:
 				self.ide_path = os.environ.get('PYTHONPATH')
-		
-		# logging.debug('self.ide_path');
-		# logging.debug(self.ide_path);	
+
 		self.ide_path = os.path.join(self.ide_path ,'res',arduino_name)
 		self.core_path = self.ide_path+'/hardware/arduino/cores/arduino'
 
@@ -138,6 +128,32 @@ class Compiler:
 	def createUnicodeString(self, input_str):
 		return  unicodedata.normalize('NFKD', unicode(input_str)).encode('ASCII','ignore')
 
+
+	def parseError(self, error):
+		returnObject = []
+		if 'too few arguments to function' in error or 'expected ; before { token' in error or 'expected primary-expression before' in error or 'expected unqualified-id before' in error or 'no matching function for call to' in error:
+			returnObject.append('input-empty')
+		if 'expected } before else' in error:
+			returnObject.append('else-inside-if')
+		if 'break statement not within loop or switch' in error:
+			returnObject.append('break-outside-loop')
+		if 'continue statement not within a loop' in error:
+			returnObject.append('coutinue-outside-loop')
+		if 'case label' in error and 'not within a switch statement' in error:
+			returnObject.append('case-outside-switch')
+		if 'else without a previous if' in error: 
+			returnObject.append('else-without-if')
+		if 'function-definition is not allowed here' in error:
+			returnObject.append('function-definition-not-allowed')
+		if 'invalid conversion from' in error:
+			returnObject.append('invalid-conversion')
+		if 'was not declared in this scope' in error:
+			returnObject.append('not-declared-in-scope')
+		if 'does not name a type' in error: 
+			returnObject.append('not-name-a-type')
+
+		return returnObject
+
 	def compilerStderr (self, stdErr):
 		#split the stdErr with each line ending
 		stdErrSplitted = stdErr.split('\n')
@@ -168,16 +184,21 @@ class Compiler:
 						line = line.replace(':','')
 						#Replace everything but the error info
 						error = re.sub(':\d*:', '',error)
+
 						#If there appears this characters, there is no error, is the final line of the error report
 						if 'make: *** [applet/tmp.o]' in error:
 							error = ''
 						if 'warning:' not in error:
 							#Append the error report
-							errorReport[errorNum]['error'].append({'line':line, 'error':error})
+							bloqsError = self.parseError(error)
+							if errorNum < 0 :
+								errorNum +=1
+								errorReport.append({'function': error, 'error':[]})
+							errorReport[errorNum]['error'].append({'line':line, 'error':error, 'bloqsError':bloqsError})
 		except :
 			print 'Compiler parsing exception'
 			parsingError = True
-
+		print errorReport
 		return parsingError, errorReport
 
 	def compileWithMakefile(self, code, board,  arduinoDir, sketchbookDir):
