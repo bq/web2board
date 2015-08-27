@@ -30,82 +30,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import unicodedata
 
-qBoard = Queue(maxsize=1)
-qMonitor = Queue()
-qBaudRate = Queue()
-
-
-class SerialMonitor:
-	def __init__(self, port, baudRate = 9600):
-		self.port = port
-		self.baudRate = baudRate
-		self.serial = serial.Serial(
-			port=self.port,
-			baudrate=self.baudRate,
-			parity=serial.PARITY_ODD,
-			stopbits=serial.STOPBITS_TWO,
-			bytesize=serial.SEVENBITS
-		)
-		self.pause = False
-
-		self.t2 = threading.Thread(target=self.ui)
-		self.t2.start()
-
-		self.t1 = threading.Thread(target=self.readQmonitor)
-		self.t1.start()
-
-		self.t3 = threading.Thread(target=self.readBoard)
-		self.t3.start()
-
-		self.t4 = threading.Thread(target=self.readBaudRate)
-		self.t4.start()
-
-
-	def readQmonitor(self):
-		while 1:
-			if not qMonitor.empty():
-				message = qMonitor.get()
-				if message == 'exitWeb2boardPythonProgram':
-					self.serial.close()
-					time.sleep(0.5)
-					os._exit(1)
-					return
-				elif message == 'stopWeb2boardPythonProgram':
-					self.pause = True
-				elif message == 'startWeb2boardPythonProgram':
-					self.pause = False
-				else:
-					self.serial.write(message)
-				qMonitor.task_done()
-
-
-	def readBoard (self):
-		while 1 :
-			if self.serial.isOpen():
-				out = ''
-				try:
-					while self.serial.inWaiting() > 0:
-						out += self.serial.read(1)
-					if out != '' and self.pause == False:
-						qBoard.put(out)
-				except:
-					pass
-
-	def ui (self):
-		ex = wx.App()
-		ex.MainLoop()
-		self.ui = SerialMonitorUI(None)
-
-	def readBaudRate (self):
-		while 1:
-			if not qBaudRate.empty():
-				baudRate = qBaudRate.get()
-				self.serial.close()
-				time.sleep(1)
-				self.serial.baudrate = baudRate
-				time.sleep(1)
-				self.serial.open()
-
+serial = serial.Serial()
 
 class SerialMonitorUI(wx.Dialog):
 
@@ -154,10 +79,7 @@ class SerialMonitorUI(wx.Dialog):
 		self.SetSizer(vbox)
 		self.ShowModal()
 
-	def update(self, event):
-		if not qBoard.empty() and self.Pause == False:
-			message = qBoard.get()
-			self.logText(message)
+
 
 	def logText (self, message):
 		if '\n' in message:
@@ -171,21 +93,29 @@ class SerialMonitorUI(wx.Dialog):
 		else:
 			self.response.AppendText(message)
 
+	def update(self, event):
+		if serial.isOpen():
+			out = ''
+			try:
+				while serial.inWaiting() > 0:
+					out += serial.read(1)
+				if out != '' and self.Pause == False:
+					self.logText(out)
+			except:
+				pass
+
 	def onSend(self, event):
 		message = self.inputTextBox.GetValue()
 		self.logText(message)
-		# self.response.AppendText(message+self.newLine)
-		qMonitor.put(unicode(message))
+		serial.write(message)
 		self.inputTextBox.SetValue('')
 
 	def onPause (self, event):
 		if self.pauseButton.GetLabel() == 'Pause':
 			self.pauseButton.SetLabel('Continue')
-			qMonitor.put('stopWeb2boardPythonProgram')
 			self.Pause = True
 		else:
 			self.pauseButton.SetLabel('Pause')
-			qMonitor.put('startWeb2boardPythonProgram')
 			self.Pause = False
 
 	def onClear (self, event):
@@ -197,7 +127,9 @@ class SerialMonitorUI(wx.Dialog):
 		qBaudRate.put(self.dropdown.GetValue())
 
 	def onClose(self, event):
-		qMonitor.put('exitWeb2boardPythonProgram')
+		serial.close()
+		time.sleep(0.5)
+		os._exit(1)
 		self.Destroy()
 
 
@@ -206,4 +138,12 @@ if __name__ == "__main__":
 		print 'USAGE: SerialMonitor << port >>'
 		sys.exit(1)
 	else:
-		serialMonitor = SerialMonitor(sys.argv[1])
+		serial.port = sys.argv[1]
+		serial.baudrate = 9600
+		serial.open()
+
+		# app = wx.App(redirect=True)
+		app = wx.App()
+		serialMonitor = SerialMonitorUI(None)
+		serialMonitor.Show()
+		app.MainLoop()
