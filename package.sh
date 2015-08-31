@@ -191,27 +191,32 @@ if [ $BUILD_TARGET = "darwin" ]; then
 
 	#Remove everything inside src/res
 	rm -rf src/res
-	rm -rf dist/mac/x64
+	rm -rf distResources/mac
 	#Copy everything inside res/
 	cp -a res/darwin src/res
 	cp -a res/common/* src/res
 
-	python setup_mac.py py2app -b build_mac -d dist/mac/x64
+	python setup_mac.py py2app -b build_mac -d distResources/mac
 
-	chmod -R 755 dist/mac/x64/Web2Board.app/Contents/Resources/res/arduinoDarwin/hardware
+	chmod -R 755 distResources/mac/Web2Board.app/Contents/Resources/res/arduinoDarwin/hardware
 
-	pkg/darwin/create-dmg/create-dmg \
-		--volname "Web2board Installer" \
-		--volicon "src/res/web2board.icns" \
-		--background "src/res/installer_background.jpg" \
-		--window-pos 200 120 \
-		--window-size 700 400 \
-		--icon-size 100 \
-		--icon web2board.app 180 280 \
-		--hide-extension Web2Board.app \
-		--app-drop-link 530 275 \
-		dist/mac/x64/Web2Board.dmg \
-		dist/mac/x64/Web2Board.app
+	# Create pkg :
+	echo "Building mpkg..."
+	/usr/local/bin/packagesbuild pkg/darwin/create-mpkg/web2board/web2board.pkgproj 
+	
+	# Create basic dmg :
+	# pkg/darwin/create-dmg/create-dmg \
+	# 	--volname "Web2board Installer" \
+	# 	--volicon "src/res/web2board.icns" \
+	# 	--background "src/res/installer_background.jpg" \
+	# 	--window-pos 200 120 \
+	# 	--window-size 700 400 \
+	# 	--icon-size 100 \
+	# 	--icon web2board.app 180 280 \
+	# 	--hide-extension Web2Board.app \
+	# 	--app-drop-link 530 275 \
+	# 	distResources/mac/Web2Board.dmg \
+	# 	distResources/mac/Web2Board.app
 
 	rm -rf build_mac
 
