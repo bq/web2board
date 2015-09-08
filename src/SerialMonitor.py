@@ -49,7 +49,7 @@ class SerialConnection():
 				pass
 
 	def write(self, data):
-		self.serial.write(data)
+		self.serial.write(data.encode())
 
 	def changeBaudRate (self, value):
 		self.serial.close()
