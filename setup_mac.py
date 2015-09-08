@@ -13,7 +13,7 @@ def package_data_dirs(source, sub_folders):
 	return dirs
 
 APP = ['src/web2board.py']
-DATA_FILES = ['src/res']
+DATA_FILES = ['src/res','src/SerialMonitor.py']
 
 setup(
     author='bq',

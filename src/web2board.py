@@ -12,7 +12,7 @@
 #                                                                       #
 #-----------------------------------------------------------------------#
 
-import signal, sys, ssl, logging
+import signal, sys, ssl, logging, os
 from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
@@ -73,7 +73,12 @@ class messageHandler (WebSocket):
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
          try:
-            self.proc = subprocess.Popen(['python', sys.path[0]+'/SerialMonitor.py', message], shell=False)
+            if os.environ.get('PYTHONPATH') != None:
+               path = os.environ.get('PYTHONPATH')
+            else:
+               path = sys.path[0]
+
+            self.proc = subprocess.Popen(['python', path + '/SerialMonitor.py', message], shell=False)
          except:
             print "caught this"
          self.sendMessage_('SERIALMONITOROPENED')
