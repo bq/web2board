@@ -6,7 +6,7 @@
 #                                                                       #
 # Copyright (C) 2015 Mundo Reader S.L.                                  #
 #                                                                       #
-# Date: April - May 2015                                                #
+# Date: August 2015                                                     #
 # Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
 #                                                                       #
 #-----------------------------------------------------------------------#
@@ -30,25 +30,55 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import unicodedata
 
-serial = serial.Serial()
+class SerialConnection():
+	def __init__(self,port):
+		self.serial = serial.Serial()
+		self.serial.port = port
+		self.serial.baudrate = 9600
+		self.serial.open()
+
+	def getData (self):
+		if self.serial.isOpen():
+			out = ''
+			try:
+				while self.serial.inWaiting() > 0:
+					out += self.serial.read(1)
+				if out != '':
+					return out
+			except:
+				pass
+
+	def write(self, data):
+		self.serial.write(data)
+
+	def changeBaudRate (self, value):
+		self.serial.close()
+		self.serial.baudrate = value
+		self.serial.open()
+
+	def close (self):
+		self.serial.close()
+
 
 class SerialMonitorUI(wx.Dialog):
 
-	def __init__(self, parent):
+	def __init__(self, parent,port):
 		super(SerialMonitorUI, self).__init__(parent, title='bitbloq\'s Serial Monitor', size=(500,500), style=wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX
 )
+		self.serialConnection = SerialConnection(port)
 		#Timer
 		self.timer = wx.Timer(self)
 		self.Bind(wx.EVT_TIMER, self.update, self.timer)
 		self.timer.Start(100)
 		self.newLine = ''
 		self.Pause = False
+		self.lastPause = False
 		self.charCounter = 0
 
 		# Elements
 		self.inputTextBox = wx.TextCtrl(self, size=(300,10))
 		self.response = wx.TextCtrl(self, size=(10,250), style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL)
-		self.response.SetMaxLength(3)
+		# self.response.SetMaxLength(3)
 		self.sendButton = wx.Button(self, label='Send',style = wx.ALIGN_RIGHT)
 		self.pauseButton = wx.Button(self, label='Pause',style = wx.ALIGN_RIGHT)
 		self.clearButton = wx.Button(self, label='Clear',style = wx.ALIGN_RIGHT)
@@ -79,35 +109,34 @@ class SerialMonitorUI(wx.Dialog):
 		self.SetSizer(vbox)
 		self.ShowModal()
 
-
-
 	def logText (self, message):
-		if '\n' in message:
-			self.charCounter = 0
-		else:
-			self.charCounter+=1
+		if message != None:
+			if '\n' in message:
+				self.charCounter = 0
+			else:
+				self.charCounter+=1
 
-		if self.response.GetNumberOfLines() >= 800 or self.charCounter > 300:
-			self.response.SetValue(message)
-			self.charCounter = 0
-		else:
-			self.response.AppendText(message)
+			if self.response.GetNumberOfLines() >= 800 or self.charCounter > 300:
+				self.response.SetValue(message)
+				self.charCounter = 0
+			else:
+				self.response.AppendText(message)
 
 	def update(self, event):
-		if serial.isOpen():
-			out = ''
+		if self.Pause and not self.lastPause:
+			self.logText('\n*** SERIAL MONITOR PAUSED ***\n\n')
+			self.lastPause = True
+		elif not self.Pause:
 			try:
-				while serial.inWaiting() > 0:
-					out += serial.read(1)
-				if out != '' and self.Pause == False:
-					self.logText(out)
+				self.logText(self.serialConnection.getData())
 			except:
 				pass
+			self.lastPause = False
 
 	def onSend(self, event):
 		message = self.inputTextBox.GetValue()
-		self.logText(message)
-		serial.write(message)
+		# self.logText(message)
+		self.serialConnection.write(message)
 		self.inputTextBox.SetValue('')
 
 	def onPause (self, event):
@@ -124,10 +153,10 @@ class SerialMonitorUI(wx.Dialog):
 		self.charCounter = 0
 
 	def onBaudRateChanged (self, event):
-		qBaudRate.put(self.dropdown.GetValue())
+		self.serialConnection.changeBaudRate(self.dropdown.GetValue())
 
 	def onClose(self, event):
-		serial.close()
+		self.serialConnection.close()
 		time.sleep(0.5)
 		os._exit(1)
 		self.Destroy()
@@ -138,12 +167,8 @@ if __name__ == "__main__":
 		print 'USAGE: SerialMonitor << port >>'
 		sys.exit(1)
 	else:
-		serial.port = sys.argv[1]
-		serial.baudrate = 9600
-		serial.open()
-
 		# app = wx.App(redirect=True)
 		app = wx.App()
-		serialMonitor = SerialMonitorUI(None)
+		serialMonitor = SerialMonitorUI(None, sys.argv[1])
 		serialMonitor.Show()
 		app.MainLoop()
