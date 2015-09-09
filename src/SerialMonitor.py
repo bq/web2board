@@ -87,6 +87,7 @@ class SerialMonitorUI(wx.Dialog):
 		self.dropdown = wx.ComboBox(self, 0, '9600', (0, 0), wx.DefaultSize ,baudRates, wx.CB_DROPDOWN)
 
 		# Events
+		self.inputTextBox.Bind(wx.EVT_CHAR, self.onKeyPress)
 		self.sendButton.Bind(wx.EVT_BUTTON, self.onSend)
 		self.pauseButton.Bind(wx.EVT_BUTTON, self.onPause)
 		self.clearButton.Bind(wx.EVT_BUTTON, self.onClear)
@@ -108,6 +109,13 @@ class SerialMonitorUI(wx.Dialog):
 		vbox.Add(hbox1, 0, wx.EXPAND, 12)
 		self.SetSizer(vbox)
 		self.ShowModal()
+
+	def onKeyPress (self, event):
+		if event.GetKeyCode() != wx.WXK_RETURN: 
+			event.Skip()
+			return
+		else:
+			self.onSend(event)
 
 	def logText (self, message):
 		if message != None:
