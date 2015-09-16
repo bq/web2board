@@ -197,6 +197,7 @@ if [ $BUILD_TARGET = "darwin" ]; then
 	cp -a res/common/* src/res
 
 	python setup_mac.py py2app -b build_mac -d distResources/mac
+	python setup_mac_serialmonitor.py py2app -b build_mac -d distResources/mac
 
 	chmod -R 755 distResources/mac/Web2Board.app/Contents/Resources/res/arduinoDarwin/hardware
 

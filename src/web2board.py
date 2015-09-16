@@ -12,7 +12,7 @@
 #                                                                       #
 #-----------------------------------------------------------------------#
 
-import signal, sys, ssl, logging, os
+import signal, sys, ssl, logging, os, platform
 from libs.SimpleWebSocketServer import WebSocket, SimpleWebSocketServer, SimpleSSLWebSocketServer
 from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
@@ -73,12 +73,12 @@ class messageHandler (WebSocket):
       elif 'SerialMonitor' in self.data:
          message = str(self.data.replace('SerialMonitor','').replace(' ',''))
          try:
-            if os.environ.get('PYTHONPATH') != None:
-               path = os.environ.get('PYTHONPATH')
+            if platform.system() == 'Darwin':
+               self.proc = subprocess.Popen(['/Applications/SerialMonitor.app/Contents/MacOS/SerialMonitor', message], shell=False)
             else:
                path = sys.path[0]
-
-            self.proc = subprocess.Popen(['python', path + '/SerialMonitor.py', message], shell=False)
+               self.proc = subprocess.Popen(['python', path + '/SerialMonitor.py', message], shell=False)
+            
          except:
             print "caught this"
          self.sendMessage_('SERIALMONITOROPENED')
