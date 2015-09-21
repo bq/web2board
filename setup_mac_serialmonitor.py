@@ -12,9 +12,16 @@ def package_data_dirs(source, sub_folders):
                 dirs.append(os.path.join(dirname, f))
     return dirs
 
+def version ():
+  import sys, json;
+  f = open('res/common/config.json')
+  ret = json.load(f)["version"]
+  return str(ret)
+
 setup(
     author='bq',
     name='SerialMonitor',
+    version=version(),
     author_email='support-bitbloq@bq.com',
     description='Serial Monitor.',
     license='GNU GPL',
