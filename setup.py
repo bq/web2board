@@ -13,10 +13,15 @@ def package_data_dirs(source, sub_folders):
 			for f in files:
 				dirs.append(os.path.join(dirname, f))
 	return dirs
-      
+def version ():
+  import sys, json;
+  f = open('res/common/config.json')
+  ret = json.load(f)["version"]
+  return str(ret)
+
 setup(
       name='web2board',
-      version='0.0.1',
+      version=version(),
       author='bitbloq team',
       author_email='support-bitbloq@bq.com',
       platforms=['any'],

@@ -111,6 +111,13 @@ Function LaunchLink
   ExecShell "" "$SMPROGRAMS\Web2board ${VERSION}\Web2board ${VERSION}.lnk"
 FunctionEnd
 
+
+Section "PostInstallation script"
+  ; Add the libraries and the register.
+  ExecWait '"$INSTDIR\afterInstall.bat" /lm'
+SectionEnd
+
+
 Section "Install FTDI Drivers"
   ; Set output path to the driver directory.
   SetOutPath "$INSTDIR\drivers\"
@@ -131,11 +138,7 @@ Section "Install Arduino Drivers"
   ${EndIf}
 SectionEnd
 
-Section "PostInstallation script"
-  ; Add the libraries and the register.
-  ExecWait '"$INSTDIR\afterInstall.bat" /lm'
 
-SectionEnd
 
 
 
