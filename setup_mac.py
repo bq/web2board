@@ -12,12 +12,19 @@ def package_data_dirs(source, sub_folders):
 				dirs.append(os.path.join(dirname, f))
 	return dirs
 
+def version ():
+  import sys, json;
+  f = open('res/common/config.json')
+  ret = json.load(f)["version"]
+  return str(ret)
+
 APP = ['src/web2board.py']
 DATA_FILES = ['src/res']
 
 setup(
     author='bq',
     name='Web2Board',
+    version=version(),
     author_email='support-bitbloq@bq.com',
     description='Native program that connects a web and a board. It compiles Arduino sketches and uploads them onto an Arduino board.',
     license='GNU GPL',
