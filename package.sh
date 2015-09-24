@@ -19,7 +19,7 @@ EXTRA_ARGS=${2}
 ##Which version name are we appending to the final archive
 # VERSION=`head -1 pkg/linux/debian/changelog | grep -o '\(([^\)]*\)' | tr -d '()' | head -1`
 VERSION=$(cat res/common/config.json | python -c 'import sys, json;print(json.load(sys.stdin)["version"])')
-echo "Version -->" ${VERSION} 
+echo "Version -->" ${VERSION} ${#VERSION} 
 
 
 VEXT=${VEXT:=""}
@@ -319,8 +319,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 	# Package the result
 	rm -rf ../pkg/win32/dist
 	ln -sf `pwd`/${TARGET_DIR} ../pkg/win32/dist
-	makensis -DVERSION=${VERSION}${VEXT} ../pkg/win32/installer.nsi
+	makensis ../pkg/win32/installer.nsi
 	if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
-	mv ../pkg/win32/Web2board_${VERSION}${VEXT}.exe web2board.exe
+	mv ../pkg/win32/Web2board.exe web2board.exe
 	rm -rf ../pkg/win32/dist
 fi

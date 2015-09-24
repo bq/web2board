@@ -4,17 +4,17 @@
 !addplugindir "nsisPlugins"
 
 ; The name of the installer
-Name "Web2board ${VERSION}"
+Name "Web2board"
 
 ; The file to write
-OutFile "Web2board_${VERSION}.exe"
+OutFile "Web2board.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\Web2board_${VERSION}
+InstallDir $PROGRAMFILES\Web2board
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\Web2board_${VERSION}" "Install_Dir"
+InstallDirRegKey HKLM "Software\Web2board" "Install_Dir"
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -46,7 +46,7 @@ SetCompressor /SOLID lzma
 
 ;Run Cura after installing
 !define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Start Web2board ${VERSION}"
+!define MUI_FINISHPAGE_RUN_TEXT "Start Web2board"
 !define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
 
 ; Pages
@@ -70,7 +70,7 @@ ReserveFile '${NSISDIR}\Plugins\InstallOptions.dll'
 ;--------------------------------
 
 ; The stuff to install
-Section "Web2board ${VERSION}"
+Section "Web2board"
 
   SectionIn RO
   
@@ -84,21 +84,21 @@ Section "Web2board ${VERSION}"
   Delete "$INSTDIR\src\Web2board\*.ini"
   
   ; Write the installation path into the registry
-  WriteRegStr HKLM "SOFTWARE\Web2board_${VERSION}" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "SOFTWARE\Web2board" "Install_Dir" "$INSTDIR"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board_${VERSION}" "DisplayName" "Web2board ${VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board_${VERSION}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board_${VERSION}" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board_${VERSION}" "NoRepair" 1
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board" "DisplayName" "Web2board"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
   ; Write start menu entries for all users
   SetShellVarContext all
   
-  CreateDirectory "$SMPROGRAMS\Web2board ${VERSION}"
-  CreateShortCut "$SMPROGRAMS\Web2board ${VERSION}\Uninstall Web2board ${VERSION}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  CreateShortCut "$SMPROGRAMS\Web2board ${VERSION}\Web2board ${VERSION}.lnk" "$INSTDIR\python\python.exe" "$\"$INSTDIR\src\Web2board.py$\"" "$INSTDIR\res\Web2board.ico" 0
+  CreateDirectory "$SMPROGRAMS\Web2board"
+  CreateShortCut "$SMPROGRAMS\Web2board\Uninstall Web2board.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\Web2board\Web2board.lnk" "$INSTDIR\python\python.exe" "$\"$INSTDIR\src\Web2board.py$\"" "$INSTDIR\res\Web2board.ico" 0
   
   ; Give all users write permissions in the install directory, so they can read/write profile and preferences files.
   AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"
@@ -108,7 +108,7 @@ SectionEnd
 Function LaunchLink
   ; Write start menu entries for all users
   SetShellVarContext all
-  ExecShell "" "$SMPROGRAMS\Web2board ${VERSION}\Web2board ${VERSION}.lnk"
+  ExecShell "" "$SMPROGRAMS\Web2board\Web2board.lnk"
 FunctionEnd
 
 
@@ -150,14 +150,14 @@ SectionEnd
 Section "Uninstall"
   
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board_${VERSION}"
-  DeleteRegKey HKLM "SOFTWARE\Web2board_${VERSION}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Web2board"
+  DeleteRegKey HKLM "SOFTWARE\Web2board"
 
   ; Write start menu entries for all users
   SetShellVarContext all
 
   ; Remove directories used
-  RMDir /r "$SMPROGRAMS\Web2board ${VERSION}"
+  RMDir /r "$SMPROGRAMS\Web2board"
   RMDir /r "$INSTDIR"
 
 SectionEnd
