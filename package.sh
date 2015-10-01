@@ -159,25 +159,52 @@ if [ $BUILD_TARGET = "debian" ]; then
 	cd ../..
 	rm -rf "web2board.egg-info"
 
-	echo [Desktop Entry] >> deb_dist/INSTALL.desktop
-	echo Encoding=UTF-8 >> deb_dist/INSTALL.desktop
-	echo Name=Web2Board >> deb_dist/INSTALL.desktop
-	echo Comment=Install >> deb_dist/INSTALL.desktop
-	echo "Exec=bash -c 'echo \$ \"-------------------------------------------------- \" && echo  \"  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR \" && echo  \"  INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\" && echo \$ \"--------------------------------------------------\n\n\n \" && echo  \"Instalando... \" && echo  \"Installing... \" && userName=\$( who | head -1| cut -d  \" \" -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install xterm && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/web2board/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo \$ \"\n\n\n-------------------------------------------------- \" && echo  \"INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA \" && echo  \"INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW \" && echo  \"REINICIE EL ORDENADOR \" && echo  \"REBOOT THE COMPUTER \" && echo \$ \"--------------------------------------------------\n\n\n \"'">> deb_dist/INSTALL.desktop
-	echo "Terminal=true">> deb_dist/INSTALL.desktop
+	echo [Desktop Entry] | tee -a deb_dist/Web2Board-PROD.desktop deb_dist/Web2Board-BETA.desktop deb_dist/Web2Board-QA.desktop deb_dist/Web2Board-STAGING.desktop
+	echo Encoding=UTF-8  | tee -a deb_dist/Web2Board-PROD.desktop deb_dist/Web2Board-BETA.desktop deb_dist/Web2Board-QA.desktop deb_dist/Web2Board-STAGING.desktop
+	echo Name=Web2Board-PROD  deb_dist/Web2Board-PROD.desktop 
+	echo Name=Web2Board-BETA  deb_dist/Web2Board-BETA.desktop 
+	echo Name=Web2Board-QA  deb_dist/Web2Board-QA.desktop 
+	echo Name=Web2Board-STAGING  deb_dist/Web2Board-STAGING.desktop 
+	echo Comment=Install  | tee -a deb_dist/Web2Board-PROD.desktop deb_dist/Web2Board-BETA.desktop deb_dist/Web2Board-QA.desktop deb_dist/Web2Board-STAGING.desktop
+	#PROD:
+	echo "Exec=bash -c 'echo \$ \"-------------------------------------------------- \" && echo  \"  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR \" && echo  \"  INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\" && echo \$ \"--------------------------------------------------\n\n\n \" && echo  \"Instalando... \" && echo  \"Installing... \" && userName=\$( who | head -1| cut -d  \" \" -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install xterm && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/web2board/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo \$ \"\n\n\n-------------------------------------------------- \" && echo  \"INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA \" && echo  \"INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW \" && echo  \"REINICIE EL ORDENADOR \" && echo  \"REBOOT THE COMPUTER \" && echo \$ \"--------------------------------------------------\n\n\n \"'">> deb_dist/Web2Board-PROD.desktop
+	#BETA:
+	echo "Exec=bash -c 'echo \$ \"-------------------------------------------------- \" && echo  \"  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR \" && echo  \"  INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\" && echo \$ \"--------------------------------------------------\n\n\n \" && echo  \"Instalando... \" && echo  \"Installing... \" && userName=\$( who | head -1| cut -d  \" \" -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install xterm && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/dev/beta/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo \$ \"\n\n\n-------------------------------------------------- \" && echo  \"INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA \" && echo  \"INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW \" && echo  \"REINICIE EL ORDENADOR \" && echo  \"REBOOT THE COMPUTER \" && echo \$ \"--------------------------------------------------\n\n\n \"'">> deb_dist/Web2Board-BETA.desktop
+	#QA:
+	echo "Exec=bash -c 'echo \$ \"-------------------------------------------------- \" && echo  \"  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR \" && echo  \"  INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\" && echo \$ \"--------------------------------------------------\n\n\n \" && echo  \"Instalando... \" && echo  \"Installing... \" && userName=\$( who | head -1| cut -d  \" \" -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install xterm && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/dev/qa/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo \$ \"\n\n\n-------------------------------------------------- \" && echo  \"INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA \" && echo  \"INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW \" && echo  \"REINICIE EL ORDENADOR \" && echo  \"REBOOT THE COMPUTER \" && echo \$ \"--------------------------------------------------\n\n\n \"'">> deb_dist/Web2Board-QA.desktop
+	#STAGING:
+	echo "Exec=bash -c 'echo \$ \"-------------------------------------------------- \" && echo  \"  INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR \" && echo  \"  INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\" && echo \$ \"--------------------------------------------------\n\n\n \" && echo  \"Instalando... \" && echo  \"Installing... \" && userName=\$( who | head -1| cut -d  \" \" -f 1) && sudo adduser \$userName dialout && sudo apt-get -y install gdebi && sudo apt-get install xterm && sudo apt-get install wget && wget http://bitbloq.com.s3.amazonaws.com/dev/staging/linux/web2board.deb && sudo gdebi --non-interactive web2board.deb && rm web2board.deb && echo \$ \"\n\n\n-------------------------------------------------- \" && echo  \"INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA \" && echo  \"INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW \" && echo  \"REINICIE EL ORDENADOR \" && echo  \"REBOOT THE COMPUTER \" && echo \$ \"--------------------------------------------------\n\n\n \"'">> deb_dist/Web2Board-STAGING.desktop
+
+	echo "Terminal=true"  | tee -a deb_dist/Web2Board-PROD.desktop deb_dist/Web2Board-BETA.desktop deb_dist/Web2Board-QA.desktop deb_dist/Web2Board-STAGING.desktop
 	# echo "Icon=/usr/share/icons/gnome/48x48/mimetypes/application-x-executable.png"  >> deb_dist/INSTALL.desktop
-	echo "Type=Application" >> deb_dist/INSTALL.desktop
+	echo "Type=Application"  | tee -a deb_dist/Web2Board-PROD.desktop deb_dist/Web2Board-BETA.desktop deb_dist/Web2Board-QA.desktop deb_dist/Web2Board-STAGING.desktop
 
 
 	mv deb_dist/*.deb deb_dist/web2board.deb
 
-	mv deb_dist/INSTALL.desktop deb_dist/Web2Board.desktop
-	chmod +x deb_dist/Web2Board.desktop
+	# mv deb_dist/INSTALL.desktop deb_dist/Web2Board.desktop
+	chmod +x deb_dist/Web2Board*.desktop
 
 	cd deb_dist
-	tar -czpf web2board.tar.gz Web2Board.desktop
-	# rm -rf web2board
-	rm -rf Web2Board.desktop
+	mv Web2Board-PROD.desktop Web2Board.desktop
+	tar -czpf Web2Board-PROD.tar.gz Web2Board.desktop
+	rm Web2board.desktop
+
+	mv Web2Board-BETA.desktop Web2Board.desktop
+	tar -czpf Web2Board-BETA.tar.gz Web2Board.desktop
+	rm Web2board.desktop
+
+
+	mv Web2Board-QA.desktop Web2Board.desktop
+	tar -czpf Web2Board-QA.tar.gz Web2Board.desktop
+	rm Web2board.desktop
+
+
+	mv Web2Board-STAGING.desktop Web2Board.desktop
+	tar -czpf Web2Board-STAGING.tar.gz Web2Board.desktop
+	rm Web2board.desktop
+
+	rm -rf Web2Board*.desktop
 	rm -rf web2board-*
 	rm -rf web2board_*
 
