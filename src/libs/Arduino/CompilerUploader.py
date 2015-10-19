@@ -99,18 +99,24 @@ class ArduinoCompilerUploader:
 		elif platform.system() =='Darwin':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/tty.usbmodem*')
+				if len(availablePorts) < 1: # This is only for Arduino UNO compatible boards such as DCCDuino ( CH340/341 )
+					availablePorts = glob.glob('/dev/tty.usbserial-*')
 			elif self.board == 'bt328':
 				availablePorts = glob.glob('/dev/tty.usbserial-*')
 			else:
 				availablePorts = glob.glob('/dev/tty*')
 
+
 		elif platform.system() =='Linux':
 			if self.board == 'uno':
 				availablePorts = glob.glob('/dev/ttyACM*')
+				if len(availablePorts) < 1: # This is only for Arduino UNO compatible boards such as DCCDuino ( CH340/341 )
+					availablePorts = glob.glob('/dev/ttyUSB*')
 			elif self.board == 'bt328':
 				availablePorts = glob.glob('/dev/ttyUSB*')
 			else:
 				availablePorts = glob.glob('/dev/tty*')
+
 		return availablePorts
 
 
