@@ -106,8 +106,68 @@ rm -rf deb_dist
 rm -rf win_dist
 rm -rf dar_dist
 
+
 #############################
-# Debian packaging
+# Debian 32 bits packaging
+#############################
+
+if [ $BUILD_TARGET = "debian32" ]; then
+	#Remove everything inside src/res
+	rm -rf src/res
+	rm -rf debian
+	#Copy everything inside res/
+	cp -a res/linux src/res
+	cp -a res/common/* src/res
+
+	# Generate Debian source package
+	CLFAGS=-m32 LDFLAGS=-m32 python setup.py --command-packages=stdeb.command sdist_dsc debianize \
+	#--debian-version 1 \
+	#--suite 'trusty' \
+	#--section 'main' \
+	#--package 'web2board' \
+	#--depends 'python,
+	#           python-serial,
+	#           avrdude \
+	#bdist_deb # Used to generate deb files
+
+	# Copy postinst and postrm files
+	cp -a pkg/linux/debian/postinst deb_dist/web2board-${VERSION}/debian/postinst
+	# cp -a pkg/linux/debian/preinst deb_dist/web2board-${VERSION}/debian/preinst
+	cp -a pkg/linux/debian/postrm deb_dist/web2board-${VERSION}/debian/postrm
+
+	# Modify changelog and control files
+	cp -a pkg/linux/debian/changelog deb_dist/web2board-${VERSION}/debian/changelog
+	cp -a pkg/linux/debian/control deb_dist/web2board-${VERSION}/debian/control
+
+
+
+	cd deb_dist/web2board-${VERSION}
+	if [ $EXTRA_ARGS ]; then
+		if [ $EXTRA_ARGS = "-s" ]; then
+			# Build and sign Debian sources
+			debuild -S -sa
+		elif [ $EXTRA_ARGS = "-i" ]; then
+			# Install Debian package
+			dpkg-buildpackage -ai386 -b -us -uc
+			sudo dpkg -i ../web2board*.deb
+			sudo apt-get -f install
+		fi
+		else
+			# Build and sign Debian package
+			dpkg-buildpackage -ai386 -b -us -uc
+		fi
+
+	# Clean directory
+	cd ../..
+	rm -rf "web2board.egg-info"
+
+	mv deb_dist/*.deb deb_dist/web2board.deb
+
+fi
+
+
+#############################
+# Debian 64 bits packaging
 #############################
 
 if [ $BUILD_TARGET = "debian" ]; then
