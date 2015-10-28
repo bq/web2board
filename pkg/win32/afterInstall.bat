@@ -5,7 +5,22 @@ RD /S /q "C:\%HOMEPATH%\Documents\Arduino\libraries\bitbloqLibs"
 
 ::INSTALL WGET FIRST!!! / ADD it in this path 
 "%~dp0\wget.exe" https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip --no-check-certificate
-"%~dp0\7za.exe" x v0.0.1.zip
+
+:CheckOS
+IF EXIST "%PROGRAMFILES(X86)%" (GOTO 64BIT) ELSE (GOTO 32BIT)
+
+:64BIT
+echo 64-bit...
+"%~dp0\7za-64.exe" x v0.0.1.zip
+GOTO END
+
+:32BIT
+echo 32-bit...
+"%~dp0\7za-32.exe" x v0.0.1.zip
+GOTO END
+
+:END
+
 DEL v0.0.1.zip
 rename bitbloqLibs-0.0.1 bitbloqLibs
 MOVE bitbloqLibs "C:\%HOMEPATH%\Documents\Arduino\libraries\"
