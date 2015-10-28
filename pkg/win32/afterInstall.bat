@@ -16,4 +16,5 @@ DEL wget*
 DEL 7zxa.*
 
 ::Add the .reg file
-regedit.exe /S src/res/web2board.reg
+::CheckOS
+IF EXIST "%PROGRAMFILES(X86)%" (regedit.exe /S src/res/web2board.reg) ELSE (regedit.exe /S src/res/web2boardTo32.reg)
