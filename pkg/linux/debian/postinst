@@ -2,7 +2,7 @@
  
 set -e
 
-
+BITBLOQLIBS_VERSION=0.0.1
 
 ################# REGISTER #################
 # echo $USERNAME
@@ -47,10 +47,11 @@ if [ -d "$HOME/sketchbook" ]; then
   cd $HOME/sketchbook/libraries/
 
   #Download the new version:
-  wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-  unzip v0.0.1.zip -d .
-  rm -rf v0.0.1.zip*
-  mv bitbloqLibs-0.0.1 bitbloqLibs
+  wget https://github.com/bq/bitbloqLibs/archive/v${BITBLOQLIBS_VERSION}.zip
+  unzip v${BITBLOQLIBS_VERSION}.zip -d .
+  rm -rf v${BITBLOQLIBS_VERSION}.zip*
+  mv bitbloqLibs-${BITBLOQLIBS_VERSION}/* .
+  rm -rf bitbloqLibs-${BITBLOQLIBS_VERSION}
 fi
 
 #NEWER VERSIONS
@@ -63,9 +64,10 @@ rm -rf $HOME/Arduino/libraries/bitbloqLibs
 cd $HOME/Arduino/libraries/
 
 #Download the new version:
-wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-unzip v0.0.1.zip -d .
-rm -rf v0.0.1.zip*
-mv bitbloqLibs-0.0.1 bitbloqLibs
+wget https://github.com/bq/bitbloqLibs/archive/v${BITBLOQLIBS_VERSION}.zip
+unzip v${BITBLOQLIBS_VERSION}.zip -d .
+rm -rf v${BITBLOQLIBS_VERSION}.zip*
+mv bitbloqLibs-${BITBLOQLIBS_VERSION}/* .
+rm -rf bitbloqLibs-${BITBLOQLIBS_VERSION}
 
 exit 0
