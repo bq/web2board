@@ -36,36 +36,36 @@ x-scheme-handler/web2board=web2board-handler.desktop
 
 ################# LIBRARIES #################
 
-#OLDER VERSIONS  --> if home/sketchbook exists, we copy the libraries so they can be used in the old sketchbook directory
-if [ -d "$HOME/sketchbook" ]; then
-  #Create route if it does not exist previously
-  mkdir -p $HOME/sketchbook/libraries/
+# #OLDER VERSIONS  --> if home/sketchbook exists, we copy the libraries so they can be used in the old sketchbook directory
+# if [ -d "$HOME/sketchbook" ]; then
+#   #Create route if it does not exist previously
+#   mkdir -p $HOME/sketchbook/libraries/
 
-  #Remove previous bitbloqLibs library if it exists:
-  rm -rf $HOME/sketchbook/libraries/bitbloqLibs
+#   #Remove previous bitbloqLibs library if it exists:
+#   rm -rf $HOME/sketchbook/libraries/bitbloqLibs
 
-  cd $HOME/sketchbook/libraries/
+#   cd $HOME/sketchbook/libraries/
 
-  #Download the new version:
-  wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-  unzip v0.0.1.zip -d .
-  rm -rf v0.0.1.zip*
-  mv bitbloqLibs-0.0.1 bitbloqLibs
-fi
+#   #Download the new version:
+#   wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
+#   unzip v0.0.1.zip -d .
+#   rm -rf v0.0.1.zip*
+#   mv bitbloqLibs-0.0.1 bitbloqLibs
+# fi
 
-#NEWER VERSIONS
-#Create route if it does not exist previously
-mkdir -p $HOME/Arduino/libraries/
+# #NEWER VERSIONS
+# #Create route if it does not exist previously
+# mkdir -p $HOME/Arduino/libraries/
 
-#Remove previous bitbloqLibs library if it exists:
-rm -rf $HOME/Arduino/libraries/bitbloqLibs
+# #Remove previous bitbloqLibs library if it exists:
+# rm -rf $HOME/Arduino/libraries/bitbloqLibs
 
-cd $HOME/Arduino/libraries/
+# cd $HOME/Arduino/libraries/
 
-#Download the new version:
-wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-unzip v0.0.1.zip -d .
-rm -rf v0.0.1.zip*
-mv bitbloqLibs-0.0.1 bitbloqLibs
+# #Download the new version:
+# wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
+# unzip v0.0.1.zip -d .
+# rm -rf v0.0.1.zip*
+# mv bitbloqLibs-0.0.1 bitbloqLibs
 
 exit 0

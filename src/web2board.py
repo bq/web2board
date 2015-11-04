@@ -19,95 +19,12 @@ from libs.CompilerUploader import CompilerUploader
 import json
 import subprocess
 from os.path import expanduser
-from distutils.dir_util import mkpath
-import zipfile
-
+from libs.LibraryUpdater import LibraryUpdater
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 compilerUploader = CompilerUploader()
-
-def getBitbloqLibsVersion():
-      # Get bitbloqLibs version from config file
-   pathToMain = sys.path[0]
-   if platform.system() == 'Darwin':
-      if os.environ.get('PYTHONPATH') != None:
-         pathToMain = os.environ.get('PYTHONPATH')
-
-   with open(pathToMain+'/res/config.json') as json_data_file:
-      data = json.load(json_data_file)
-      version = str(data['bitbloqLibsVersion'])
-      # print version
-   return version
-
-def setBitbloqLibsVersion(newVersion):
-   pathToMain = sys.path[0]
-   if platform.system() == 'Darwin':
-      if os.environ.get('PYTHONPATH') != None:
-         pathToMain = os.environ.get('PYTHONPATH')
-
-   jsonFile = open(pathToMain+'/res/config.json', "r")
-   data = json.load(jsonFile)
-   jsonFile.close()
-
-   data["bitbloqLibsVersion"] = newVersion
-
-   jsonFile = open(pathToMain+'/res/config.json', "w+")
-   jsonFile.write(json.dumps(data))
-   jsonFile.close()
-
-from urllib2 import urlopen, URLError, HTTPError
-
-
-def dlfile(url, path='.'):
-    # Open the url
-    try:
-        f = urlopen(url)
-        print "downloading " + url
-
-        # Open our local file for writing
-        print os.path.basename(url),expanduser("~")
-        with open(expanduser("~")+'/'+os.path.basename(url), "wb") as local_file:
-            local_file.write(f.read())
-
-    #handle errors
-    except HTTPError, e:
-        print "HTTP Error:", e.code, url
-    except URLError, e:
-        print "URL Error:", e.reason, url
-
-def downloadLibs ():
-
-      # Select Sketchbook folder depending on OS
-   if platform.system() == 'Linux':
-      pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-   elif platform.system() == 'Windows' or platform.system() == 'Darwin':
-      pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
-
-   # If there is something inside bitbloqLibs
-   if  os.path.exists(pathToSketchbook+'/bitbloqLibs')  and os.listdir(pathToSketchbook+'/bitbloqLibs'):
-      import shutil
-      shutil.rmtree(pathToSketchbook+'/bitbloqLibs')
-
-   version = getBitbloqLibsVersion()
-   print ('Downloading new libs, version', version)
-
-   # Download bitbloqLibs
-   url = ('https://github.com/bq/bitbloqLibs/archive/v'+version+'.zip')
-   dlfile(url)
-
-   # Extract it to the correct dir
-   with zipfile.ZipFile(expanduser("~")+'/'+'v'+version+'.zip', "r") as z:
-       z.extractall(pathToSketchbook)
-   # Rename folder 
-   os.rename(pathToSketchbook+'/bitbloqLibs-'+version, pathToSketchbook+'/bitbloqLibs')
-   # Remove .zip
-   try:
-       os.remove(expanduser("~")+'/'+'v'+version+'.zip')
-   except OSError:
-       pass
-
-
+libUpdater = LibraryUpdater()
 
 class messageHandler (WebSocket):
    def sendMessage_(self,message):
@@ -148,14 +65,13 @@ class messageHandler (WebSocket):
          self.sendMessage_('COMPILED -> '+json.dumps(report))
       elif 'setBitbloqLibsVersion' in self.data:
          message = str(self.data.replace('setBitbloqLibsVersion','').replace(' ',''))
-         print getBitbloqLibsVersion() != message, getBitbloqLibsVersion() , message
-         if getBitbloqLibsVersion() != message:
-            setBitbloqLibsVersion(message)
-            self.sendMessage_('SETTED VERSION -> '+ getBitbloqLibsVersion())
-            downloadLibs()
+         if libUpdater.getBitbloqLibsVersion() != message:
+            libUpdater.setBitbloqLibsVersion(message)
+            self.sendMessage_('SETTED VERSION -> '+ libUpdater.getBitbloqLibsVersion())
+            libUpdater.downloadLibs()
          #update bitbloqLibs if version is different!!
       elif 'getBitbloqLibsVersion' in self.data:
-         self.sendMessage_(getBitbloqLibsVersion())
+         self.sendMessage_(libUpdater.getBitbloqLibsVersion())
       elif 'upload' in self.data:
          try:
             self.proc.terminate()
@@ -191,17 +107,9 @@ class messageHandler (WebSocket):
 
 if __name__ == "__main__":
 
-   # Check if the sketchbook folder exists
-   # Select Sketchbook folder depending on OS
-   if platform.system() == 'Linux':
-      pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-   elif platform.system() == 'Windows' or platform.system() == 'Darwin':
-      pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
-
-   # If there is no bitbloqLibs folder or it is empty
-   if not os.path.exists(pathToSketchbook+'/bitbloqLibs') or not os.listdir(pathToSketchbook+'/bitbloqLibs'):
-      mkpath(pathToSketchbook)
-      downloadLibs()
+   # If there is no libraries folder, download it
+   libUpdater.libExists()
+  
 
    parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
    parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")

@@ -15,6 +15,9 @@ import os
 import platform
 import glob
 import logging
+
+from . import base
+
 from collections import defaultdict
 from os.path import expanduser
 
@@ -45,7 +48,8 @@ class ArduinoCompilerUploader:
 		if platform.system() == 'Linux':
 			self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino'
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
-			self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino'
+			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino'
+			self.pathToSketchbook = base.sys_path.get_document_path()+'/Arduino'
 
 		self.pathToSketchbook = self.pathToSketchbook.decode('latin1')
 

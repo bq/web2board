@@ -72,6 +72,9 @@ def get_document_path():
         document_path = os.getenv('HOME')
     return document_path
 
+def get_home_path():
+    doc_path = self.get_document_path()
+    return os.path.dirname(doc_path)
 
 def get_tmp_path():
     tmp_path = '/tmp'
