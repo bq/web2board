@@ -24,7 +24,7 @@ class LibraryUpdater:
 		# Select Sketchbook folder depending on OS
 		if platform.system() == 'Linux':
 			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-			self.pathToSketchbook = base.sys_path.get_home_path()+'/Arduino/libraries'
+			self.pathToSketchbook = base.sys_path.get_home_path()+'/Arduino'
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
 			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
 			self.pathToSketchbook = base.sys_path.get_document_path()+'/Arduino'
@@ -102,12 +102,16 @@ class LibraryUpdater:
 
 		tmp_path = base.sys_path.get_tmp_path()+'/bitbloqLibs-'+version
 		if int(version.replace('.','')) <= 2:
+			print(tmp_path)
+			print(self.pathToSketchbook+'/libraries/bitbloqLibs')
 			distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/bitbloqLibs')
 			bitbloqLibsNames = 'bitbloqLibs'
 		elif int(version.replace('.','')) > 2:
 			for name in os.listdir(tmp_path):
+				print(tmp_path+'/'+name)
 				if os.path.isdir(tmp_path+'/'+name):
 					distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/')
+					#shutil.copytree(tmp_path, self.pathToSketchbook+'/libraries/'+name)
 			bitbloqLibsNames = [ name for name in os.listdir(base.sys_path.get_tmp_path()+'/bitbloqLibs-'+version) if os.path.isdir(os.path.join(base.sys_path.get_tmp_path()+'/bitbloqLibs-'+version, name)) ]
 
 		# Store the names of the bitbloq libraries
