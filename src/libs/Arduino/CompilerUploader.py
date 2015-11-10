@@ -93,10 +93,11 @@ class ArduinoCompilerUploader:
 			self.boardSettings[boardName]=BoardConfig(boardConfig)
 
 	def getAvailablePorts (self):
+		availablePorts = []
+
 		if platform.system() =='Windows':
 			from serial.tools.list_ports import comports
 			comPorts = list(comports())
-			availablePorts = []
 			for port in comPorts:
 				if not 'Bluetooth' in port[1]: #discard bluetooth ports
 					availablePorts.append(port[0])
@@ -108,8 +109,16 @@ class ArduinoCompilerUploader:
 			elif self.board == 'bt328':
 				availablePorts = glob.glob('/dev/tty.usbserial-*')
 			else:
-				availablePorts = glob.glob('/dev/tty*')
+				darwinPorts = glob.glob('/dev/tty.*')
+				for port in darwinPorts:
+					if not 'Bluetooth' in port: #discard bluetooth ports
+						availablePorts.append(port)
 
+			if len(availablePorts) < 1: 
+				darwinPorts = glob.glob('/dev/tty.*')
+				for port in darwinPorts:
+					if not 'Bluetooth' in port: #discard bluetooth ports
+						availablePorts.append(port)
 
 		elif platform.system() =='Linux':
 			if self.board == 'uno':
