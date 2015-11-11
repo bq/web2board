@@ -64,14 +64,16 @@ class messageHandler (WebSocket):
          report = compilerUploader.compile(message)
          self.sendMessage_('COMPILED -> '+json.dumps(report))
       elif 'setBitbloqLibsVersion' in self.data:
+         #update bitbloqLibs if version is different!!
          message = str(self.data.replace('setBitbloqLibsVersion','').replace(' ',''))
          if libUpdater.getBitbloqLibsVersion() != message:
             libUpdater.setBitbloqLibsVersion(message)
             self.sendMessage_('SETTED VERSION -> '+ libUpdater.getBitbloqLibsVersion())
             libUpdater.downloadLibs()
-         #update bitbloqLibs if version is different!!
+         else:
+            self.sendMessage_('SETTED VERSION -> '+ libUpdater.getBitbloqLibsVersion())
       elif 'getBitbloqLibsVersion' in self.data:
-         self.sendMessage_(libUpdater.getBitbloqLibsVersion())
+         self.sendMessage_('BITBLOQLIBSVERSION -> ' + libUpdater.getBitbloqLibsVersion())
       elif 'upload' in self.data:
          try:
             self.proc.terminate()
