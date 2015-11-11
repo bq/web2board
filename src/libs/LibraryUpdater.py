@@ -46,7 +46,12 @@ class LibraryUpdater:
 	      # Get bitbloqLibs name from config file
 	   with open(self.pathToMain+'/res/config.json') as json_data_file:
 	      data = json.load(json_data_file)
-	      bitbloqLibsName = data['bitbloqLibsName']
+	      bitbloqLibsName = []
+	      try:
+	      	bitbloqLibsName = data['bitbloqLibsName']
+	      except:
+	      	print 'No bitbloqLibsName'
+	      	pass
 	   return bitbloqLibsName
 
 	def setBitbloqLibsVersion(self, newVersion):
@@ -125,9 +130,13 @@ class LibraryUpdater:
 
 	def  libExists(self):
 		missingLibs = False
-		for lib in self.getBitbloqLibsName():
-			if not os.path.exists(self.pathToSketchbook+'/libraries/'+lib) or not os.listdir(self.pathToSketchbook+'/libraries/'+lib):
-				missingLibs = True
+		libsNames = self.getBitbloqLibsName()
+		if len(libsNames) < 1:
+			missingLibs = True
+		else:
+			for lib in libsNames:
+				if not os.path.exists(self.pathToSketchbook+'/libraries/'+lib) or not os.listdir(self.pathToSketchbook+'/libraries/'+lib):
+					missingLibs = True
 
 		# If there is no bitbloqLibs folder or it is empty
 		# if not os.path.exists(self.pathToSketchbook+'/bitbloqLibs') or not os.listdir(self.pathToSketchbook+'/bitbloqLibs'):
