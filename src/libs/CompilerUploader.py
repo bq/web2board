@@ -12,6 +12,7 @@
 #-----------------------------------------------------------------------#
 
 from Arduino.CompilerUploader import ArduinoCompilerUploader
+from Arduino import base
 
 import sys
 import json
@@ -44,7 +45,7 @@ class CompilerUploader:
 		self.readConfigFile()
 
 	def readConfigFile(self):
-		with open(self.pathToMain+'/res/config.json') as json_data_file:
+		with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
 			data = json.load(json_data_file)
 			self.version = str(data['version'])
 

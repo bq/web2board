@@ -25,6 +25,7 @@ class LibraryUpdater:
 		if platform.system() == 'Linux':
 			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
 			self.pathToSketchbook = base.sys_path.get_home_path()+'/Arduino'
+
 		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
 			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
 			self.pathToSketchbook = base.sys_path.get_document_path()+'/Arduino'
@@ -37,14 +38,14 @@ class LibraryUpdater:
 
 	def getBitbloqLibsVersion(self):
 	      # Get bitbloqLibs version from config file
-	   with open(self.pathToMain+'/res/config.json') as json_data_file:
+	   with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
 	      data = json.load(json_data_file)
 	      version = str(data['bitbloqLibsVersion'])
 	   return version
 
 	def getBitbloqLibsName(self):
 	      # Get bitbloqLibs name from config file
-	   with open(self.pathToMain+'/res/config.json') as json_data_file:
+	   with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
 	      data = json.load(json_data_file)
 	      bitbloqLibsName = []
 	      try:
@@ -55,25 +56,25 @@ class LibraryUpdater:
 	   return bitbloqLibsName
 
 	def setBitbloqLibsVersion(self, newVersion):
-	   jsonFile = open(self.pathToMain+'/res/config.json', "r")
+	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
 	   data = json.load(jsonFile)
 	   jsonFile.close()
 
 	   data["bitbloqLibsVersion"] = newVersion
 
-	   jsonFile = open(self.pathToMain+'/res/config.json', "w+")
+	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
 	   jsonFile.write(json.dumps(data))
 	   jsonFile.close()
 
 
 	def setBitbloqLibsNames(self, bitbloqLibsNames):
-	   jsonFile = open(self.pathToMain+'/res/config.json', "r")
+	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
 	   data = json.load(jsonFile)
 	   jsonFile.close()
 
 	   data["bitbloqLibsName"] = bitbloqLibsNames
 
-	   jsonFile = open(self.pathToMain+'/res/config.json', "w+")
+	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
 	   jsonFile.write(json.dumps(data))
 	   jsonFile.close()
 
