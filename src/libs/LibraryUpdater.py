@@ -37,46 +37,54 @@ class LibraryUpdater:
 				self.pathToMain = os.environ.get('PYTHONPATH')	
 
 	def getBitbloqLibsVersion(self):
-	      # Get bitbloqLibs version from config file
-	   with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
-	      data = json.load(json_data_file)
-	      version = str(data['bitbloqLibsVersion'])
-	   return version
+		# Get bitbloqLibs version from config file
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+				shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
+		with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
+			data = json.load(json_data_file)
+			version = str(data['bitbloqLibsVersion'])
+		return version
 
 	def getBitbloqLibsName(self):
-	      # Get bitbloqLibs name from config file
-	   with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
-	      data = json.load(json_data_file)
-	      bitbloqLibsName = []
-	      try:
-	      	bitbloqLibsName = data['bitbloqLibsName']
-	      except:
-	      	print 'No bitbloqLibsName'
-	      	pass
-	   return bitbloqLibsName
+		# Get bitbloqLibs name from config file
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+			shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
+		with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
+			data = json.load(json_data_file)
+			bitbloqLibsName = []
+			try:
+				bitbloqLibsName = data['bitbloqLibsName']
+			except:
+				print 'No bitbloqLibsName'
+				pass
+		return bitbloqLibsName
 
 	def setBitbloqLibsVersion(self, newVersion):
-	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
-	   data = json.load(jsonFile)
-	   jsonFile.close()
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+			shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
+		jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
+		data = json.load(jsonFile)
+		jsonFile.close()
 
-	   data["bitbloqLibsVersion"] = newVersion
+		data["bitbloqLibsVersion"] = newVersion
 
-	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
-	   jsonFile.write(json.dumps(data))
-	   jsonFile.close()
+		jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
+		jsonFile.write(json.dumps(data))
+		jsonFile.close()
 
 
 	def setBitbloqLibsNames(self, bitbloqLibsNames):
-	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
-	   data = json.load(jsonFile)
-	   jsonFile.close()
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+			shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
+		jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "r")
+		data = json.load(jsonFile)
+		jsonFile.close()
 
-	   data["bitbloqLibsName"] = bitbloqLibsNames
+		data["bitbloqLibsName"] = bitbloqLibsNames
 
-	   jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
-	   jsonFile.write(json.dumps(data))
-	   jsonFile.close()
+		jsonFile = open(base.sys_path.get_home_path()+'/.web2boardconfig', "w+")
+		jsonFile.write(json.dumps(data))
+		jsonFile.close()
 
 	def downloadFile(self, url, path='.'):
 	    # Open the url
@@ -108,13 +116,10 @@ class LibraryUpdater:
 
 		tmp_path = base.sys_path.get_tmp_path()+'/bitbloqLibs-'+version
 		if int(version.replace('.','')) <= 2:
-			print(tmp_path)
-			print(self.pathToSketchbook+'/libraries/bitbloqLibs')
 			distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/bitbloqLibs')
 			bitbloqLibsNames = 'bitbloqLibs'
 		elif int(version.replace('.','')) > 2:
 			for name in os.listdir(tmp_path):
-				print(tmp_path+'/'+name)
 				if os.path.isdir(tmp_path+'/'+name):
 					distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/')
 					#shutil.copytree(tmp_path, self.pathToSketchbook+'/libraries/'+name)

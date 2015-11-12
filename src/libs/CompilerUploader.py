@@ -19,6 +19,7 @@ import json
 import os
 import logging
 import platform
+import shutil
 ##
 # Class CompilerUploader, created to support different compilers & uploaders
 #
@@ -45,6 +46,8 @@ class CompilerUploader:
 		self.readConfigFile()
 
 	def readConfigFile(self):
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+			shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
 		with open(base.sys_path.get_home_path()+'/.web2boardconfig') as json_data_file:
 			data = json.load(json_data_file)
 			self.version = str(data['version'])
