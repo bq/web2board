@@ -23,7 +23,7 @@ mkdir -p ~/.local/share/applications/
 
 sudo rm ~/.local/share/applications/web2board-handler.desktop
 echo "[Desktop Entry]
-Version=0.0.1
+Version=1.0.0
 Type=Application
 Exec= xterm -iconic -e web2board
 Icon=vncviewer
@@ -44,7 +44,7 @@ x-scheme-handler/web2board=web2board-handler.desktop
 ################# DPKG WEB2BOARD.DEB #################
 cd .res
 ls
-sudo dpkg -i web2board_0.0.1_amd64.deb
+sudo dpkg -i web2board_1.0.0_amd64.deb
 
 ################# LIBRARIES #################
 
