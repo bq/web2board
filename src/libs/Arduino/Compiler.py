@@ -104,26 +104,28 @@ class Compiler:
 		userLibs = []
 		lib = ''
 		initIndexes= list(self.find_all(code,'#include'))
-		finalIndexes= list(self.find_all(code,'\n'))
 		if len(initIndexes) >= 1:
 			for i in range(len(initIndexes)):
-				lib = code[initIndexes[i]: finalIndexes[i]]
+				finalIndex = code.find('\n', initIndexes[i])
+				lib = code[initIndexes[i]: finalIndex]
 				#remove all spaces, #include ,< & >,",.h
 				lib = lib.replace(' ','').replace('#include','').replace('<','').replace('>','').replace('"','').replace('.h','')
 				if lib in self.oficialArduinoLibs:
 					arduinoLibs.append(lib)
 				else:
-					#if (lib == 'bqLiquidCrystal'):
-					#	userLibs.append('MCP23008')
+					# if (lib == 'bqLiquidCrystal'):
+					# 	userLibs.append('MCP23008')
 					userLibs.append(lib)
-
 		#remove duplicates from lists of libs
 		arduinoLibs = sorted(set(arduinoLibs))
 		userLibs = sorted(set(userLibs))
+		print (arduinoLibs)
+		print (userLibs)
 		#join lists into strings
 		self.setArduinoLibs(' '.join(arduinoLibs))
 		self.setUserLibs(' '.join(userLibs))
 		return arduinoLibs+userLibs
+
 
 	def createUnicodeString(self, input_str):
 		return  unicodedata.normalize('NFKD', unicode(input_str)).encode('ASCII','ignore')
@@ -233,11 +235,11 @@ class Compiler:
 			if lib != '':
 				self.libs.append(sketchbookDir+'/libraries/'+lib)
 				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
-			self.libs.append(self.ide_path+'/libraries/Servo')
-			self.libs.append(self.ide_path+'/libraries/Wire')
-			self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
-			self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/bqLiquidCrystal')
-		self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
+			# self.libs.append(self.ide_path+'/libraries/Servo')
+			# self.libs.append(self.ide_path+'/libraries/Wire')
+			# self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
+			# self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/bqLiquidCrystal')
+		# self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
 		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
 
 
