@@ -26,13 +26,14 @@ import unicodedata
 
 import arduino_compiler
 
+
 class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		self.userLibs = ''
 		self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
 		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
-
+		self.bitbloqLibs = ['bqLiquidCrystal', 'bqSoftwareSerial', 'ButtonPad', 'Joystick', 'LineFollower', 'MCP23008', 'Oscillator', 'US']
 		self.ide_path = os.path.realpath(__file__)
 		if self.ide_path[len(self.ide_path)-1] == 'c':
 			self.ide_path = self.ide_path[:-25]
@@ -227,20 +228,22 @@ class Compiler:
 		self.parseLibs(code)
 		self.createSketchFile(code)
 
+		bitbloqLibsInclude = False
 		self.libs = []
 		for lib in self.getArduinoLibs().split(' '):
 			if lib != '':
 				self.libs.append(self.ide_path+'/libraries/'+lib)
 		for lib in self.getUserLibs().split(' '):
 			if lib != '':
+				if lib in self.bitbloqLibs: 
+					bitbloqLibsInclude = True
 				self.libs.append(sketchbookDir+'/libraries/'+lib)
 				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
-			# self.libs.append(self.ide_path+'/libraries/Servo')
-			# self.libs.append(self.ide_path+'/libraries/Wire')
-			# self.libs.append(self.ide_path+'/libraries/SoftwareSerial')
-			# self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/bqLiquidCrystal')
-		# self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
+
 		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
+		if bitbloqLibsInclude:
+			self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
+		
 
 
 		if platform.system() == 'Windows':
