@@ -137,6 +137,8 @@ class LibraryUpdater:
 	def  libExists(self):
 		missingLibs = False
 		libsNames = self.getBitbloqLibsName()
+		if not os.path.exists(self.pathToSketchbook):
+			os.makedirs(self.pathToSketchbook)
 		if len(libsNames) < 1:
 			missingLibs = True
 		else:
