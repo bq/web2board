@@ -36,6 +36,19 @@ class LibraryUpdater:
 			if os.environ.get('PYTHONPATH') != None:
 				self.pathToMain = os.environ.get('PYTHONPATH')	
 
+	def updateWeb2BoardVersion(self):
+		# Get bitbloqLibs version from config file
+		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
+				shutil.copyfile(self.pathToMain+'/res/config.json', base.sys_path.get_home_path()+'/.web2boardconfig')
+		with open(self.pathToMain+'/res/config.json') as json_data_file:
+			data = json.load(json_data_file)
+			versionTrue = str(data['bitbloqLibsVersion'])
+		with open(base.sys_path.get_home_path()+'/.web2boardconfig',"r+") as json_data_file:
+			data = json.load(json_data_file)
+			versionLocal = str(data['bitbloqLibsVersion'])
+			if versionLocal!=versionTrue: 
+				data['bitbloqLibsVersion']=versionTrue
+
 	def getBitbloqLibsVersion(self):
 		# Get bitbloqLibs version from config file
 		if not os.path.isfile(base.sys_path.get_home_path()+'/.web2boardconfig'):
@@ -135,6 +148,8 @@ class LibraryUpdater:
 		   pass
 
 	def  libExists(self):
+		self.updateWeb2BoardVersion()
+
 		missingLibs = False
 		libsNames = self.getBitbloqLibsName()
 		if not os.path.exists(self.pathToSketchbook):
@@ -150,3 +165,5 @@ class LibraryUpdater:
 
 		if missingLibs:
 			self.downloadLibs()
+
+

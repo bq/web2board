@@ -138,7 +138,17 @@ Section "Install Arduino Drivers"
   ${EndIf}
 SectionEnd
 
+Section "Install Zowi Drivers"
+  ; Set output path to the driver directory.
+  SetOutPath "$INSTDIR\drivers\"
+  File /r "drivers\"
 
+  ${If} ${RunningX64}
+    ExecWait '"$INSTDIR\drivers\bqZowi_x64.exe" /lm'
+  ${Else}
+    ExecWait '"$INSTDIR\drivers\bqZowi_x86.exe" /lm'
+  ${EndIf}
+SectionEnd
 
 
 
