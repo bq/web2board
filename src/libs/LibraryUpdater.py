@@ -142,6 +142,8 @@ class LibraryUpdater:
 		if len(libsNames) < 1:
 			missingLibs = True
 		else:
+			if(libsNames == 'bitbloqLibs'):
+				libsNames = ['bitbloqLibs']
 			for lib in libsNames:
 				if not os.path.exists(self.pathToSketchbook+'/libraries/'+lib) or not os.listdir(self.pathToSketchbook+'/libraries/'+lib):
 					missingLibs = True
