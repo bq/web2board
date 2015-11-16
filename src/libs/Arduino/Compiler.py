@@ -18,6 +18,7 @@ import platform
 import shutil
 import time 
 import logging
+from . import base
 
 import sys
 reload(sys)
@@ -31,7 +32,12 @@ class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		self.userLibs = ''
-		self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
+		
+		if platform.system() == 'Windows':
+			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/.web2board'
+		else:	
+			self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
+
 		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
 		self.bitbloqLibs = ['bqLiquidCrystal', 'bqSoftwareSerial', 'ButtonPad', 'Joystick', 'LineFollower', 'MCP23008', 'Oscillator', 'US']
 		self.ide_path = os.path.realpath(__file__)

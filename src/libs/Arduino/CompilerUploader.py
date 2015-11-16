@@ -47,9 +47,10 @@ class ArduinoCompilerUploader:
 
 		if platform.system() == 'Linux':
 			self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino'
-		elif platform.system() == 'Windows' or platform.system() == 'Darwin':
-			# self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino'
+		elif platform.system() == 'Darwin':
 			self.pathToSketchbook = base.sys_path.get_document_path()+'/Arduino'
+		elif platform.system() == 'Windows' : 
+			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/Documents/Arduino'
 
 		self.pathToSketchbook = self.pathToSketchbook.decode('latin1')
 

@@ -148,9 +148,5 @@ class LibraryUpdater:
 				if not os.path.exists(self.pathToSketchbook+'/libraries/'+lib) or not os.listdir(self.pathToSketchbook+'/libraries/'+lib):
 					missingLibs = True
 
-		# If there is no bitbloqLibs folder or it is empty
-		# if not os.path.exists(self.pathToSketchbook+'/bitbloqLibs') or not os.listdir(self.pathToSketchbook+'/bitbloqLibs'):
-		# 	missingLibs = True
-
 		if missingLibs:
 			self.downloadLibs()
