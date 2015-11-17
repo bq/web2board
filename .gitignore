@@ -7,7 +7,6 @@ debian/
 build/
 tmp/
 web2board.egg-info/
-*.o
 src/serial_poc.py
 # Editor File Ignore
 *.sublime-project
