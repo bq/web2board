@@ -15,5 +15,4 @@ src/serial_poc.py
 .Python
 bin/
 include/
-lib/
 src/res/
