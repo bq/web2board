@@ -144,9 +144,9 @@ Section "Install Zowi Drivers"
   File /r "drivers\"
 
   ${If} ${RunningX64}
-    ExecWait '"$INSTDIR\drivers\bqZowi_x64.exe" /lm'
+    ExecWait '"$INSTDIR\drivers\CP210xVCPInstaller_x64.exe" /lm'
   ${Else}
-    ExecWait '"$INSTDIR\drivers\bqZowi_x86.exe" /lm'
+    ExecWait '"$INSTDIR\drivers\CP210xVCPInstaller_x86.exe" /lm'
   ${EndIf}
 SectionEnd
 

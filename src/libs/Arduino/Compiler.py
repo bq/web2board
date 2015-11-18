@@ -34,7 +34,7 @@ class Compiler:
 		self.userLibs = ''
 		
 		if platform.system() == 'Windows':
-			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/.web2board'
+			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/.web2board/'
 		else:	
 			self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
 

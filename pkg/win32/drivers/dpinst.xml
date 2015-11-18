@@ -1,149 +1,172 @@
 <?xml version="1.0" ?>
 <dpinst>
-<legacyMode/>
 <enableNotListedLanguages/>
 <language code="0x0401">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0804">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0404">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0405">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0406">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0407">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0408">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0409">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0C0A">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x040B">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x040C">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x040D">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x040E">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0410">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0411">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0412">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0414">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0413">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0415">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0416">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0816">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x0419">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x041D">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 <language code="0x041F">
-<dpinstTitle>bq Zowi Driver Installer</dpinstTitle>
-<welcomeTitle>Welcome to the bq Zowi Driver Installer</welcomeTitle>
-<welcomeIntro>This wizard will help you install the drivers for your bq Zowi device.</welcomeIntro>
-<finishTitle>Completing the Installation of the bq Zowi Driver</finishTitle>
+<dpinstTitle>CP210x USB to UART Bridge Driver Installer</dpinstTitle>
+<welcomeTitle>Welcome to the CP210x USB to UART Bridge Driver Installer</welcomeTitle>
+<welcomeIntro>This wizard will help you install the drivers for your CP210x USB to UART Bridge device.</welcomeIntro>
+<eula type="txt" path="SLAB_License_Agreement_VCP_Windows.txt"/>
+<finishTitle>Completing the Installation of the CP210x USB to UART Bridge Driver</finishTitle>
 </language>
 </dpinst>

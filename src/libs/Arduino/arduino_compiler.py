@@ -124,6 +124,7 @@ class Compiler(object):
     def build(self):
         start_time = time.time()
         self.prepare_project_src_files()
+        self.need_to_build = True
         if self.need_to_build:
             print('[Stino - Start building]\\n')
             self.prepare_core_src_files()

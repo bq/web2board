@@ -28,6 +28,7 @@ from utils import BoardConfig, callAvrdude
 class ArduinoCompilerUploader:
 
 	def __init__(self, pathToMain):
+		self.pathToSketchbook = ''
 		#Get path on mac
 		if platform.system() == 'Darwin':
 			# logging.debug('self.pathToMain');
@@ -50,9 +51,7 @@ class ArduinoCompilerUploader:
 		elif platform.system() == 'Darwin':
 			self.pathToSketchbook = base.sys_path.get_document_path()+'/Arduino'
 		elif platform.system() == 'Windows' : 
-			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/Documents/Arduino'
-
-		self.pathToSketchbook = self.pathToSketchbook.decode('latin1')
+			self.pathToSketchbook = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/Documents/Arduino'
 
 		self.pathToArduinoDir = pathToMain+'/res/arduino/'
 		self.uploader = Uploader(pathToMain)
@@ -103,34 +102,15 @@ class ArduinoCompilerUploader:
 				if not 'Bluetooth' in port[1]: #discard bluetooth ports
 					availablePorts.append(port[0])
 		elif platform.system() =='Darwin':
-			if self.board == 'uno':
-				availablePorts = glob.glob('/dev/tty.usbmodem*')
-				if len(availablePorts) < 1: # This is only for Arduino UNO compatible boards such as DCCDuino ( CH340/341 )
-					availablePorts = glob.glob('/dev/tty.usbserial-*')
-			elif self.board == 'bt328':
-				availablePorts = glob.glob('/dev/tty.usbserial-*')
-			else:
-				darwinPorts = glob.glob('/dev/tty.*')
-				for port in darwinPorts:
-					if not 'Bluetooth' in port: #discard bluetooth ports
-						availablePorts.append(port)
+			darwinPorts = glob.glob('/dev/tty.*')
 
-			if len(availablePorts) < 1: 
-				darwinPorts = glob.glob('/dev/tty.*')
-				for port in darwinPorts:
-					if not 'Bluetooth' in port: #discard bluetooth ports
-						availablePorts.append(port)
+			for port in darwinPorts:
+				if not 'Bluetooth' in port: #discard bluetooth ports
+					availablePorts.append(port)
 
 		elif platform.system() =='Linux':
-			if self.board == 'uno':
-				availablePorts = glob.glob('/dev/ttyACM*')
-				if len(availablePorts) < 1: # This is only for Arduino UNO compatible boards such as DCCDuino ( CH340/341 )
-					availablePorts = glob.glob('/dev/ttyUSB*')
-			elif self.board == 'bt328':
-				availablePorts = glob.glob('/dev/ttyUSB*')
-			else:
-				availablePorts = glob.glob('/dev/tty*')
-
+			availablePorts = glob.glob('/dev/ttyACM*')
+			availablePorts += glob.glob('/dev/ttyUSB*')
 		return availablePorts
 
 
