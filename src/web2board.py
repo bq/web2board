@@ -113,7 +113,6 @@ if __name__ == "__main__":
    # If there is no libraries folder, download it
    libUpdater.libExists()
   
-   logging.debug('parsing options...');
    parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
    parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
    parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
@@ -122,6 +121,11 @@ if __name__ == "__main__":
    parser.add_option("--cert", default='./cert.pem', type='string', action="store", dest="cert", help="cert (./cert.pem)")
    parser.add_option("--ver", default=ssl.PROTOCOL_TLSv1, type=int, action="store", dest="ver", help="ssl version")
    
+   if sys.argv[1:]:
+      logging.debug('with arguments: ')
+      logging.debug(sys.argv[1:])
+      sys.argv[1:] = []
+
    (options, args) = parser.parse_args()
 
    cls = messageHandler
@@ -136,7 +140,7 @@ if __name__ == "__main__":
       server.close()
       sys.exit()
 
-   logging.debug('process ended');
+   print 'web2board is waiting for any request'
 
    signal.signal(signal.SIGINT, close_sig_handler)
    server.serveforever()

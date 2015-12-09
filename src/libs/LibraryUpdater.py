@@ -128,11 +128,8 @@ class LibraryUpdater:
 		# Extract it to the correct dir
 		with zipfile.ZipFile(base.sys_path.get_tmp_path()+'/'+'v'+version+'.zip', "r") as z:
 			z.extractall(base.sys_path.get_tmp_path())
-			logging.debug('z.extractall done');
 
 		tmp_path = base.sys_path.get_tmp_path()+'/bitbloqLibs-'+version
-		logging.debug('my tmp_path is ' + tmp_path);
-		logging.debug('my self.pathToSketchbook is ' + self.pathToSketchbook);
 		if int(version.replace('.','')) <= 2:
 			distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/bitbloqLibs')
 			bitbloqLibsNames = 'bitbloqLibs'
@@ -140,7 +137,6 @@ class LibraryUpdater:
 			for name in os.listdir(tmp_path):
 				if os.path.isdir(tmp_path+'/'+name):
 					try:
-						logging.debug('try copy_tree with ' + name);
 						distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook+'/libraries/')
 					except OSError as e:
 		   				logging.debug('Error: exception in copy_tree with ' + name);
@@ -151,7 +147,6 @@ class LibraryUpdater:
 
 		# Store the names of the bitbloq libraries
 		self.setBitbloqLibsNames(bitbloqLibsNames)
-		logging.debug('all copies done')
 
 		# Remove .zip
 		try:
