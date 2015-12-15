@@ -12,8 +12,6 @@
 # -----------------------------------------------------------------------#
 
 import json
-import logging
-import platform
 import shutil
 
 from Arduino.CompilerUploader import ArduinoCompilerUploader
@@ -26,25 +24,11 @@ __globalCompilerUploader = None
 ##
 # Class CompilerUploader, created to support different compilers & uploaders
 #
+# todo: use inheritance || if platformIO does not solve it
 class CompilerUploader:
     def __init__(self):
         # self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
         # initializing attributes
-        if platform.system() == 'Darwin':
-            __log.debug('sys.path[0]')
-            __log.debug(sys.path[0])
-            __log.debug('PWD=')
-            __log.debug(os.environ.get('PWD'))
-            __log.debug('PYTHONPATH=')
-            __log.debug(os.environ.get('PYTHONPATH'))
-            __log.debug('ENVIRON=')
-            __log.debug(os.environ)
-            if os.environ.get('PYTHONPATH') is not None:
-                self.pathToMain = os.environ.get('PYTHONPATH')
-            else:
-                self.pathToMain = sys.path[0]
-        elif platform.system() == 'Windows' or platform.system() == 'Linux':
-            self.pathToMain = sys.path[0]
         self.arduino = ArduinoCompilerUploader(MAIN_PATH)
         self.version = None
 
@@ -52,7 +36,6 @@ class CompilerUploader:
         self.readConfigFile()
 
     def readConfigFile(self):
-        # todo:check if this works
         if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
             shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
         with open(WEB2BOARD_CONFIG_PATH) as json_data_file:

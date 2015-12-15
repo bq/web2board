@@ -27,12 +27,12 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import LibraryUpdater
-from libs.PathConstants import logRelevantEnvironmentalPaths
+from libs.PathConstants import Web2BoardPaths as Paths
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-logRelevantEnvironmentalPaths()
+Paths.logRelevantEnvironmentalPaths()
 
 compilerUploader = getCompilerUploader()
 libUpdater = LibraryUpdater()
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     HubsInspector.constructJSFile("libs/WSCommunication/Hubs/Clients")
 
     # If there is no libraries folder, download it
-    libUpdater.libExists()
+    libUpdater.downloadLibsIfNecessary()
 
     parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
     parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")

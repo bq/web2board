@@ -25,20 +25,10 @@ from libs.PathConstants import *
 #
 
 class LibraryUpdater:
+    BITBLOQ_LIBS_URL_TEMPLATE = 'https://github.com/bq/bitbloqLibs/archive/v{}.zip'
+
     def __init__(self):
-        # Select Sketchbook folder depending on OS
-        if platform.system() == 'Linux':
-            # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-            self.pathToSketchbook = base.sys_path.get_home_path() + '/Arduino'
-
-        elif platform.system() == 'Windows' or platform.system() == 'Darwin':
-            # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
-            self.pathToSketchbook = base.sys_path.get_document_path() + '/Arduino'
-
-        self.pathToMain = sys.path[0]
-        if platform.system() == 'Darwin':
-            if os.environ.get('PYTHONPATH') is not None:
-                self.pathToMain = os.environ.get('PYTHONPATH')
+        pass
 
     def updateWeb2BoardVersion(self):
         # Get bitbloqLibs version from config file
@@ -90,16 +80,18 @@ class LibraryUpdater:
 
     def setBitbloqLibsNames(self, bitbloqLibsNames):
         self.__copyConfigInHomeIfNotExists()
-        jsonFile = open(WEB2BOARD_CONFIG_PATH, "r")
-        data = json.load(jsonFile)
-        jsonFile.close()
+        if hasattr(bitbloqLibsNames, "__iter__"):
+            raise Exception("bitbloqLibsNames have to be a list, received: {}".format(bitbloqLibsNames))
+
+        with open(WEB2BOARD_CONFIG_PATH, "r") as jsonFile:
+            data = json.load(jsonFile)
 
         data["bitbloqLibsName"] = bitbloqLibsNames
 
-        jsonFile = open(WEB2BOARD_CONFIG_PATH, "w+")
-        jsonFile.write(json.dumps(data))
-        jsonFile.close()
-        print "config ready"
+        with open(WEB2BOARD_CONFIG_PATH, "w+") as jsonFile:
+            jsonFile.write(json.dumps(data))
+
+        log.info("config ready")
 
     def __copyConfigInHomeIfNotExists(self):
         if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
@@ -109,13 +101,13 @@ class LibraryUpdater:
         # Open the url
         try:
             f = urlopen(url)
-            print "downloading " + url
-
+            log.info("downloading " + url)
+            tempFilePath = Web2BoardPaths.getDownloadedFilePath(url)
             # Open our local file for writing
-            with open(base.sys_path.get_tmp_path() + '/' + os.path.basename(url), "wb") as local_file:
+            with open(tempFilePath, "wb") as local_file:
                 local_file.write(f.read())
 
-                # handle errors
+            return tempFilePath
         except HTTPError, e:
             print "HTTP Error:", e.code, url
         except URLError, e:
@@ -123,65 +115,73 @@ class LibraryUpdater:
 
     def downloadLibs(self):
         version = self.getBitbloqLibsVersion()
-        print ('Downloading new libs, version', version)
+        log.info('Downloading new libs, version: {}'.format(version))
 
-        # Download bitbloqLibs
-        url = ('https://github.com/bq/bitbloqLibs/archive/v' + version + '.zip')
-        self.downloadFile(url)
+        downloadedFilePath = self.downloadFile(self.BITBLOQ_LIBS_URL_TEMPLATE.format(version))
 
-        # Extract it to the correct dir
-        with zipfile.ZipFile(base.sys_path.get_tmp_path() + '/' + 'v' + version + '.zip', "r") as z:
-            z.extractall(base.sys_path.get_tmp_path())
-
-        tmp_path = base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version
-        if int(version.replace('.', '')) <= 2:
-            distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook + '/libraries/bitbloqLibs')
-            bitbloqLibsNames = 'bitbloqLibs'
-        elif int(version.replace('.', '')) > 2:
-            for name in os.listdir(tmp_path):
-                if os.path.isdir(tmp_path + '/' + name):
-                    try:
-                        distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook + '/libraries/')
-                    except OSError as e:
-                        logging.debug('Error: exception in copy_tree with ' + name)
-                        logging.debug(e)
-
-                        # shutil.copytree(tmp_path, self.pathToSketchbook+'/libraries/'+name)
-            bitbloqLibsNames = [name for name in os.listdir(base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version) if
-                                os.path.isdir(
-                                    os.path.join(base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version, name))]
-        else:
-            raise RuntimeError("version not supported")
-
-        # Store the names of the bitbloq libraries
-        self.setBitbloqLibsNames(bitbloqLibsNames)
+        self._extractZip(downloadedFilePath, base.sys_path.get_tmp_path())
+        log.info('extracting zip')
+        self._copyLibsInTmpToBoardsLibsPath(version)
+        log.info('copying libraries in Arduino\'s libraries directory')
+        self.setBitbloqLibsNames(self._getBitbloqLibsNamesFromDownloadedZip(version))
 
         # Remove .zip
         try:
-            os.remove(base.sys_path.get_tmp_path() + '/' + 'v' + version + '.zip')
+            os.remove(downloadedFilePath)
         except OSError as e:
-            logging.debug('exception in os.remove')
-            logging.debug(e)
+            logging.error('exception: {} raised removing libraries zip file'.format(e))
 
         logging.info("Bitbloq libs downloaded")
 
-    def libExists(self):
+    def areWeMissingLibs(self):
         self.updateWeb2BoardVersion()
 
-        missingLibs = False
         libsNames = self.getBitbloqLibsName()
-        if not os.path.exists(self.pathToSketchbook):
-            os.makedirs(self.pathToSketchbook)
+        if not os.path.exists(SKETCHBOOK_PATH):
+            os.makedirs(SKETCHBOOK_PATH)
         if len(libsNames) < 1:
-            missingLibs = True
+            return True
         else:
-            if libsNames == 'bitbloqLibs':
-                libsNames = ['bitbloqLibs']
             for lib in libsNames:
-                libPath = self.pathToSketchbook + os.sep + 'libraries' + os.sep + lib
+                libPath = SKETCHBOOK_LIBRARIES_PATH + lib
                 if not os.path.exists(libPath) or not os.listdir(libPath):
-                    missingLibs = True
-                    break
+                    return True
+        return False
 
-        if missingLibs:
+    def downloadLibsIfNecessary(self):
+        if self.areWeMissingLibs():
             self.downloadLibs()
+
+    def _listDirectoriesInPath(self, path):
+        return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+
+    def _extractZip(self, origin, destination):
+        with zipfile.ZipFile(origin, "r") as z:
+            z.extractall(destination)
+
+    def _copyLibsInTmpToBoardsLibsPath(self, version):
+        tmpPath = Web2BoardPaths.getBitbloqLibsTempPath(version)
+        versionNumber = int(version.replace('.', ''))
+        if versionNumber <= 2:
+            distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
+        elif versionNumber > 2:
+            for name in os.listdir(tmpPath):
+                if os.path.isdir(tmpPath + '/' + name):
+                    try:
+                        distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
+                    except OSError as e:
+                        # todo could we handle this error in main??
+                        logging.debug('Error: exception in copy_tree with ' + name)
+                        logging.debug(e)
+        else:
+            raise RuntimeError("version not supported")
+
+    def _getBitbloqLibsNamesFromDownloadedZip(self, version):
+        tmpPath = Web2BoardPaths.getBitbloqLibsTempPath(version)
+        versionNumber = int(version.replace('.', ''))
+        if versionNumber <= 2:
+            return ['bitbloqLibs']
+        elif versionNumber > 2:
+            return self._listDirectoriesInPath(tmpPath)
+        else:
+            raise RuntimeError("version not supported")
