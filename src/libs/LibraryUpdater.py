@@ -12,21 +12,18 @@
 # -----------------------------------------------------------------------#
 import distutils
 import json
-import logging
-import os
-import platform
 import shutil
-import sys
 import zipfile
 from distutils.dir_util import mkpath
 from urllib2 import urlopen, URLError, HTTPError
 
-from Arduino import base
+from libs.PathConstants import *
 
 
 ##
 # Class LibraryUpdater, created to check for downloaded libraries and update them if necessary
 #
+
 class LibraryUpdater:
     def __init__(self):
         # Select Sketchbook folder depending on OS
@@ -45,12 +42,14 @@ class LibraryUpdater:
 
     def updateWeb2BoardVersion(self):
         # Get bitbloqLibs version from config file
-        if not os.path.isfile(base.sys_path.get_home_path() + '/.web2boardconfig'):
-            shutil.copyfile(self.pathToMain + '/res/config.json', base.sys_path.get_home_path() + '/.web2boardconfig')
-        with open(self.pathToMain + '/res/config.json') as json_data_file:
+
+        self.__copyConfigInHomeIfNotExists()
+
+        with open(RES_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
-            versionTrue = str(data['bitbloqLibsVersion'])
-        with open(base.sys_path.get_home_path() + '/.web2boardconfig', "r+") as json_data_file:
+            versionTrue = str(data.get('bitbloqLibsVersion', "0.0.0"))
+
+        with open(WEB2BOARD_CONFIG_PATH, "r+") as json_data_file:
             data = json.load(json_data_file)
             versionLocal = str(data['bitbloqLibsVersion'])
             if versionLocal != versionTrue:
@@ -58,18 +57,16 @@ class LibraryUpdater:
 
     def getBitbloqLibsVersion(self):
         # Get bitbloqLibs version from config file
-        if not os.path.isfile(base.sys_path.get_home_path() + '/.web2boardconfig'):
-            shutil.copyfile(self.pathToMain + '/res/config.json', base.sys_path.get_home_path() + '/.web2boardconfig')
-        with open(base.sys_path.get_home_path() + '/.web2boardconfig') as json_data_file:
+        self.__copyConfigInHomeIfNotExists()
+        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             version = str(data['bitbloqLibsVersion'])
         return version
 
     def getBitbloqLibsName(self):
         # Get bitbloqLibs name from config file
-        if not os.path.isfile(base.sys_path.get_home_path() + '/.web2boardconfig'):
-            shutil.copyfile(self.pathToMain + '/res/config.json', base.sys_path.get_home_path() + '/.web2boardconfig')
-        with open(base.sys_path.get_home_path() + '/.web2boardconfig') as json_data_file:
+        self.__copyConfigInHomeIfNotExists()
+        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             bitbloqLibsName = []
             try:
@@ -80,31 +77,33 @@ class LibraryUpdater:
         return bitbloqLibsName
 
     def setBitbloqLibsVersion(self, newVersion):
-        if not os.path.isfile(base.sys_path.get_home_path() + '/.web2boardconfig'):
-            shutil.copyfile(self.pathToMain + '/res/config.json', base.sys_path.get_home_path() + '/.web2boardconfig')
-        jsonFile = open(base.sys_path.get_home_path() + '/.web2boardconfig', "r")
+        self.__copyConfigInHomeIfNotExists()
+        jsonFile = open(WEB2BOARD_CONFIG_PATH, "r")
         data = json.load(jsonFile)
         jsonFile.close()
 
         data["bitbloqLibsVersion"] = newVersion
 
-        jsonFile = open(base.sys_path.get_home_path() + '/.web2boardconfig', "w+")
+        jsonFile = open(WEB2BOARD_CONFIG_PATH, "w+")
         jsonFile.write(json.dumps(data))
         jsonFile.close()
 
     def setBitbloqLibsNames(self, bitbloqLibsNames):
-        if not os.path.isfile(base.sys_path.get_home_path() + '/.web2boardconfig'):
-            shutil.copyfile(self.pathToMain + '/res/config.json', base.sys_path.get_home_path() + '/.web2boardconfig')
-        jsonFile = open(base.sys_path.get_home_path() + '/.web2boardconfig', "r")
+        self.__copyConfigInHomeIfNotExists()
+        jsonFile = open(WEB2BOARD_CONFIG_PATH, "r")
         data = json.load(jsonFile)
         jsonFile.close()
 
         data["bitbloqLibsName"] = bitbloqLibsNames
 
-        jsonFile = open(base.sys_path.get_home_path() + '/.web2boardconfig', "w+")
+        jsonFile = open(WEB2BOARD_CONFIG_PATH, "w+")
         jsonFile.write(json.dumps(data))
         jsonFile.close()
         print "config ready"
+
+    def __copyConfigInHomeIfNotExists(self):
+        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
+            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
 
     def downloadFile(self, url, path='.'):
         # Open the url
@@ -116,7 +115,7 @@ class LibraryUpdater:
             with open(base.sys_path.get_tmp_path() + '/' + os.path.basename(url), "wb") as local_file:
                 local_file.write(f.read())
 
-            # handle errors
+                # handle errors
         except HTTPError, e:
             print "HTTP Error:", e.code, url
         except URLError, e:
@@ -145,9 +144,9 @@ class LibraryUpdater:
                         distutils.dir_util.copy_tree(tmp_path, self.pathToSketchbook + '/libraries/')
                     except OSError as e:
                         logging.debug('Error: exception in copy_tree with ' + name)
-                        logging.debug(e);
+                        logging.debug(e)
 
-                    # shutil.copytree(tmp_path, self.pathToSketchbook+'/libraries/'+name)
+                        # shutil.copytree(tmp_path, self.pathToSketchbook+'/libraries/'+name)
             bitbloqLibsNames = [name for name in os.listdir(base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version) if
                                 os.path.isdir(
                                     os.path.join(base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version, name))]
@@ -163,7 +162,6 @@ class LibraryUpdater:
         except OSError as e:
             logging.debug('exception in os.remove')
             logging.debug(e)
-            pass
 
         logging.info("Bitbloq libs downloaded")
 
@@ -180,9 +178,10 @@ class LibraryUpdater:
             if libsNames == 'bitbloqLibs':
                 libsNames = ['bitbloqLibs']
             for lib in libsNames:
-                if not os.path.exists(self.pathToSketchbook + '/libraries/' + lib) or not os.listdir(
-                                        self.pathToSketchbook + '/libraries/' + lib):
+                libPath = self.pathToSketchbook + os.sep + 'libraries' + os.sep + lib
+                if not os.path.exists(libPath) or not os.listdir(libPath):
                     missingLibs = True
+                    break
 
         if missingLibs:
             self.downloadLibs()

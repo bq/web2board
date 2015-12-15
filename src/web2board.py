@@ -27,9 +27,12 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import LibraryUpdater
+from libs.PathConstants import logRelevantEnvironmentalPaths
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 log = logging.getLogger(__name__)
+
+logRelevantEnvironmentalPaths()
 
 compilerUploader = getCompilerUploader()
 libUpdater = LibraryUpdater()

@@ -11,14 +11,13 @@
 #                                                                       #
 # -----------------------------------------------------------------------#
 
-from Arduino.CompilerUploader import ArduinoCompilerUploader
-from Arduino import base
-import sys
 import json
-import os
 import logging
 import platform
 import shutil
+
+from Arduino.CompilerUploader import ArduinoCompilerUploader
+from libs.PathConstants import *
 
 log = logging.getLogger(__name__)
 __globalCompilerUploader = None
@@ -32,21 +31,21 @@ class CompilerUploader:
         # self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
         # initializing attributes
         if platform.system() == 'Darwin':
-            log.debug('sys.path[0]')
-            log.debug(sys.path[0])
-            log.debug('PWD=')
-            log.debug(os.environ.get('PWD'))
-            log.debug('PYTHONPATH=')
-            log.debug(os.environ.get('PYTHONPATH'))
-            log.debug('ENVIRON=')
-            log.debug(os.environ)
+            __log.debug('sys.path[0]')
+            __log.debug(sys.path[0])
+            __log.debug('PWD=')
+            __log.debug(os.environ.get('PWD'))
+            __log.debug('PYTHONPATH=')
+            __log.debug(os.environ.get('PYTHONPATH'))
+            __log.debug('ENVIRON=')
+            __log.debug(os.environ)
             if os.environ.get('PYTHONPATH') is not None:
                 self.pathToMain = os.environ.get('PYTHONPATH')
             else:
                 self.pathToMain = sys.path[0]
         elif platform.system() == 'Windows' or platform.system() == 'Linux':
             self.pathToMain = sys.path[0]
-        self.arduino = ArduinoCompilerUploader(self.pathToMain)
+        self.arduino = ArduinoCompilerUploader(MAIN_PATH)
         self.version = None
 
         # executing initialization
@@ -54,11 +53,9 @@ class CompilerUploader:
 
     def readConfigFile(self):
         # todo:check if this works
-        web2boardConfigPath = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
-
-        if not os.path.isfile(web2boardConfigPath):
-            shutil.copyfile(self.pathToMain + '/res/config.json', web2boardConfigPath)
-        with open(web2boardConfigPath) as json_data_file:
+        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
+            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
+        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             self.version = str(data['version'])
 
