@@ -73,6 +73,10 @@ def get_document_path():
     return document_path
 
 
+def get_home_path():
+    return get_document_path()
+
+
 def get_tmp_path():
     tmp_path = '/tmp'
     os_name = sys_info.get_os_name()

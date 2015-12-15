@@ -124,6 +124,7 @@ class Compiler(object):
     def build(self):
         start_time = time.time()
         self.prepare_project_src_files()
+        self.need_to_build = True
         if self.need_to_build:
             print('[Stino - Start building]\\n')
             self.prepare_core_src_files()
@@ -135,9 +136,15 @@ class Compiler(object):
                 logging.debug("IOError")
                 logging.debug(errno);
                 logging.debug(strerror);
+                self.error_occured = True
+                return self.stderr
+
             except:
                 logging.debug("Caught it!")
                 logging.debug(sys.exc_info()[0]);
+                self.error_occured = True
+                return self.stderr
+
             if not self.error_occured:
                 end_time = time.time()
                 diff_time = end_time - start_time
@@ -411,9 +418,9 @@ class Compiler(object):
             result, stderr = exec_cmds(self.ide_path, cmds, show_compilation_output)
             self.stderr += stderr
             if (result != 0):
+                self.error_occured = True
                 break
     def has_error(self):
-        print("error")
         return self.error_occured
 
 
@@ -471,8 +478,8 @@ def gen_obj_paths(src_path, build_path, sub_dir, cpp_files):
 def exec_cmds(working_dir, cmds, is_verbose=False):
     error_occured = False
     for cmd in cmds:
-        return_code, stdout, stderr = exec_cmd(working_dir, cmd)
         logging.debug(cmd)
+        return_code, stdout, stderr = exec_cmd(working_dir, cmd)
         # if is_verbose:
         #     # message_queue.put(cmd + '\n')
         #     if stdout:
@@ -484,6 +491,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         if stderr:
             logging.debug(stderr + '\n')
         return return_code, stderr
+
     return return_code, stderr
 
 

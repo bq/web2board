@@ -18,6 +18,7 @@ import platform
 import shutil
 import time 
 import logging
+from . import base
 
 import sys
 reload(sys)
@@ -26,13 +27,19 @@ import unicodedata
 
 import arduino_compiler
 
+
 class Compiler:
 	def __init__(self, pathToMain):
 		self.pathToMain = pathToMain
 		self.userLibs = ''
-		self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
-		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
+		
+		if platform.system() == 'Windows':
+			self.tmpPath = os.path.dirname(os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path())))+'/.web2board/'
+		else:	
+			self.tmpPath = expanduser("~").decode('latin1')+'/.web2board/'
 
+		self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control', 'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper', 'TFT', 'WiFi', 'Wire'];
+		self.bitbloqLibs = ['bqLiquidCrystal', 'bqSoftwareSerial', 'ButtonPad', 'Joystick', 'LineFollower', 'MCP23008', 'Oscillator', 'US']
 		self.ide_path = os.path.realpath(__file__)
 		if self.ide_path[len(self.ide_path)-1] == 'c':
 			self.ide_path = self.ide_path[:-25]
@@ -119,10 +126,13 @@ class Compiler:
 		#remove duplicates from lists of libs
 		arduinoLibs = sorted(set(arduinoLibs))
 		userLibs = sorted(set(userLibs))
+		print (arduinoLibs)
+		print (userLibs)
 		#join lists into strings
 		self.setArduinoLibs(' '.join(arduinoLibs))
 		self.setUserLibs(' '.join(userLibs))
 		return arduinoLibs+userLibs
+
 
 	def createUnicodeString(self, input_str):
 		return  unicodedata.normalize('NFKD', unicode(input_str)).encode('ASCII','ignore')
@@ -171,6 +181,9 @@ class Compiler:
 				elif 'error: expected initializer before' in error:
 					error = re.sub('^(.*?)error: expected initializer before ', '', error)
 					errorReport.append({'function': error, 'error':'expected initializer before function'})
+				elif 'No such file or directory' in error:
+					error = re.sub('No such file: No such file or directory', '', error)
+					errorReport.append({'function': error, 'error':'No such file or directory'})
 				else:
 					#Remove non important parts of the string
 					error = re.sub('^(.*?)applet/tmp.cpp', '', error)
@@ -221,15 +234,23 @@ class Compiler:
 		self.parseLibs(code)
 		self.createSketchFile(code)
 
+		bitbloqLibsInclude = False
 		self.libs = []
 		for lib in self.getArduinoLibs().split(' '):
 			if lib != '':
 				self.libs.append(self.ide_path+'/libraries/'+lib)
 		for lib in self.getUserLibs().split(' '):
 			if lib != '':
+				if lib in self.bitbloqLibs: 
+					bitbloqLibsInclude = True
 				self.libs.append(sketchbookDir+'/libraries/'+lib)
-				print 'lib -->',sketchbookDir+'/libraries/'+lib
+				self.libs.append(sketchbookDir+'/libraries/bitbloqLibs/'+lib)
+
 		self.libs.append(self.ide_path+'/hardware/arduino/variants/standard')
+		if bitbloqLibsInclude:
+			self.libs.append(sketchbookDir+'/libraries/bitbloqLibs')
+		
+
 
 		if platform.system() == 'Windows':
 		 	self.ide_path = self.ide_path.replace('/', '\\')

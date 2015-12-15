@@ -18,10 +18,14 @@ from optparse import OptionParser
 from libs.CompilerUploader import CompilerUploader
 import json
 import subprocess
+from os.path import expanduser
+from libs.LibraryUpdater import LibraryUpdater
+import logging
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 compilerUploader = CompilerUploader()
+libUpdater = LibraryUpdater()
 
 class messageHandler (WebSocket):
    def sendMessage_(self,message):
@@ -60,6 +64,17 @@ class messageHandler (WebSocket):
          self.sendMessage_('COMPILING')
          report = compilerUploader.compile(message)
          self.sendMessage_('COMPILED -> '+json.dumps(report))
+      elif 'setBitbloqLibsVersion' in self.data:
+         #update bitbloqLibs if version is different!!
+         message = str(self.data.replace('setBitbloqLibsVersion','').replace(' ',''))
+         if libUpdater.getBitbloqLibsVersion() != message:
+            libUpdater.setBitbloqLibsVersion(message)
+            self.sendMessage_('SETTED VERSION -> '+ libUpdater.getBitbloqLibsVersion())
+            libUpdater.downloadLibs()
+         else:
+            self.sendMessage_('SETTED VERSION -> '+ libUpdater.getBitbloqLibsVersion())
+      elif 'getBitbloqLibsVersion' in self.data:
+         self.sendMessage_('BITBLOQLIBSVERSION -> ' + libUpdater.getBitbloqLibsVersion())
       elif 'upload' in self.data:
          try:
             self.proc.terminate()
@@ -92,8 +107,13 @@ class messageHandler (WebSocket):
       print self.address, 'closed'
 
 
+
 if __name__ == "__main__":
 
+   # If there is no libraries folder, download it
+   libUpdater.libExists()
+  
+   logging.debug('parsing options...');
    parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
    parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
    parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
@@ -108,12 +128,15 @@ if __name__ == "__main__":
 
    if options.ssl == 1:
       server = SimpleSSLWebSocketServer(options.host, options.port, cls, options.cert, options.cert, version=options.ver)
+      logging.debug('SimpleSSLWebSocketServer with options.ssl as 1');
    else:	
       server = SimpleWebSocketServer(options.host, options.port, cls)
 
    def close_sig_handler(signal, frame):
       server.close()
       sys.exit()
+
+   logging.debug('process ended');
 
    signal.signal(signal.SIGINT, close_sig_handler)
    server.serveforever()
