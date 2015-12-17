@@ -21,6 +21,7 @@ class SerialMonitorHub(Hub):
         """:type : subprocess.Popen """
 
     def startApp(self, args):
+        # todo: could we just run serialMonitor in a thread?
         if platform.system() == 'Darwin':
             processArgs = ['/Applications/SerialMonitor.app/Contents/MacOS/SerialMonitor', args]
         else:

@@ -11,15 +11,15 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import libs.LoggingInitialization as logging
 import importlib
-import logging
 import os
 import signal
 import ssl
 import sys
+import threading
 from optparse import OptionParser
 from wsgiref.simple_server import make_server
-
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
@@ -29,25 +29,9 @@ from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import LibraryUpdater
 from libs.PathConstants import Web2BoardPaths as Paths
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-log = logging.getLogger(__name__)
+log = logging.getLog(__name__)
 
-Paths.logRelevantEnvironmentalPaths()
-
-compilerUploader = getCompilerUploader()
-libUpdater = LibraryUpdater()
-
-if __name__ == "__main__":
-    importlib.import_module("libs.WSCommunication.Hubs")
-    HubsInspector.inspectImplementedHubs()
-
-    # do not call this function in executable
-    # HubsInspector.constructPythonFile("libs/WSCommunication/Hubs/Clients")
-    HubsInspector.constructJSFile("libs/WSCommunication/Hubs/Clients")
-
-    # If there is no libraries folder, download it
-    libUpdater.downloadLibsIfNecessary()
-
+def handleSystemArguments():
     parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
     parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
     parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
@@ -56,25 +40,63 @@ if __name__ == "__main__":
     parser.add_option("--cert", default='./cert.pem', type='string', action="store", dest="cert",
                       help="cert (./cert.pem)")
     parser.add_option("--ver", default=ssl.PROTOCOL_TLSv1, type=int, action="store", dest="ver", help="ssl version")
-
     if sys.argv[1:]:
         log.debug('with arguments: ')
         log.debug(sys.argv[1:])
         sys.argv[1:] = []
-
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
     log.debug("init web2board with options: {}, and args: {}".format(options, args))
 
+    return options
+
+
+def initializeServerAndCommunicationProtocol(options):
+    importlib.import_module("libs.WSCommunication.Hubs")
+    HubsInspector.inspectImplementedHubs()
+    # do not call this line in executable
+    HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
     server = make_server(options.host, options.port, server_class=WSGIServer,
                          handler_class=WebSocketWSGIRequestHandler,
                          app=WebSocketWSGIApplication(handler_cls=ConnectionHandler))
     server.initialize_websockets_manager()
+    return server
 
-    def close_sig_handler(signal, frame):
+
+def initSerialMonitor():
+    import wx
+    from SerialMonitor import SerialMonitorUI
+
+    def initSerialMonitorInThread():
+        app = wx.App()
+        serialMonitor = SerialMonitorUI(None, '/dev/ttyACM0')
+        serialMonitor.Show()
+        app.MainLoop()
+
+    t = threading.Thread(target=initSerialMonitorInThread)
+    t.setDaemon(True)
+    t.start()
+    return t
+
+def main():
+    Paths.logRelevantEnvironmentalPaths()
+    compilerUploader = getCompilerUploader()
+    libUpdater = LibraryUpdater()
+    libUpdater.downloadLibsIfNecessary()
+
+    options = handleSystemArguments()
+    server = initializeServerAndCommunicationProtocol(options)
+
+    #serialThread = initSerialMonitor()
+
+    def closeSigHandler(signal, frame):
         server.server_close()
         os._exit(1)
 
-    signal.signal(signal.SIGINT, close_sig_handler)
+    signal.signal(signal.SIGINT, closeSigHandler)
 
     log.debug("listening...")
-    target = server.serve_forever()
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

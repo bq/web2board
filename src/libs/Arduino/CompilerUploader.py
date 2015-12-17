@@ -11,16 +11,16 @@
 #                                                                       #
 # -----------------------------------------------------------------------#
 
+import glob
 import os
 import platform
-import glob
-import logging
-from . import base
 from collections import defaultdict
 from os.path import expanduser
+
 from Compiler import Compiler
 from Uploader import Uploader
 from utils import BoardConfig, callAvrdude
+from . import base
 
 
 class ArduinoCompilerUploader:

@@ -36,8 +36,12 @@ class CodeHub(Hub):
                 self.__getSerialCommProcess().terminate()
             except:
                 log.exception("unable to terminate process")
-        _sender.isUploading()
-        return self.compilerUploader.upload(code)
+        _sender.isUploading(self.compilerUploader.getPort())
+        compileReport = self.compilerUploader.upload(code)
+        if compileReport["status"] == "OK":
+            return True
+        else:
+            return self._constructUnsuccessfulReplay(compileReport["error"])
 
     def __getSerialCommProcess(self):
         """

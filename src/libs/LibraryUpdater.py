@@ -16,14 +16,12 @@ import shutil
 import zipfile
 from distutils.dir_util import mkpath
 from urllib2 import urlopen, URLError, HTTPError
-
 from libs.PathConstants import *
 
 
 ##
 # Class LibraryUpdater, created to check for downloaded libraries and update them if necessary
 #
-
 class LibraryUpdater:
     BITBLOQ_LIBS_URL_TEMPLATE = 'https://github.com/bq/bitbloqLibs/archive/v{}.zip'
 
@@ -80,7 +78,7 @@ class LibraryUpdater:
 
     def setBitbloqLibsNames(self, bitbloqLibsNames):
         self.__copyConfigInHomeIfNotExists()
-        if hasattr(bitbloqLibsNames, "__iter__"):
+        if not hasattr(bitbloqLibsNames, "__iter__"):
             raise Exception("bitbloqLibsNames have to be a list, received: {}".format(bitbloqLibsNames))
 
         with open(WEB2BOARD_CONFIG_PATH, "r") as jsonFile:
@@ -92,10 +90,6 @@ class LibraryUpdater:
             jsonFile.write(json.dumps(data))
 
         log.info("config ready")
-
-    def __copyConfigInHomeIfNotExists(self):
-        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
-            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
 
     def downloadFile(self, url, path='.'):
         # Open the url
@@ -185,3 +179,7 @@ class LibraryUpdater:
             return self._listDirectoriesInPath(tmpPath)
         else:
             raise RuntimeError("version not supported")
+
+    def __copyConfigInHomeIfNotExists(self):
+        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
+            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)

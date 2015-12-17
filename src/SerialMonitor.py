@@ -14,15 +14,17 @@
 import os
 import sys
 import time
-import wx._core
+import wx
+import logging
 
 import serial
 
+log = logging.getLogger(__name__)
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 
-class SerialConnection():
+class SerialConnection:
     def __init__(self, port):
         self.serial = serial.Serial()
         self.serial.port = port
@@ -37,8 +39,8 @@ class SerialConnection():
                     out += self.serial.read(1)
                 if out != '':
                     return out
-            except:
-                pass
+            except Exception as e:
+                log.critical("error getting data {}".format(e), exc_info=1)
 
     def write(self, data):
         self.serial.write(data.encode())
@@ -110,7 +112,7 @@ class SerialMonitorUI(wx.Dialog):
             self.onSend(event)
 
     def logText(self, message):
-        if message != None:
+        if message is not None:
             if '\n' in message:
                 self.charCounter = 0
             else:
