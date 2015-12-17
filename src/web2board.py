@@ -11,7 +11,6 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
-import libs.LoggingInitialization as logging
 import importlib
 import os
 import signal
@@ -20,16 +19,19 @@ import sys
 import threading
 from optparse import OptionParser
 from wsgiref.simple_server import make_server
+
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
+import libs.LoggingInitialization as logging
 from libs.CompilerUploader import getCompilerUploader
-from libs.LibraryUpdater import LibraryUpdater
+from libs.LibraryUpdater import getLibUpdater
 from libs.PathConstants import Web2BoardPaths as Paths
 
 log = logging.getLog(__name__)
+
 
 def handleSystemArguments():
     parser = OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
@@ -77,16 +79,17 @@ def initSerialMonitor():
     t.start()
     return t
 
+
 def main():
     Paths.logRelevantEnvironmentalPaths()
-    compilerUploader = getCompilerUploader()
-    libUpdater = LibraryUpdater()
+    getCompilerUploader()
+    libUpdater = getLibUpdater()
     libUpdater.downloadLibsIfNecessary()
 
     options = handleSystemArguments()
     server = initializeServerAndCommunicationProtocol(options)
 
-    #serialThread = initSerialMonitor()
+    # serialThread = initSerialMonitor()
 
     def closeSigHandler(signal, frame):
         server.server_close()

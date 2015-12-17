@@ -18,6 +18,7 @@ from distutils.dir_util import mkpath
 from urllib2 import urlopen, URLError, HTTPError
 from libs.PathConstants import *
 
+__globalLibUpdater = None
 
 ##
 # Class LibraryUpdater, created to check for downloaded libraries and update them if necessary
@@ -183,3 +184,13 @@ class LibraryUpdater:
     def __copyConfigInHomeIfNotExists(self):
         if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
             shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
+
+
+def getLibUpdater():
+    """
+    :rtype: CompilerUploader
+    """
+    global __globalLibUpdater
+    if __globalLibUpdater is None:
+        __globalLibUpdater = LibraryUpdater()
+    return __globalLibUpdater

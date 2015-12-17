@@ -28,3 +28,4 @@ class SerialMonitorHub(Hub):
             path = sys.path[0]
             processArgs = ['python', path + '/SerialMonitor.py', args]
         self.serialCommunicationProcess = subprocess.Popen(processArgs, shell=False)
+        return True

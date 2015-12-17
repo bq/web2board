@@ -1,6 +1,7 @@
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import getCompilerUploader
+from libs.LibraryUpdater import getLibUpdater
 
 
 class BoardConfigHubException(Exception):
@@ -36,4 +37,11 @@ class BoardConfigHub(Hub):
 
     def setPort(self, port):
         self.compilerUploader.setPort(port)
+        return True
+
+    def setLibVersion(self, version):
+        libUpdater = getLibUpdater()
+        if libUpdater.getBitbloqLibsVersion() != version:
+            libUpdater.setBitbloqLibsVersion(version)
+            libUpdater.downloadLibs()
         return True
