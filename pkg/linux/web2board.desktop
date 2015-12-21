@@ -8,3 +8,4 @@ Path=/usr/lib/python2.7/dist-packages/web2board/
 StartupNotify=true
 Terminal=false
 Categories=GNOME;GTK;Utility;
+Name[es]=web2board.txt

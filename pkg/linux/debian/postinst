@@ -11,6 +11,7 @@ set -e
 #Create route if it does not exist previously 
 mkdir -p ~/.local/share/applications/
 
+echo "testing......"
 
 echo "[Desktop Entry]
 Version=0.0.1

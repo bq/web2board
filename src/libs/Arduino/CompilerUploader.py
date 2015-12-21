@@ -19,6 +19,7 @@ from os.path import expanduser
 
 from Compiler import Compiler
 from Uploader import Uploader
+from libs.PathConstants import *
 from utils import BoardConfig, callAvrdude
 from . import base
 
@@ -27,37 +28,15 @@ class ArduinoCompilerUploader:
     ALLOWED_BOARDS = ["uno", "bt328"]
 
     def __init__(self, pathToMain):
-        self.pathToSketchbook = ''
-        # Get path on mac
-        if platform.system() == 'Darwin':
-            # logging.debug('self.pathToMain');
-            # logging.debug(self.pathToMain);
-            # logging.debug('PWD=');
-            # logging.debug(os.environ.get('PWD'));
-            # logging.debug('PYTHONPATH=');
-            # logging.debug(os.environ.get('PYTHONPATH'));
-            # logging.debug('ENVIRON=');
-            # logging.debug(os.environ);
-            if os.environ.get('PYTHONPATH') != None:
-                self.pathToMain = os.environ.get('PYTHONPATH')
-            else:
-                self.pathToMain = pathToMain
-        elif platform.system() == 'Windows' or platform.system() == 'Linux':
-            self.pathToMain = pathToMain
 
-        if platform.system() == 'Linux':
-            self.pathToSketchbook = expanduser("~").decode('latin1') + '/Arduino'
-        elif platform.system() == 'Darwin':
-            self.pathToSketchbook = base.sys_path.get_document_path() + '/Arduino'
-        elif platform.system() == 'Windows':
-            self.pathToSketchbook = os.path.dirname(
-                os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path()))) + '/Documents/Arduino'
+        self.pathToMain = MAIN_PATH
+        self.pathToSketchbook = SKETCHBOOK_PATH
 
         self.pathToArduinoDir = pathToMain + '/res/arduino/'
         self.uploader = Uploader(pathToMain)
         self.compiler = Compiler(pathToMain)
         self.boardSettings = defaultdict(BoardConfig)
-        self.parseBoardSettings(self.pathToMain + "/res/boards.txt")
+        self.parseBoardSettings(RES_BOARDS_PATH)
         self.board = 'uno'
         self.port = None
 
@@ -123,7 +102,7 @@ class ArduinoCompilerUploader:
         ports = []
         for port in availablePorts:
             args = "-P " + port + " -p " + self.getBoardMCU() + " -b " + self.getBoardBaudRate() + " -c arduino"
-            output, err = callAvrdude(args);
+            output, err = callAvrdude(args)
             if 'Device signature =' in output or 'Device signature =' in err:
                 ports.append(port)
         if len(ports) == 1:

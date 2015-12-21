@@ -1,10 +1,12 @@
 import logging
+import os
 import platform
 import subprocess
 import sys
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import getCompilerUploader
+from libs.PathConstants import MAIN_PATH
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +27,6 @@ class SerialMonitorHub(Hub):
         if platform.system() == 'Darwin':
             processArgs = ['/Applications/SerialMonitor.app/Contents/MacOS/SerialMonitor', args]
         else:
-            path = sys.path[0]
-            processArgs = ['python', path + '/SerialMonitor.py', args]
+            processArgs = ['python', MAIN_PATH + os.sep + 'SerialMonitor.py', args]
         self.serialCommunicationProcess = subprocess.Popen(processArgs, shell=False)
         return True

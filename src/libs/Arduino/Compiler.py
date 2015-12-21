@@ -39,14 +39,11 @@ class Compiler:
 
         self.oficialArduinoLibs = ['EEPROM', 'Esplora', 'Ethernet', 'Firmata', 'GSM', 'LiquidCrystal', 'Robot_Control',
                                    'RobotIRremote', 'Robot_Motor', 'SD', 'Servo', 'SoftwareSerial', 'SPI', 'Stepper',
-                                   'TFT', 'WiFi', 'Wire'];
+                                   'TFT', 'WiFi', 'Wire']
         self.bitbloqLibs = ['bqLiquidCrystal', 'bqSoftwareSerial', 'ButtonPad', 'Joystick', 'LineFollower', 'MCP23008',
                             'Oscillator', 'US']
-        self.ide_path = os.path.realpath(__file__)
-        if self.ide_path[len(self.ide_path) - 1] == 'c':
-            self.ide_path = self.ide_path[:-25]
-        else:
-            self.ide_path = self.ide_path[:-24]
+        self.ide_path = pathToMain
+
         arduino_name = 'arduinoLinux'
         if platform.system() == 'Windows':
             arduino_name = 'arduinoWin'

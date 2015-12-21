@@ -1,8 +1,10 @@
 import logging
 import os
-import sys
 import platform
+import sys
+
 from Arduino import base
+from libs import utils
 
 log = logging.getLogger(__name__)
 
@@ -13,11 +15,18 @@ class Web2BoardPaths:
 
     @staticmethod
     def getMainPath():
-        path = sys.path[0]
+        path = os.getcwd()
         if platform.system() == 'Darwin':
             if os.environ.get('PYTHONPATH') is not None:
                 path = os.environ.get('PYTHONPATH')
         return path
+
+    @staticmethod
+    def getBasePath():
+        if utils.areWeFrozen():
+            return sys._MEIPASS
+        else:
+            return Web2BoardPaths.getMainPath()
 
     @staticmethod
     def getSketchbookPath():
@@ -41,7 +50,7 @@ class Web2BoardPaths:
         log.debug('WEB2BOARD_CONFIG_PATH: {}'.format(WEB2BOARD_CONFIG_PATH))
         log.debug('SKETCHBOOK_PATH: {}'.format(SKETCHBOOK_PATH))
         log.debug('SKETCHBOOK_LIBRARIES_PATH: {}'.format(SKETCHBOOK_LIBRARIES_PATH))
-        #log.debug('ENVIRON: {}'.format(os.environ))
+        # log.debug('ENVIRON: {}'.format(os.environ))
 
     @staticmethod
     def getDownloadedFilePath(url):
@@ -55,13 +64,13 @@ class Web2BoardPaths:
     def getSketchbookLibrariesPath():
         return SKETCHBOOK_PATH + os.sep + 'libraries' + os.sep
 
-for i in range(5000):
-    try:
-        MAIN_PATH = Web2BoardPaths.getMainPath()
-        RES_CONFIG_PATH = MAIN_PATH + '{0}res{0}config.json'.format(os.sep)
-        WEB2BOARD_CONFIG_PATH = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
-        SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
-        SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()
-    except Exception as e:
-        log.error("Error finding paths", exc_info=1)
-        # raise e
+    @staticmethod
+    def getPathForNewPackage(version):
+        return MAIN_PATH + os.sep + "web2board_{}".format(version)
+
+MAIN_PATH = Web2BoardPaths.getMainPath()
+RES_CONFIG_PATH = MAIN_PATH + '{0}res{0}config.json'.format(os.sep)
+RES_BOARDS_PATH = MAIN_PATH + '{0}res{0}boards.txt'.format(os.sep)
+WEB2BOARD_CONFIG_PATH = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
+SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
+SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()

@@ -140,8 +140,8 @@ class Compiler(object):
                 return self.stderr
 
             except:
-                logging.debug("Caught it!")
-                logging.debug(sys.exc_info()[0]);
+                logging.exception("Caught it!")
+                logging.debug(sys.exc_info()[0])
                 self.error_occured = True
                 return self.stderr
 

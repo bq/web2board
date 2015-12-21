@@ -11,7 +11,15 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
-import importlib
+from libs import utils
+import os
+# necessray for package, do not remove!
+import libs.LoggingHandlers
+import libs.WSCommunication.Hubs
+
+os.chdir(utils.getModulePath())
+
+from libs.PathConstants import Web2BoardPaths as Paths
 import os
 import signal
 import ssl
@@ -28,7 +36,6 @@ from wshubsapi.HubsInspector import HubsInspector
 import libs.LoggingInitialization as logging
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import getLibUpdater
-from libs.PathConstants import Web2BoardPaths as Paths
 
 log = logging.getLog(__name__)
 
@@ -53,10 +60,10 @@ def handleSystemArguments():
 
 
 def initializeServerAndCommunicationProtocol(options):
-    importlib.import_module("libs.WSCommunication.Hubs")
     HubsInspector.inspectImplementedHubs()
     # do not call this line in executable
-    HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
+    if not utils.areWeFrozen():
+        HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
     server = make_server(options.host, options.port, server_class=WSGIServer,
                          handler_class=WebSocketWSGIRequestHandler,
                          app=WebSocketWSGIApplication(handler_cls=ConnectionHandler))
