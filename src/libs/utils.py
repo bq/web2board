@@ -2,12 +2,15 @@ import inspect
 import os
 import sys
 
+import shutil
+
 
 def areWeFrozen():
     # All of the modules are built-in to the interpreter, e.g., by py2exe
     return hasattr(sys, "frozen")
 
-def getModulePath(frame = None):
+
+def getModulePath(frame=None):
     encoding = sys.getfilesystemencoding()
     encoding = encoding if encoding is not None else 'utf-8'
     if not areWeFrozen():
@@ -17,3 +20,16 @@ def getModulePath(frame = None):
         return os.path.dirname(os.path.abspath(unicode(fileName, encoding)))
     else:
         return os.path.dirname(os.path.abspath(unicode(sys.executable, encoding)))
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
