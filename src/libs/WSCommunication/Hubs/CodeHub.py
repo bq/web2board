@@ -31,9 +31,9 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        if self.__getSerialCommProcess() is not None:
+        if self.__getSerialCommThread().isRunning:
             try:
-                self.__getSerialCommProcess().terminate()
+                self.__getSerialCommThread().stop()
             except:
                 log.exception("unable to terminate process")
         _sender.isUploading(self.compilerUploader.getPort())
@@ -43,8 +43,5 @@ class CodeHub(Hub):
         else:
             return self._constructUnsuccessfulReplay(compileReport["error"])
 
-    def __getSerialCommProcess(self):
-        """
-        :rtype: subprocess.Popen|None
-        """
-        return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationProcess
+    def __getSerialCommThread(self):
+        return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationThread

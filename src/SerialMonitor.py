@@ -102,7 +102,7 @@ class SerialMonitorUI(wx.Dialog):
         hbox1.Add(self.dropdown, 0, wx.ALL ^ wx.ALIGN_RIGHT, 12)
         vbox.Add(hbox1, 0, wx.EXPAND, 12)
         self.SetSizer(vbox)
-        self.ShowModal()
+        # self.ShowModal()
 
     def onKeyPress(self, event):
         if event.GetKeyCode() != wx.WXK_RETURN:

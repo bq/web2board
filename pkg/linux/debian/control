@@ -5,15 +5,11 @@ Maintainer: bitbloq Team <support-bitbloq@bq.com>
 Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 9)
 Standards-Version: 3.9.7
 Homepage: http://bitbloq.bq.com
-
 Package: web2board
-Architecture: any
-Depends: ${misc:Depends}, ${python:Depends}, python, python-serial, python-wxgtk2.8, avrdude, gcc-avr, binutils-avr, gdb-avr, avr-libc, wget
-Description: WEB2BOARD 
+Architecture: {architecture}
+Description: WEB2BOARD
  Program that connects a webapp and an Arduino compatible board. It is able to compile and upload Arduino sketches as well as open a custom serial monitor.
  After installing this package, open a terminal and enter the following command, substituting [your-user] with your username: sudo adduser [your-user] dialout 
  PLEASE REBOOT YOUR COMPUTER AFTER THE INSTALLATION. / 
  POR FAVOR REINICIA EL ORDENADOR DESPUÉS DE LA INSTALACIÓN.
-
-
-
+Version: {version}

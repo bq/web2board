@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # 1. Copyright
 # 2. Lisence
@@ -33,17 +33,18 @@ from . import arduino_src
 def list_cpp_files(path):
     matches = []
     for root, dirnames, filenames in os.walk(path):
-      for filename in fnmatch.filter(filenames, '*.cpp'):
-        matches.append(os.path.join(root, filename))
+        for filename in fnmatch.filter(filenames, '*.cpp'):
+            matches.append(os.path.join(root, filename))
     return matches
 
 
 def list_c_files(path):
     matches = []
     for root, dirnames, filenames in os.walk(path):
-      for filename in fnmatch.filter(filenames, '*.c'):
-        matches.append(os.path.join(root, filename))
+        for filename in fnmatch.filter(filenames, '*.c'):
+            matches.append(os.path.join(root, filename))
     return matches
+
 
 class Project(base.abs_file.Dir):
     def __init__(self, path):
@@ -85,12 +86,11 @@ class Project(base.abs_file.Dir):
 class Compiler(object):
     def __init__(self, path, libraries, core_path, ide_path, build_f_cpu, target_board_mcu):
         self.myLibraries = libraries
-        self.libraries =''
+        self.libraries = ''
         for lib in self.myLibraries:
-            self.libraries+=' -I "'+lib+'" '
+            self.libraries += ' -I "' + lib + '" '
             if 'Wire' in lib:
-                self.libraries+=' -I "'+lib+'/utility" '
-
+                self.libraries += ' -I "' + lib + '/utility" '
 
         self.need_to_build = True
         self.params = {}
@@ -133,15 +133,12 @@ class Compiler(object):
             try:
                 self.exec_build_cmds()
             except IOError as (errno, strerror):
-                logging.debug("IOError")
-                logging.debug(errno);
-                logging.debug(strerror);
+                logging.exception("IOError")
                 self.error_occured = True
                 return self.stderr
 
             except:
-                logging.debug("Caught it!")
-                logging.debug(sys.exc_info()[0]);
+                logging.exception("Caught it!")
                 self.error_occured = True
                 return self.stderr
 
@@ -149,7 +146,7 @@ class Compiler(object):
                 end_time = time.time()
                 diff_time = end_time - start_time
                 diff_time = '%.1f' % diff_time
-                print('[Stino - Done building in '+ diff_time+'s.]\\n')
+                print('[Stino - Done building in ' + diff_time + 's.]\\n')
         else:
             self.error_occured = True
         return self.stderr
@@ -163,7 +160,7 @@ class Compiler(object):
         if ino_files and not self.bare_gcc:
             combined_file_name = self.project.get_name() + '.ino.cpp'
             combined_file_path = os.path.join(
-                self.build_path, combined_file_name)
+                    self.build_path, combined_file_name)
             combined_file = base.abs_file.File(combined_file_path)
             combined_obj_path = combined_file_path + '.o'
             self.project_obj_paths.append(combined_obj_path)
@@ -175,7 +172,7 @@ class Compiler(object):
                 main_cxx_file = base.abs_file.File(main_cxx_path)
                 ino_files.append(main_cxx_file)
             combined_src = arduino_src.combine_ino_files(
-                core_path, ino_files)
+                    core_path, ino_files)
             combined_file.write(combined_src)
             cpp_obj_pair = (combined_file_path, combined_obj_path)
 
@@ -184,7 +181,7 @@ class Compiler(object):
         sub_dir_name = self.project.get_name()
         cpp_files = self.project.list_cpp_files(self.is_big_project)
         self.project_obj_paths += gen_obj_paths(
-            self.project.get_path(), self.build_path, sub_dir_name, cpp_files)
+                self.project.get_path(), self.build_path, sub_dir_name, cpp_files)
         cpp_obj_pairs = gen_cpp_obj_pairs(self.project.get_path(),
                                           self.build_path, sub_dir_name,
                                           cpp_files)
@@ -194,7 +191,6 @@ class Compiler(object):
         if self.project_cpp_obj_pairs:
             self.project_src_changed = True
         self.need_to_build = bool(self.project_obj_paths)
-
 
     def prepare_core_src_files(self):
         self.core_obj_paths = []
@@ -207,10 +203,10 @@ class Compiler(object):
             lib_cpp_files = list_cpp_files(library)
             lib_c_files = list_c_files(library)
             lib_obj_paths = gen_obj_paths(library_path, self.build_path,
-                                          sub_dir_name, lib_cpp_files+lib_c_files)
+                                          sub_dir_name, lib_cpp_files + lib_c_files)
             lib_cpp_obj_pairs = gen_cpp_obj_pairs(
-                library_path, self.build_path, sub_dir_name, lib_cpp_files+lib_c_files,
-                True)
+                    library_path, self.build_path, sub_dir_name, lib_cpp_files + lib_c_files,
+                    True)
             self.core_obj_paths += lib_obj_paths
             self.core_cpp_obj_pairs += lib_cpp_obj_pairs
         self.core_paths = []
@@ -233,7 +229,7 @@ class Compiler(object):
 
             for core_path in self.core_paths:
                 core_obj_paths, core_cpp_obj_pairs = gen_core_objs(
-                    core_path, 'core_', self.build_path)
+                        core_path, 'core_', self.build_path)
                 self.core_obj_paths += core_obj_paths
                 self.core_cpp_obj_pairs += core_cpp_obj_pairs
 
@@ -241,7 +237,8 @@ class Compiler(object):
             self.core_src_changed = True
 
 
-####################################################################
+        ####################################################################
+
     def gen_replaced_text_list(self, text):
         pattern_text = r'\{\S+?}'
         pattern = re.compile(pattern_text)
@@ -258,7 +255,6 @@ class Compiler(object):
                 value = value.replace(text, param_value)
         return value
 
-
     def replace_param_values(self, params):
         new_params = {}
         for key in params:
@@ -267,7 +263,8 @@ class Compiler(object):
                 value = self.replace_param_value(value, params)
             new_params[key] = value
         return new_params
-####################################################################
+
+    ####################################################################
 
     def prepare_params(self):
         self.archive_file_name = 'core.a'
@@ -299,38 +296,60 @@ class Compiler(object):
         if not os.path.isdir(compiler_path):
             self.params['compiler.path'] = ''
 
-
         if platform.system() == 'Linux':
             compiler_path = ''
 
-
-        #my intervention!
-        compiler_c_cmd='avr-gcc'
-        compiler_S_cmd='avr-gcc'
-        compiler_c_flags='-c -g -Os -w -ffunction-sections -fdata-sections -MMD'
-        compiler_c_elf_flags='-Os -Wl,--gc-sections'
-        compiler_c_elf_cmd='avr-gcc'
-        compiler_S_flags='-c -g -assembler-with-cpp'
-        compiler_cpp_cmd='avr-g++'
-        compiler_cpp_flags='-c -g -Os -w -fno-exceptions -ffunction-sections -fdata-sections -MMD'
-        compiler_ar_cmd='avr-ar'
-        compiler_ar_flags='rcs'
-        compiler_objcopy_cmd='avr-objcopy'
-        compiler_objcopy_eep_flags='-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0'
-        compiler_elf2hex_flags='-O ihex -R .eeprom'
-        compiler_elf2hex_cmd='avr-objcopy'
+        # my intervention!
+        compiler_c_cmd = 'avr-gcc'
+        compiler_S_cmd = 'avr-gcc'
+        compiler_c_flags = '-c -g -Os -w -ffunction-sections -fdata-sections -MMD'
+        compiler_c_elf_flags = '-Os -Wl,--gc-sections'
+        compiler_c_elf_cmd = 'avr-gcc'
+        compiler_S_flags = '-c -g -assembler-with-cpp'
+        compiler_cpp_cmd = 'avr-g++'
+        compiler_cpp_flags = '-c -g -Os -w -fno-exceptions -ffunction-sections -fdata-sections -MMD'
+        compiler_ar_cmd = 'avr-ar'
+        compiler_ar_flags = 'rcs'
+        compiler_objcopy_cmd = 'avr-objcopy'
+        compiler_objcopy_eep_flags = '-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0'
+        compiler_elf2hex_flags = '-O ihex -R .eeprom'
+        compiler_elf2hex_cmd = 'avr-objcopy'
 
         self.params['build.mcu'] = self.target_board_mcu
         self.params['build.f_cpu'] = self.build_f_cpu
-        self.params['includes']+= self.libraries
+        self.params['includes'] += self.libraries
 
-        self.params['recipe.c.o.pattern'] = '"'+compiler_path+ compiler_c_cmd + '"'+'  '+ compiler_c_flags +' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
-        self.params['recipe.cpp.o.pattern'] = '"'+compiler_path+compiler_cpp_cmd+'"'+' '+ compiler_cpp_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+' '+ self.params['includes'] +' "{source_file}" -o "{object_file}"'
-        self.params['recipe.S.o.pattern'] = '"'+compiler_path+ compiler_S_cmd+'"'+' '+ compiler_S_flags + ' -mmcu='+self.params['build.mcu']+' -DF_CPU='+self.params['build.f_cpu']+ ' '+self.params['includes'] +' "{source_file}" -o "{object_file}"'
-        self.params['recipe.ar.pattern'] = '"'+compiler_path+ compiler_ar_cmd+'"'+' '+ compiler_ar_flags + ' "'+ self.params['build.path']+'/{archive_file}" "{object_file}"'
-        self.params['recipe.c.combine.pattern'] = '"'+compiler_path+ compiler_c_elf_cmd+'"'+' '+compiler_c_elf_flags + ' -mmcu='+self.params['build.mcu']+' -o '+'"'+self.params['build.path']+'/'+self.params['build.project_name']+'.elf" {object_files} '+' "'+self.params['build.path']+'/{archive_file}" -L"'+self.params['build.path']+'" -lm'
-        self.params['recipe.objcopy.eep.pattern'] = '"'+compiler_path+ compiler_objcopy_cmd+'"'+' '+ compiler_objcopy_eep_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.eep'
-        self.params['recipe.objcopy.hex.pattern'] = '"'+compiler_path+compiler_elf2hex_cmd+'"'+' '+ compiler_elf2hex_flags + ' '+ self.params['build.path']+'/'+self.params['build.project_name']+'.elf '+self.params['build.path']+'/'+self.params['build.project_name']+'.hex'
+        self.params[
+            'recipe.c.o.pattern'] = '"' + compiler_path + compiler_c_cmd + '"' + '  ' + compiler_c_flags + ' -mmcu=' + \
+                                    self.params['build.mcu'] + ' -DF_CPU=' + self.params['build.f_cpu'] + ' ' + \
+                                    self.params['includes'] + ' "{source_file}" -o "{object_file}"'
+        self.params[
+            'recipe.cpp.o.pattern'] = '"' + compiler_path + compiler_cpp_cmd + '"' + ' ' + compiler_cpp_flags + ' -mmcu=' + \
+                                      self.params['build.mcu'] + ' -DF_CPU=' + self.params['build.f_cpu'] + ' ' + \
+                                      self.params['includes'] + ' "{source_file}" -o "{object_file}"'
+        self.params[
+            'recipe.S.o.pattern'] = '"' + compiler_path + compiler_S_cmd + '"' + ' ' + compiler_S_flags + ' -mmcu=' + \
+                                    self.params['build.mcu'] + ' -DF_CPU=' + self.params['build.f_cpu'] + ' ' + \
+                                    self.params['includes'] + ' "{source_file}" -o "{object_file}"'
+        self.params[
+            'recipe.ar.pattern'] = '"' + compiler_path + compiler_ar_cmd + '"' + ' ' + compiler_ar_flags + ' "' + \
+                                   self.params['build.path'] + '/{archive_file}" "{object_file}"'
+        self.params[
+            'recipe.c.combine.pattern'] = '"' + compiler_path + compiler_c_elf_cmd + '"' + ' ' + compiler_c_elf_flags + ' -mmcu=' + \
+                                          self.params['build.mcu'] + ' -o ' + '"' + self.params['build.path'] + '/' + \
+                                          self.params['build.project_name'] + '.elf" {object_files} ' + ' "' + \
+                                          self.params['build.path'] + '/{archive_file}" -L"' + self.params[
+                                              'build.path'] + '" -lm'
+        self.params[
+            'recipe.objcopy.eep.pattern'] = '"' + compiler_path + compiler_objcopy_cmd + '"' + ' ' + compiler_objcopy_eep_flags + ' ' + \
+                                            self.params['build.path'] + '/' + self.params[
+                                                'build.project_name'] + '.elf ' + self.params['build.path'] + '/' + \
+                                            self.params['build.project_name'] + '.eep'
+        self.params[
+            'recipe.objcopy.hex.pattern'] = '"' + compiler_path + compiler_elf2hex_cmd + '"' + ' ' + compiler_elf2hex_flags + ' ' + \
+                                            self.params['build.path'] + '/' + self.params[
+                                                'build.project_name'] + '.elf ' + self.params['build.path'] + '/' + \
+                                            self.params['build.project_name'] + '.hex'
         self.params = self.replace_param_values(self.params)
 
     def prepare_cmds(self):
@@ -346,7 +365,7 @@ class Compiler(object):
         self.project_obj_paths = []
         self.file_cmds_dict = {}
         for cpp_path, obj_path in (self.project_cpp_obj_pairs +
-                                   self.core_cpp_obj_pairs):
+                                       self.core_cpp_obj_pairs):
             cmd = compile_cpp_cmd
             ext = os.path.splitext(cpp_path)[1]
             if ext == '.c':
@@ -354,7 +373,7 @@ class Compiler(object):
             elif ext == '.S':
                 cmd = compile_asm_cmd
 
-            if type(obj_path)!= type('unicode'):
+            if type(obj_path) != type('unicode'):
                 obj_path = obj_path.get_path()
             cmd = cmd.replace('{source_file}', cpp_path)
             self.project_obj_paths.append(obj_path)
@@ -372,7 +391,6 @@ class Compiler(object):
                 cmds.append(cmd)
             self.build_files.append(core_archive_path)
             self.file_cmds_dict[core_archive_path] = cmds
-
 
         project_file_base_path = os.path.join(self.build_path,
                                               self.project.get_name())
@@ -412,17 +430,17 @@ class Compiler(object):
 
         total_file_number = len(self.build_files)
         for index, build_file in enumerate(self.build_files):
-            percent = str(int(100 * (index + 1) / total_file_number )).rjust(3)
-            print('['+percent+'%] \\n')
+            percent = str(int(100 * (index + 1) / total_file_number)).rjust(3)
+            print('[' + percent + '%] \\n')
             cmds = self.file_cmds_dict.get(build_file)
             result, stderr = exec_cmds(self.ide_path, cmds, show_compilation_output)
             self.stderr += stderr
             if (result != 0):
                 self.error_occured = True
                 break
+
     def has_error(self):
         return self.error_occured
-
 
 
 def get_build_path():
@@ -486,7 +504,7 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
         #         # message_queue.put(stdout + '\n')
         #         print(stdout + '\n')
         if return_code != 0:
-            logging.debug('[Stino - Exit with error code '+str(return_code)+'.]\\n'+stderr)
+            logging.debug('[Stino - Exit with error code ' + str(return_code) + '.]\\n' + stderr)
             error_occured = True
         if stderr:
             logging.debug(stderr + '\n')
@@ -495,15 +513,12 @@ def exec_cmds(working_dir, cmds, is_verbose=False):
     return return_code, stderr
 
 
-
 def exec_cmd(working_dir, cmd):
-    
-    
     os.environ['CYGWIN'] = 'nodosfilewarning'
-    
+
     if cmd:
         os.chdir(working_dir)
-        #logging.debug(cmd);
+        # logging.debug(cmd);
         compile_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         logging.debug(compile_proc.poll());
         result = compile_proc.communicate()
@@ -542,19 +557,18 @@ def regular_numner(num):
     return regular_num
 
 
-def gen_core_objs(core_path, folder_prefix, build_path, is_new_build = True):
+def gen_core_objs(core_path, folder_prefix, build_path, is_new_build=True):
     core_dir = base.abs_file.Dir(core_path)
     core_cpp_files = core_dir.recursive_list_files(
-        arduino_src.CPP_EXTS, ['libraries'])
-   
+            arduino_src.CPP_EXTS, ['libraries'])
+
     sub_dir_name = folder_prefix + core_dir.get_name()
 
     for i in range(len(core_cpp_files)):
         core_cpp_files[i] = core_cpp_files[i].get_path()
 
-    
     core_obj_paths = gen_obj_paths(core_path, build_path,
                                    sub_dir_name, core_cpp_files)
     core_cpp_obj_pairs = gen_cpp_obj_pairs(
-        core_path, build_path, sub_dir_name, core_cpp_files, is_new_build)
+            core_path, build_path, sub_dir_name, core_cpp_files, is_new_build)
     return (core_obj_paths, core_cpp_obj_pairs)

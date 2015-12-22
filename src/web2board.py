@@ -11,6 +11,8 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import time
+
 from libs import utils
 import os
 # necessray for package, do not remove!
@@ -24,7 +26,6 @@ import os
 import signal
 import ssl
 import sys
-import threading
 from optparse import OptionParser
 from wsgiref.simple_server import make_server
 
@@ -71,22 +72,6 @@ def initializeServerAndCommunicationProtocol(options):
     return server
 
 
-def initSerialMonitor():
-    import wx
-    from SerialMonitor import SerialMonitorUI
-
-    def initSerialMonitorInThread():
-        app = wx.App()
-        serialMonitor = SerialMonitorUI(None, '/dev/ttyACM0')
-        serialMonitor.Show()
-        app.MainLoop()
-
-    t = threading.Thread(target=initSerialMonitorInThread)
-    t.setDaemon(True)
-    t.start()
-    return t
-
-
 def main():
     Paths.logRelevantEnvironmentalPaths()
     getCompilerUploader()
@@ -95,8 +80,6 @@ def main():
 
     options = handleSystemArguments()
     server = initializeServerAndCommunicationProtocol(options)
-
-    # serialThread = initSerialMonitor()
 
     def closeSigHandler(signal, frame):
         server.server_close()
