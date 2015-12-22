@@ -31,7 +31,7 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        if self.__getSerialCommThread().isRunning:
+        if not self.__getSerialCommThread().event.is_set():
             try:
                 self.__getSerialCommThread().stop()
             except:

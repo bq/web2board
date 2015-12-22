@@ -56,9 +56,8 @@ class SerialConnection:
 
 class SerialMonitorUI(wx.Dialog):
     def __init__(self, parent, port):
-        super(SerialMonitorUI, self).__init__(parent, title='bitbloq\'s Serial Monitor', size=(500, 500),
-                                              style=wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX
-                                              )
+        style = wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX
+        super(SerialMonitorUI, self).__init__(parent, title='bitbloq\'s Serial Monitor', size=(500, 500), style=style)
         self.serialConnection = SerialConnection(port)
         # Timer
         self.timer = wx.Timer(self)

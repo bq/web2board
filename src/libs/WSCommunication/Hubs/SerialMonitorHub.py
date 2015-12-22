@@ -22,7 +22,7 @@ class RunAppThread(multiprocessing.Process):
         self.app = None
         self.serialMonitor = None
         self.isRunning = False
-        self.stopChecker = threading.Thread(target=self)
+        self.stopChecker = threading.Thread(target=self.checkStop)
         self.event = multiprocessing.Event()
 
     def run(self):
