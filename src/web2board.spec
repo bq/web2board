@@ -1,10 +1,21 @@
 # -*- mode: python -*-
+
+block_cipher = None
+
+
 a = Analysis(['web2board.py'],
-             pathex=['/home/jorgarira/SoftwareProjects/web2board/src'],
+             pathex=['C:\\SoftwareProjects\\web2board\\src'],
+             binaries=None,
+             datas=None,
              hiddenimports=[],
              hookspath=None,
-             runtime_hooks=None)
-pyz = PYZ(a.pure)
+             runtime_hooks=None,
+             excludes=None,
+             win_no_prefer_redirects=None,
+             win_private_assemblies=None,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

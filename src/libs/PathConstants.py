@@ -3,8 +3,8 @@ import os
 import platform
 import sys
 
-from Arduino import base
 from libs import utils
+from libs.Arduino import base
 
 log = logging.getLogger(__name__)
 
@@ -52,13 +52,10 @@ class Web2BoardPaths:
         log.debug('SKETCHBOOK_LIBRARIES_PATH: {}'.format(SKETCHBOOK_LIBRARIES_PATH))
         # log.debug('ENVIRON: {}'.format(os.environ))
 
-    @staticmethod
-    def getDownloadedFilePath(url):
-        return base.sys_path.get_tmp_path() + os.sep + os.path.basename(url)
 
     @staticmethod
     def getBitbloqLibsTempPath(version):
-        return base.sys_path.get_tmp_path() + '/bitbloqLibs-' + version
+        return base.sys_path.get_tmp_path() + os.sep + 'bitbloqLibs-' + version
 
     @staticmethod
     def getSketchbookLibrariesPath():
@@ -67,6 +64,7 @@ class Web2BoardPaths:
     @staticmethod
     def getPathForNewPackage(version):
         return MAIN_PATH + os.sep + "web2board_{}".format(version)
+
 
 MAIN_PATH = Web2BoardPaths.getMainPath()
 RES_CONFIG_PATH = MAIN_PATH + '{0}res{0}config.json'.format(os.sep)

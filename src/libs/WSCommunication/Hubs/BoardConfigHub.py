@@ -43,5 +43,5 @@ class BoardConfigHub(Hub):
         libUpdater = getLibUpdater()
         if libUpdater.getBitbloqLibsVersion() != version:
             libUpdater.setBitbloqLibsVersion(version)
-            libUpdater.downloadLibs()
+            libUpdater._downloadLibs()
         return True

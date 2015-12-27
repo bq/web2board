@@ -1,8 +1,15 @@
 import inspect
+import logging
 import os
 import sys
 
 import shutil
+import zipfile
+from urllib2 import urlopen
+
+from libs.Arduino import base
+
+log = logging.getLogger(__name__)
 
 
 def areWeFrozen():
@@ -33,3 +40,24 @@ def copytree(src, dst, symlinks=False, ignore=None):
         else:
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
+
+
+def downloadFile(url):
+    f = urlopen(url)
+    log.info("downloading " + url)
+
+    tempFilePath = os.path.join(base.sys_path.get_tmp_path(), os.path.basename(url))
+    # Open our local file for writing
+    with open(tempFilePath, "wb") as local_file:
+        local_file.write(f.read())
+
+    return tempFilePath
+
+
+def listDirectoriesInPath(path):
+    return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+
+
+def extractZip(origin, destination):
+    with zipfile.ZipFile(origin, "r") as z:
+        z.extractall(destination)

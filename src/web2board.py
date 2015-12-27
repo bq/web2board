@@ -11,18 +11,22 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
-import time
-
+import json
 from libs import utils
 import os
-# necessray for package, do not remove!
-import libs.LoggingHandlers
-import libs.WSCommunication.Hubs
 
+# set current path src folder
 os.chdir(utils.getModulePath())
 
-from libs.PathConstants import Web2BoardPaths as Paths
-import os
+import logging
+import logging.config
+import urllib2
+from urllib2 import HTTPError, URLError
+
+
+import libs.LoggingHandlers  # necessary for package, do not remove!
+import libs.WSCommunication.Hubs  # necessary for package, do not remove!
+
 import signal
 import ssl
 import sys
@@ -34,11 +38,14 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
-import libs.LoggingInitialization as logging
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import getLibUpdater
 
-log = logging.getLog(__name__)
+from libs.PathConstants import Web2BoardPaths as Paths
+
+logging.config.dictConfig(json.load(open('res' + os.sep + 'logging.json')))
+log = logging.getLogger(__name__)
+logging.getLogger("ws4py").setLevel(logging.ERROR)
 
 
 def handleSystemArguments():
@@ -72,12 +79,25 @@ def initializeServerAndCommunicationProtocol(options):
     return server
 
 
+def updateLibrariesIfNecessary():
+    libUpdater = getLibUpdater()
+    try:
+        libUpdater.downloadLibsIfNecessary()
+    except (HTTPError, URLError):
+        log.exception("unable to download libraries (might be a proxy problem)")
+        proxyName = raw_input("introduce proxy name: ")
+        proxy = urllib2.ProxyHandler({'http': proxyName})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        updateLibrariesIfNecessary()
+    except OSError:
+        log.exception("unable to copy libraries files, there could be a permissions problem.")
+
+
 def main():
     Paths.logRelevantEnvironmentalPaths()
     getCompilerUploader()
-    libUpdater = getLibUpdater()
-    libUpdater.downloadLibsIfNecessary()
-
+    updateLibrariesIfNecessary()
     options = handleSystemArguments()
     server = initializeServerAndCommunicationProtocol(options)
 

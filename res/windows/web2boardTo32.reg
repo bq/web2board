@@ -12,4 +12,4 @@ Windows Registry Editor Version 5.00
 
 
 [HKEY_CLASSES_ROOT\web2board\shell\open\command]
-@="C:\\Program Files\\Web2board\\web2board.bat"
+@="C:\\Program Files\\Web2board\\web2board.exe"

@@ -5,15 +5,6 @@ from libs.utils import *
 
 
 class LinuxPackager(Packager):
-    versionPath = None
-    folderName = None
-    executablePath = None
-    executableResPath = None
-    packageDebianMetadataPath = None
-    debianMetadataPath = None
-    debDistPath = None
-    Web2BoardDesktopTemplate = None
-
     ARCH_64, ARCH_32 = "amd64", "i386"
 
     RELEASE_TYPES = ({"path": "web2board", "desktopName": "Web2Board-PROD"},
@@ -24,31 +15,31 @@ class LinuxPackager(Packager):
     def __init__(self, architecture=ARCH_64):
         self.architecture = architecture
         Packager.__init__(self)
-
-    def _initPaths(self):
-        Packager._initPaths(self)
-        if self.versionPath is None:
-            self.versionPath = self.srcPath + os.sep + "web2board_{}".format(self.version)
-            self.folderVersionName = os.path.basename(self.versionPath)
-            self.executablePath = os.path.join(self.versionPath, "usr", "lib", "python2.7", "dist-packages", "Scripts",
-                                               "web2board")
-            self.executableResPath = os.path.join(self.executablePath, "res")
-            self.packageDebianMetadataPath = os.path.join(self.versionPath, "DEBIAN")
-            self.debDistPath = os.path.join(self.srcPath, "deb_dist")
-            self.debDistPath = os.path.join(self.srcPath, "deb_dist")
-            self.debianMetadataPath = os.path.join(self.pkgPath, "linux", "debian")
-            with open(self.packagerResPath + os.sep + "Web2Board-template.desktop") as desktopFile:
-                self.Web2BoardDesktopTemplate = desktopFile.read()
+        self.versionPath = self.web2boardPath + os.sep + "deb_web2board_{}".format(self.version)
+        self.folderVersionName = os.path.basename(self.versionPath)
+        self.executablePath = os.path.join(self.versionPath, "usr", "lib", "python2.7", "dist-packages", "Scripts",
+                                           "web2board")
+        self.executableResPath = os.path.join(self.executablePath, "res")
+        self.packageDebianMetadataPath = os.path.join(self.versionPath, "DEBIAN")
+        self.debDistPath = os.path.join(self.web2boardPath, "deb_dist")
+        self.installerPath = self.installerFolder + os.sep + "debian"
+        self.debianMetadataPath = os.path.join(self.pkgPath, "linux", "debian")
+        with open(self.packagerResPath + os.sep + "Web2Board-template.desktop") as desktopFile:
+            self.Web2BoardDesktopTemplate = desktopFile.read()
 
     def _clearMainFolders(self):
         if os.path.exists(self.versionPath):
             shutil.rmtree(self.versionPath)
         if os.path.exists(self.debDistPath):
             shutil.rmtree(self.debDistPath)
+        if os.path.exists(self.installerPath):
+            shutil.rmtree(self.installerPath)
+        self._clearBuildFiles()
 
     def _makeMainDirs(self):
         os.makedirs(self.versionPath)
         os.makedirs(self.executablePath)
+        os.makedirs(self.installerPath)
         os.mkdir(self.debDistPath)
 
     def _addResFilesForExecutable(self):
@@ -56,16 +47,15 @@ class LinuxPackager(Packager):
         copytree(os.path.join(self.resPath, "linux"), self.executableResPath)
 
     def _constructAndMoveExecutable(self):
-        call(["pyinstaller", "--onefile", "web2board.py"])
-        shutil.copy2(os.path.join(self.srcPath, "dist", "web2board"), self.executablePath)
+        currentPath = os.getcwd()
+        os.chdir(self.srcPath)
+        try:
+            call(["pyinstaller", "--onefile", "web2board.py"])
+            shutil.copy2(os.path.join(self.pyInstallerDistFolder, "web2board"), self.executablePath)
+        finally:
+            os.chdir(currentPath)
 
-    def _clearBuildFiles(self):
-        if os.path.exists(self.srcPath + os.sep + "dist"):
-            shutil.rmtree(self.srcPath + os.sep + "dist")
-        if os.path.exists(self.srcPath + os.sep + "build"):
-            shutil.rmtree(self.srcPath + os.sep + "build")
-
-    def _addMetadataForExecutable(self):
+    def _addMetadataForInstaller(self):
         copytree(self.debianMetadataPath, self.packageDebianMetadataPath)
         with open(self.packageDebianMetadataPath + os.sep + "control", "r") as controlFile:
             controlText = controlFile.read()
@@ -95,20 +85,30 @@ class LinuxPackager(Packager):
         finally:
             os.chdir(currentDirectory)
 
-    def _moveDebToDebDistPath(self):
+    def _moveDebToInstallerPath(self):
         resultingDeb = self.srcPath + os.sep + self.folderVersionName + ".deb"
-        shutil.copy(resultingDeb, self.debDistPath + os.sep + "web2board.deb")
+        shutil.copy(resultingDeb, self.installerPath + os.sep + "web2board.deb")
 
     def createPackage(self):
         try:
+            log.debug("Removing main folders")
             self._clearMainFolders()
+            log.debug("Creating main folders")
             self._makeMainDirs()
+            log.debug("Adding resources for executable")
             self._addResFilesForExecutable()
-            self._createDesktops()
+            # self._createDesktops()
+            log.info("Constructing executable")
             self._constructAndMoveExecutable()
-            self._addMetadataForExecutable()
+            log.debug("Adding metadata for installer")
+            self._addMetadataForInstaller()
+            os.chdir(self.versionPath)
+            log.info("Creating Installer")
             call(["dpkg-deb", "--build", self.versionPath])
-            self._moveDebToDebDistPath()
+            self._moveDebToInstallerPath()
+            log.info("installer created successfully")
         finally:
-            self._clearBuildFiles()
+            log.debug("Cleaning files")
+            os.chdir(self.web2boardPath)
+            self._clearMainFolders()
             self._deleteVersionFolder()
