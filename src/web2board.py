@@ -15,14 +15,10 @@ import json
 from libs import utils
 import os
 
-# set current path src folder
-os.chdir(utils.getModulePath())
-
 import logging
 import logging.config
 import urllib2
 from urllib2 import HTTPError, URLError
-
 
 import libs.LoggingHandlers  # necessary for package, do not remove!
 import libs.WSCommunication.Hubs  # necessary for package, do not remove!

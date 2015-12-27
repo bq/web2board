@@ -65,6 +65,11 @@ class Web2BoardPaths:
     def getPathForNewPackage(version):
         return MAIN_PATH + os.sep + "web2board_{}".format(version)
 
+#set working directory to src
+if utils.areWeFrozen():
+    os.chdir(utils.getModulePath())
+else:
+    os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
 MAIN_PATH = Web2BoardPaths.getMainPath()
 RES_CONFIG_PATH = MAIN_PATH + '{0}res{0}config.json'.format(os.sep)

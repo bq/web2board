@@ -5,16 +5,8 @@ from libs.utils import *
 
 log = logging.getLogger(__name__)
 
-class WindowsPackager(Packager):
-    versionPath = None
-    folderName = None
-    executablePath = None
-    executableResPath = None
-    packageDebianMetadataPath = None
-    debianMetadataPath = None
-    debDistPath = None
-    Web2BoardDesktopTemplate = None
 
+class WindowsPackager(Packager):
     def __init__(self):
         Packager.__init__(self)
         self.versionPath = self.web2boardPath + os.sep + "win_web2board_{}".format(self.version)
@@ -40,7 +32,6 @@ class WindowsPackager(Packager):
     def _addResFilesForExecutable(self):
         copytree(os.path.join(self.resPath, "common"), self.executableResPath)
         copytree(os.path.join(self.resPath, "windows"), self.executableResPath)
-
 
     def _addBatScripsToWinDist(self):
         batName = "afterInstall.bat"
