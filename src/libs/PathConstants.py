@@ -52,7 +52,6 @@ class Web2BoardPaths:
         log.debug('SKETCHBOOK_LIBRARIES_PATH: {}'.format(SKETCHBOOK_LIBRARIES_PATH))
         # log.debug('ENVIRON: {}'.format(os.environ))
 
-
     @staticmethod
     def getBitbloqLibsTempPath(version):
         return base.sys_path.get_tmp_path() + os.sep + 'bitbloqLibs-' + version
@@ -72,8 +71,8 @@ else:
     os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
 MAIN_PATH = Web2BoardPaths.getMainPath()
-RES_CONFIG_PATH = MAIN_PATH + '{0}res{0}config.json'.format(os.sep)
-RES_BOARDS_PATH = MAIN_PATH + '{0}res{0}boards.txt'.format(os.sep)
+RES_CONFIG_PATH = os.path.join(MAIN_PATH, 'res', 'config.json')
+RES_BOARDS_PATH = os.path.join(MAIN_PATH, 'res', 'boards.txt')
 WEB2BOARD_CONFIG_PATH = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
 SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
 SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()
