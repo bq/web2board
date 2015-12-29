@@ -30,6 +30,9 @@ class Packager:
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
         self.version = json.load(open(os.path.join(self.resPath, "common", "config.json")))["version"]
 
+        self.web2boardSpecPath = os.path.join(self.srcResPath, "web2board.spec")
+        self.serialMonitorSpecPath = os.path.join(self.srcResPath, "serialMonitor.spec")
+
         # abstract attributes
         self.installerPath = None
         self.installerCreationPath = None
@@ -81,9 +84,9 @@ class Packager:
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            call(["pyinstaller", "--onefile", "web2board.spec"])
+            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
-            call(["pyinstaller", "--onefile", "serialMonitor.spec"])
+            call(["pyinstaller", "--onefile", self.serialMonitorSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
                          self.installerCreationDistPath)
         finally:

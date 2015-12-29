@@ -20,6 +20,9 @@ class MacPackager(Packager):
         self.web2boardExecutableName = "web2board.exe"
         self.serialMonitorExecutableName = "SerialMonitor.exe"
 
+        self.web2boardSpecPath = os.path.join(self.srcResPath, "web2board-mac.spec")
+        self.serialMonitorSpecPath = os.path.join(self.srcResPath, "serialMonitor-mac.spec")
+
         self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
 
     def _addMetadataForInstaller(self):
