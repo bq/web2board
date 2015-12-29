@@ -1,10 +1,28 @@
 # -*- mode: python -*-
-
+import os
 block_cipher = None
 
+##### include mydir in distribution #######
+def extraDatas(mydir):
+    def rec_glob(p, files):
+        import os
+        import glob
+        for d in glob.glob(p):
+            if os.path.isfile(d):
+                files.append(d)
+            rec_glob("%s/*" % d, files)
+    files = []
+    rec_glob("%s/*" % mydir, files)
+    extra_datas = []
+    for f in files:
+        extra_datas.append((f, f, 'DATA'))
+
+    return extra_datas
+###########################################
+pathEx = os.getcwd()
 
 a = Analysis(['web2board.py'],
-             pathex=['C:\\SoftwareProjects\\web2board\\src'],
+             pathex=[pathEx],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -16,6 +34,8 @@ a = Analysis(['web2board.py'],
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+a.datas += extraDatas("res")
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

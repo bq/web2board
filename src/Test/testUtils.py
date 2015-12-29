@@ -2,21 +2,13 @@ import os
 import shutil
 import unittest
 
-from datetime import datetime, timedelta
-
 import time
 
 from libs.Arduino import base
 
 from libs import utils
 
-# do not remove
-
-try:
-    from unittest.mock import MagicMock
-except:
-    from mock import MagicMock
-
+import flexmock
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
@@ -93,4 +85,3 @@ class TestUtils(unittest.TestCase):
 
         self.assertTrue(os.path.exists(self.zipFolder))
         self.assertTrue(os.path.exists(self.zipFolder + os.sep + "zip.txt"))
-

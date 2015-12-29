@@ -2,9 +2,26 @@
 
 block_cipher = None
 
+##### include mydir in distribution #######
+def extraDatas(mydir):
+    def rec_glob(p, files):
+        import os
+        import glob
+        for d in glob.glob(p):
+            if os.path.isfile(d):
+                files.append(d)
+    files = []
+    rec_glob("%s/*" % mydir, files)
+    extra_datas = []
+    for f in files:
+        extra_datas.append((f, f, 'DATA'))
 
-a = Analysis(['SerialMonitor.py'],
-             pathex=['C:\\SoftwareProjects\\web2board\\src'],
+    return extra_datas
+###########################################
+pathEx = os.getcwd()
+
+a = Analysis(['serialMonitor.py'],
+             pathex=[pathEx],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -16,12 +33,14 @@ a = Analysis(['SerialMonitor.py'],
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+a.datas += extraDatas("res")
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='SerialMonitor',
+          name='serialMonitor',
           debug=False,
           strip=None,
           upx=True,

@@ -15,10 +15,7 @@ class Web2BoardPaths:
 
     @staticmethod
     def getMainPath():
-        path = os.getcwd()
-        if platform.system() == 'Darwin':
-            if os.environ.get('PYTHONPATH') is not None:
-                path = os.environ.get('PYTHONPATH')
+        path = Web2BoardPaths.getBasePath()
         return path
 
     @staticmethod
@@ -26,7 +23,7 @@ class Web2BoardPaths:
         if utils.areWeFrozen():
             return sys._MEIPASS
         else:
-            return Web2BoardPaths.getMainPath()
+            return os.getcwd()
 
     @staticmethod
     def getSketchbookPath():
@@ -71,8 +68,9 @@ else:
     os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
 MAIN_PATH = Web2BoardPaths.getMainPath()
-RES_CONFIG_PATH = os.path.join(MAIN_PATH, 'res', 'config.json')
-RES_BOARDS_PATH = os.path.join(MAIN_PATH, 'res', 'boards.txt')
+RES_PATH = os.path.join(MAIN_PATH, 'res')
+RES_CONFIG_PATH = os.path.join(RES_PATH, 'config.json')
+RES_BOARDS_PATH = os.path.join(RES_PATH, 'boards.txt')
 WEB2BOARD_CONFIG_PATH = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
 SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
 SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()

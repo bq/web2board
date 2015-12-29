@@ -70,12 +70,32 @@ Following dependencies are included in deb package, but if you want to install i
 sudo apt-get install python-serial 
 ```
 
+### WSHubsAPI
+```bash
+sudo pip install WSHubsAPI==0.5.0a7
+```
+
+### WXPython
+download and install binaries from http://www.wxpython.org/download.php#osx
+
+*Note: for Mac, use cocoa distribution: wxPython3.0-osx-cocoa-py2.7
+
+### flexmock
+```bash
+sudo pip install flexmock
+```
+
 #### AVRDUDE
 ```bash
 sudo apt-get install avrdude
 ```
 
 In order to generate Debian and Windows packages, some extra dependencies are needed
+
+### Create executables
+```bash
+sudo pip install pyInstaller==2.1
+```
 
 #### Packaging
 ```bash
