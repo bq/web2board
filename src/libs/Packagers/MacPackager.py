@@ -20,6 +20,8 @@ class MacPackager(Packager):
         self.web2boardExecutableName = "web2board.exe"
         self.serialMonitorExecutableName = "SerialMonitor.exe"
 
+        self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
+
     def _addMetadataForInstaller(self):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
 
@@ -30,7 +32,8 @@ class MacPackager(Packager):
             self._addMetadataForInstaller()
             os.chdir(self.installerCreationDistPath)
             log.info("Creating Installer")
-            #call(["makensis", "installer.nsi"])
+
+            #call(["/usr/local/bin/packagesbuild", self.pkgprojPath])
             #self._moveInstallerToInstallerFolder()
             #log.info("installer created successfully")
         finally:
