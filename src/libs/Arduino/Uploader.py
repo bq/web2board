@@ -13,14 +13,14 @@
 import re
 
 from utils import callAvrdude
-
+from libs.base import sys_path
 
 class Uploader :
 	def __init__(self, pathToMain):
 
 		self.pathToMain = pathToMain
 
-		self.tmpPath = libs.base.sys_path.get_tmp_path() + '/Stino_build/.web2board/.web2board.hex'
+		self.tmpPath = sys_path.get_tmp_path() + '/Stino_build/.web2board/.web2board.hex'
 
 	def uploadFromWeb2boardFolder (self, code, port, board, boardMCU, boardBaudRate, pathToMain, pathToSketchbook):
 		if port != None:

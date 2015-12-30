@@ -8,6 +8,7 @@ from urllib2 import urlopen
 
 import serial.tools.list_ports
 import libs.base
+import platform
 
 log = logging.getLogger(__name__)
 
@@ -68,3 +69,15 @@ def listSerialPorts(portsFilter = None):
     if portsFilter is not None:
         ports = filter(portsFilter, ports)
     return ports
+
+
+def isLinux():
+    return platform.system() == 'Linux'
+
+
+def isWindows():
+    return platform.system() == 'Windows'
+
+
+def isMac():
+    return platform.system() == 'Darwin'

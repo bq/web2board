@@ -26,11 +26,22 @@ class Web2BoardPaths:
             return os.getcwd()
 
     @staticmethod
+    def getExternalDataFolder():
+        if utils.isLinux():
+            return os.path.join(sys_path.get_home_path(), ".web2board")
+        elif utils.isWindows():
+            return os.path.join(os.getenv('APPDATA'), 'web2board')
+        elif utils.isMac():
+            return os.path.join("~/Library/Application Support", 'web2board')
+        else:
+            raise Exception("Not supported platform: {}".format(platform.system()))
+
+    @staticmethod
     def getSketchbookPath():
-        if platform.system() == 'Linux':
+        if utils.isLinux():
             # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
             return sys_path.get_home_path() + os.sep + 'Arduino'
-        elif platform.system() == 'Windows' or platform.system() == 'Darwin':
+        elif utils.isWindows() or utils.isMac():
             # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
             return sys_path.get_document_path() + os.sep + 'Arduino'
         else:
@@ -72,7 +83,12 @@ MAIN_PATH = Web2BoardPaths.getMainPath()
 RES_PATH = os.path.join(MAIN_PATH, 'res')
 RES_CONFIG_PATH = os.path.join(RES_PATH, 'config.json')
 RES_BOARDS_PATH = os.path.join(RES_PATH, 'boards.txt')
-EXTERNAL_DATA_PATH = os.path.join(sys_path.get_home_path(), ".webtoboard")
-WEB2BOARD_CONFIG_PATH = os.path.join(EXTERNAL_DATA_PATH, '.web2boardconfig')
+SETTINGS_PATH = Web2BoardPaths.getExternalDataFolder()
+WEB2BOARD_CONFIG_PATH = os.path.join(SETTINGS_PATH, '.web2boardconfig')
 SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
 SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()
+
+
+#construct External_data_path if not exists
+if not os.path.exists(SETTINGS_PATH):
+    os.makedirs(SETTINGS_PATH)
