@@ -20,7 +20,7 @@ import unicodedata
 from os.path import expanduser
 
 import arduino_compiler
-from . import base
+import libs.base
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -33,7 +33,7 @@ class Compiler:
 
         if platform.system() == 'Windows':
             self.tmpPath = os.path.dirname(
-                os.path.dirname(os.path.dirname(base.sys_path.get_tmp_path()))) + '/.web2board/'
+                os.path.dirname(os.path.dirname(libs.base.sys_path.get_tmp_path()))) + '/.web2board/'
         else:
             self.tmpPath = expanduser("~").decode('latin1') + '/.web2board/'
 

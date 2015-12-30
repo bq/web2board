@@ -10,24 +10,23 @@ Documents
 """
 
 from __future__ import absolute_import
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
-import threading
-import subprocess
-import re
-import time
-import platform
-import ntpath
 import fnmatch
-import shutil
 import logging
-import sys
+import ntpath
+import os
+import platform
+import re
+import shutil
+import subprocess
+import time
 
-from . import base
 from . import arduino_src
+from libs import base
+import libs.base
 
 
 def list_cpp_files(path):
@@ -46,12 +45,12 @@ def list_c_files(path):
     return matches
 
 
-class Project(base.abs_file.Dir):
+class Project(libs.base.abs_file.Dir):
     def __init__(self, path):
         super(Project, self).__init__(path)
         primary_file_name = self.name + '.ino'
         primary_file_path = os.path.join(self.path, primary_file_name)
-        self.primary_file = base.abs_file.File(primary_file_path)
+        self.primary_file = libs.base.abs_file.File(primary_file_path)
 
     def list_ino_files(self):
         files = self.list_files_of_extensions(arduino_src.INO_EXTS)
@@ -112,7 +111,7 @@ class Compiler(object):
 
         self.error_occured = False
         self.stderr = ''
-        self.settings = base.settings.get_arduino_settings()
+        self.settings = libs.base.settings.get_arduino_settings()
         self.bare_gcc = self.settings.get('bare_gcc', False)
         self.is_big_project = self.settings.get('big_project', False)
 
@@ -161,7 +160,7 @@ class Compiler(object):
             combined_file_name = self.project.get_name() + '.ino.cpp'
             combined_file_path = os.path.join(
                     self.build_path, combined_file_name)
-            combined_file = base.abs_file.File(combined_file_path)
+            combined_file = libs.base.abs_file.File(combined_file_path)
             combined_obj_path = combined_file_path + '.o'
             self.project_obj_paths.append(combined_obj_path)
             ino_changed = check_ino_change(ino_files, combined_file)
@@ -169,7 +168,7 @@ class Compiler(object):
             core_path = self.params.get('build.core.path', '')
             main_cxx_path = os.path.join(core_path, 'main.cxx')
             if os.path.isfile(main_cxx_path):
-                main_cxx_file = base.abs_file.File(main_cxx_path)
+                main_cxx_file = libs.base.abs_file.File(main_cxx_path)
                 ino_files.append(main_cxx_file)
             combined_src = arduino_src.combine_ino_files(
                     core_path, ino_files)
@@ -444,10 +443,10 @@ class Compiler(object):
 
 
 def get_build_path():
-    settings = base.settings.get_arduino_settings()
+    settings = libs.base.settings.get_arduino_settings()
     build_path = settings.get('build_path', '')
     if not build_path:
-        tmp_path = base.sys_path.get_tmp_path()
+        tmp_path = libs.base.sys_path.get_tmp_path()
         build_path = os.path.join(tmp_path, 'Stino_build')
     if not os.path.isdir(build_path):
         os.makedirs(build_path)
@@ -458,7 +457,7 @@ def check_ino_change(ino_files, combined_file):
     ino_changed = False
     combined_file_path = combined_file.get_path()
     obj_path = combined_file_path + '.o'
-    obj_file = base.abs_file.File(obj_path)
+    obj_file = libs.base.abs_file.File(obj_path)
     for ino_file in ino_files:
         if ino_file.get_mtime() > obj_file.get_mtime():
             ino_changed = True
@@ -469,7 +468,7 @@ def check_ino_change(ino_files, combined_file):
 def gen_cpp_obj_pairs(src_path, build_path, sub_dir,
                       cpp_files, new_build=False):
     obj_paths = gen_obj_paths(src_path, build_path, sub_dir, cpp_files)
-    obj_files = [base.abs_file.File(path) for path in obj_paths]
+    obj_files = [libs.base.abs_file.File(path) for path in obj_paths]
     path_pairs = []
     for cpp_file, obj_file in zip(cpp_files, obj_files):
         if new_build or cpp_file.get_mtime() > obj_file.get_mtime():
@@ -558,7 +557,7 @@ def regular_numner(num):
 
 
 def gen_core_objs(core_path, folder_prefix, build_path, is_new_build=True):
-    core_dir = base.abs_file.Dir(core_path)
+    core_dir = libs.base.abs_file.Dir(core_path)
     core_cpp_files = core_dir.recursive_list_files(
             arduino_src.CPP_EXTS, ['libraries'])
 

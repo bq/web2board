@@ -1,14 +1,13 @@
 import inspect
 import logging
 import os
-import sys
-
 import shutil
+import sys
 import zipfile
 from urllib2 import urlopen
 
-from libs.Arduino import base
 import serial.tools.list_ports
+import libs.base
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ def downloadFile(url):
     f = urlopen(url)
     log.info("downloading " + url)
 
-    tempFilePath = os.path.join(base.sys_path.get_tmp_path(), os.path.basename(url))
+    tempFilePath = os.path.join(libs.base.sys_path.get_tmp_path(), os.path.basename(url))
     # Open our local file for writing
     with open(tempFilePath, "wb") as local_file:
         local_file.write(f.read())

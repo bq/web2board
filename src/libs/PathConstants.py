@@ -4,9 +4,9 @@ import platform
 import sys
 
 from libs import utils
-from libs.Arduino import base
+from libs.base import sys_path
 
-log = logging.getLogger(__name__)
+_pathsLog = logging.getLogger(__name__)
 
 
 class Web2BoardPaths:
@@ -29,29 +29,29 @@ class Web2BoardPaths:
     def getSketchbookPath():
         if platform.system() == 'Linux':
             # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-            return base.sys_path.get_home_path() + os.sep + 'Arduino'
+            return sys_path.get_home_path() + os.sep + 'Arduino'
         elif platform.system() == 'Windows' or platform.system() == 'Darwin':
             # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
-            return base.sys_path.get_document_path() + os.sep + 'Arduino'
+            return sys_path.get_document_path() + os.sep + 'Arduino'
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
 
     @staticmethod
     def logRelevantEnvironmentalPaths():
-        log.debug('sys.path[0]: {}'.format(sys.path[0]))
-        log.debug('PWD: {}'.format(os.environ.get('PWD')))
-        log.debug('PYTHONPATH: {}'.format(os.environ.get('PYTHONPATH')))
+        _pathsLog.debug('sys.path[0]: {}'.format(sys.path[0]))
+        _pathsLog.debug('PWD: {}'.format(os.environ.get('PWD')))
+        _pathsLog.debug('PYTHONPATH: {}'.format(os.environ.get('PYTHONPATH')))
 
-        log.debug('MAIN_PATH: {}'.format(MAIN_PATH))
-        log.debug('RES_CONFIG_PATH: {}'.format(RES_CONFIG_PATH))
-        log.debug('WEB2BOARD_CONFIG_PATH: {}'.format(WEB2BOARD_CONFIG_PATH))
-        log.debug('SKETCHBOOK_PATH: {}'.format(SKETCHBOOK_PATH))
-        log.debug('SKETCHBOOK_LIBRARIES_PATH: {}'.format(SKETCHBOOK_LIBRARIES_PATH))
+        _pathsLog.debug('MAIN_PATH: {}'.format(MAIN_PATH))
+        _pathsLog.debug('RES_CONFIG_PATH: {}'.format(RES_CONFIG_PATH))
+        _pathsLog.debug('WEB2BOARD_CONFIG_PATH: {}'.format(WEB2BOARD_CONFIG_PATH))
+        _pathsLog.debug('SKETCHBOOK_PATH: {}'.format(SKETCHBOOK_PATH))
+        _pathsLog.debug('SKETCHBOOK_LIBRARIES_PATH: {}'.format(SKETCHBOOK_LIBRARIES_PATH))
         # log.debug('ENVIRON: {}'.format(os.environ))
 
     @staticmethod
     def getBitbloqLibsTempPath(version):
-        return base.sys_path.get_tmp_path() + os.sep + 'bitbloqLibs-' + version
+        return sys_path.get_tmp_path() + os.sep + 'bitbloqLibs-' + version
 
     @staticmethod
     def getSketchbookLibrariesPath():
@@ -72,6 +72,7 @@ MAIN_PATH = Web2BoardPaths.getMainPath()
 RES_PATH = os.path.join(MAIN_PATH, 'res')
 RES_CONFIG_PATH = os.path.join(RES_PATH, 'config.json')
 RES_BOARDS_PATH = os.path.join(RES_PATH, 'boards.txt')
-WEB2BOARD_CONFIG_PATH = base.sys_path.get_home_path() + os.sep + '.web2boardconfig'
+EXTERNAL_DATA_PATH = os.path.join(sys_path.get_home_path(), ".webtoboard")
+WEB2BOARD_CONFIG_PATH = os.path.join(EXTERNAL_DATA_PATH, '.web2boardconfig')
 SKETCHBOOK_PATH = Web2BoardPaths.getSketchbookPath()
 SKETCHBOOK_LIBRARIES_PATH = Web2BoardPaths.getSketchbookLibrariesPath()

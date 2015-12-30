@@ -10,15 +10,16 @@ Documents
 """
 
 from __future__ import absolute_import
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
 import inspect
 import json
+import os
 
 from . import abs_file
+
 
 class JSONFile(abs_file.File):
     def __init__(self, path):

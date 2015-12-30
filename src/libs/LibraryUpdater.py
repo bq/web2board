@@ -18,9 +18,9 @@ import shutil
 from distutils.dir_util import mkpath
 
 from libs import utils
-from libs.Arduino import base
 from libs.PathConstants import RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH, SKETCHBOOK_LIBRARIES_PATH, SKETCHBOOK_PATH, \
     Web2BoardPaths
+import libs.base
 
 log = logging.getLogger(__name__)
 __globalLibUpdater = None
@@ -44,7 +44,7 @@ class LibraryUpdater:
         downloadedFilePath = utils.downloadFile(self.BITBLOQ_LIBS_URL_TEMPLATE.format(self._bitbloqLibsVersion))
 
         log.info('extracting zip')
-        utils.extractZip(downloadedFilePath, base.sys_path.get_tmp_path())
+        utils.extractZip(downloadedFilePath, libs.base.sys_path.get_tmp_path())
         log.info('copying libraries in Arduino\'s libraries directory')
         self._copyLibsInTmpToBoardsLibsPath()
 

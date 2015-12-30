@@ -1,14 +1,13 @@
 import os
 import shutil
+import time
 import unittest
 
-import time
-
-from libs.Arduino import base
+import serial.tools.list_ports
 
 from libs import utils
+import libs.base
 
-import serial.tools.list_ports
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
@@ -73,7 +72,7 @@ class TestUtils(unittest.TestCase):
         lastModificationFile = os.stat(tempFile).st_mtime
         lastModificationDiff = time.time() - lastModificationFile
         self.assertTrue(abs(lastModificationDiff) < 0.5)
-        self.assertIn(base.sys_path.get_tmp_path(), tempFile)
+        self.assertIn(libs.base.sys_path.get_tmp_path(), tempFile)
 
     def test_listDirectoriesInPath(self):
         directories = utils.listDirectoriesInPath(self.myResFolder)
