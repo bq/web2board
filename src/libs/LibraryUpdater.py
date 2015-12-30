@@ -158,9 +158,10 @@ class LibraryUpdater:
 
     def downloadLibsIfNecessary(self):
         if self.areWeMissingLibs():
+            log.warning("Necessary to update libraries")
             self._downloadLibs()
         else:
-            log.debug("Libraries are up to date")
+            log.info("Libraries are up to date")
 
 
 def getLibUpdater():

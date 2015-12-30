@@ -19,6 +19,8 @@ import logging
 
 import serial
 
+from libs import utils
+
 log = logging.getLogger(__name__)
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -165,11 +167,11 @@ class SerialMonitorUI(wx.Dialog):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print 'USAGE: SerialMonitor << port >>'
-        sys.exit(1)
+        port = utils.listSerialPorts()[0][0]
     else:
-        # app = wx.App(redirect=True)
-        app = wx.App()
-        serialMonitor = SerialMonitorUI(None, sys.argv[1])
-        serialMonitor.Show()
-        app.MainLoop()
+        port = sys.argv[1]
+    # app = wx.App(redirect=True)
+    app = wx.App()
+    serialMonitor = SerialMonitorUI(None, port)
+    serialMonitor.Show()
+    app.MainLoop()

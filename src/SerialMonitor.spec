@@ -35,6 +35,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 a.datas += extraDatas("res")
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

@@ -39,6 +39,7 @@ from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import getLibUpdater
 
 from libs.PathConstants import Web2BoardPaths as Paths, RES_PATH
+from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 
 logging.config.dictConfig(json.load(open(RES_PATH + os.sep + 'logging.json')))
 log = logging.getLogger(__name__)
@@ -55,22 +56,20 @@ def handleSystemArguments():
     parser.add_option("--cert", default='./cert.pem', type='string', action="store", dest="cert",
                       help="cert (./cert.pem)")
     parser.add_option("--ver", default=ssl.PROTOCOL_TLSv1, type=int, action="store", dest="ver", help="ssl version")
-
     parser.add_option("--test", default='none', type='string', action="store", dest="testing", help="options: [none, unit, integration]")
-
 
     if sys.argv[1:]:
         log.debug('with arguments: {}'.format(sys.argv[1:]))
     options, args = parser.parse_args()
     testing = options.testing
     sys.argv[1:] = []
-    print testing
+
     if testing.lower() == "unit":
         from Test.runAllTests import runAllTests
         runAllTests()
         os._exit(1)
 
-    log.debug("init web2board with options: {}, and args: {}".format(options, args))
+    log.info("init web2board with options: {}, and args: {}".format(options, args))
 
     return options
 
@@ -109,15 +108,17 @@ def main():
     updateLibrariesIfNecessary()
     server = initializeServerAndCommunicationProtocol(options)
 
+    HubsInspector.getHubInstance(SerialMonitorHub).startApp()
+
     def closeSigHandler(signal, frame):
-        log.info("closing server")
+        log.warning("closing server")
         server.server_close()
-        log.info("server closed")
+        log.warning("server closed")
         os._exit(1)
 
     signal.signal(signal.SIGINT, closeSigHandler)
 
-    log.debug("listening...")
+    log.info("listening...")
     server.serve_forever()
 
 
@@ -127,5 +128,5 @@ if __name__ == "__main__":
     except SystemExit:
         pass
     except:
-        log.exception("critical exception")
+        log.critical("critical exception", exc_info = 1)
     os._exit(1)

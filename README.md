@@ -85,6 +85,11 @@ download and install binaries from http://www.wxpython.org/download.php#osx
 sudo pip install flexmock
 ```
 
+### platformio
+```bash
+sudo pip install platformio
+```
+
 #### AVRDUDE
 ```bash
 sudo apt-get install avrdude

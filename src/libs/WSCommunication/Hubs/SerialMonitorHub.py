@@ -1,63 +1,45 @@
 import logging
-import multiprocessing
-import threading
-import wx
-
-import time
+import os
+import platform
+import subprocess
 from wshubsapi.Hub import Hub
-from SerialMonitor import SerialMonitorUI
 
+from libs import utils
 from libs.CompilerUploader import getCompilerUploader
+from libs.Packagers.Packager import Packager
+from libs.PathConstants import MAIN_PATH, EXECUTABLE_PATH
 
 log = logging.getLogger(__name__)
 
 
-class SerialMonitorHubException(Exception):
+class CodeHubException(Exception):
     pass
 
 
-class RunAppThread(multiprocessing.Process):
-    def __init__(self, *args, **kwargs):
-        super(RunAppThread, self).__init__(*args, **kwargs)
-        self.app = None
-        self.serialMonitor = None
-        self.isRunning = False
-        self.stopChecker = threading.Thread(target=self.checkStop)
-        self.event = multiprocessing.Event()
-
-    def run(self):
-        self.stopChecker.start()
-        self.app = wx.App()
-        self.serialMonitor = SerialMonitorUI(None, '/dev/ttyACM0')
-        self.isRunning = True
-        self.serialMonitor.Show()
-        self.app.MainLoop()
-
-    def stop(self):
-        self.event.set()
-        # self.app.ExitMainLoop()
-        # wx.WakeUpMainThread()
-
-    def checkStop(self):
-        while not self.event.is_set():
-            time.sleep(0.1)
-        self.isRunning = False
-        self.serialMonitor.close()
-
-
 class SerialMonitorHub(Hub):
+    SERIAL_MONITOR_PATH = os.path.join(EXECUTABLE_PATH, "SerialMonitor")
     def __init__(self):
         super(SerialMonitorHub, self).__init__()
         self.compilerUploader = getCompilerUploader()
-        self.serialCommunicationThread = RunAppThread()
+        self.serialCommunicationProcess = None
+        """:type : subprocess.Popen """
 
-    def startApp(self, args):
-        if not self.__isGuiRunning():
-            self.serialCommunicationThread = RunAppThread()
-            self.serialCommunicationThread.start()
-        else:
-            raise SerialMonitorHubException("Monitor already running")
+    def startApp(self, port = None):
+        processArgs = self.__getProcessArgsToStartSerialMonitor()
+        if port is not None:
+            processArgs.append(port)
+        self.serialCommunicationProcess = subprocess.Popen(processArgs, shell=False)
         return True
 
-    def __isGuiRunning(self):
-        return self.serialCommunicationThread.isRunning
+    def __findSerialMonitorPath(self):
+        if utils.areWeFrozen():
+            packager = Packager.constructCurrentPlatformPackager()
+            return os.path.join(EXECUTABLE_PATH, packager.serialMonitorExecutableName)
+        else:
+            return os.path.join(EXECUTABLE_PATH, "SerialMonitor.py")
+
+    def __getProcessArgsToStartSerialMonitor(self):
+        if utils.areWeFrozen():
+            return [self.__findSerialMonitorPath()]
+        else:
+            return ["python", self.__findSerialMonitorPath()]

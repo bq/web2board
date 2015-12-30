@@ -67,6 +67,7 @@ if utils.areWeFrozen():
 else:
     os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
+EXECUTABLE_PATH = os.getcwd()
 MAIN_PATH = Web2BoardPaths.getMainPath()
 RES_PATH = os.path.join(MAIN_PATH, 'res')
 RES_CONFIG_PATH = os.path.join(RES_PATH, 'config.json')

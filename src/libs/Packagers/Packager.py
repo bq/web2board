@@ -5,6 +5,8 @@ import os
 import shutil
 from subprocess import call
 
+import platform
+
 from libs import utils
 
 pDir = os.path.pardir
@@ -101,3 +103,19 @@ class Packager:
         self._prepareResFolderForExecutable()
         log.info("Constructing executable")
         self._constructAndMoveExecutable()
+
+    @staticmethod
+    def constructCurrentPlatformPackager():
+        """
+        :rtype: Packager
+        """
+        if platform.system() == 'Darwin':
+            from MacPackager import MacPackager
+            return MacPackager()
+        elif platform.system() == 'linux':
+            from LinuxPackager import LinuxPackager
+            return LinuxPackager()
+        elif platform.system() == 'windows':
+            from WindowsPackager import WindowsPackager
+            return WindowsPackager()
+

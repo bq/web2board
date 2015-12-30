@@ -17,16 +17,20 @@ class MacPackager(Packager):
         self.pkgPlatformPath = os.path.join(self.pkgPath, "darwin")
         self.resPlatformPath = os.path.join(self.resPath, "darwin")
 
-        self.web2boardExecutableName = "web2board.exe"
-        self.serialMonitorExecutableName = "SerialMonitor.exe"
+        self.web2boardExecutableName = "web2board"
+        self.serialMonitorExecutableName = "SerialMonitor"
 
-        self.web2boardSpecPath = os.path.join(self.srcResPath, "web2board-mac.spec")
-        self.serialMonitorSpecPath = os.path.join(self.srcResPath, "serialMonitor-mac.spec")
+        self.web2boardSpecPath = os.path.join(self.srcPath, "web2board-mac.spec")
+        self.serialMonitorSpecPath = os.path.join(self.srcPath, "serialMonitor-mac.spec")
 
         self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
+        self.installerBackgroundPath = os.path.join(self.resPlatformPath, "installer_background.jpg")
+        self.licensePath = os.path.join(self.web2boardPath, "LICENSE.txt")
 
     def _addMetadataForInstaller(self):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
+        shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
+        shutil.copy2(self.licensePath, self.installerCreationDistPath)
 
     def createPackage(self):
         try:

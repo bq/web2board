@@ -1,8 +1,7 @@
 import copy
 import logging
-import os
 
-from libs.TerminalController import TerminalController
+import click
 
 __author__ = 'jorge.garcia'
 
@@ -10,7 +9,6 @@ __author__ = 'jorge.garcia'
 class ColoredConsoleHandler(logging.StreamHandler):
     def __init__(self, stream=None):
         super(ColoredConsoleHandler, self).__init__(stream)
-        self.terminalController = TerminalController()
 
     def emit(self, record):
         # Need to make a actual copy of the record
@@ -22,30 +20,48 @@ class ColoredConsoleHandler(logging.StreamHandler):
         except:
             myRecord.msg = "Unable to format record"
             self.format(myRecord)
+        style = self.__getStyle(myRecord)
+        click.secho(self.format(myRecord), **style)
+        # self.__addColor(myRecord)
 
-        self.__addColor(myRecord)
+        # logging.StreamHandler.emit(self, myRecord)
+        # if myRecord.levelno >= 50:
+        #     os._exit(1)
 
-        logging.StreamHandler.emit(self, myRecord)
-        if myRecord.levelno >= 50:
-            os._exit(1)
+    def __getStyle(self, myRecord):
+        """
+        Supported color names:
 
-    def __addColor(self, myRecord):
+        * ``black`` (might be a gray)
+        * ``red``
+        * ``green``
+        * ``yellow`` (might be an orange)
+        * ``blue``
+        * ``magenta``
+        * ``cyan``
+        * ``white`` (might be light gray)
+        * ``reset`` (reset the color code only)
+
+        :param myRecord:
+        :return: Dict
+        """
+        style = {"fg": None, "bg": None, "bold": True, "blink": None, "underline": None}
         try:
             levelNo = myRecord.levelno
             if levelNo >= 50:  # CRITICAL / FATAL
-                color = '${RED}${BOLD}${BG_YELLOW}'
+                style["fg"] = 'red'
+                style["bg"] = 'white'
+                style["underline"] = True
             elif levelNo >= 40:  # ERROR
-                color = '${RED}'
+                style["fg"] = 'red'
             elif levelNo >= 30:  # WARNING
-                color = '${YELLOW}'
+                style["fg"] = 'magenta'
             elif levelNo >= 20:  # INFO
-                color = '${GREEN}'
+                style["fg"] = 'green'
             elif levelNo >= 10:  # DEBUG
-                color = '${CYAN}'
+                style["fg"] = 'cyan'
             else:  # NOTSET and anything else
-                color = '${NORMAL}'
-
-            myRecord.msg = self.terminalController.render(color + myRecord.msg + '${NORMAL}')
+                pass
         except:
-            # if error parsing message, just let the default handler
             pass
+        return style

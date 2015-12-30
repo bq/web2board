@@ -75,25 +75,8 @@ class ArduinoCompilerUploader:
             self.boardSettings[boardName] = BoardConfig(boardConfig)
 
     def getAvailablePorts(self):
-        availablePorts = []
-
-        if platform.system() == 'Windows':
-            from serial.tools.list_ports import comports
-            comPorts = list(comports())
-            for port in comPorts:
-                if not 'Bluetooth' in port[1]:  # discard bluetooth ports
-                    availablePorts.append(port[0])
-        elif platform.system() == 'Darwin':
-            darwinPorts = glob.glob('/dev/tty.*')
-
-            for port in darwinPorts:
-                if not 'Bluetooth' in port:  # discard bluetooth ports
-                    availablePorts.append(port)
-
-        elif platform.system() == 'Linux':
-            availablePorts = glob.glob('/dev/ttyACM*')
-            availablePorts += glob.glob('/dev/ttyUSB*')
-        return availablePorts
+        ports = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        return map(lambda x: x[0], ports)
 
     def searchPort(self):
         availablePorts = self.getAvailablePorts()

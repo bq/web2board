@@ -192,8 +192,8 @@ function HubsAPI(url, serverTimeout) {
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
         
-        startApp : function (args){
-            
+        startApp : function (port){
+            arguments[0] = port === undefined ? null : port;
             return constructMessage('SerialMonitorHub', 'startApp', arguments);
         }
     };

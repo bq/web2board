@@ -8,6 +8,7 @@ import zipfile
 from urllib2 import urlopen
 
 from libs.Arduino import base
+import serial.tools.list_ports
 
 log = logging.getLogger(__name__)
 
@@ -61,3 +62,10 @@ def listDirectoriesInPath(path):
 def extractZip(origin, destination):
     with zipfile.ZipFile(origin, "r") as z:
         z.extractall(destination)
+
+
+def listSerialPorts(portsFilter = None):
+    ports = list(serial.tools.list_ports.comports())
+    if portsFilter is not None:
+        ports = filter(portsFilter, ports)
+    return ports

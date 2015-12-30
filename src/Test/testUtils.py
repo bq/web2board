@@ -8,7 +8,7 @@ from libs.Arduino import base
 
 from libs import utils
 
-import flexmock
+import serial.tools.list_ports
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
@@ -85,3 +85,16 @@ class TestUtils(unittest.TestCase):
 
         self.assertTrue(os.path.exists(self.zipFolder))
         self.assertTrue(os.path.exists(self.zipFolder + os.sep + "zip.txt"))
+
+    def test_listSerialPorts_useSerialLib(self):
+        ports = [(1,2,3), (4,5,6)]
+        serial.tools.list_ports.comports = lambda : ports
+
+        self.assertEqual(utils.listSerialPorts(), ports)
+
+    def test_listSerialPorts_filterWithFunction(self):
+        portsFilter = lambda x: x[0] == 1
+        ports = [(1,2,3), (4,5,6)]
+        serial.tools.list_ports.comports = lambda : ports
+
+        self.assertEqual(utils.listSerialPorts(portsFilter), ports[0:1])
