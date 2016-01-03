@@ -18,8 +18,8 @@ import shutil
 from distutils.dir_util import mkpath
 
 from libs import utils
-from libs.PathConstants import RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH, SKETCHBOOK_LIBRARIES_PATH, SKETCHBOOK_PATH, \
-    Web2BoardPaths
+from libs.PathsManager import RES_CONFIG_PATH, SETTINGS_CONFIG_PATH, SKETCHBOOK_LIBRARIES_PATH, SKETCHBOOK_PATH, \
+    PathsManager
 import libs.base
 
 log = logging.getLogger(__name__)
@@ -34,10 +34,11 @@ class LibraryUpdater:
 
     def __init__(self):
         self._bitbloqLibsVersion = self.getBitbloqLibsVersion()
+        self.necessaryToDownloadLibs = False
 
     def __copyConfigInHomeIfNotExists(self):
-        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
-            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
+        if not os.path.isfile(SETTINGS_CONFIG_PATH):
+            shutil.copyfile(RES_CONFIG_PATH, SETTINGS_CONFIG_PATH)
 
     def _downloadLibs(self):
         log.info('Downloading new libs, version: {}'.format(self._bitbloqLibsVersion))
@@ -59,7 +60,7 @@ class LibraryUpdater:
         log.info("Bitbloq libs downloaded")
 
     def _copyLibsInTmpToBoardsLibsPath(self):
-        tmpPath = Web2BoardPaths.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
+        tmpPath = PathsManager.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
         versionNumber = self._getBitbloqLibsVersionNumber()
         if versionNumber <= 2:
             distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
@@ -69,7 +70,7 @@ class LibraryUpdater:
                     distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
 
     def _getBitbloqLibsNamesFromDownloadedZip(self):
-        tmpPath = Web2BoardPaths.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
+        tmpPath = PathsManager.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
         versionNumber = self._getBitbloqLibsVersionNumber()
         if versionNumber <= 2:
             return ['bitbloqLibs']
@@ -88,7 +89,7 @@ class LibraryUpdater:
             data = json.load(json_data_file)
             versionTrue = str(data.get('bitbloqLibsVersion', "0.0.0"))
 
-        with open(WEB2BOARD_CONFIG_PATH, "r+") as json_data_file:
+        with open(SETTINGS_CONFIG_PATH, "r+") as json_data_file:
             data = json.load(json_data_file)
             versionLocal = str(data['bitbloqLibsVersion'])
             if versionLocal != versionTrue:
@@ -98,7 +99,7 @@ class LibraryUpdater:
     def getBitbloqLibsVersion(self):
         # Get bitbloqLibs version from config file
         self.__copyConfigInHomeIfNotExists()
-        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
+        with open(SETTINGS_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             version = str(data['bitbloqLibsVersion'])
         return version
@@ -106,7 +107,7 @@ class LibraryUpdater:
     def getBitbloqLibsName(self):
         # Get bitbloqLibs name from config file
         self.__copyConfigInHomeIfNotExists()
-        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
+        with open(SETTINGS_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             bitbloqLibsName = []
             try:
@@ -118,25 +119,26 @@ class LibraryUpdater:
 
     def setBitbloqLibsVersion(self, newVersion):
         self.__copyConfigInHomeIfNotExists()
-        with open(WEB2BOARD_CONFIG_PATH, "r") as jsonFile:
+        with open(SETTINGS_CONFIG_PATH, "r") as jsonFile:
             data = json.load(jsonFile)
 
         data["bitbloqLibsVersion"] = newVersion
 
-        with open(WEB2BOARD_CONFIG_PATH, "w+") as jsonFile:
+        with open(SETTINGS_CONFIG_PATH, "w+") as jsonFile:
             jsonFile.write(json.dumps(data))
+        self.necessaryToDownloadLibs = True
 
     def setBitbloqLibsNames(self, bitbloqLibsNames):
         self.__copyConfigInHomeIfNotExists()
         if not hasattr(bitbloqLibsNames, "__iter__"):
             raise Exception("bitbloqLibsNames have to be a list, received: {}".format(bitbloqLibsNames))
 
-        with open(WEB2BOARD_CONFIG_PATH, "r") as jsonFile:
+        with open(SETTINGS_CONFIG_PATH, "r") as jsonFile:
             data = json.load(jsonFile)
 
         data["bitbloqLibsName"] = bitbloqLibsNames
 
-        with open(WEB2BOARD_CONFIG_PATH, "w+") as jsonFile:
+        with open(SETTINGS_CONFIG_PATH, "w+") as jsonFile:
             jsonFile.write(json.dumps(data))
 
         log.info("config ready")
@@ -157,9 +159,10 @@ class LibraryUpdater:
         return False
 
     def downloadLibsIfNecessary(self):
-        if self.areWeMissingLibs():
+        if self.areWeMissingLibs() or self.necessaryToDownloadLibs:
             log.warning("Necessary to update libraries")
             self._downloadLibs()
+            self.necessaryToDownloadLibs = False
         else:
             log.info("Libraries are up to date")
 

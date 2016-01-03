@@ -1,28 +1,13 @@
 # -*- mode: python -*-
 import os
+import sys
+sys.path.append(os.getcwd())
+import libs.utils as utils
+
 block_cipher = None
 
-##### include mydir in distribution #######
-def extraDatas(mydir):
-    def rec_glob(p, files):
-        import os
-        import glob
-        for d in glob.glob(p):
-            if os.path.isfile(d):
-                files.append(d)
-            rec_glob("%s/*" % d, files)
-    files = []
-    rec_glob("%s/*" % mydir, files)
-    extra_datas = []
-    for f in files:
-        extra_datas.append((f, f, 'DATA'))
-
-    return extra_datas
-###########################################
-pathEx = os.getcwd()
-
 a = Analysis(['web2board.py'],
-             pathex=[pathEx],
+             pathex=[os.getcwd()],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -35,7 +20,10 @@ a = Analysis(['web2board.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-a.datas += extraDatas("res")
+a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
+a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
+a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

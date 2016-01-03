@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from Compiler import Compiler
 from Uploader import Uploader
-from libs.PathConstants import *
+from libs.PathsManager import *
 from utils import BoardConfig, callAvrdude
 
 

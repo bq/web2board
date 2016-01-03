@@ -1,24 +1,8 @@
 # -*- mode: python -*-
-
+import sys
+sys.path.append(os.getcwd())
+import libs.utils as utils
 block_cipher = None
-
-##### include mydir in distribution #######
-def extraDatas(mydir):
-    def rec_glob(p, files):
-        import os
-        import glob
-        for d in glob.glob(p):
-            if os.path.isfile(d):
-                files.append(d)
-            rec_glob("%s/*" % d, files)
-    files = []
-    rec_glob("%s/*" % mydir, files)
-    extra_datas = []
-    for f in files:
-        extra_datas.append((f, f, 'DATA'))
-
-    return extra_datas
-###########################################
 
 a = Analysis(['test.py'],
              pathex=['C:\\SoftwareProjects\\web2board\\src'],
@@ -34,8 +18,9 @@ a = Analysis(['test.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-a.datas += extraDatas("platformio")
+a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 
+print a.datas
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

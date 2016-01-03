@@ -9,7 +9,7 @@
   },
   "handlers": {
     "console": {
-      "class": "libs.LoggingHandlers.ColoredConsoleHandler",
+      "class": "libs.LoggingUtils.ColoredConsoleHandler",
       "level": "DEBUG",
       "formatter": "simple",
       "stream": "ext://sys.stdout"

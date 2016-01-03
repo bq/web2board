@@ -11,22 +11,14 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
-import json
-
-from libs import utils
-import os
-
-import logging
-import logging.config
 import urllib2
 from urllib2 import HTTPError, URLError
 
-import libs.LoggingHandlers  # necessary for package, do not remove!
+import libs.LoggingUtils  # necessary for package, do not remove!
 import libs.WSCommunication.Hubs  # necessary for package, do not remove!
 
 import signal
 import ssl
-import sys
 from optparse import OptionParser
 from wsgiref.simple_server import make_server
 
@@ -37,13 +29,10 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import getLibUpdater
+from libs.LoggingUtils import initLogging
+from libs.PathsManager import *
 
-from libs.PathConstants import Web2BoardPaths as Paths, RES_PATH
-from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
-
-logging.config.dictConfig(json.load(open(RES_PATH + os.sep + 'logging.json')))
-log = logging.getLogger(__name__)
-logging.getLogger("ws4py").setLevel(logging.ERROR)
+log = initLogging(__name__) # initialized in main
 
 
 def handleSystemArguments():
@@ -56,7 +45,8 @@ def handleSystemArguments():
     parser.add_option("--cert", default='./cert.pem', type='string', action="store", dest="cert",
                       help="cert (./cert.pem)")
     parser.add_option("--ver", default=ssl.PROTOCOL_TLSv1, type=int, action="store", dest="ver", help="ssl version")
-    parser.add_option("--test", default='none', type='string', action="store", dest="testing", help="options: [none, unit, integration]")
+    parser.add_option("--test", default='none', type='string', action="store", dest="testing",
+                      help="options: [none, unit, integration]")
 
     if sys.argv[1:]:
         log.debug('with arguments: {}'.format(sys.argv[1:]))
@@ -102,13 +92,12 @@ def updateLibrariesIfNecessary():
 
 
 def main():
+    PathsManager.moveInternalConfigToExternalIfNecessary()
     options = handleSystemArguments()
-    Paths.logRelevantEnvironmentalPaths()
+    PathsManager.logRelevantEnvironmentalPaths()
     compileUploader = getCompilerUploader()
     updateLibrariesIfNecessary()
     server = initializeServerAndCommunicationProtocol(options)
-
-    HubsInspector.getHubInstance(SerialMonitorHub).startApp()
 
     def closeSigHandler(signal, frame):
         log.warning("closing server")
@@ -127,6 +116,9 @@ if __name__ == "__main__":
         main()
     except SystemExit:
         pass
-    except:
-        log.critical("critical exception", exc_info = 1)
+    except Exception as e:
+        if log is None:
+            raise e
+        else:
+            log.critical("critical exception", exc_info=1)
     os._exit(1)

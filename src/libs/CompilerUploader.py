@@ -10,61 +10,132 @@
 # Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import logging
+import os
+import subprocess
 
-import json
-import shutil
-
-from Arduino.CompilerUploader import ArduinoCompilerUploader
-from libs.PathConstants import *
+from libs.PathsManager import MAIN_PATH, SETTINGS_PLATFORMIO_PATH
+from libs.utils import isWindows, isMac, isLinux, listSerialPorts
+from platformio.platformioUtils import run as platformioRun
+from platformio import exception, util
+from platformio.util import get_boards, memoized
 
 log = logging.getLogger(__name__)
 __globalCompilerUploader = None
+
+ERROR_BOARD_NOT_SET = {"code": 0, "message": "Necessary to define board before to run/compile"}
+ERROR_BOARD_NOT_SUPPORTED = {"code": 1, "message": "Board: {0} not Supported"}
+ERROR_NO_PORT_FOUND = {"code": 2, "message": "No port found, check the board is connected"}
+ERROR_MULTIPLE_BOARDS_CONNECTED = {"code": 3, "message": "More than one connected board was found. You should only have one board connected"}
+
+
+class CompilerException(Exception):
+    def __init__(self, error, *args):
+        self.code = error["code"]
+        self.message = error["message"].format(*args)
+        super(CompilerException, self).__init__(self.message)
 
 
 ##
 # Class CompilerUploader, created to support different compilers & uploaders
 #
-# todo: use inheritance || if platformIO does not solve it
 class CompilerUploader:
     def __init__(self):
-        # self.pathToMain = os.path.dirname(os.path.realpath("web2board.py"))
-        # initializing attributes
-        self.arduino = ArduinoCompilerUploader(MAIN_PATH)
-        self.version = None
+        self.board = None  # we use the board name as the environment (check platformio.ini)
+    def _getIniConfig(self, environment):
+        """
+        :type environment: str
+            """
+        with util.cd(SETTINGS_PLATFORMIO_PATH):
+            config = util.get_project_config()
 
-        # executing initialization
-        self.readConfigFile()
+            if not config.sections():
+                raise exception.ProjectEnvsNotAvailable()
 
-    def readConfigFile(self):
-        if not os.path.isfile(WEB2BOARD_CONFIG_PATH):
-            shutil.copyfile(RES_CONFIG_PATH, WEB2BOARD_CONFIG_PATH)
-        with open(WEB2BOARD_CONFIG_PATH) as json_data_file:
-            data = json.load(json_data_file)
-            self.version = str(data['version'])
+            known = set([s[4:] for s in config.sections()
+                         if s.startswith("env:")])
+            unknown = set((environment,)) - known
+            if unknown:
+                return None
 
-    def getVersion(self):
-        return self.version
+            for section in config.sections():
+                envName = section[4:]
+                if environment and envName and envName == environment:
+                    iniConfig = {k: v for k, v in config.items(section)}
+                    iniConfig["boardData"] = get_boards(iniConfig["board"])
+                    return iniConfig
 
-    def setBoard(self, board):
-        return self.arduino.setBoard(board)
+    def _callAvrdude(self, args):
+        if isWindows():
+            cmd = os.path.join(MAIN_PATH, 'res', 'avrdude.exe ') + args
+        elif isMac():
+            avrPath = MAIN_PATH + "/res/arduinoDarwin/hardware/tools/avr"
+            cmd = avrPath + "/bin/avrdude -C " + avrPath + "/etc/avrdude.conf " + args
+        elif isLinux():
+            cmd = "avrdude " + args
+        else:
+            raise Exception("Platform not supported")
+        log.info("Command executed: {}".format(cmd))
+        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             close_fds=(not isWindows()))
+        output = p.stdout.read()
+        err = p.stderr.read()
+        log.debug(output)
+        log.debug(err)
+        return output, err
 
-    def setPort(self, port=''):
-        self.arduino.setPort(port)
+    def _searchPorts(self, mcu, baudRate):
+        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        availablePorts = map(lambda x: x[0], portsToUpload)
+        if len(availablePorts) <= 0:
+            return []
+        portsToUpload = []
+        for port in availablePorts:
+            if self._checkPort(port, mcu, baudRate):
+                portsToUpload.append(port)
+        return portsToUpload
+
+    def _checkPort(self, port, mcu, baudRate):
+        args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
+        output, err = self._callAvrdude(args)
+        return 'Device signature =' in output or 'Device signature =' in err
+
+    def _run(self, code, upload=False):
+        self._checkBoard()
+        target = ("upload",) if upload else ()
+        uploadPort = self.getPort() if upload else None
+
+        with open(os.path.join(SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
+            mainCppFile.write(code)
+
+        return platformioRun(target=target, environment=(self.board,), project_dir=SETTINGS_PLATFORMIO_PATH,
+                             upload_port=uploadPort)[0]
+
+    def _checkBoard(self):
+        if self.board is None:
+            raise CompilerException(ERROR_BOARD_NOT_SET)
+        if self._getIniConfig(self.board) is None:
+            raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
     def getPort(self):
-        return self.arduino.getPort()
+        self._checkBoard()
+        options = self._getIniConfig(self.board)
+        portsToUpload = self._searchPorts(options["boardData"]["build"]["mcu"], options["boardData"]["upload"]["speed"])
+        if len(portsToUpload) == 0:
+            raise CompilerException(ERROR_NO_PORT_FOUND)
+        elif len(portsToUpload) > 1:
+            raise CompilerException(ERROR_MULTIPLE_BOARDS_CONNECTED)
+        return portsToUpload[0]
 
-    def getBoard(self):
-        return self.arduino.getBoard()
-
-    def searchPort(self):
-        return self.arduino.searchPort()
+    def setBoard(self, board):
+        self.board = board
+        self._checkBoard()
 
     def compile(self, code):
-        return self.arduino.compile(code)
+        return self._run(code, upload=False)
 
     def upload(self, code):
-        return self.arduino.upload(code)
+        return self._run(code, upload=True)
 
 
 def getCompilerUploader():

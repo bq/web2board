@@ -1,6 +1,4 @@
 import json
-import logging
-import logging.config
 import os
 import shutil
 from subprocess import call
@@ -8,11 +6,11 @@ from subprocess import call
 import platform
 
 from libs import utils
+from libs.LoggingUtils import initLogging
 
 pDir = os.path.pardir
 
-logging.config.dictConfig(json.load(open('res' + os.sep + 'logging.json')))
-log = logging.getLogger(__name__)
+log = initLogging(__name__)
 
 
 class Packager:

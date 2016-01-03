@@ -7,7 +7,7 @@ from wshubsapi.Hub import Hub
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Packagers.Packager import Packager
-from libs.PathConstants import MAIN_PATH, EXECUTABLE_PATH
+from libs.PathsManager import MAIN_PATH, EXECUTABLE_PATH
 
 log = logging.getLogger(__name__)
 
