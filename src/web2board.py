@@ -37,7 +37,7 @@ from libs.PathsManager import *
 
 log = initLogging(__name__)  # initialized in main
 isAppRunning = False
-
+server = ""
 
 def handleSystemArguments():
     parser = OptionParser(usage="usage: %prog [options] filename",
@@ -135,16 +135,13 @@ def consoleViewer():
 
 
 def startConsoleViewerIfMac():
-    if utils.isMac() or False:
-        t = threading.Thread(target=consoleViewer)
-        t.daemon = True
-        t.start()
-        while not isAppRunning:
-            time.sleep(0.1)
+    consoleViewer()
 
 
 def main():
-    startConsoleViewerIfMac()
+    global server
+    while not isAppRunning:
+        time.sleep(0.1)
     PathsManager.moveInternalConfigToExternalIfNecessary()
     options = handleSystemArguments()
     PathsManager.logRelevantEnvironmentalPaths()
@@ -152,21 +149,25 @@ def main():
     updateLibrariesIfNecessary()
     server = initializeServerAndCommunicationProtocol(options)
 
-    def closeSigHandler(signal, frame):
-        log.warning("closing server")
-        server.server_close()
-        log.warning("server closed")
-        os._exit(1)
-
-    signal.signal(signal.SIGINT, closeSigHandler)
-
     log.info("listening...")
     server.serve_forever()
 
-
 if __name__ == "__main__":
+    global server
     try:
-        main()
+        t = threading.Thread(target=main)
+        t.daemon = True
+        t.start()
+
+        def closeSigHandler(signal, frame):
+            log.warning("closing server")
+            server.server_close()
+            log.warning("server closed")
+            os._exit(1)
+
+        signal.signal(signal.SIGINT, closeSigHandler)
+
+        startConsoleViewerIfMac()
     except SystemExit:
         pass
     except Exception as e:
