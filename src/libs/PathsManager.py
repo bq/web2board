@@ -34,7 +34,7 @@ class PathsManager:
         elif utils.isWindows():
             return os.path.join(os.getenv('APPDATA'), 'web2board')
         elif utils.isMac():
-            return os.path.join("~/Library/Application Support", 'web2board')
+            return sys_path.get_home_path() + os.sep + ".web2board"
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
 

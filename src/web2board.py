@@ -39,6 +39,7 @@ log = initLogging(__name__)  # initialized in main
 isAppRunning = False
 server = ""
 
+
 def handleSystemArguments():
     parser = OptionParser(usage="usage: %prog [options] filename",
                           version="%prog 1.0")
@@ -101,14 +102,19 @@ def consoleViewer():
     import wx
 
     class RedirectText(object):
-        def __init__(self, aWxTextCtrl):
-            self.out = aWxTextCtrl
+        def __init__(self):
+            self.out = ""
 
         def write(self, string):
-            self.out.WriteText(string)
+            self.out += string
 
         def flush(self, *args):
             pass
+
+        def get(self):
+            aux = self.out
+            self.out = ""
+            return aux
 
     class MyForm(wx.Frame):
         def __init__(self):
@@ -116,17 +122,26 @@ def consoleViewer():
 
             # Add a panel so it looks the correct on all platforms
             panel = wx.Panel(self, wx.ID_ANY)
-            log = wx.TextCtrl(panel, wx.ID_ANY, size=(400, 300),
-                              style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+            self.log = wx.TextCtrl(panel, wx.ID_ANY, size=(400, 300),
+                                   style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+
+            self.timer = wx.Timer(self, 123456)
+            self.Bind(wx.EVT_TIMER, self.onTimer)
+
+            self.timer.Start(100)  # 1 second interval
 
             # Add widgets to a sizer
             sizer = wx.BoxSizer(wx.VERTICAL)
-            sizer.Add(log, 1, wx.ALL | wx.EXPAND, 5)
+            sizer.Add(self.log, 1, wx.ALL | wx.EXPAND, 5)
             panel.SetSizer(sizer)
 
             # redirect text here
-            redir = RedirectText(log)
-            sys.stdout = redir
+            self.redir = RedirectText()
+            sys.stdout = self.redir
+
+        def onTimer(self, *args):
+            message = self.redir.get()
+            self.log.WriteText(message)
 
     app = wx.App(False)
     frame = MyForm().Show()
@@ -152,6 +167,7 @@ def main():
     log.info("listening...")
     server.serve_forever()
 
+
 if __name__ == "__main__":
     global server
     try:
@@ -159,11 +175,13 @@ if __name__ == "__main__":
         t.daemon = True
         t.start()
 
+
         def closeSigHandler(signal, frame):
             log.warning("closing server")
             server.server_close()
             log.warning("server closed")
             os._exit(1)
+
 
         signal.signal(signal.SIGINT, closeSigHandler)
 
