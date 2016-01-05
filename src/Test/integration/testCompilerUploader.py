@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import click
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
@@ -8,10 +9,19 @@ from libs.PathsManager import TEST_RES_PATH, SETTINGS_PLATFORMIO_PATH
 from libs.utils import isWindows, isLinux, isMac
 
 
-class testCompilerUploader(unittest.TestCase):
+class TestCompilerUploader(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        print "\n\n\n##################################################\nRemember to connect a diemilanove board\n##################################################\n"
+        print """\n\n\n
+        #######################################
+        Remember to connect a arduino uno board
+        #######################################\n"""
+
+        def clickConfirm(message):
+            print message
+            return True
+
+        click.confirm = clickConfirm
 
     def setUp(self):
         global SETTINGS_PLATFORMIO_PATH
@@ -21,7 +31,7 @@ class testCompilerUploader(unittest.TestCase):
         SETTINGS_PLATFORMIO_PATH = self.platformioPath
         self.workingCppPath = os.path.join(self.platformioPath, "src", "working.cpp")
         self.notWorkingCppPath = os.path.join(self.platformioPath, "src", "notWorking.cpp")
-        self.connectedBoard = 'diemilanove'
+        self.connectedBoard = 'uno'
 
     def tearDown(self):
         global SETTINGS_PLATFORMIO_PATH

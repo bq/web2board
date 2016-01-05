@@ -13,6 +13,7 @@ src/serial_poc.py
 *.sublime-workspace
 .idea/
 .Python
+.pioenvs
 bin/
 include/
 src/res/

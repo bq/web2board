@@ -180,11 +180,6 @@ function HubsAPI(url, serverTimeout) {
         setLibVersion : function (version){
             
             return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
-        },
-
-        setPort : function (port){
-            
-            return constructMessage('BoardConfigHub', 'setPort', arguments);
         }
     };
     this.BoardConfigHub.client = {};

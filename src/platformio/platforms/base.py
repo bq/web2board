@@ -435,7 +435,7 @@ class BasePlatform(object):
 
             result = util.exec_command(
                 [
-                    "scons",
+                    "C:\Python27\Scripts\dist\scons.exe",
                     "-Q",
                     "-j %d" % self.get_job_nums(),
                     "--warn=no-no-parallel-support",

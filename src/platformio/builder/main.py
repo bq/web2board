@@ -16,6 +16,7 @@
 
 try:
     from platformio import util
+    print("imported util")
 except ImportError:
     import sys
     for p in sys.path:
@@ -80,7 +81,16 @@ commonvars.AddVariables(
     ("UPLOAD_SPEED",),
     ("UPLOAD_FLAGS",)
 )
-
+print 10
+print util.get_home_dir()
+print util.get_project_dir()
+print util.get_projectlib_dir()
+print util.get_projectsrc_dir()
+print util.get_pioenvs_dir()
+print util.get_source_dir()
+print util.get_lib_dir()
+print join("$PLATFORMFW_DIR", "libraries")
+print "bad"
 DefaultEnvironment(
     tools=[
         "gcc", "g++", "as", "ar", "gnulink",
@@ -112,10 +122,10 @@ DefaultEnvironment(
         join("$PLATFORMFW_DIR", "libraries")
     ]
 )
-
+print 11
 env = DefaultEnvironment()
 env.Prepend(LIBPATH=[join("$PIOPACKAGES_DIR", "ldscripts")])
-
+print 12
 if "BOARD" in env:
     try:
         env.Replace(BOARD_OPTIONS=util.get_boards(env.subst("$BOARD")))
@@ -148,7 +158,7 @@ if "BOARD" in env:
             "Use '%s' platform instead." % (
                 env['PLATFORM'], env.get("BOARD_OPTIONS", {}).get("platform")))
 
-
+print 13
 for opt in ("LIB_IGNORE", "LIB_USE"):
     if opt not in env:
         continue

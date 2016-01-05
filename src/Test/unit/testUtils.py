@@ -14,8 +14,8 @@ class TestUtils(unittest.TestCase):
     def setUp(self):
         self.originalListPortsComports = serial.tools.list_ports.comports
         self.myTestFolder = os.path.join(TEST_SETTINGS_PATH, "testUtils")
-        self.copyTreeOld = os.path.join(self.myTestFolder, "copyTree_old")
-        self.copyTreeNew = os.path.join(self.myTestFolder, "copyTree_new")
+        self.copyTreeOld = os.path.join(self.myTestFolder, "copytree_old")
+        self.copyTreeNew = os.path.join(self.myTestFolder, "copytree_new")
         self.zipPath = os.path.join(self.myTestFolder, "zip.zip")
         self.zipFolder = os.path.join(self.myTestFolder, "zip")
 
