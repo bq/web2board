@@ -11,14 +11,10 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import importlib
 import urllib2
 from urllib2 import HTTPError, URLError
-
 import time
-
-import libs.LoggingUtils  # necessary for package, do not remove!
-import libs.WSCommunication.Hubs  # necessary for package, do not remove!
-
 import threading
 import signal
 import ssl
@@ -37,12 +33,11 @@ from libs.PathsManager import *
 
 log = initLogging(__name__)  # initialized in main
 isAppRunning = False
-server = ""
+w2bServer = ""
 
 
 def handleSystemArguments():
-    parser = OptionParser(usage="usage: %prog [options] filename",
-                          version="%prog 1.0")
+    parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
     parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
     parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
     parser.add_option("--example", default='echo', type='string', action="store", dest="example", help="echo, chat")
@@ -70,15 +65,17 @@ def handleSystemArguments():
 
 
 def initializeServerAndCommunicationProtocol(options):
+    global w2bServer
+    importlib.import_module("libs.WSCommunication.Hubs")
     HubsInspector.inspectImplementedHubs()
     # do not call this line in executable
     if not utils.areWeFrozen():
         HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
-    server = make_server(options.host, options.port, server_class=WSGIServer,
-                         handler_class=WebSocketWSGIRequestHandler,
-                         app=WebSocketWSGIApplication(handler_cls=ConnectionHandler))
-    server.initialize_websockets_manager()
-    return server
+    w2bServer = make_server(options.host, options.port, server_class=WSGIServer,
+                            handler_class=WebSocketWSGIRequestHandler,
+                            app=WebSocketWSGIApplication(handler_cls=ConnectionHandler))
+    w2bServer.initialize_websockets_manager()
+    return w2bServer
 
 
 def updateLibrariesIfNecessary():
@@ -154,7 +151,7 @@ def startConsoleViewerIfMac():
 
 
 def main():
-    global server
+    global w2bServer
     while not isAppRunning:
         time.sleep(0.1)
     PathsManager.moveInternalConfigToExternalIfNecessary()
@@ -162,14 +159,13 @@ def main():
     PathsManager.logRelevantEnvironmentalPaths()
     compileUploader = getCompilerUploader()
     updateLibrariesIfNecessary()
-    server = initializeServerAndCommunicationProtocol(options)
+    w2bServer = initializeServerAndCommunicationProtocol(options)
 
     log.info("listening...")
-    server.serve_forever()
+    w2bServer.serve_forever()
 
 
 if __name__ == "__main__":
-    global server
     try:
         t = threading.Thread(target=main)
         t.daemon = True
@@ -177,8 +173,9 @@ if __name__ == "__main__":
 
 
         def closeSigHandler(signal, frame):
+            global w2bServer
             log.warning("closing server")
-            server.server_close()
+            w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
 

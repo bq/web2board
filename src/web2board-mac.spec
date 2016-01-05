@@ -17,6 +17,7 @@ pyz = PYZ(a.pure)
 
 a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
+a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,
@@ -27,4 +28,22 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True )
+          console=False )
+
+app = BUNDLE(exe,
+         name='web2board.app',
+         icon='res\web2board.icns',
+         bundle_identifier=None
+         info_plist={
+            'CFBundleIconFile': 'res/web2board.icns',
+            'CFBundleURLTypes': [
+                {
+                 'CFBundleURLName': 'bitbloq.bq.com',
+                 'CFBundleURLSchemes' : 'web2board'
+                }
+            ],
+            'PyOptions': {
+                'argv_emulation': True
+            }
+            },
+         )

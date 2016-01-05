@@ -1,15 +1,15 @@
 # -*- mode: python -*-
 import os
 import sys
+
 sys.path.append(os.getcwd())
 import libs.utils as utils
 
 block_cipher = None
 
-
 a = Analysis(['serialMonitor.py'],
              pathex=[os.getcwd()],
-             hiddenimports=[],
+             hiddenimports=['libs.LoggingUtils'],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)
@@ -26,4 +26,10 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True )
+          console=False)
+
+app = BUNDLE(exe,
+             name='web2board.app',
+             icon='res\web2board.icns',
+             bundle_identifier=None
+             )

@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 import os
 import sys
+
 sys.path.append(os.getcwd())
 import libs.utils as utils
 
@@ -10,7 +11,7 @@ a = Analysis(['web2board.py'],
              pathex=[os.getcwd()],
              binaries=None,
              datas=None,
-             hiddenimports=[],
+             hiddenimports=['libs.LoggingUtils', 'libs.WSCommunication.Hubs'],
              hookspath=None,
              runtime_hooks=None,
              excludes=None,
@@ -18,7 +19,7 @@ a = Analysis(['web2board.py'],
              win_private_assemblies=None,
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
 
 a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
@@ -33,4 +34,4 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True )
+          console=True)
