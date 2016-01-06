@@ -1,10 +1,11 @@
 # -*- mode: python -*-
 import os
 import sys
+
 sys.path.append(os.getcwd())
 import libs.utils as utils
-block_cipher = None
 
+block_cipher = None
 
 pathEx = os.getcwd()
 
@@ -28,22 +29,22 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False )
+          console=False)
 
 app = BUNDLE(exe,
-         name='web2board.app',
-         icon='res\web2board.icns',
-         bundle_identifier=None
-         info_plist={
-            'CFBundleIconFile': 'res/web2board.icns',
-            'CFBundleURLTypes': [
-                {
-                 'CFBundleURLName': 'bitbloq.bq.com',
-                 'CFBundleURLSchemes' : 'web2board'
-                }
-            ],
-            'PyOptions': {
-                'argv_emulation': True
-            }
-            },
-         )
+             name='web2board.app',
+             icon='res\web2board.icns',
+             bundle_identifier=None,
+             info_plist={
+                 'CFBundleIconFile': 'res/web2board.icns',
+                 'CFBundleURLTypes': [
+                     {
+                         'CFBundleURLName': 'bitbloq.bq.com',
+                         'CFBundleURLSchemes': 'web2board'
+                     }
+                 ],
+                 'PyOptions': {
+                     'argv_emulation': True
+                 }
+             },
+             )

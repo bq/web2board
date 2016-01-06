@@ -1,5 +1,5 @@
 import inspect
-import json
+import tempfile
 import logging
 import os
 import platform
@@ -32,16 +32,16 @@ def getModulePath(frame=None):
         return os.path.dirname(os.path.abspath(unicode(sys.executable, encoding)))
 
 
-def copytree(src, dst, symlinks=False, ignore=None):
+def copytree(src, dst, symlinks=False, ignore=None, forceCopy=False):
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            copytree(s, d, symlinks, ignore)
+            copytree(s, d, symlinks, ignore, forceCopy)
         else:
-            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+            if forceCopy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
 
@@ -58,25 +58,25 @@ def findFilesForPyInstaller(path, patterns):
     return [(f, f, 'DATA') for f in files if os.path.isfile(f)]
 
 
-def getUrlData(url):
+def getDataFromUrl(url):
     f = urlopen(url)
     return f.read()
 
 
 def downloadFile(url):
     log.info("downloading " + url)
-    urlData = getUrlData(url)
-    tempFilePath = os.path.join(libs.base.sys_path.get_tmp_path(), os.path.basename(url))
-    # Open our local file for writing
-    with open(tempFilePath, "wb") as local_file:
-        local_file.write(urlData)
+    extension = url.rsplit(".", 1)
+    extension = extension[1] if len(extension) == 2 else ""
+    urlData = getDataFromUrl(url)
 
-    return tempFilePath
+    with tempfile.NamedTemporaryFile(suffix="." + extension, delete=False) as downloadedTempFile:
+        downloadedTempFile.write(urlData)
+    return os.path.abspath(downloadedTempFile.name)
 
 
 def extractZip(origin, destination):
     with zipfile.ZipFile(origin, "r") as z:
-        z.extractall(destination)
+        return z.extractall(destination)
 
 
 def listSerialPorts(portsFilter=None):
