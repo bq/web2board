@@ -102,6 +102,9 @@ class Packager:
         log.info("Constructing executable")
         self._constructAndMoveExecutable()
 
+    def createPackage(self):
+        raise NotImplementedError
+
     @staticmethod
     def constructCurrentPlatformPackager():
         """

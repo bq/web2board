@@ -125,12 +125,3 @@ class Updater:
             if os.path.exists(extractFolder):
                 shutil.rmtree(extractFolder)
 
-
-if __name__ == "__main__":
-    downloadedFilePath = utils.downloadFile('https://github.com/bq/bitbloqLibs/archive/v0.0.5.zip')
-    try:
-        obj = utils.extractZip(downloadedFilePath, tempfile.gettempdir())
-        print obj
-    finally:
-        if os.path.exists(downloadedFilePath):
-            os.unlink(downloadedFilePath)

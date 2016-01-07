@@ -14,7 +14,7 @@ import logging
 import os
 import subprocess
 
-from libs.PathsManager import MAIN_PATH, SETTINGS_PLATFORMIO_PATH
+from libs.PathsManager import MAIN_PATH, SETTINGS_PLATFORMIO_PATH, RES_PATH
 from libs.utils import isWindows, isMac, isLinux, listSerialPorts
 from platformio.platformioUtils import run as platformioRun
 from platformio import exception, util
@@ -42,6 +42,7 @@ class CompilerException(Exception):
 class CompilerUploader:
     def __init__(self):
         self.board = None  # we use the board name as the environment (check platformio.ini)
+
     def _getIniConfig(self, environment):
         """
         :type environment: str
@@ -67,10 +68,10 @@ class CompilerUploader:
 
     def _callAvrdude(self, args):
         if isWindows():
-            cmd = os.path.join(MAIN_PATH, 'res', 'avrdude.exe ') + args
+            cmd = os.path.join(RES_PATH, 'avrdude.exe ') + "-C " + os.path.join(RES_PATH, 'avrdude.conf ') + args
         elif isMac():
-            avrPath = MAIN_PATH + "/res/arduinoDarwin/hardware/tools/avr"
-            cmd = avrPath + "/bin/avrdude -C " + avrPath + "/etc/avrdude.conf " + args
+            avrPath = MAIN_PATH + "/res/arduinoDarwin"
+            cmd = avrPath + "avrdude -C " + avrPath + "avrdude.os.path.join(RES_PATH, 'avrdude.exe ') " + args
         elif isLinux():
             cmd = "avrdude " + args
         else:
@@ -85,11 +86,12 @@ class CompilerUploader:
         return output, err
 
     def _searchPorts(self, mcu, baudRate):
-        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0] and "bluetooth" not in x.hwid.lower())
         availablePorts = map(lambda x: x[0], portsToUpload)
         if len(availablePorts) <= 0:
             return []
         portsToUpload = []
+        log.debug("Found available ports: {}".format(availablePorts))
         for port in availablePorts:
             if self._checkPort(port, mcu, baudRate):
                 portsToUpload.append(port)
@@ -101,7 +103,7 @@ class CompilerUploader:
         return 'Device signature =' in output or 'Device signature =' in err
 
     def _run(self, code, upload=False):
-        self._checkBoard()
+        self._checkBoardConfiguration()
         target = ("upload",) if upload else ()
         uploadPort = self.getPort() if upload else None
 
@@ -111,14 +113,14 @@ class CompilerUploader:
         return platformioRun(target=target, environment=(self.board,), project_dir=SETTINGS_PLATFORMIO_PATH,
                              upload_port=uploadPort)[0]
 
-    def _checkBoard(self):
+    def _checkBoardConfiguration(self):
         if self.board is None:
             raise CompilerException(ERROR_BOARD_NOT_SET)
         if self._getIniConfig(self.board) is None:
             raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
     def getPort(self):
-        self._checkBoard()
+        self._checkBoardConfiguration()
         options = self._getIniConfig(self.board)
         portsToUpload = self._searchPorts(options["boardData"]["build"]["mcu"], options["boardData"]["upload"]["speed"])
         if len(portsToUpload) == 0:
@@ -129,13 +131,22 @@ class CompilerUploader:
 
     def setBoard(self, board):
         self.board = board
-        self._checkBoard()
+        self._checkBoardConfiguration()
 
     def compile(self, code):
         return self._run(code, upload=False)
 
     def upload(self, code):
         return self._run(code, upload=True)
+
+    def uploadAvrHex(self, hexFilePath):
+        self._checkBoardConfiguration()
+        options = self._getIniConfig(self.board)
+        port = self.getPort()
+        mcu = options["boardData"]["build"]["mcu"]
+        baudRate = str(options["boardData"]["upload"]["speed"])
+        args = "-V " + " -P " + port + " -p " + mcu + " -b " + baudRate + " -c arduino -D -U flash:w:" + hexFilePath + ":i"
+        return self._callAvrdude(args)
 
 
 def getCompilerUploader():
@@ -146,3 +157,5 @@ def getCompilerUploader():
     if __globalCompilerUploader is None:
         __globalCompilerUploader = CompilerUploader()
     return __globalCompilerUploader
+
+

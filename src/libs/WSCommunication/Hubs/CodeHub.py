@@ -5,6 +5,7 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs.CompilerUploader import getCompilerUploader
+from libs import utils
 
 log = logging.getLogger(__name__)
 
@@ -31,12 +32,24 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        if self.__getSerialCommProcess() is not None:
-            try:
-                self.__getSerialCommProcess().terminate()
-            except:
-                log.exception("unable to terminate process")
+        self.__tryToTerminateSerialCommProcess()
+
         _sender.isUploading(self.compilerUploader.getPort())
+        compileReport = self.compilerUploader.upload(code)
+        if compileReport["status"] == "OK":
+            return True
+        else:
+            return self._constructUnsuccessfulReplay(compileReport["error"])
+
+    def uploadHexUrl(self, hexFileUrl, _sender):
+        """
+        :type hexFileUrl: str
+        :type _sender: ConnectedClientsGroup
+        """
+        self.__tryToTerminateSerialCommProcess()
+
+        _sender.isUploading(self.compilerUploader.getPort())
+        hexFilePath = utils.downloadFile(hexFileUrl)
         compileReport = self.compilerUploader.upload(code)
         if compileReport["status"] == "OK":
             return True
@@ -48,3 +61,10 @@ class CodeHub(Hub):
         :rtype: subprocess.Popen|None
         """
         return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationProcess
+
+    def __tryToTerminateSerialCommProcess(self):
+        if self.__getSerialCommProcess() is not None:
+            try:
+                self.__getSerialCommProcess().terminate()
+            except:
+                log.exception("unable to terminate process")

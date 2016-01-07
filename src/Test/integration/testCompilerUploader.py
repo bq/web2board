@@ -5,7 +5,7 @@ import click
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
-from libs.PathsManager import TEST_RES_PATH, SETTINGS_PLATFORMIO_PATH
+from libs.PathsManager import TEST_RES_PATH, SETTINGS_PLATFORMIO_PATH, TEST_SETTINGS_PATH
 from libs.utils import isWindows, isLinux, isMac
 
 
@@ -27,7 +27,8 @@ class TestCompilerUploader(unittest.TestCase):
         global SETTINGS_PLATFORMIO_PATH
         self.originalSettingsPlatformioPath = SETTINGS_PLATFORMIO_PATH
         self.compiler = CompilerUploader()
-        self.platformioPath = os.path.join(TEST_RES_PATH, "platformio")
+        self.platformioPath = os.path.join(TEST_SETTINGS_PATH, "platformio")
+        self.hexFilePath = os.path.join(TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         SETTINGS_PLATFORMIO_PATH = self.platformioPath
         self.workingCppPath = os.path.join(self.platformioPath, "src", "working.cpp")
         self.notWorkingCppPath = os.path.join(self.platformioPath, "src", "notWorking.cpp")
@@ -128,3 +129,10 @@ class TestCompilerUploader(unittest.TestCase):
         compileResult = self.compiler.upload(notWorkingCpp)
 
         self.assertFalse(compileResult[0])
+
+    def test_uploadAvrHex_CompilesSuccessfullyWithWorkingHexFile(self):
+        self.compiler = flexmock(self.compiler, getPort="COM7")
+        self.compiler.setBoard(self.connectedBoard)
+        output, err = self.compiler.uploadAvrHex(self.hexFilePath)
+
+        self.assertTrue("done.  Thank you" in output or "done.  Thank you" in err)
