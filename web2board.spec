@@ -7,7 +7,7 @@ import libs.utils as utils
 
 block_cipher = None
 
-a = Analysis(['web2board.py'],
+a = Analysis(['src/web2board.py'],
              pathex=[os.getcwd()],
              binaries=None,
              datas=None,
@@ -20,7 +20,6 @@ a = Analysis(['web2board.py'],
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
-
 a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
@@ -34,4 +33,5 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True)
+          console=True,
+          icon=os.getcwd() + os.sep + 'res/Web2board.ico')

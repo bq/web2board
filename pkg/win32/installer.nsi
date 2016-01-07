@@ -98,7 +98,7 @@ Section "Web2board"
   
   CreateDirectory "$SMPROGRAMS\Web2board"
   CreateShortCut "$SMPROGRAMS\Web2board\Uninstall Web2board.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  CreateShortCut "$SMPROGRAMS\Web2board\Web2board.lnk" "$INSTDIR\python\python.exe" "$\"$INSTDIR\src\Web2board.py$\"" "$INSTDIR\res\Web2board.ico" 0
+  CreateShortcut "$SMPROGRAMS\Web2board\Web2board.lnk" "$INSTDIR\web2board.exe" "$INSTDIR\web2board.exe" "$INSTDIR\res\Web2board.ico"
   
   ; Give all users write permissions in the install directory, so they can read/write profile and preferences files.
   AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"

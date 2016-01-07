@@ -32,4 +32,4 @@
 
 ::Add the .reg file
 ::CheckOS
-IF EXIST "%PROGRAMFILES(X86)%" (regedit.exe /S res/web2board.reg) ELSE (regedit.exe /S res/web2boardTo32.reg)
+IF EXIST "%PROGRAMFILES(X86)%" (regedit.exe /S web2board.reg) ELSE (regedit.exe /S web2boardTo32.reg)

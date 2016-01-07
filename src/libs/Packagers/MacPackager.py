@@ -20,8 +20,8 @@ class MacPackager(Packager):
         self.web2boardExecutableName = "web2board.app"
         self.serialMonitorExecutableName = "SerialMonitor.app"
 
-        self.web2boardSpecPath = os.path.join(self.srcPath, "web2board-mac.spec")
-        self.serialMonitorSpecPath = os.path.join(self.srcPath, "serialMonitor-mac.spec")
+        self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-mac.spec")
+        self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor-mac.spec")
 
         self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
         self.installerBackgroundPath = os.path.join(self.resPlatformPath, "installer_background.jpg")
@@ -36,9 +36,9 @@ class MacPackager(Packager):
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
+            call(["pyinstaller", "--onefile", "-w", self.web2boardSpecPath])
             shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
-            call(["pyinstaller", "--onefile", self.serialMonitorSpecPath])
+            call(["pyinstaller", "--onefile", "-w", self.serialMonitorSpecPath])
             shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
                          self.installerCreationDistPath)
         finally:

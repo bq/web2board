@@ -29,10 +29,11 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False)
+          console=False,
+          icon=os.getcwd() + os.sep + 'res/Web2board.ico')
 
 app = BUNDLE(exe,
-             name='web2board',
+             name='web2board.app',
              icon='res\web2board.icns',
              bundle_identifier=None,
              info_plist={

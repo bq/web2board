@@ -30,8 +30,8 @@ class Packager:
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
         self.version = json.load(open(os.path.join(self.resPath, "common", "config.json")))["version"]
 
-        self.web2boardSpecPath = os.path.join(self.srcResPath, "web2board.spec")
-        self.serialMonitorSpecPath = os.path.join(self.srcResPath, "serialMonitor.spec")
+        self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
+        self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor.spec")
 
         # abstract attributes
         self.installerPath = None
@@ -86,7 +86,7 @@ class Packager:
         try:
             call(["pyinstaller", "--onefile", self.web2boardSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
-            call(["pyinstaller", "--onefile", self.serialMonitorSpecPath])
+            call(["pyinstaller", "--onefile", "-w", self.serialMonitorSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
                          self.installerCreationDistPath)
         finally:
@@ -110,13 +110,13 @@ class Packager:
         """
         :rtype: Packager
         """
-        if platform.system() == 'Darwin':
+        if utils.isMac():
             from MacPackager import MacPackager
             return MacPackager()
-        elif platform.system() == 'linux':
+        elif utils.isLinux():
             from LinuxPackager import LinuxPackager
             return LinuxPackager()
-        elif platform.system() == 'windows':
+        elif utils.isWindows():
             from WindowsPackager import WindowsPackager
             return WindowsPackager()
 

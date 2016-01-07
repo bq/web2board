@@ -1,11 +1,12 @@
 # -*- mode: python -*-
 import sys
+import os
 sys.path.append(os.getcwd())
 import libs.utils as utils
 
 block_cipher = None
 
-a = Analysis(['serialMonitor.py'],
+a = Analysis(['src\serialMonitor.py'],
              pathex=[os.getcwd()],
              binaries=None,
              datas=None,
@@ -28,8 +29,9 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='serialMonitor',
+          name='SerialMonitor',
           debug=False,
           strip=None,
           upx=True,
-          console=True )
+          console=False,
+          icon=os.getcwd() + os.sep + 'res/Web2board.ico')

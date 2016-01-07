@@ -147,12 +147,13 @@ def consoleViewer():
 
 
 def startConsoleViewerIfMac():
-    consoleViewer()
+    if utils.isMac():
+        consoleViewer()
 
 
 def main():
     global w2bServer
-    while not isAppRunning:
+    while utils.isMac() and not isAppRunning:
         time.sleep(0.1)
     PathsManager.moveInternalConfigToExternalIfNecessary()
     options = handleSystemArguments()
@@ -165,11 +166,18 @@ def main():
     w2bServer.serve_forever()
 
 
-if __name__ == "__main__":
-    try:
+def startMain():
+    if utils.isMac():
         t = threading.Thread(target=main)
         t.daemon = True
         t.start()
+    else:
+        main()
+
+
+if __name__ == "__main__":
+    try:
+        startMain()
 
 
         def closeSigHandler(signal, frame):

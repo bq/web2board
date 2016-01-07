@@ -21,36 +21,23 @@ class WindowsPackager(Packager):
     def _addBatScripsToWinDist(self):
         batName = "afterInstall.bat"
         shutil.copy2(self.installerCreationPath + os.sep + batName, self.installerCreationDistPath + os.sep + batName)
+        web2boardRegName = "web2board.reg"
+        shutil.copy2(self.srcResPath + os.sep + "web2board.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
+        web2boardRegName = "web2boardTo32.reg"
+        shutil.copy2(self.srcResPath + os.sep + "web2board.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
 
     def _addMetadataForInstaller(self):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.iconPath, self.installerCreationPath + os.sep + os.path.basename(self.iconPath))
         self._addBatScripsToWinDist()
 
-    def _constructAndMoveExecutable(self):
-        currentPath = os.getcwd()
-        os.chdir(self.srcPath)
-        try:
-            call(["pyinstaller", "--onefile", "web2board.spec"])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
-            call(["pyinstaller", "--onefile", "serialMonitor.spec"])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName), self.installerCreationDistPath)
-        finally:
-            os.chdir(currentPath)
 
     def _moveInstallerToInstallerFolder(self):
         shutil.copy2(self.installerCreationPath + os.sep + "Web2board.exe", self.installerPath)
 
     def createPackage(self):
         try:
-            log.debug("Removing main folders")
-            self._clearMainFolders()
-            log.debug("Creating main folders")
-            self._makeMainDirs()
-            log.debug("Adding resources for executable")
-            self._prepareResFolderForExecutable()
-            log.info("Constructing executable")
-            self._constructAndMoveExecutable()
+            self._createMainStructureAndExecutables()
             log.debug("Adding metadata for installer")
             self._addMetadataForInstaller()
             os.chdir(self.installerCreationPath)
@@ -63,4 +50,4 @@ class WindowsPackager(Packager):
             os.chdir(self.web2boardPath)
             self._restoreSrcResFolder()
             self._clearBuildFiles()
-            # self._deleteInstallerCreationFolder()
+            #self._deleteInstallerCreationFolder()
