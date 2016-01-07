@@ -75,7 +75,7 @@ class TestUtils(unittest.TestCase):
         lastModificationFile = os.stat(tempFile).st_mtime
         lastModificationDiff = time.time() - lastModificationFile
         self.assertTrue(abs(lastModificationDiff) < 0.5)
-        self.assertIn(libs.base.sys_path.get_tmp_path(), tempFile)
+        self.assertIn(libs.base.sys_path.get_tmp_path().lower(), tempFile.lower())
 
     def test_listDirectoriesInPath(self):
         directories = utils.listDirectoriesInPath(self.myTestFolder)

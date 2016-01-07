@@ -49,13 +49,28 @@ def listDirectoriesInPath(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
 
 
-def findFilesForPyInstaller(path, patterns):
+def findFiles(path, patterns):
     if not isinstance(patterns, (list, tuple, set)):
         patterns = [patterns]
     files = []
     for pattern in patterns:
         files += glob2.glob(path + os.sep + pattern)
+    return files
+
+
+def findFilesForPyInstaller(path, patterns):
+    files = findFiles(path, patterns)
     return [(f, f, 'DATA') for f in files if os.path.isfile(f)]
+
+def findModulesForPyInstaller(path, patterns):
+    files = findFiles(path, patterns)
+    def getModuleFromFile(file):
+        """
+        :type file: str
+        """
+        module = file.replace(os.sep, ".")
+        return module[:-3] #removing .py
+    return [getModuleFromFile(f) for f in files if os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
 
 
 def getDataFromUrl(url):

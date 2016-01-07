@@ -50,7 +50,8 @@ class TestBoardConfigHub(unittest.TestCase):
 
         with self.assertRaises(BoardConfigHubException) as cm:
             self.boardConfigHub.setBoard("undefined", self.sender)
-            self.assertEqual(str(cm.exception), 'BOARD UNDEFINED')
+
+        self.assertEqual(str(cm.exception), 'BOARD UNDEFINED')
 
     def test_setBoard_raisesExceptionIfBoardIsNotSupported(self):
         self.sender.should_receive("isSettingBoard").once()

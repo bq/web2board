@@ -3,7 +3,9 @@ import logging
 import os
 import tempfile
 
-from libs.utils import getDataFromUrl, listDirectoriesInPath, downloadFile, extractZip
+import shutil
+
+from libs import utils
 
 log = logging.getLogger(__name__)
 
@@ -50,17 +52,17 @@ class Updater:
     def _getOnlineVersionNumber(self):
         return self._getVersionNumber(self.onlineVersionInfo)
 
-    def _checkLibraryNames(self, reloadVersions=False):
+    def _areWeMissingLibraries(self, reloadVersions=False):
         if reloadVersions:
             self._reloadVersion()
         log.debug("[{0}] Checking library names".format(self.name))
-        libraries = listDirectoriesInPath(self.destinationPath)
+        libraries = utils.listDirectoriesInPath(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
         for cLibrary in self.currentVersionInfo.librariesNames:
             if cLibrary.lower() not in libraries:
-                return False
+                return True
 
-        return len(self.currentVersionInfo.librariesNames) <= len(libraries)
+        return len(self.currentVersionInfo.librariesNames) > len(libraries)
 
     def _checkVersions(self, reloadVersions=False):
         if reloadVersions:
@@ -72,14 +74,19 @@ class Updater:
         if reloadVersions:
             self._reloadVersion()
 
-        log.debug("[{0}] Updating version to: {}").format(self.name, self.onlineVersionInfo.version)
+        log.debug("[{0}] Updating version to: {}".format(self.name, self.onlineVersionInfo.version))
         with open(self.currentVersionInfoPath, 'w') as currentVersionFile:
             json.dump(self.onlineVersionInfo.getDictionary(), currentVersionFile, indent=4)
 
         self.currentVersionInfo = self.onlineVersionInfo
 
+    def _moveDownloadedToDestinationPath(self, downloadedPath):
+        if not os.path.exists(self.destinationPath):
+            os.makedirs(self.destinationPath)
+        utils.copytree(downloadedPath, self.destinationPath, forceCopy=True)
+
     def readCurrentVersionInfo(self):
-        log.debug("[{0}] Reading current version info").format(self.name)
+        log.debug("[{0}] Reading current version info".format(self.name))
         with open(self.currentVersionInfoPath) as versionFile:
             jsonVersion = json.load(versionFile)
         self.currentVersionInfo = VersionInfo(**jsonVersion)
@@ -87,8 +94,8 @@ class Updater:
         return self.currentVersionInfo
 
     def downloadOnlineVersionInfo(self):
-        log.debug("[{0}] Downloading online version info").format(self.name)
-        jsonVersion = json.loads(getDataFromUrl(self.onlineVersionUrl))
+        log.debug("[{0}] Downloading online version info".format(self.name))
+        jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))
         self.onlineVersionInfo = VersionInfo(**jsonVersion)
         log.debug("[{0}] Downloaded online version: {1}".format(self.name, self.onlineVersionInfo.version))
         return self.onlineVersionInfo
@@ -97,26 +104,33 @@ class Updater:
         if reloadVersions:
             self._reloadVersion()
 
-        return self._checkVersions() or self._checkLibraryNames()
+        return self._checkVersions() or self._areWeMissingLibraries()
 
     def update(self, reloadVersions=False):
         if reloadVersions:
             self._reloadVersion()
-        log.info('[{0}] Downloading version {1}, from {2}'.format(self.name, self.onlineVersionInfo, self.onlineVersionUrl))
-        downloadedFilePath = downloadFile(self.destinationPath)
+        log.info(
+                '[{0}] Downloading version {1}, from {2}'.format(self.name, self.onlineVersionInfo,
+                                                                 self.onlineVersionUrl))
+        downloadedFilePath = utils.downloadFile(self.onlineVersionInfo.file2DownloadUrl)
+        extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
+        os.mkdir(extractFolder)
         try:
-            log.info('[{0}] extracting zipfile: {1}'.format(self.name,downloadedFilePath))
-            extractZip(downloadedFilePath, tempfile.gettempdir())
+            log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
+            utils.extractZip(downloadedFilePath, extractFolder)
+            self._moveDownloadedToDestinationPath(extractFolder)
         finally:
             if os.path.exists(downloadedFilePath):
                 os.unlink(downloadedFilePath)
+            if os.path.exists(extractFolder):
+                shutil.rmtree(extractFolder)
 
 
-
-downloadedFilePath = downloadFile('https://github.com/bq/bitbloqLibs/archive/v0.0.5.zip')
-try:
-    obj = extractZip(downloadedFilePath, tempfile.gettempdir())
-    print obj
-finally:
-    if os.path.exists(downloadedFilePath):
-        os.unlink(downloadedFilePath)
+if __name__ == "__main__":
+    downloadedFilePath = utils.downloadFile('https://github.com/bq/bitbloqLibs/archive/v0.0.5.zip')
+    try:
+        obj = utils.extractZip(downloadedFilePath, tempfile.gettempdir())
+        print obj
+    finally:
+        if os.path.exists(downloadedFilePath):
+            os.unlink(downloadedFilePath)

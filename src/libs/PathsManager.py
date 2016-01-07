@@ -80,12 +80,12 @@ class PathsManager:
             shutil.copyfile(RES_CONFIG_PATH, SETTINGS_CONFIG_PATH)
         if not os.path.isdir(SETTINGS_PLATFORMIO_PATH):
             os.makedirs(SETTINGS_PLATFORMIO_PATH)
-            copytree(RES_PLATFORMIO_PATH, SETTINGS_PLATFORMIO_PATH)
+        copytree(RES_PLATFORMIO_PATH, SETTINGS_PLATFORMIO_PATH)
         if not os.path.isfile(SETTINGS_LOGGING_CONFIG_PATH):
             shutil.copyfile(RES_LOGGING_CONFIG_PATH, SETTINGS_LOGGING_CONFIG_PATH)
         if not os.path.exists(TEST_SETTINGS_PATH):
             os.makedirs(TEST_SETTINGS_PATH)
-            copytree(TEST_RES_PATH, TEST_SETTINGS_PATH)
+        copytree(TEST_RES_PATH, TEST_SETTINGS_PATH)
 
 #set working directory to src
 if utils.areWeFrozen():
