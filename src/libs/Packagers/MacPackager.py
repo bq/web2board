@@ -17,8 +17,8 @@ class MacPackager(Packager):
         self.pkgPlatformPath = os.path.join(self.pkgPath, "darwin")
         self.resPlatformPath = os.path.join(self.resPath, "darwin")
 
-        self.web2boardExecutableName = "web2board"
-        self.serialMonitorExecutableName = "SerialMonitor"
+        self.web2boardExecutableName = "web2board.app"
+        self.serialMonitorExecutableName = "SerialMonitor.app"
 
         self.web2boardSpecPath = os.path.join(self.srcPath, "web2board-mac.spec")
         self.serialMonitorSpecPath = os.path.join(self.srcPath, "serialMonitor-mac.spec")
@@ -31,6 +31,18 @@ class MacPackager(Packager):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
         shutil.copy2(self.licensePath, self.installerCreationDistPath)
+
+    def _constructAndMoveExecutable(self):
+        currentPath = os.getcwd()
+        os.chdir(self.srcPath)
+        try:
+            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
+            shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
+            call(["pyinstaller", "--onefile", self.serialMonitorSpecPath])
+            shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
+                         self.installerCreationDistPath)
+        finally:
+            os.chdir(currentPath)
 
     def createPackage(self):
         try:

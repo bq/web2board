@@ -29,7 +29,7 @@ exe = EXE(pyz,
           console=False)
 
 app = BUNDLE(exe,
-             name='web2board.app',
+             name='web2board',
              icon='res\web2board.icns',
              bundle_identifier=None
              )
