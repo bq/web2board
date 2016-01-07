@@ -113,6 +113,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertRaises(CompilerException, self.compiler.upload, workingCpp)
 
     def test_upload_CompilesSuccessfullyWithWorkingCpp(self):
+        self.compiler = flexmock(self.compiler, getPort="COM7") #todo: remove this line
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
@@ -131,7 +132,6 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertFalse(compileResult[0])
 
     def test_uploadAvrHex_CompilesSuccessfullyWithWorkingHexFile(self):
-        self.compiler = flexmock(self.compiler, getPort="COM7")
         self.compiler.setBoard(self.connectedBoard)
         output, err = self.compiler.uploadAvrHex(self.hexFilePath)
 

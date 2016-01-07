@@ -70,7 +70,8 @@ def findModulesForPyInstaller(path, patterns):
         """
         module = file.replace(os.sep, ".")
         return module[:-3] #removing .py
-    return [getModuleFromFile(f) for f in files if os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
+    listModules = [getModuleFromFile(f) for f in files if os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
+    return list(set(listModules))
 
 
 def getDataFromUrl(url):

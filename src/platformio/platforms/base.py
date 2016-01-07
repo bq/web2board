@@ -431,11 +431,11 @@ class BasePlatform(object):
         self._found_error = False
         try:
             # test that SCons is installed correctly
-            assert util.test_scons()
+            # assert util.test_scons()
 
             result = util.exec_command(
                 [
-                    "C:\Python27\Scripts\dist\scons.exe",
+                    "C:\Users\jorgarira\SoftwareProjects\web2board\src\scons.py",
                     "-Q",
                     "-j %d" % self.get_job_nums(),
                     "--warn=no-no-parallel-support",

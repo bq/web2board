@@ -24,13 +24,12 @@ class WindowsPackager(Packager):
         web2boardRegName = "web2board.reg"
         shutil.copy2(self.srcResPath + os.sep + "web2board.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
         web2boardRegName = "web2boardTo32.reg"
-        shutil.copy2(self.srcResPath + os.sep + "web2board.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
+        shutil.copy2(self.srcResPath + os.sep + "web2boardTo32.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
 
     def _addMetadataForInstaller(self):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.iconPath, self.installerCreationPath + os.sep + os.path.basename(self.iconPath))
         self._addBatScripsToWinDist()
-
 
     def _moveInstallerToInstallerFolder(self):
         shutil.copy2(self.installerCreationPath + os.sep + "Web2board.exe", self.installerPath)
