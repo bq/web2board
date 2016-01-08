@@ -32,7 +32,7 @@ class TestCompilerUploader(unittest.TestCase):
         SETTINGS_PLATFORMIO_PATH = self.platformioPath
         self.workingCppPath = os.path.join(self.platformioPath, "src", "working.cpp")
         self.notWorkingCppPath = os.path.join(self.platformioPath, "src", "notWorking.cpp")
-        self.connectedBoard = 'uno'
+        self.connectedBoard = 'diemilanove'
 
     def tearDown(self):
         global SETTINGS_PLATFORMIO_PATH
@@ -113,7 +113,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertRaises(CompilerException, self.compiler.upload, workingCpp)
 
     def test_upload_CompilesSuccessfullyWithWorkingCpp(self):
-        self.compiler = flexmock(self.compiler, getPort="COM7") #todo: remove this line
+        self.compiler = flexmock(self.compiler, getPort="COM3") #todo: remove this line
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()

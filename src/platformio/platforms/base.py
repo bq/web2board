@@ -20,6 +20,7 @@ from os.path import isdir, isfile, join
 
 import click
 
+from libs.PathsManager import EXECUTABLE_PATH
 from platformio import app, exception, util
 from platformio.app import get_state_item, set_state_item
 from platformio.pkgmanager import PackageManager
@@ -435,7 +436,7 @@ class BasePlatform(object):
 
             result = util.exec_command(
                 [
-                    "C:\Users\jorgarira\SoftwareProjects\web2board\src\scons.py",
+                    EXECUTABLE_PATH + os.sep + "scons.exe",
                     "-Q",
                     "-j %d" % self.get_job_nums(),
                     "--warn=no-no-parallel-support",
