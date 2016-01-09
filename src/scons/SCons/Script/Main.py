@@ -9,6 +9,7 @@ something that we expect other software to want to use, it should go in
 some other module.  If it's specific to the "scons" script invocation,
 it goes here.
 """
+from pprint import pprint
 
 unsupported_python_version = (2, 3, 0)
 deprecated_python_version = (2, 7, 0)
@@ -832,7 +833,6 @@ def _main(parser):
     global this_build_status
 
     options = parser.values
-
     # Here's where everything really happens.
 
     # First order of business:  set up default warnings and then

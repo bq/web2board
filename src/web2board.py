@@ -12,24 +12,29 @@
 #                                                                       #
 # -----------------------------------------------------------------------#
 import importlib
-import urllib2
-from urllib2 import HTTPError, URLError
-import time
-import threading
+import os
 import signal
 import ssl
+import threading
+import time
+import urllib2
 from optparse import OptionParser
+from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
 
+import sys
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
+from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.LibraryUpdater import getLibUpdater
 from libs.LoggingUtils import initLogging
-from libs.PathsManager import *
+from libs.PathsManager import PathsManager
+from Scripts.testRunner import *
+from Scripts import afterInstallScript
 
 log = initLogging(__name__)  # initialized in main
 isAppRunning = False
@@ -41,25 +46,30 @@ def handleSystemArguments():
     parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
     parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
     parser.add_option("--example", default='echo', type='string', action="store", dest="example", help="echo, chat")
-    parser.add_option("--ssl", default=0, type='int', action="store", dest="ssl", help="ssl (1: on, 0: off (default))")
-    parser.add_option("--cert", default='./cert.pem', type='string', action="store", dest="cert",
-                      help="cert (./cert.pem)")
-    parser.add_option("--ver", default=ssl.PROTOCOL_TLSv1, type=int, action="store", dest="ver", help="ssl version")
     parser.add_option("--test", default='none', type='string', action="store", dest="testing",
-                      help="options: [none, unit, integration]")
+                      help="options: [none, unit, integration, all]")
+    parser.add_option("--afterInstall", default=False, action="store_true", dest="afterInstall",
+                      help="setup packages and folder structure")
 
-    if sys.argv[1:]:
-        log.debug('with arguments: {}'.format(sys.argv[1:]))
     options, args = parser.parse_args()
-    testing = options.testing
-    sys.argv[1:] = []
+    log.info("init web2board with options: {}, and args: {}".format(options, args))
 
-    if testing.lower() == "unit":
-        from Test.runAllTests import runAllTests
-        runAllTests()
+    if options.afterInstall:
+        afterInstallScript.run()
+        log.warning("exiting program...")
         os._exit(1)
 
-    log.info("init web2board with options: {}, and args: {}".format(options, args))
+    testing = options.testing.lower()
+    sys.argv[1:] = []
+    if testing != "none":
+        if testing == "unit":
+            runUnitTests()
+        elif testing == "integration":
+            runIntegrationTests()
+        elif testing == "all":
+            runAllTests()
+        log.warning("exiting program...")
+        os._exit(1)
 
     return options
 
@@ -177,9 +187,6 @@ def startMain():
 
 if __name__ == "__main__":
     try:
-        startMain()
-
-
         def closeSigHandler(signal, frame):
             global w2bServer
             log.warning("closing server")
@@ -189,6 +196,8 @@ if __name__ == "__main__":
 
 
         signal.signal(signal.SIGINT, closeSigHandler)
+
+        startMain()
 
         startConsoleViewerIfMac()
     except SystemExit:

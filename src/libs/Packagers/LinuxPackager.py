@@ -26,6 +26,7 @@ class LinuxPackager(Packager):
         self.resPlatformPath = os.path.join(self.resPath, "linux")
         self.web2boardExecutableName = "web2board"
         self.serialMonitorExecutableName = "SerialMonitor"
+        self.serialMonitorExecutableName = "scons"
 
         self.packageDebianMetadataPath = os.path.join(self.installerCreationPath, "DEBIAN")
         self.debDistPath = os.path.join(self.installerPath, "deb_dist")

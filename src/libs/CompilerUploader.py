@@ -14,7 +14,8 @@ import logging
 import os
 import subprocess
 
-from libs.PathsManager import MAIN_PATH, SETTINGS_PLATFORMIO_PATH, RES_PATH
+from libs.Decorators.Asynchronous import asynchronous
+from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isMac, isLinux, listSerialPorts
 from platformio.platformioUtils import run as platformioRun
 from platformio import exception, util
@@ -47,7 +48,7 @@ class CompilerUploader:
         """
         :type environment: str
             """
-        with util.cd(SETTINGS_PLATFORMIO_PATH):
+        with util.cd(pm.SETTINGS_PLATFORMIO_PATH):
             config = util.get_project_config()
 
             if not config.sections():
@@ -68,9 +69,9 @@ class CompilerUploader:
 
     def _callAvrdude(self, args):
         if isWindows():
-            cmd = os.path.join(RES_PATH, 'avrdude.exe ') + "-C " + os.path.join(RES_PATH, 'avrdude.conf ') + args
+            cmd = os.path.join(pm.RES_PATH, 'avrdude.exe ') + "-C " + os.path.join(pm.RES_PATH, 'avrdude.conf ') + args
         elif isMac():
-            avrPath = MAIN_PATH + "/res/arduinoDarwin"
+            avrPath = pm.MAIN_PATH + "/res/arduinoDarwin"
             cmd = avrPath + "avrdude -C " + avrPath + "avrdude.os.path.join(RES_PATH, 'avrdude.exe ') " + args
         elif isLinux():
             cmd = "avrdude " + args
@@ -86,17 +87,22 @@ class CompilerUploader:
         return output, err
 
     def _searchPorts(self, mcu, baudRate):
-        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0] and "bluetooth" not in x.hwid.lower())
+        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0])
         availablePorts = map(lambda x: x[0], portsToUpload)
         if len(availablePorts) <= 0:
             return []
         portsToUpload = []
         log.debug("Found available ports: {}".format(availablePorts))
+        portResultHashMap = {}
         for port in availablePorts:
-            if self._checkPort(port, mcu, baudRate):
+            portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
+
+        for port, resultObject in portResultHashMap.items():
+            if resultObject.get():
                 portsToUpload.append(port)
         return portsToUpload
 
+    @asynchronous()
     def _checkPort(self, port, mcu, baudRate):
         args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
         output, err = self._callAvrdude(args)
@@ -107,10 +113,10 @@ class CompilerUploader:
         target = ("upload",) if upload else ()
         uploadPort = self.getPort() if upload else None
 
-        with open(os.path.join(SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
+        with open(os.path.join(pm.SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
-        return platformioRun(target=target, environment=(self.board,), project_dir=SETTINGS_PLATFORMIO_PATH,
+        return platformioRun(target=target, environment=(self.board,), project_dir=pm.SETTINGS_PLATFORMIO_PATH,
                              upload_port=uploadPort)[0]
 
     def _checkBoardConfiguration(self):

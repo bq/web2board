@@ -4,19 +4,19 @@ import sys
 import os
 import zipfile
 
+from libs.PathsManager import PathsManager
+
 sys.path.append(os.getcwd())
 from libs import utils
 
 block_cipher = None
 
-ZIP_FILE_PATH = os.getcwd() + os.sep + "res" + os.sep + "res.zip"
-zipData = map(lambda x: x[0], utils.findFilesForPyInstaller("scons", ["*", "**/*"]))
-with zipfile.ZipFile(ZIP_FILE_PATH, "w") as z:
+zipData = utils.findFiles("scons", ["*", "**/*"])
+with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "w") as z:
     for zipFilePath in zipData:
         z.write(zipFilePath)
-    z.close()
 
-a = Analysis(['scons.py'],
+a = Analysis(['src/scons.py'],
              pathex=[os.getcwd()],
              binaries=None,
              datas=None,

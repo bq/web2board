@@ -5,8 +5,10 @@ from subprocess import call
 
 import platform
 
+from Scripts import getAllNecessaryPackages
 from libs import utils
 from libs.LoggingUtils import initLogging
+from libs.utils import areWeFrozen
 
 pDir = os.path.pardir
 
@@ -28,10 +30,13 @@ class Packager:
         self.pyInstallerDistFolder = self.srcPath + os.sep + "dist"
         self.pyInstallerBuildFolder = self.srcPath + os.sep + "build"
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
-        self.version = json.load(open(os.path.join(self.resPath, "common", "config.json")))["version"]
+
+        if not areWeFrozen(): # preventing some errors in testing
+            self.version = json.load(open(os.path.join(self.resPath, "common", "config.json")))["version"]
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
         self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor.spec")
+        self.sconsSpecPath = os.path.join(self.web2boardPath, "scons.spec")
 
         # abstract attributes
         self.installerPath = None
@@ -43,6 +48,7 @@ class Packager:
 
         self.web2boardExecutableName = None
         self.serialMonitorExecutableName = None
+        self.sconsExecutableName = None
 
         os.chdir(self.web2boardPath)
 
@@ -84,13 +90,24 @@ class Packager:
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
+            call(["pyinstaller", "--onefile", self.sconsSpecPath])
+            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
+                         self.installerCreationDistPath)
             call(["pyinstaller", "--onefile", "-w", self.serialMonitorSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
                          self.installerCreationDistPath)
+
+            log.debug("getting scons packages")
+            self._getSconsPackages()
+            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
+            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName),
+                         self.installerCreationDistPath)
+
         finally:
             os.chdir(currentPath)
+
+    def _getSconsPackages(self):
+        getAllNecessaryPackages.run()
 
     def _createMainStructureAndExecutables(self):
         log.debug("Removing main folders")
@@ -119,4 +136,3 @@ class Packager:
         elif utils.isWindows():
             from WindowsPackager import WindowsPackager
             return WindowsPackager()
-

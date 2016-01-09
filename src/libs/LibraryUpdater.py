@@ -18,8 +18,7 @@ import shutil
 from distutils.dir_util import mkpath
 
 from libs import utils
-from libs.PathsManager import RES_CONFIG_PATH, SETTINGS_CONFIG_PATH, SKETCHBOOK_LIBRARIES_PATH, SKETCHBOOK_PATH, \
-    PathsManager
+from libs.PathsManager import PathsManager
 import libs.base
 
 log = logging.getLogger(__name__)
@@ -37,8 +36,8 @@ class LibraryUpdater:
         self.necessaryToDownloadLibs = False
 
     def __copyConfigInHomeIfNotExists(self):
-        if not os.path.isfile(SETTINGS_CONFIG_PATH):
-            shutil.copyfile(RES_CONFIG_PATH, SETTINGS_CONFIG_PATH)
+        if not os.path.isfile(PathsManager.SETTINGS_CONFIG_PATH):
+            shutil.copyfile(PathsManager.RES_CONFIG_PATH, PathsManager.SETTINGS_CONFIG_PATH)
 
     def _downloadLibs(self):
         log.info('Downloading new libs, version: {}'.format(self._bitbloqLibsVersion))
@@ -63,11 +62,11 @@ class LibraryUpdater:
         tmpPath = PathsManager.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
         versionNumber = self._getBitbloqLibsVersionNumber()
         if versionNumber <= 2:
-            distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
+            distutils.dir_util.copy_tree(tmpPath, PathsManager.SKETCHBOOK_LIBRARIES_PATH)
         elif versionNumber > 2:
             for name in os.listdir(tmpPath):
                 if os.path.isdir(tmpPath + os.sep + name):
-                    distutils.dir_util.copy_tree(tmpPath, SKETCHBOOK_LIBRARIES_PATH)
+                    distutils.dir_util.copy_tree(tmpPath, PathsManager.SKETCHBOOK_LIBRARIES_PATH)
 
     def _getBitbloqLibsNamesFromDownloadedZip(self):
         tmpPath = PathsManager.getBitbloqLibsTempPath(self._bitbloqLibsVersion)
@@ -85,11 +84,11 @@ class LibraryUpdater:
 
         self.__copyConfigInHomeIfNotExists()
 
-        with open(RES_CONFIG_PATH) as json_data_file:
+        with open(PathsManager.RES_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             versionTrue = str(data.get('bitbloqLibsVersion', "0.0.0"))
 
-        with open(SETTINGS_CONFIG_PATH, "r+") as json_data_file:
+        with open(PathsManager.SETTINGS_CONFIG_PATH, "r+") as json_data_file:
             data = json.load(json_data_file)
             versionLocal = str(data['bitbloqLibsVersion'])
             if versionLocal != versionTrue:
@@ -99,7 +98,7 @@ class LibraryUpdater:
     def getBitbloqLibsVersion(self):
         # Get bitbloqLibs version from config file
         self.__copyConfigInHomeIfNotExists()
-        with open(SETTINGS_CONFIG_PATH) as json_data_file:
+        with open(PathsManager.SETTINGS_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             version = str(data['bitbloqLibsVersion'])
         return version
@@ -107,7 +106,7 @@ class LibraryUpdater:
     def getBitbloqLibsName(self):
         # Get bitbloqLibs name from config file
         self.__copyConfigInHomeIfNotExists()
-        with open(SETTINGS_CONFIG_PATH) as json_data_file:
+        with open(PathsManager.SETTINGS_CONFIG_PATH) as json_data_file:
             data = json.load(json_data_file)
             bitbloqLibsName = []
             try:
@@ -119,12 +118,12 @@ class LibraryUpdater:
 
     def setBitbloqLibsVersion(self, newVersion):
         self.__copyConfigInHomeIfNotExists()
-        with open(SETTINGS_CONFIG_PATH, "r") as jsonFile:
+        with open(PathsManager.SETTINGS_CONFIG_PATH, "r") as jsonFile:
             data = json.load(jsonFile)
 
         data["bitbloqLibsVersion"] = newVersion
 
-        with open(SETTINGS_CONFIG_PATH, "w+") as jsonFile:
+        with open(PathsManager.SETTINGS_CONFIG_PATH, "w+") as jsonFile:
             jsonFile.write(json.dumps(data))
         self.necessaryToDownloadLibs = True
 
@@ -133,12 +132,12 @@ class LibraryUpdater:
         if not hasattr(bitbloqLibsNames, "__iter__"):
             raise Exception("bitbloqLibsNames have to be a list, received: {}".format(bitbloqLibsNames))
 
-        with open(SETTINGS_CONFIG_PATH, "r") as jsonFile:
+        with open(PathsManager.SETTINGS_CONFIG_PATH, "r") as jsonFile:
             data = json.load(jsonFile)
 
         data["bitbloqLibsName"] = bitbloqLibsNames
 
-        with open(SETTINGS_CONFIG_PATH, "w+") as jsonFile:
+        with open(PathsManager.SETTINGS_CONFIG_PATH, "w+") as jsonFile:
             jsonFile.write(json.dumps(data))
 
         log.info("config ready")
@@ -147,13 +146,13 @@ class LibraryUpdater:
         self.updateWeb2BoardVersion()
 
         libsNames = self.getBitbloqLibsName()
-        if not os.path.exists(SKETCHBOOK_PATH):
-            os.makedirs(SKETCHBOOK_PATH)
+        if not os.path.exists(PathsManager.SKETCHBOOK_PATH):
+            os.makedirs(PathsManager.SKETCHBOOK_PATH)
         if len(libsNames) < 1:
             return True
         else:
             for lib in libsNames:
-                libPath = SKETCHBOOK_LIBRARIES_PATH + lib
+                libPath = PathsManager.SKETCHBOOK_LIBRARIES_PATH + lib
                 if not os.path.exists(libPath) or not os.listdir(libPath):
                     return True
         return False

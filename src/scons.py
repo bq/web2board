@@ -3,38 +3,40 @@ import os
 import sys
 from pprint import pprint
 
-from libs.utils import getModulePath, areWeFrozen
-from libs.PathsManager import PathsManager, MAIN_PATH
+from libs.utils import areWeFrozen
+from libs.PathsManager import PathsManager
+from platformio.pkgmanager import PackageManager
 
 PathsManager.moveInternalConfigToExternalIfNecessary()
 
 if areWeFrozen():
-    with zipfile.ZipFile(MAIN_PATH + os.sep + "res" + os.sep + "res.zip", "r") as z:
-        z.extractall(MAIN_PATH)
-
-pprint(sys.argv)
+    with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "r") as z:
+        z.extractall(PathsManager.MAIN_PATH)
 
 # args = ['C:\Users\jorgarira\SoftwareProjects\web2board\src\scons.exe',
 #         '-Q',
 #         '-j 4',
 #         '--warn=no-no-parallel-support',
 #         '-f',
-#         MAIN_PATH + os.sep + 'scons\\platformio\\builder\\main.py',
+#         PathsManager.MAIN_PATH + os.sep + 'scons\\platformio\\builder\\main.py',
 #         'PIOENV=uno',
 #         'PLATFORM=atmelavr',
 #         'UPLOAD_PORT=COM3',
 #         'BOARD=diecimilaatmega328',
 #         'FRAMEWORK=arduino',
-#         'BUILD_SCRIPT=' + MAIN_PATH + os.sep + 'scons\\platformio\\builder\\scripts\\atmelavr.py',
+#         'BUILD_SCRIPT=' + PathsManager.MAIN_PATH + os.sep + 'scons\\platformio\\builder\\scripts\\atmelavr.py',
 #         'PIOPACKAGE_TOOLCHAIN=toolchain-atmelavr',
 #         'PIOPACKAGE_FRAMEWORK=framework-arduinoavr',
-#         "upload"]
+#         "upload",
+#         os.path.join(PathsManager.TEST_SETTINGS_PATH, "platformio")]
+#
+# sys.argv[1:] = args[1:]
 
-sys.argv[5] = MAIN_PATH + os.sep + 'platformio\\builder\\main.py'
-sys.argv[11] = 'BUILD_SCRIPT=' + MAIN_PATH + os.sep + 'platformio\\builder\\scripts\\atmelavr.py'
+pprint(sys.argv)
 
-os.chdir("C:\SoftwareProjects\web2board\src\Test\\resources\platformio")
+os.chdir(sys.argv.pop(-1))
 
-# _null call(args)
-sys.path.extend([MAIN_PATH + os.sep + 'scons'])
-execfile(MAIN_PATH + os.sep + "scons\scons.py")
+# atmelvarBinPath = os.path.join(PackageManager()._package_dir, "toolchain-atmelavr", "bin")
+# os.environ["PATH"] += atmelvarBinPath
+sys.path.extend([PathsManager.MAIN_PATH + os.sep + 'scons'])
+execfile(PathsManager.MAIN_PATH + os.sep + "scons\scons.py")

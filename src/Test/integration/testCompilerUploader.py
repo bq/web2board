@@ -5,7 +5,7 @@ import click
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
-from libs.PathsManager import TEST_RES_PATH, SETTINGS_PLATFORMIO_PATH, TEST_SETTINGS_PATH
+from libs.PathsManager import PathsManager
 from libs.utils import isWindows, isLinux, isMac
 
 
@@ -24,19 +24,12 @@ class TestCompilerUploader(unittest.TestCase):
         click.confirm = clickConfirm
 
     def setUp(self):
-        global SETTINGS_PLATFORMIO_PATH
-        self.originalSettingsPlatformioPath = SETTINGS_PLATFORMIO_PATH
-        self.compiler = CompilerUploader()
-        self.platformioPath = os.path.join(TEST_SETTINGS_PATH, "platformio")
-        self.hexFilePath = os.path.join(TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
-        SETTINGS_PLATFORMIO_PATH = self.platformioPath
-        self.workingCppPath = os.path.join(self.platformioPath, "src", "working.cpp")
-        self.notWorkingCppPath = os.path.join(self.platformioPath, "src", "notWorking.cpp")
+        self.platformioPath = PathsManager.SETTINGS_PLATFORMIO_PATH
+        self.hexFilePath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
+        self.workingCppPath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy", "working.cpp")
+        self.notWorkingCppPath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy", "notWorking.cpp")
         self.connectedBoard = 'diemilanove'
-
-    def tearDown(self):
-        global SETTINGS_PLATFORMIO_PATH
-        SETTINGS_PLATFORMIO_PATH = self.originalSettingsPlatformioPath
+        self.compiler = CompilerUploader()
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.assertIsNone(self.compiler.board)
@@ -93,7 +86,6 @@ class TestCompilerUploader(unittest.TestCase):
         compileResult = self.compiler.compile(workingCpp)
 
         self.assertTrue(compileResult[0])
-        self.assertEqual(compileResult[1]["err"], "")
 
     def test_compile_ResultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
@@ -113,7 +105,6 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertRaises(CompilerException, self.compiler.upload, workingCpp)
 
     def test_upload_CompilesSuccessfullyWithWorkingCpp(self):
-        self.compiler = flexmock(self.compiler, getPort="COM3") #todo: remove this line
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()

@@ -19,6 +19,7 @@ class MacPackager(Packager):
 
         self.web2boardExecutableName = "web2board.app"
         self.serialMonitorExecutableName = "SerialMonitor.app"
+        self.sconsExecutableName = "scons.app"
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-mac.spec")
         self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor-mac.spec")
@@ -40,6 +41,12 @@ class MacPackager(Packager):
             shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName), self.installerCreationDistPath)
             call(["pyinstaller", "--onefile", "-w", self.serialMonitorSpecPath])
             shutil.copytree(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
+                         self.installerCreationDistPath)
+
+            log.debug("getting scons packages")
+            self._getSconsPackages()
+            call(["pyinstaller", "--onefile", "-w", self.sconsSpecPath])
+            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
                          self.installerCreationDistPath)
         finally:
             os.chdir(currentPath)

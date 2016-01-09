@@ -7,7 +7,7 @@ from wshubsapi.Hub import Hub
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Packagers.Packager import Packager
-from libs.PathsManager import MAIN_PATH, EXECUTABLE_PATH
+from libs.PathsManager import PathsManager
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class CodeHubException(Exception):
 
 
 class SerialMonitorHub(Hub):
-    SERIAL_MONITOR_PATH = os.path.join(EXECUTABLE_PATH, "SerialMonitor")
+    SERIAL_MONITOR_PATH = os.path.join(PathsManager.EXECUTABLE_PATH, "SerialMonitor")
     def __init__(self):
         super(SerialMonitorHub, self).__init__()
         self.compilerUploader = getCompilerUploader()
@@ -34,9 +34,9 @@ class SerialMonitorHub(Hub):
     def __findSerialMonitorPath(self):
         if utils.areWeFrozen():
             packager = Packager.constructCurrentPlatformPackager()
-            return os.path.join(EXECUTABLE_PATH, packager.serialMonitorExecutableName)
+            return os.path.join(PathsManager.EXECUTABLE_PATH, packager.serialMonitorExecutableName)
         else:
-            return os.path.join(EXECUTABLE_PATH, "SerialMonitor.py")
+            return os.path.join(PathsManager.EXECUTABLE_PATH, "SerialMonitor.py")
 
     def __getProcessArgsToStartSerialMonitor(self):
         if utils.areWeFrozen():

@@ -36,6 +36,8 @@ def copytree(src, dst, symlinks=False, ignore=None, forceCopy=False):
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
+        if ignore is not None and ignore in item:
+            continue
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):

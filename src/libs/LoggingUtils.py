@@ -1,10 +1,11 @@
 import copy
 import json
 import logging.config
+import os
 
 import click
 
-from libs.PathsManager import *
+from libs.PathsManager import PathsManager
 
 __author__ = 'jorge.garcia'
 
@@ -71,10 +72,10 @@ class ColoredConsoleHandler(logging.StreamHandler):
 
 
 def initLogging(name):
-    if os.path.isfile(SETTINGS_LOGGING_CONFIG_PATH):
-        logging.config.dictConfig(json.load(open(SETTINGS_LOGGING_CONFIG_PATH)))
+    if os.path.isfile(PathsManager.SETTINGS_LOGGING_CONFIG_PATH):
+        logging.config.dictConfig(json.load(open(PathsManager.SETTINGS_LOGGING_CONFIG_PATH)))
     else:
-        logging.config.dictConfig(json.load(open(RES_LOGGING_CONFIG_PATH)))
+        logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))
     logging.getLogger("ws4py").setLevel(logging.ERROR)
 
     return logging.getLogger(name)

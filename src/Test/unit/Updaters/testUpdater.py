@@ -5,7 +5,7 @@ import unittest
 import shutil
 from flexmock import flexmock
 
-from libs.PathsManager import TEST_RES_PATH, TEST_SETTINGS_PATH
+from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
 
@@ -17,14 +17,14 @@ versionTestData = {
 
 
 class TestUpdater(unittest.TestCase):
-    ORIGINAL_DOWNLOAD_ZIP_PATH = os.path.join(TEST_SETTINGS_PATH, "Updater", "000.zip")
-    COPY_DOWNLOAD_ZIP_PATH = os.path.join(TEST_SETTINGS_PATH, "Updater", "copy_000.zip")
+    ORIGINAL_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "000.zip")
+    COPY_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "copy_000.zip")
 
     def setUp(self):
         self.updater = Updater()
-        self.updater.currentVersionInfoPath = os.path.join(TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
+        self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
         self.updater.onlineVersionUrl = "onlineVersionUrl"
-        self.updater.destinationPath = os.path.join(TEST_SETTINGS_PATH, "Updater", "destinationPath")
+        self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
 
         self.originalGetDataFromUrl = utils.getDataFromUrl
         self.originalDownloadFile = utils.downloadFile

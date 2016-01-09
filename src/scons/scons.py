@@ -22,7 +22,7 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from libs.PathsManager import MAIN_PATH
+from libs.PathsManager import PathsManager
 
 __revision__ = "src/script/scons.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
@@ -177,8 +177,8 @@ else:
 # then for 'scons'.
 libs.extend([os.path.join(x, scons_version) for x in prefs])
 libs.extend([os.path.join(x, 'scons') for x in prefs])
-libs.extend([MAIN_PATH + os.sep + "scons"])
-libs.extend([MAIN_PATH + os.sep + "scons" + os.sep + "SCons"])
+libs.extend([PathsManager.MAIN_PATH + os.sep + "scons"])
+libs.extend([PathsManager.MAIN_PATH + os.sep + "scons" + os.sep + "SCons"])
 
 sys.path = libs + sys.path
 

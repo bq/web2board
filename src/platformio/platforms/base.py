@@ -20,7 +20,7 @@ from os.path import isdir, isfile, join
 
 import click
 
-from libs.PathsManager import EXECUTABLE_PATH
+from libs.PathsManager import PathsManager
 from platformio import app, exception, util
 from platformio.app import get_state_item, set_state_item
 from platformio.pkgmanager import PackageManager
@@ -436,12 +436,12 @@ class BasePlatform(object):
 
             result = util.exec_command(
                 [
-                    EXECUTABLE_PATH + os.sep + "scons.exe",
+                    PathsManager.getSonsExecutablePath(), # [JORGE_GARCIA] modified for scons compatibility
                     "-Q",
                     "-j %d" % self.get_job_nums(),
                     "--warn=no-no-parallel-support",
                     "-f", join(util.get_source_dir(), "builder", "main.py")
-                ] + variables + targets,
+                ] + variables + targets + [PathsManager.SETTINGS_PLATFORMIO_PATH], # [JORGE_GARCIA] modified for scons compatibility
                 stdout=util.AsyncPipe(self.on_run_out),
                 stderr=util.AsyncPipe(self.on_run_err)
             )
