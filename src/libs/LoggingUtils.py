@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import logging.config
 import os
 
@@ -72,6 +73,9 @@ class ColoredConsoleHandler(logging.StreamHandler):
 
 
 def initLogging(name):
+    """
+    :rtype: logging.Logger
+    """
     if os.path.isfile(PathsManager.SETTINGS_LOGGING_CONFIG_PATH):
         logging.config.dictConfig(json.load(open(PathsManager.SETTINGS_LOGGING_CONFIG_PATH)))
     else:

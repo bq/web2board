@@ -11,11 +11,11 @@ log = logging.getLogger(__name__)
 
 
 class VersionInfo:
-    def __init__(self, version, file2DownloadUrl, librariesNames=list()):
+    def __init__(self, version, file2DownloadUrl="", librariesNames=list()):
         self.version = version
         """:type : str """
         self.file2DownloadUrl = file2DownloadUrl
-        """:type : str """
+        """:type : str | dict """
         self.librariesNames = librariesNames
 
     def getDictionary(self):
@@ -23,6 +23,8 @@ class VersionInfo:
 
 
 class Updater:
+    NONE_VERSION = "0.0.0"
+
     def __init__(self):
         self.currentVersionInfo = None
         """:type : VersionInfo """
@@ -43,14 +45,11 @@ class Updater:
         self.readCurrentVersionInfo()
         self.downloadOnlineVersionInfo()
 
-    def _getVersionNumber(self, versionInfo):
-        return int(versionInfo.version.replace('.', ''))
-
     def _getCurrentVersionNumber(self):
-        return self._getVersionNumber(self.currentVersionInfo)
+        return self.getVersionNumber(self.currentVersionInfo)
 
     def _getOnlineVersionNumber(self):
-        return self._getVersionNumber(self.onlineVersionInfo)
+        return self.getVersionNumber(self.onlineVersionInfo)
 
     def _areWeMissingLibraries(self, reloadVersions=False):
         if reloadVersions:
@@ -81,12 +80,32 @@ class Updater:
         self.currentVersionInfo = self.onlineVersionInfo
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
-        if not os.path.exists(self.destinationPath):
-            os.makedirs(self.destinationPath)
-        utils.copytree(downloadedPath, self.destinationPath, forceCopy=True)
+        raise NotImplementedError
+        if os.path.exists(self.destinationPath):
+            if os.path.isfile(self.destinationPath):
+                os.remove(self.destinationPath)
+            else:
+                shutil.rmtree(self.destinationPath)
+                os.makedirs(self.destinationPath)
+
+        if os.path.isdir(downloadedPath):
+            shutil.move(downloadedPath, self.destinationPath)
+        else:
+            os.rename(downloadedPath, self.destinationPath)
+
+    def getVersionNumber(self, versionInfo):
+        """
+        :type versionInfo: VersionInfo
+        """
+        return int(versionInfo.version.replace('.', ''))
 
     def readCurrentVersionInfo(self):
         log.debug("[{0}] Reading current version info".format(self.name))
+        if not os.path.exists(self.currentVersionInfoPath):
+            self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
+            logText = "[{0}] Unable to find version in settings path: {1}"
+            log.warning(logText.format(self.name, self.currentVersionInfoPath))
+            return self.currentVersionInfo
         with open(self.currentVersionInfoPath) as versionFile:
             jsonVersion = json.load(versionFile)
         self.currentVersionInfo = VersionInfo(**jsonVersion)
@@ -94,7 +113,7 @@ class Updater:
         return self.currentVersionInfo
 
     def downloadOnlineVersionInfo(self):
-        log.debug("[{0}] Downloading online version info".format(self.name))
+        log.debug("[{0}] Downloading online version info from: {1}".format(self.name, self.onlineVersionUrl))
         jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))
         self.onlineVersionInfo = VersionInfo(**jsonVersion)
         log.debug("[{0}] Downloaded online version: {1}".format(self.name, self.onlineVersionInfo.version))
@@ -109,12 +128,12 @@ class Updater:
     def update(self, reloadVersions=False):
         if reloadVersions:
             self._reloadVersion()
-        log.info(
-                '[{0}] Downloading version {1}, from {2}'.format(self.name, self.onlineVersionInfo,
-                                                                 self.onlineVersionUrl))
+        log.info('[{0}] Downloading version {1}, from {2}'
+                 .format(self.name, self.onlineVersionInfo.version, self.onlineVersionInfo.file2DownloadUrl))
         downloadedFilePath = utils.downloadFile(self.onlineVersionInfo.file2DownloadUrl)
         extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
-        os.mkdir(extractFolder)
+        if not os.path.exists(extractFolder):
+            os.mkdir(extractFolder)
         try:
             log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
             utils.extractZip(downloadedFilePath, extractFolder)
@@ -124,4 +143,3 @@ class Updater:
                 os.unlink(downloadedFilePath)
             if os.path.exists(extractFolder):
                 shutil.rmtree(extractFolder)
-

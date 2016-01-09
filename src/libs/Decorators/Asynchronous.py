@@ -24,7 +24,8 @@ class Result(object):
                 self.thread.join()
             else:
                 raise AsynchronousNotDone("Asynchronous not done yet")
-
+        if isinstance(self.result, Exception):
+            raise self.result
         return self.result
 
 
@@ -36,7 +37,10 @@ def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None):
         def overFunction(*args, **kwargs):
             func = kwargs.pop("__func__")
             resultObject = kwargs.pop("__ResultObject__")
-            result = func(*args, **kwargs)
+            try:
+                result = func(*args, **kwargs)
+            except Exception as e:
+                result = e
             resultObject.result = result
             if callback is not None:
                 callback(result, *callbackArgs, **callbackKwargs)

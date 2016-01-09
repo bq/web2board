@@ -8,6 +8,7 @@ import platform
 from Scripts import getAllNecessaryPackages
 from libs import utils
 from libs.LoggingUtils import initLogging
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 from libs.utils import areWeFrozen
 
 pDir = os.path.pardir
@@ -31,8 +32,7 @@ class Packager:
         self.pyInstallerBuildFolder = self.srcPath + os.sep + "build"
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
 
-        if not areWeFrozen(): # preventing some errors in testing
-            self.version = json.load(open(os.path.join(self.resPath, "common", "config.json")))["version"]
+        self.version = getWeb2boardUpdater().currentVersionInfo.version
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
         self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor.spec")

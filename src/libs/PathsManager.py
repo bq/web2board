@@ -3,7 +3,6 @@ import os
 import platform
 import shutil
 import sys
-
 from libs import utils
 from libs.base import sys_path
 from libs.utils import copytree
@@ -97,19 +96,25 @@ class PathsManager:
 
     @classmethod
     def moveInternalConfigToExternalIfNecessary(cls):
-        return
-        if not os.path.isfile(cls.SETTINGS_CONFIG_PATH):
+        from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+        web2boardUpdater = getWeb2boardUpdater()
+        if web2boardUpdater.isNecessaryToUpdateSettings():
+            _pathsLog.info("Creating settings folder structure in: {}".format(cls.TEST_SETTINGS_PATH))
             shutil.copyfile(cls.RES_CONFIG_PATH, cls.SETTINGS_CONFIG_PATH)
-        if not os.path.isdir(cls.SETTINGS_PLATFORMIO_PATH):
+
+            if os.path.exists(cls.SETTINGS_PLATFORMIO_PATH):
+                shutil.rmtree(cls.SETTINGS_PLATFORMIO_PATH)
             os.makedirs(cls.SETTINGS_PLATFORMIO_PATH)
-            # todo: check version to update values
             copytree(cls.RES_PLATFORMIO_PATH, cls.SETTINGS_PLATFORMIO_PATH)
-        if not os.path.isfile(cls.SETTINGS_LOGGING_CONFIG_PATH):
+
             shutil.copyfile(cls.RES_LOGGING_CONFIG_PATH, cls.SETTINGS_LOGGING_CONFIG_PATH)
-        if not os.path.exists(cls.TEST_SETTINGS_PATH):
+
+            if os.path.exists(cls.TEST_SETTINGS_PATH):
+                shutil.rmtree(cls.TEST_SETTINGS_PATH)
             os.makedirs(cls.TEST_SETTINGS_PATH)
-            # todo: check version to update values
             copytree(cls.TEST_RES_PATH, cls.TEST_SETTINGS_PATH, ignore=".pioenvs")
+
+            shutil.copyfile(web2boardUpdater.currentVersionInfoPath, web2boardUpdater.settingsVersionInfoPath)
 
 
 # set working directory to src

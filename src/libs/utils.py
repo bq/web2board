@@ -10,7 +10,6 @@ from urllib2 import urlopen
 
 import glob2
 import serial.tools.list_ports
-import libs.base
 
 log = logging.getLogger(__name__)
 
@@ -114,3 +113,6 @@ def isWindows():
 
 def isMac():
     return platform.system() == 'Darwin'
+
+def is64bits():
+    return sys.maxsize > 2**32
