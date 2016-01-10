@@ -41,7 +41,7 @@ class Updater:
 
         self.name = "Updater"
 
-    def _reloadVersion(self):
+    def _reloadVersions(self):
         self.readCurrentVersionInfo()
         self.downloadOnlineVersionInfo()
 
@@ -53,11 +53,11 @@ class Updater:
 
     def _areWeMissingLibraries(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
         log.debug("[{0}] Checking library names".format(self.name))
         libraries = utils.listDirectoriesInPath(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
-        for cLibrary in self.currentVersionInfo.librariesNames:
+        for cLibrary in self.onlineVersionInfo.librariesNames:
             if cLibrary.lower() not in libraries:
                 return True
 
@@ -65,13 +65,13 @@ class Updater:
 
     def _checkVersions(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
 
         return self._getCurrentVersionNumber() != self._getOnlineVersionNumber()
 
     def _updateVersionInfo(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
 
         log.debug("[{0}] Updating version to: {}".format(self.name, self.onlineVersionInfo.version))
         with open(self.currentVersionInfoPath, 'w') as currentVersionFile:
@@ -81,17 +81,7 @@ class Updater:
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         raise NotImplementedError
-        if os.path.exists(self.destinationPath):
-            if os.path.isfile(self.destinationPath):
-                os.remove(self.destinationPath)
-            else:
-                shutil.rmtree(self.destinationPath)
-                os.makedirs(self.destinationPath)
 
-        if os.path.isdir(downloadedPath):
-            shutil.move(downloadedPath, self.destinationPath)
-        else:
-            os.rename(downloadedPath, self.destinationPath)
 
     def getVersionNumber(self, versionInfo):
         """
@@ -121,13 +111,13 @@ class Updater:
 
     def isNecessaryToUpdate(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
 
         return self._checkVersions() or self._areWeMissingLibraries()
 
     def update(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
         log.info('[{0}] Downloading version {1}, from {2}'
                  .format(self.name, self.onlineVersionInfo.version, self.onlineVersionInfo.file2DownloadUrl))
         downloadedFilePath = utils.downloadFile(self.onlineVersionInfo.file2DownloadUrl)

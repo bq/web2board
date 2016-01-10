@@ -75,7 +75,7 @@ class Web2BoardUpdater(Updater):
 
     def update(self, reloadVersions=False):
         if reloadVersions:
-            self._reloadVersion()
+            self._reloadVersions()
 
         downloadUrl = self._getDownloadUrl()
 

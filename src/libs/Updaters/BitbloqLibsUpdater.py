@@ -21,7 +21,9 @@ class BitbloqLibsUpdater(Updater):
         self.onlineVersionUrl = "https://github.com/bq/bitbloqLibs/archive/master.zip"  # todo: recheck this
         self.destinationPath = os.path.join(PathsManager.SETTINGS_PLATFORMIO_PATH, "lib")
         self.name = "BitbloqLibsUpdater"
-        # self._reloadVersion()
+        # self._reloadVersions() # todo: this needs to be called when  urls work
+        self.currentVersionInfo = VersionInfo("0.0.1", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
+        self.onlineVersionInfo = VersionInfo("0.0.2", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         directoriesInUnzippedFolder = utils.listDirectoriesInPath(downloadedPath)
@@ -41,9 +43,3 @@ def getBitbloqLibsUpdater():
     if __globalBitbloqLibsUpdater is None:
         __globalBitbloqLibsUpdater = BitbloqLibsUpdater()
     return __globalBitbloqLibsUpdater
-
-
-u = getBitbloqLibsUpdater()
-u.onlineVersionInfo = VersionInfo("0.0.1", "https://github.com/bq/bitbloqLibs/archive/master.zip")
-u.currentVersionInfo = VersionInfo("0.0.0", "https://github.com/bq/bitbloqLibs/archive/master.zip")
-u.update()
