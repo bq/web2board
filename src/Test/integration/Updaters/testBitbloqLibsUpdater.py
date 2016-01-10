@@ -25,6 +25,24 @@ class TestBitbloqUpdater(unittest.TestCase):
     def test_reloadVersions_constructVersionsInfo(self):
         self.updater.onlineVersionUrl = "https://raw.githubusercontent.com/bq/web2board/devel/src/Test/resources/Updater/onlineBitbloqLibsVersionV5.version"
         self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
+
         self.updater._reloadVersions()
+
+        self.assertEqual(self.updater.currentVersionInfo.version, "0.0.1")
+        self.assertEqual(self.updater.currentVersionInfo.file2DownloadUrl, 'file2DownloadUrl')
+        self.assertEqual(self.updater.onlineVersionInfo.version, "0.0.5")
+        self.assertEqual(self.updater.onlineVersionInfo.file2DownloadUrl, 'https://raw.githubusercontent.com/bq/web2board/devel/src/Test/resources/Updater/bitbloqLibsV5.zip')
+
+    def test_upload_writesLibrariesInDestinationPath(self):
+        self.updater.onlineVersionUrl = "https://raw.githubusercontent.com/bq/web2board/devel/src/Test/resources/Updater/onlineBitbloqLibsVersionV5.version"
+        self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
+        self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "newLibrariesPath")
+        try:
+            self.updater.update(reloadVersions=True)
+            downloadedLibraries = utils.listDirectoriesInPath(self.updater.destinationPath)
+            self.assertGreater(len(downloadedLibraries), 0)
+        finally:
+            if os.path.exists(self.updater.destinationPath):
+                shutil.rmtree(self.updater.destinationPath)
 
 
