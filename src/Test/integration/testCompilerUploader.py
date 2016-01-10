@@ -2,20 +2,25 @@ import os
 import unittest
 
 import click
+import sys
+import os
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
-from libs.PathsManager import PathsManager
+from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
 
 
 class TestCompilerUploader(unittest.TestCase):
+    platformToUse = None
+
     @classmethod
     def setUpClass(cls):
-        print """\n\n\n
+        cls.platformToUse = cls.__getPlatformToUse()
+        print """\n\n
         #######################################
-        Remember to connect a arduino uno board
-        #######################################\n"""
+        Remember to connect a {} board
+        #######################################\n""".format(cls.platformToUse)
 
         def clickConfirm(message):
             print message
@@ -23,12 +28,25 @@ class TestCompilerUploader(unittest.TestCase):
 
         click.confirm = clickConfirm
 
+    @classmethod
+    def __getPlatformToUse(cls):
+        board = os.environ.get("platformioBoard", None)
+        if board is None:
+            board = filter(lambda x: x.startswith("platformioBoard="), sys.argv)
+            if board is None:
+                return "uno"
+            else:
+                return board[0].split("=")[1]
+        return board
+
     def setUp(self):
-        self.platformioPath = PathsManager.SETTINGS_PLATFORMIO_PATH
-        self.hexFilePath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
-        self.workingCppPath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy", "working.cpp")
-        self.notWorkingCppPath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy", "notWorking.cpp")
-        self.connectedBoard = 'diemilanove'
+        self.platformioPath = pm.SETTINGS_PLATFORMIO_PATH
+        self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
+        self.srcCopyPath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
+        self.workingCppPath = os.path.join(self.srcCopyPath, "working.cpp")
+        self.notWorkingCppPath = os.path.join(self.srcCopyPath, "notWorking.cpp")
+        self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.cpp")
+        self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader()
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
@@ -84,6 +102,15 @@ class TestCompilerUploader(unittest.TestCase):
             workingCpp = f.read()
 
         compileResult = self.compiler.compile(workingCpp)
+
+        self.assertTrue(compileResult[0])
+
+    def test_compile_CompilesSuccessfullyWithLibraries(self):
+        self.compiler.setBoard(self.connectedBoard)
+        with open(self.withLibrariesCppPath) as f:
+            withLibrariesCpp = f.read()
+
+        compileResult = self.compiler.compile(withLibrariesCpp)
 
         self.assertTrue(compileResult[0])
 

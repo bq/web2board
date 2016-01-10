@@ -15,9 +15,14 @@ versionTestData = {
     "librariesNames": ["l1"]
 }
 
+onlineVersionTestData = {
+    "version": "90.90.90",
+    "file2DownloadUrl": "file2DownloadUrl",
+}
+
 
 class TestUpdater(unittest.TestCase):
-    ORIGINAL_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "000.zip")
+    ORIGINAL_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "bitbloqLibsV1.zip")
     COPY_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "copy_000.zip")
 
     def setUp(self):
@@ -29,6 +34,7 @@ class TestUpdater(unittest.TestCase):
         self.originalGetDataFromUrl = utils.getDataFromUrl
         self.originalDownloadFile = utils.downloadFile
         self.originalExtractZip = utils.extractZip
+        self.originalListDirectoriesInPath = utils.listDirectoriesInPath
 
         self.zipToClearPath = None
 
@@ -36,6 +42,7 @@ class TestUpdater(unittest.TestCase):
         utils.getDataFromUrl = self.originalGetDataFromUrl
         utils.downloadFile = self.originalDownloadFile
         utils.extractZip = self.originalExtractZip
+        utils.listDirectoriesInPath = self.originalListDirectoriesInPath
 
         for libraryName in versionTestData["librariesNames"]:
             if os.path.exists(self.updater.destinationPath + os.sep + libraryName):
@@ -59,7 +66,7 @@ class TestUpdater(unittest.TestCase):
     def test_readCurrentVersionInfo_setsCurrentVersionInfoValues(self):
         self.updater.readCurrentVersionInfo()
 
-        self.assertEqual(self.updater.currentVersionInfo.version, "0.0.0")
+        self.assertEqual(self.updater.currentVersionInfo.version, "0.0.1")
         self.assertTrue(len(self.updater.currentVersionInfo.librariesNames) >= 1)
 
     def test_readCurrentVersionInfo_returnsNoneVersionIfFileNotFound(self):
@@ -78,7 +85,7 @@ class TestUpdater(unittest.TestCase):
         self.assertEqual(self.updater.onlineVersionInfo.librariesNames, ["l1"])
 
     def test_isNecessaryToUpdate_raiseExceptionIfCurrentVersionIsNone(self):
-        self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
+        self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
 
         with self.assertRaises(Exception):
             self.updater.isNecessaryToUpdate()
@@ -98,7 +105,7 @@ class TestUpdater(unittest.TestCase):
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreDifferent(self):
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
-        self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
+        self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
         self.updater.currentVersionInfo.version = "0.1.1"
 
         self.assertTrue(self.updater.isNecessaryToUpdate())
@@ -135,16 +142,35 @@ class TestUpdater(unittest.TestCase):
         with self.assertRaises(Exception):
             self.updater.update()
 
-    def test_update_ReloadsVersionIfFlagIsTrue(self):
+    def test_update_ReloadsVersionsIfFlagIsTrue(self):
         self.__getMockForGetDataFromUrl()
         self.__getMockForDownloadFile().once()
         self.__getMockForExtractZip().once()
-
+        flexmock(utils).should_receive("listDirectoriesInPath")
         self.updater._moveDownloadedToDestinationPath = lambda x: x
+
         self.updater.update(reloadVersions=True)
 
         self.assertIsNotNone(self.updater.onlineVersionInfo)
         self.assertIsNotNone(self.updater.currentVersionInfo)
+
+    def test_update_updatesCurrentVersionInfo(self):
+        self.__getMockForGetDataFromUrl()
+        self.__getMockForDownloadFile().once()
+        self.__getMockForExtractZip().once()
+        flexmock(utils).should_receive("listDirectoriesInPath").and_return(["l1", "l2"])
+        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
+        self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
+        self.updater._moveDownloadedToDestinationPath = lambda x: x
+
+        self.updater.update(reloadVersions=True)
+
+        self.assertEqual(self.updater.currentVersionInfo.librariesNames, ["l1", "l2"])
+        self.assertEqual(self.updater.currentVersionInfo.version, self.updater.onlineVersionInfo.version)
+        self.assertEqual(self.updater.currentVersionInfo.version, self.updater.onlineVersionInfo.version)
+        self.assertFalse(self.updater._areWeMissingLibraries())
+        self.assertFalse(self.updater._checkVersions())
+        self.assertFalse(self.updater.isNecessaryToUpdate())
 
     @unittest.skip("_moveDownloadedToDestinationPath is not implemented in Updater")
     def test_update_MoveExtractedFolderToDestinationFolder(self):

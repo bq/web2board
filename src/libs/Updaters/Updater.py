@@ -57,7 +57,7 @@ class Updater:
         log.debug("[{0}] Checking library names".format(self.name))
         libraries = utils.listDirectoriesInPath(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
-        for cLibrary in self.onlineVersionInfo.librariesNames:
+        for cLibrary in self.currentVersionInfo.librariesNames:
             if cLibrary.lower() not in libraries:
                 return True
 
@@ -82,6 +82,10 @@ class Updater:
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         raise NotImplementedError
 
+    def _updateCurrentVersionInfo(self):
+        self.currentVersionInfo.version = self.onlineVersionInfo.version
+        self.currentVersionInfo.file2DownloadUrl = self.onlineVersionInfo.file2DownloadUrl
+        self.currentVersionInfo.librariesNames = utils.listDirectoriesInPath(self.destinationPath)
 
     def getVersionNumber(self, versionInfo):
         """
@@ -128,6 +132,7 @@ class Updater:
             log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
             utils.extractZip(downloadedFilePath, extractFolder)
             self._moveDownloadedToDestinationPath(extractFolder)
+            self._updateCurrentVersionInfo()
         finally:
             if os.path.exists(downloadedFilePath):
                 os.unlink(downloadedFilePath)

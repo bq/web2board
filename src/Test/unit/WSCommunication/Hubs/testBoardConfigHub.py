@@ -1,7 +1,6 @@
 import unittest
 
 from wshubsapi.ConnectedClient import ConnectedClient
-from wshubsapi.Hub import UnsuccessfulReplay
 from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER

@@ -1,22 +1,25 @@
-import json
 import os
 import shutil
+import zipfile
 from subprocess import call
+import logging
+import click
 
-import platform
+from libs.utils import findFiles
+from platformio import util
 
-from Scripts import getAllNecessaryPackages
 from libs import utils
-from libs.LoggingUtils import initLogging
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
-from libs.utils import areWeFrozen
+from libs.PathsManager import PathsManager as pm
+from platformio.platforms.base import PlatformFactory
 
 pDir = os.path.pardir
-
-log = initLogging(__name__)
+log = logging.getLogger(__name__)
 
 
 class Packager:
+    ARCH_64, ARCH_32 = "amd64", "i386"
+
     def __init__(self):
         modulePath = utils.getModulePath()
         self.packagerResPath = os.path.join(modulePath, "res")
@@ -107,7 +110,39 @@ class Packager:
             os.chdir(currentPath)
 
     def _getSconsPackages(self):
-        getAllNecessaryPackages.run()
+        originalCurrentDirectory = os.getcwd()
+        originalClickConfirm = click.confirm
+
+        def clickConfirm(message):
+            print message
+            return True
+
+        click.confirm = clickConfirm
+        try:
+            os.chdir(pm.SETTINGS_PLATFORMIO_PATH)
+            config = util.get_project_config()
+            for section in config.sections():
+                envOptionsDict = {x[0]: x[1] for x in config.items(section)}
+                platform = PlatformFactory.newPlatform(envOptionsDict["platform"])
+                log.info("getting packages for: {}".format(envOptionsDict))
+                platform.configure_default_packages(envOptionsDict, ["upload"])
+                platform._install_default_packages()
+
+            log.info("all packages where successfully installed")
+            platformIOPackagesSettingsPath = os.path.abspath(util.get_home_dir())
+            log.info("constructing zip file in : {}".format(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH))
+            packagesFiles = findFiles(platformIOPackagesSettingsPath, ["appstate.json", "packages/**/*"])
+            packagesFiles = [x[len(platformIOPackagesSettingsPath) + 1:] for x in packagesFiles]
+            os.chdir(platformIOPackagesSettingsPath)
+            with zipfile.ZipFile(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
+                for zipFilePath in packagesFiles:
+                    log.debug("adding file: {}".format(zipFilePath))
+                    z.write(zipFilePath)
+            log.info("zip file constructed")
+
+        finally:
+            os.chdir(originalCurrentDirectory)
+            click.confirm = originalClickConfirm
 
     def _createMainStructureAndExecutables(self):
         log.debug("Removing main folders")
@@ -123,8 +158,9 @@ class Packager:
         raise NotImplementedError
 
     @staticmethod
-    def constructCurrentPlatformPackager():
+    def constructCurrentPlatformPackager(architecture=ARCH_64):
         """
+        :param architecture: use this architecture to for linux packager
         :rtype: Packager
         """
         if utils.isMac():
@@ -132,7 +168,7 @@ class Packager:
             return MacPackager()
         elif utils.isLinux():
             from LinuxPackager import LinuxPackager
-            return LinuxPackager()
+            return LinuxPackager(architecture=architecture)
         elif utils.isWindows():
             from WindowsPackager import WindowsPackager
             return WindowsPackager()

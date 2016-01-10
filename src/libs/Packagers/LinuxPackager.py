@@ -5,14 +5,13 @@ from libs.utils import *
 
 
 class LinuxPackager(Packager):
-    ARCH_64, ARCH_32 = "amd64", "i386"
 
     RELEASE_TYPES = ({"path": "web2board", "desktopName": "Web2Board-PROD"},
                      {"path": "dev/bet", "desktopName": "Web2Board-BETA"},
                      {"path": "dev/qa", "desktopName": "Web2Board-QA"},
                      {"path": "dev/staging", "desktopName": "Web2Board-STAGING"})
 
-    def __init__(self, architecture=ARCH_64):
+    def __init__(self, architecture=Packager.ARCH_64):
         Packager.__init__(self)
         self.architecture = architecture
         self.installerPath = self.installerFolder + os.sep + "debian_{}".format(architecture)

@@ -16,10 +16,10 @@ import subprocess
 
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
-from libs.utils import isWindows, isMac, isLinux, listSerialPorts
 from platformio.platformioUtils import run as platformioRun
 from platformio import exception, util
-from platformio.util import get_boards, memoized
+from platformio.util import get_boards
+from libs import utils
 
 log = logging.getLogger(__name__)
 __globalCompilerUploader = None
@@ -68,18 +68,22 @@ class CompilerUploader:
                     return iniConfig
 
     def _callAvrdude(self, args):
-        if isWindows():
-            cmd = os.path.join(pm.RES_PATH, 'avrdude.exe ') + "-C " + os.path.join(pm.RES_PATH, 'avrdude.conf ') + args
-        elif isMac():
-            avrPath = pm.MAIN_PATH + "/res/arduinoDarwin"
-            cmd = avrPath + "avrdude -C " + avrPath + "avrdude.os.path.join(RES_PATH, 'avrdude.exe ') " + args
-        elif isLinux():
-            cmd = "avrdude " + args
+        if utils.isWindows():
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude.exe ')
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
+        elif utils.isMac():
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude ')
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
+        elif utils.isLinux():
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude64 ' if utils.is64bits() else "avrdude")
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
         else:
             raise Exception("Platform not supported")
+
+        cmd = avrExePath + "-C " + avrConfigPath + args
         log.info("Command executed: {}".format(cmd))
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             close_fds=(not isWindows()))
+                             close_fds=(not utils.isWindows()))
         output = p.stdout.read()
         err = p.stderr.read()
         log.debug(output)
@@ -87,7 +91,7 @@ class CompilerUploader:
         return output, err
 
     def _searchPorts(self, mcu, baudRate):
-        portsToUpload = listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
         availablePorts = map(lambda x: x[0], portsToUpload)
         if len(availablePorts) <= 0:
             return []
