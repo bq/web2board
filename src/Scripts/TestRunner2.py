@@ -1,6 +1,5 @@
 import os
 import unittest
-import xmlrunner
 from Test import setConfigurationFilesForTest
 from Test.HTMLTestRunner import HTMLTestRunner
 from Test.integration.testCompilerUploader import TestCompilerUploader

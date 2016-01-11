@@ -30,10 +30,8 @@ from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
 from libs import utils
-from libs.CompilerUploader import getCompilerUploader
 from libs.LoggingUtils import initLogging
-from libs.PathsManager import PathsManager
-from Scripts.testRunner import *
+from Scripts.TestRunner2 import *
 from Scripts import afterInstallScript
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
