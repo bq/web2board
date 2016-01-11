@@ -61,7 +61,6 @@ class Web2BoardUpdater(Updater):
         return self._getCurrentVersionNumber() != self._getSettingsVersionNumber()
 
     def readSettingsVersionInfo(self):
-        log.debug("[{0}] Reading settings version info".format(self.name))
         if not os.path.exists(self.settingsVersionInfoPath):
             self.settingsVersionInfo = VersionInfo(self.NONE_VERSION)
             logText = "[{0}] Unable to find version in settings path: {1}"

@@ -10,7 +10,7 @@ from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
 
-class TestBitbloqUpdater(unittest.TestCase):
+class TestBitbloqLibsUpdater(unittest.TestCase):
     def setUp(self):
         self.updater = BitbloqLibsUpdater()
         self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "newLibrariesPath")

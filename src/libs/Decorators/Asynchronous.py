@@ -1,3 +1,4 @@
+from datetime import datetime
 from threading import Thread
 
 import threading
@@ -14,6 +15,7 @@ class Result(object):
         """
         self.result = None
         self.thread = thread
+        self.startTime = datetime.now()
 
     def isDone(self):
         return not self.thread.isAlive()
@@ -21,7 +23,8 @@ class Result(object):
     def get(self, joinIfNecessary=True, joinTimeout=None):
         if not self.isDone():
             if joinIfNecessary:
-                self.thread.join(joinTimeout)
+                realTimeout = max([0, joinTimeout-(datetime.now() - self.startTime).seconds])
+                self.thread.join(realTimeout)
             else:
                 raise AsynchronousNotDone("Asynchronous not done yet")
         if isinstance(self.result, Exception):

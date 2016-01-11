@@ -11,11 +11,11 @@ def run():
     log.info("running afterInstallScript")
     log.info("adding settings files...")
     PathsManager.moveInternalConfigToExternalIfNecessary()
-    if not os.path.exists(PathsManager.RES_PLATFORMIO_PACKAGES_ZIP_PATH):
+    if not os.path.exists(PathsManager.PLATFORMIO_PACKAGES_ZIP_PATH):
         log.warning("No platformio packages zip found. (ignored)")
     else:
         log.info("extracting platformIO packages...")
-        with zipfile.ZipFile(PathsManager.RES_PLATFORMIO_PACKAGES_ZIP_PATH, "r") as z:
+        with zipfile.ZipFile(PathsManager.PLATFORMIO_PACKAGES_ZIP_PATH, "r") as z:
             z.extractall(os.path.abspath(util.get_home_dir()))
         log.info("afterInstallScript was successfully executed")
 

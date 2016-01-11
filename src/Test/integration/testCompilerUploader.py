@@ -32,11 +32,7 @@ class TestCompilerUploader(unittest.TestCase):
     def __getPlatformToUse(cls):
         board = os.environ.get("platformioBoard", None)
         if board is None:
-            board = filter(lambda x: x.startswith("platformioBoard="), sys.argv)
-            if board is None:
-                return "uno"
-            else:
-                return board[0].split("=")[1]
+            raise Exception("No board defined")
         return board
 
     def setUp(self):
@@ -49,25 +45,30 @@ class TestCompilerUploader(unittest.TestCase):
         self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader()
 
+        self.original_searchPorts = self.compiler.searchPorts
+
+    def tearDown(self):
+        self.compiler.searchPorts = self.original_searchPorts
+
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.assertIsNone(self.compiler.board)
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfNotReturningPort(self):
-        self.compiler = flexmock(CompilerUploader(), _searchPorts=lambda x, y: [])
+        self.compiler = flexmock(self.compiler, searchPorts=lambda: [])
 
         self.compiler.setBoard('uno')
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfReturnsMoreThanOnePort(self):
-        self.compiler = flexmock(CompilerUploader(), _searchPorts=lambda x, y: [1, 2])
+        self.compiler = flexmock(self.compiler, searchPorts=lambda: [1, 2])
         self.compiler.setBoard('uno')
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_returnPortIfSearchPortsReturnsOnePort(self):
-        self.compiler = flexmock(CompilerUploader(), _searchPorts=lambda x, y: [1])
+        self.compiler = flexmock(self.compiler, searchPorts=lambda: [1])
         self.compiler.setBoard('uno')
 
         port = self.compiler.getPort()

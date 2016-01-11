@@ -17,18 +17,25 @@ from flexmock import flexmock
 class TestBoardConfigHub(unittest.TestCase):
     def setUp(self):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
+        self.libUpdater = getBitbloqLibsUpdater()
         self.boardConfigHub = HubsInspector.getHubInstance(BoardConfigHub)
         client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x, lambda x=0: x)
         self.sender = flexmock(isSettingPort=lambda x: x, isSettingBoard=lambda: None)
+
+        self.original_compile = self.boardConfigHub.compilerUploader.compile
+        self.original_getPort = self.boardConfigHub.compilerUploader.getPort
+        self.original_lib_update = self.libUpdater.update
+
         self.boardConfigHub.compilerUploader = flexmock(self.boardConfigHub.compilerUploader,
                                                         compile=None,
                                                         getPort=None)
-
         self.testLibVersion = "1.1.1"
 
-        self.libUpdater = getBitbloqLibsUpdater()
 
     def tearDown(self):
+        self.boardConfigHub.compilerUploader.compile = self.original_compile
+        self.boardConfigHub.compilerUploader.getPort = self.original_compile
+        self.libUpdater.update = self.original_lib_update
         removeHubsSubclasses()
 
     def test_construct_getCompilerUploader(self):

@@ -30,11 +30,11 @@ def run():
 
         log.info("all packages where successfully installed")
         platformIOPackagesSettingsPath = os.path.abspath(util.get_home_dir())
-        log.info("constructing zip file in : {}".format(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH))
+        log.info("constructing zip file in : {}".format(pm.PLATFORMIO_PACKAGES_ZIP_PATH))
         packagesFiles = findFiles(platformIOPackagesSettingsPath, ["appstate.json", "packages/**/*"])
         packagesFiles = [x[len(platformIOPackagesSettingsPath)+1:] for x in packagesFiles]
         os.chdir(platformIOPackagesSettingsPath)
-        with zipfile.ZipFile(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
+        with zipfile.ZipFile(pm.PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
             for zipFilePath in packagesFiles:
                 log.debug("adding file: {}".format(zipFilePath))
                 z.write(zipFilePath)

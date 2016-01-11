@@ -5,11 +5,11 @@ from subprocess import call
 import logging
 import click
 
-from libs.utils import findFiles
+from libs.utils import findFiles, copytree
 from platformio import util
 
 from libs import utils
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater, Web2BoardUpdater
 from libs.PathsManager import PathsManager as pm
 from platformio.platforms.base import PlatformFactory
 
@@ -66,6 +66,8 @@ class Packager:
             shutil.rmtree(self.installerCreationPath)
 
     def _clearMainFolders(self):
+        if os.path.exists(os.path.join(self.srcPath, self.sconsExecutableName)):
+            os.remove(os.path.join(self.srcPath, self.sconsExecutableName))
         if os.path.exists(self.installerPath):
             shutil.rmtree(self.installerPath)
         if os.path.exists(self.auxiliarySrcResPath):
@@ -78,6 +80,13 @@ class Packager:
             shutil.rmtree(self.pyInstallerDistFolder)
         if os.path.exists(self.pyInstallerBuildFolder):
             shutil.rmtree(self.pyInstallerBuildFolder)
+
+    def _addMetadataForInstaller(self):
+        resourcesInstallerPath = self.installerCreationDistPath + pm.EXTERNAL_RESOURCES_PATH[len(pm.MAIN_PATH):]
+        if not os.path.exists(resourcesInstallerPath):
+            os.makedirs(resourcesInstallerPath)
+
+        copytree(pm.EXTERNAL_RESOURCES_PATH, resourcesInstallerPath)
 
     def _makeMainDirs(self):
         os.makedirs(self.installerCreationPath)
@@ -93,16 +102,12 @@ class Packager:
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            call(["pyinstaller", "--onefile", self.sconsSpecPath])
+            call(["pyinstaller", "--onefile", '-w', self.sconsSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
-                         self.installerCreationDistPath)
-            call(["pyinstaller", "--onefile", "-w", self.serialMonitorSpecPath])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.serialMonitorExecutableName),
-                         self.installerCreationDistPath)
+                         self.srcPath)
 
-            log.debug("getting scons packages")
             self._getSconsPackages()
-            call(["pyinstaller", "--onefile", self.web2boardSpecPath])
+            call(["pyinstaller", "--onefile", '-w', self.web2boardSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName),
                          self.installerCreationDistPath)
 
@@ -130,11 +135,13 @@ class Packager:
 
             log.info("all packages where successfully installed")
             platformIOPackagesSettingsPath = os.path.abspath(util.get_home_dir())
-            log.info("constructing zip file in : {}".format(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH))
+            log.info("constructing zip file in : {}".format(pm.PLATFORMIO_PACKAGES_ZIP_PATH))
             packagesFiles = findFiles(platformIOPackagesSettingsPath, ["appstate.json", "packages/**/*"])
             packagesFiles = [x[len(platformIOPackagesSettingsPath) + 1:] for x in packagesFiles]
             os.chdir(platformIOPackagesSettingsPath)
-            with zipfile.ZipFile(pm.RES_PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
+            if not os.path.exists(pm.EXTERNAL_RESOURCES_PATH):
+                os.makedirs(pm.EXTERNAL_RESOURCES_PATH)
+            with zipfile.ZipFile(pm.PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
                 for zipFilePath in packagesFiles:
                     log.debug("adding file: {}".format(zipFilePath))
                     z.write(zipFilePath)
@@ -145,6 +152,11 @@ class Packager:
             click.confirm = originalClickConfirm
 
     def _createMainStructureAndExecutables(self):
+        if self.version == Web2BoardUpdater.NONE_VERSION:
+            self._prepareResFolderForExecutable()
+            self.__init__()
+            return self._createMainStructureAndExecutables()
+
         log.debug("Removing main folders")
         self._clearMainFolders()
         log.debug("Creating main folders")

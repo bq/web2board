@@ -94,7 +94,6 @@ class Updater:
         return int(versionInfo.version.replace('.', ''))
 
     def readCurrentVersionInfo(self):
-        log.debug("[{0}] Reading current version info".format(self.name))
         if not os.path.exists(self.currentVersionInfoPath):
             self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
             logText = "[{0}] Unable to find version in settings path: {1}"
@@ -107,7 +106,6 @@ class Updater:
         return self.currentVersionInfo
 
     def downloadOnlineVersionInfo(self):
-        log.debug("[{0}] Downloading online version info from: {1}".format(self.name, self.onlineVersionUrl))
         jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))
         self.onlineVersionInfo = VersionInfo(**jsonVersion)
         log.debug("[{0}] Downloaded online version: {1}".format(self.name, self.onlineVersionInfo.version))

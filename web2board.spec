@@ -1,11 +1,18 @@
 # -*- mode: python -*-
 import os
 import sys
+import zipfile
 
 sys.path.append(os.getcwd())
 import libs.utils as utils
+from libs.PathsManager import PathsManager
 
 block_cipher = None
+zipData = utils.findFiles("scons", ["*", "**/*"])
+zipData = utils.findFiles("scons", ["*", "**/*"])
+with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "w") as z:
+    for zipFilePath in zipData:
+        z.write(zipFilePath)
 
 a = Analysis(['src/web2board.py'],
              pathex=[os.getcwd()],
@@ -24,7 +31,7 @@ pyz = PYZ(a.pure, a.zipped_data,
 a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
-
+a.datas += utils.findFilesForPyInstaller(".", ["scons.exe"])
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

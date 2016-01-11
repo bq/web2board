@@ -1,20 +1,11 @@
 # -*- mode: python -*-
-import pprint
 import sys
 import os
-import zipfile
-
-from libs.PathsManager import PathsManager
 
 sys.path.append(os.getcwd())
 from libs import utils
 
 block_cipher = None
-
-zipData = utils.findFiles("scons", ["*", "**/*"])
-with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "w") as z:
-    for zipFilePath in zipData:
-        z.write(zipFilePath)
 
 a = Analysis(['src/scons.py'],
              pathex=[os.getcwd()],

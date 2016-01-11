@@ -20,6 +20,7 @@ import logging
 import serial
 
 from libs import utils
+from libs.CompilerUploader import getCompilerUploader
 
 log = logging.getLogger(__name__)
 reload(sys)
@@ -57,7 +58,12 @@ class SerialConnection:
 
 
 class SerialMonitorUI(wx.Dialog):
-    def __init__(self, parent, port):
+    def __init__(self, parent, port=None):
+        if port is None:
+            getCompilerUploader().setBoard("uno")
+            port = getCompilerUploader().getPort()
+        else:
+            port = sys.argv[1]
         style = wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX
         super(SerialMonitorUI, self).__init__(parent, title='bitbloq\'s Serial Monitor', size=(500, 500), style=style)
         self.serialConnection = SerialConnection(port)
@@ -104,6 +110,14 @@ class SerialMonitorUI(wx.Dialog):
         vbox.Add(hbox1, 0, wx.EXPAND, 12)
         self.SetSizer(vbox)
         # self.ShowModal()
+        self.Bind( wx.EVT_CLOSE, self.ParentFrameOnClose)
+        self.isClosed = False
+
+
+    def ParentFrameOnClose(self, event):
+        self.isClosed = True
+        self.DestroyChildren()
+        self.Destroy()
 
     def onKeyPress(self, event):
         if event.GetKeyCode() != wx.WXK_RETURN:
@@ -166,10 +180,6 @@ class SerialMonitorUI(wx.Dialog):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        port = utils.listSerialPorts()[0][0]
-    else:
-        port = sys.argv[1]
     # app = wx.App(redirect=True)
     app = wx.App()
     serialMonitor = SerialMonitorUI(None, port)

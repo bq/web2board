@@ -9,9 +9,9 @@ from platformio.pkgmanager import PackageManager
 
 PathsManager.moveInternalConfigToExternalIfNecessary()
 
-if areWeFrozen():
-    with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "r") as z:
-        z.extractall(PathsManager.MAIN_PATH)
+# if areWeFrozen():
+#     with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "r") as z:
+#         z.extractall(PathsManager.MAIN_PATH)
 
 # args = ['C:\Users\jorgarira\SoftwareProjects\web2board\src\scons.exe',
 #         '-Q',
@@ -33,10 +33,11 @@ if areWeFrozen():
 # sys.argv[1:] = args[1:]
 
 pprint(sys.argv)
-
+web2boardPath = sys.argv[5].split("platformio" + os.sep)[0]
+print web2boardPath
 os.chdir(sys.argv.pop(-1))
 
 # atmelvarBinPath = os.path.join(PackageManager()._package_dir, "toolchain-atmelavr", "bin")
 # os.environ["PATH"] += atmelvarBinPath
-sys.path.extend([PathsManager.MAIN_PATH + os.sep + 'scons'])
-execfile(PathsManager.MAIN_PATH + os.sep + "scons\scons.py")
+sys.path.extend([web2boardPath + 'scons'])
+execfile(web2boardPath + "scons" + os.sep + "scons.py")

@@ -16,13 +16,15 @@ class PathsManager:
 
     EXECUTABLE_PATH = None
     MAIN_PATH = None
+    PLATFORMIO_PACKAGES_ZIP_PATH = None
+    EXTERNAL_RESOURCES_PATH = None
+
     RES_PATH = None
     RES_CONFIG_PATH = None
     RES_BOARDS_PATH = None
     RES_PLATFORMIO_PATH = None
     RES_LOGGING_CONFIG_PATH = None
     RES_SCONS_ZIP_PATH = None
-    RES_PLATFORMIO_PACKAGES_ZIP_PATH = None
     TEST_RES_PATH = None
 
     SETTINGS_PATH = None
@@ -56,9 +58,12 @@ class PathsManager:
     @classmethod
     def getSonsExecutablePath(cls):
         if utils.areWeFrozen():
-            return cls.EXECUTABLE_PATH + os.sep + "scons.exe"
+            if utils.isWindows():
+                return cls.MAIN_PATH + os.sep + "scons.exe"
+            else:
+                return cls.MAIN_PATH + os.sep + "scons"
         else:
-            return cls.EXECUTABLE_PATH + os.sep + "scons.py"
+            return cls.MAIN_PATH + os.sep + "scons.py"
 
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
@@ -89,6 +94,10 @@ class PathsManager:
             copytree(cls.TEST_RES_PATH, cls.TEST_SETTINGS_PATH, ignore=".pioenvs")
 
             shutil.copyfile(web2boardUpdater.currentVersionInfoPath, web2boardUpdater.settingsVersionInfoPath)
+            web2boardUpdater.readSettingsVersionInfo()
+
+            from Scripts import afterInstallScript
+            afterInstallScript.run()
 
 
 # set working directory to src
@@ -97,23 +106,27 @@ if utils.areWeFrozen():
 else:
     os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
-PathsManager.EXECUTABLE_PATH = os.getcwd()
-PathsManager.MAIN_PATH = PathsManager.getMainPath()
-PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH, 'res')
-PathsManager.TEST_RES_PATH = os.path.join(PathsManager.MAIN_PATH, 'Test', 'resources')
-PathsManager.RES_CONFIG_PATH = os.path.join(PathsManager.RES_PATH, 'config.json')
-PathsManager.RES_BOARDS_PATH = os.path.join(PathsManager.RES_PATH, 'boards.txt')
-PathsManager.RES_PLATFORMIO_PATH = os.path.join(PathsManager.RES_PATH, 'platformio')
-PathsManager.RES_LOGGING_CONFIG_PATH = os.path.join(PathsManager.RES_PATH, 'logging.json')
-PathsManager.RES_SCONS_ZIP_PATH = os.path.join(PathsManager.MAIN_PATH, "res", "sconsRes.zip")
-PathsManager.RES_PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(PathsManager.MAIN_PATH, "res", "platformPackages.zip")
+pm = PathsManager
+pm.EXECUTABLE_PATH = os.getcwd()
+pm.MAIN_PATH = pm.getMainPath()
+pm.EXTERNAL_RESOURCES_PATH = os.path.join(pm.EXECUTABLE_PATH, "externalResources")
+pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.EXTERNAL_RESOURCES_PATH, "platformPackages.zip")
 
-PathsManager.SETTINGS_PATH = PathsManager.getExternalDataFolder()
-PathsManager.SETTINGS_PLATFORMIO_PATH = os.path.join(PathsManager.SETTINGS_PATH, 'platformio')
-PathsManager.SETTINGS_CONFIG_PATH = os.path.join(PathsManager.SETTINGS_PATH, '.web2boardconfig')
-PathsManager.SETTINGS_LOGGING_CONFIG_PATH = os.path.join(PathsManager.SETTINGS_PATH, 'logging.json')
-PathsManager.TEST_SETTINGS_PATH = os.path.join(PathsManager.SETTINGS_PATH, 'Test', 'resources')
+pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
+pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')
+pm.RES_CONFIG_PATH = os.path.join(pm.RES_PATH, 'config.json')
+pm.RES_BOARDS_PATH = os.path.join(pm.RES_PATH, 'boards.txt')
+pm.RES_PLATFORMIO_PATH = os.path.join(pm.RES_PATH, 'platformio')
+pm.RES_LOGGING_CONFIG_PATH = os.path.join(pm.RES_PATH, 'logging.json')
+pm.RES_SCONS_ZIP_PATH = os.path.join(pm.MAIN_PATH, "res", "sconsRes.zip")
+
+
+pm.SETTINGS_PATH = pm.getExternalDataFolder()
+pm.SETTINGS_PLATFORMIO_PATH = os.path.join(pm.SETTINGS_PATH, 'platformio')
+pm.SETTINGS_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, '.web2boardconfig')
+pm.SETTINGS_LOGGING_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, 'logging.json')
+pm.TEST_SETTINGS_PATH = os.path.join(pm.SETTINGS_PATH, 'Test', 'resources')
 
 # construct External_data_path if not exists
-if not os.path.exists(PathsManager.SETTINGS_PATH):
-    os.makedirs(PathsManager.SETTINGS_PATH)
+if not os.path.exists(pm.SETTINGS_PATH):
+    os.makedirs(pm.SETTINGS_PATH)

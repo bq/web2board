@@ -7,7 +7,7 @@ initLogging(__name__)
 
 architectureInt = 64
 
-if len(sys.argv) > 0:
+if len(sys.argv) > 1:
     architectureInt = int(sys.argv[1])
 
 architecture = Packager.ARCH_32 if architectureInt == 32 else Packager.ARCH_64

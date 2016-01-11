@@ -19,6 +19,7 @@ from multiprocessing import cpu_count
 from os.path import isdir, isfile, join
 
 import click
+import sys
 
 from libs.PathsManager import PathsManager
 from platformio import app, exception, util
@@ -433,7 +434,6 @@ class BasePlatform(object):
         try:
             # test that SCons is installed correctly
             # assert util.test_scons()
-
             result = util.exec_command(
                 [
                     PathsManager.getSonsExecutablePath(), # [JORGE_GARCIA] modified for scons compatibility

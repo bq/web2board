@@ -130,7 +130,7 @@ class CompilerUploader:
             portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
 
         for port, resultObject in portResultHashMap.items():
-            if resultObject.get(joinTimeout=5):
+            if resultObject.get(joinTimeout=4):
                 portsToUpload.append(port)
         return portsToUpload
 

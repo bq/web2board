@@ -38,6 +38,7 @@ class LinuxPackager(Packager):
         os.makedirs(self.debDistPath)
 
     def _addMetadataForInstaller(self):
+        Packager._addMetadataForInstaller(self)
         copytree(self.debianMetadataPath, self.packageDebianMetadataPath)
         with open(self.packageDebianMetadataPath + os.sep + "control", "r") as controlFile:
             controlText = controlFile.read()

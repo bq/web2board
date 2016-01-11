@@ -3,18 +3,22 @@ import threading
 import sys
 import wx
 
+from SerialMonitor import SerialMonitorUI
 from frames.Web2boardgui import Web2boardGui
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.wxAsynchronous import WX_Utils
 
+
 class RedirectText(object):
-    def __init__(self, parent):
+    def __init__(self, parent, originalStdout):
         self.parent = parent
+        self.originalStdout = originalStdout
         self.out = ""
 
     def write(self, string):
         self.out += string
+        self.originalStdout(string)
 
     def flush(self, *args):
         pass
@@ -26,7 +30,7 @@ class RedirectText(object):
 
 
 class Web2boardWindow(Web2boardGui):
-    def __init__(self, parent):
+    def __init__(self, parent, eventsRefreshTime=100):
         super(Web2boardWindow, self).__init__(parent)
         self.compileUpdater = getCompilerUploader()
         self.availablePorts = ["AUTO"]
@@ -36,15 +40,18 @@ class Web2boardWindow(Web2boardGui):
         self.timer = wx.Timer(self, 123456)
         self.Bind(wx.EVT_TIMER, self.onTimer)
         self.htmlBuffer = ""
+        self.actions = []
 
-        # self.timer.Start(100)  # 1 second interval
+        if eventsRefreshTime > 0:
+            self.timer.Start(100)  # 1 second interval
 
         # redirect text here
-        self.redir = RedirectText(self)
+        originalStdout = sys.stdout.write
+        self.redir = RedirectText(self, originalStdout)
         sys.stdout = self.redir
+        self.serialMonitor = None
 
         WX_Utils.initDecorators(self)
-        wx.CallAfter(self.consoleLog.LoadPage, "http://www.java2s.com/Tutorial/Python/0380__wxPython/LoadwebpagetoHtmlWindow.htm")
 
     @asynchronous()
     def __getPorts(self):
@@ -83,7 +90,25 @@ class Web2boardWindow(Web2boardGui):
             message = "<b>{}</b>".format(message)
             self.htmlBuffer += message
             self.consoleLog.SetPage(self.htmlBuffer)
-            self.consoleLog.Scroll(0,self.consoleLog.GetScrollRange(wx.VERTICAL))
+            self.consoleLog.Scroll(0, self.consoleLog.GetScrollRange(wx.VERTICAL))
+        actions = self.actions
+        for action in actions:
+            if action[0] == "startSerialMonitor":
+                self.serialMonitor = SerialMonitorUI(None, action[1])
+                self.serialMonitor.Show()
+            elif action[0] == "closeSerialMonitor":
+                self.serialMonitor.Close()
+        self.actions = []
+
+    def startSerialMonitorApp(self, port):
+        self.actions.append(["startSerialMonitor", port])
+
+    def closeSerialMonitorApp(self):
+        self.actions.append(["startSerialMonitor"])
+
+    def isSerialMonitorRunning(self):
+        return self.serialMonitor is not None and not self.serialMonitor.isClosed
+
 
 if __name__ == '__main__':
     app = wx.App(False)

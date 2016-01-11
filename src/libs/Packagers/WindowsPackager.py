@@ -28,6 +28,7 @@ class WindowsPackager(Packager):
         shutil.copy2(self.srcResPath + os.sep + "web2boardTo32.reg", self.installerCreationDistPath + os.sep + web2boardRegName)
 
     def _addMetadataForInstaller(self):
+        Packager._addMetadataForInstaller(self)
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.iconPath, self.installerCreationPath + os.sep + os.path.basename(self.iconPath))
         self._addBatScripsToWinDist()
@@ -45,6 +46,8 @@ class WindowsPackager(Packager):
             call(["makensis", "installer.nsi"])
             self._moveInstallerToInstallerFolder()
             log.info("installer created successfully")
+        except Exception as e:
+            print str(e)
         finally:
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)

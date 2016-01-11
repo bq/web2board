@@ -29,6 +29,7 @@ class MacPackager(Packager):
         self.licensePath = os.path.join(self.web2boardPath, "LICENSE.txt")
 
     def _addMetadataForInstaller(self):
+        Packager._addMetadataForInstaller(self)
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
         shutil.copy2(self.licensePath, self.installerCreationDistPath)

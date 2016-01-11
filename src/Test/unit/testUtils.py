@@ -19,17 +19,23 @@ class TestUtils(unittest.TestCase):
         self.zipPath = os.path.join(self.myTestFolder, "zip.zip")
         self.zipFolder = os.path.join(self.myTestFolder, "zip")
 
+        self.original_list_ports_comports = serial.tools.list_ports.comports
+
     def tearDown(self):
+        serial.tools.list_ports.comports = self.original_list_ports_comports
+
         if os.path.exists(self.copyTreeNew):
             shutil.rmtree(self.copyTreeNew)
         if os.path.exists(self.zipFolder):
             shutil.rmtree(self.zipFolder)
 
+    @unittest.skipIf(utils.areWeFrozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_returnsThisModulePath(self):
         modulePath = utils.getModulePath()
 
         self.assertIn(os.path.join("src", "Test"), modulePath)
 
+    @unittest.skipIf(utils.areWeFrozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_getsUnittestPathWithPreviousFrame(self):
         import inspect
         modulePath = utils.getModulePath(inspect.currentframe().f_back)
@@ -67,6 +73,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(fileData, "01")
 
     def test_listDirectoriesInPath(self):
+        print self.myTestFolder
         directories = utils.listDirectoriesInPath(self.myTestFolder)
         directories = map(lambda x: x.lower(), directories)
         self.assertEqual(directories, ["copytree_old", "otherdir"])

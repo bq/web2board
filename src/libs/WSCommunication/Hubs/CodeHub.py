@@ -63,8 +63,10 @@ class CodeHub(Hub):
         return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationProcess
 
     def __tryToTerminateSerialCommProcess(self):
-        if self.__getSerialCommProcess() is not None:
+        from libs.Web2boardApp import getMainApp
+
+        if getMainApp().isSerialMonitorRunning():
             try:
-                self.__getSerialCommProcess().terminate()
+                getMainApp().w2bGui.closeSerialMonitorApp()
             except:
                 log.exception("unable to terminate process")
