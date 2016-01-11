@@ -17,22 +17,19 @@ class PathsManager:
     EXECUTABLE_PATH = None
     MAIN_PATH = None
     RES_PATH = None
-    TEST_RES_PATH = None
     RES_CONFIG_PATH = None
     RES_BOARDS_PATH = None
     RES_PLATFORMIO_PATH = None
     RES_LOGGING_CONFIG_PATH = None
     RES_SCONS_ZIP_PATH = None
     RES_PLATFORMIO_PACKAGES_ZIP_PATH = None
+    TEST_RES_PATH = None
 
     SETTINGS_PATH = None
     SETTINGS_PLATFORMIO_PATH = None
     SETTINGS_CONFIG_PATH = None
     SETTINGS_LOGGING_CONFIG_PATH = None
     TEST_SETTINGS_PATH = None
-
-    SKETCHBOOK_PATH = None
-    SKETCHBOOK_LIBRARIES_PATH = None
 
     @classmethod
     def getMainPath(cls):
@@ -62,29 +59,6 @@ class PathsManager:
             return cls.EXECUTABLE_PATH + os.sep + "scons.exe"
         else:
             return cls.EXECUTABLE_PATH + os.sep + "scons.py"
-
-    @staticmethod
-    def getSketchbookPath():
-        if utils.isLinux():
-            # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Arduino/libraries'
-            return sys_path.get_home_path() + os.sep + 'Arduino'
-        elif utils.isWindows() or utils.isMac():
-            # self.pathToSketchbook = expanduser("~").decode('latin1')+'/Documents/Arduino/libraries'
-            return sys_path.get_document_path() + os.sep + 'Arduino'
-        else:
-            raise Exception("Not supported platform: {}".format(platform.system()))
-
-    @staticmethod
-    def getBitbloqLibsTempPath(version):
-        return sys_path.get_tmp_path() + os.sep + 'bitbloqLibs-' + version
-
-    @classmethod
-    def getSketchbookLibrariesPath(cls):
-        return cls.SKETCHBOOK_PATH + os.sep + 'libraries' + os.sep
-
-    @classmethod
-    def getPathForNewPackage(cls, version):
-        return cls.MAIN_PATH + os.sep + "web2board_{}".format(version)
 
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
@@ -139,9 +113,6 @@ PathsManager.SETTINGS_PLATFORMIO_PATH = os.path.join(PathsManager.SETTINGS_PATH,
 PathsManager.SETTINGS_CONFIG_PATH = os.path.join(PathsManager.SETTINGS_PATH, '.web2boardconfig')
 PathsManager.SETTINGS_LOGGING_CONFIG_PATH = os.path.join(PathsManager.SETTINGS_PATH, 'logging.json')
 PathsManager.TEST_SETTINGS_PATH = os.path.join(PathsManager.SETTINGS_PATH, 'Test', 'resources')
-
-PathsManager.SKETCHBOOK_PATH = PathsManager.getSketchbookPath()
-PathsManager.SKETCHBOOK_LIBRARIES_PATH = PathsManager.getSketchbookLibrariesPath()
 
 # construct External_data_path if not exists
 if not os.path.exists(PathsManager.SETTINGS_PATH):

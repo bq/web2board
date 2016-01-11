@@ -5,7 +5,7 @@ from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 from libs.CompilerUploader import CompilerUploader, CompilerException, ERROR_NO_PORT_FOUND
-from libs.LibraryUpdater import getLibUpdater
+from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.WSCommunication.Hubs.BoardConfigHub import BoardConfigHub, BoardConfigHubException
 
 # do not remove
@@ -26,11 +26,7 @@ class TestBoardConfigHub(unittest.TestCase):
 
         self.testLibVersion = "1.1.1"
 
-        self.libUpdater = getLibUpdater()
-        self.libUpdater = flexmock(self.libUpdater,
-                                   getBitbloqLibsVersion=self.testLibVersion,
-                                   setBitbloqLibsVersion=lambda x: x,
-                                   downloadLibsIfNecessary=lambda: 1)
+        self.libUpdater = getBitbloqLibsUpdater()
 
     def tearDown(self):
         removeHubsSubclasses()
@@ -82,15 +78,17 @@ class TestBoardConfigHub(unittest.TestCase):
         self.assertTrue(self.boardConfigHub.setBoard("uno", self.sender))
 
     def test_setLibVersion_doesNotDownloadLibsIfHasRightVersion(self):
-        self.libUpdater.should_receive("downloadLibsIfNecessary").never()
+        flexmock(self.libUpdater, isNecessaryToUpdate=lambda: False).should_receive("update").never()
+        self.libUpdater.currentVersionInfo.version = self.testLibVersion
 
         self.boardConfigHub.setLibVersion(self.testLibVersion)
 
     def test_setLibVersion_doesDownloadLibsIfDoesNotHasRightVersion(self):
-        self.libUpdater.should_receive("downloadLibsIfNecessary").once()
+        self.libUpdater = flexmock(self.libUpdater).should_receive("update").once()
 
-        self.boardConfigHub.setLibVersion(self.testLibVersion + "new")
+        self.boardConfigHub.setLibVersion(self.testLibVersion)
 
     def test_setLibVersion_returnsTrue(self):
+        self.libUpdater = flexmock(self.libUpdater, update=lambda: None)
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))
-        self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion + "new"))
+        self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))

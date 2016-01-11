@@ -4,6 +4,7 @@ import time
 import unittest
 
 import serial.tools.list_ports
+from flexmock import flexmock
 
 from libs import utils
 import libs.base
@@ -12,7 +13,6 @@ from libs.PathsManager import PathsManager
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        self.originalListPortsComports = serial.tools.list_ports.comports
         self.myTestFolder = os.path.join(PathsManager.TEST_SETTINGS_PATH, "testUtils")
         self.copyTreeOld = os.path.join(self.myTestFolder, "copytree_old")
         self.copyTreeNew = os.path.join(self.myTestFolder, "copytree_new")
@@ -20,7 +20,6 @@ class TestUtils(unittest.TestCase):
         self.zipFolder = os.path.join(self.myTestFolder, "zip")
 
     def tearDown(self):
-        serial.tools.list_ports.comports = self.originalListPortsComports
         if os.path.exists(self.copyTreeNew):
             shutil.rmtree(self.copyTreeNew)
         if os.path.exists(self.zipFolder):
@@ -67,16 +66,6 @@ class TestUtils(unittest.TestCase):
         self.__assertCopyTreeNewHasAllFiles()
         self.assertEqual(fileData, "01")
 
-    def test_downloadFile_savesDataInTmpFileWithUrlBaseName(self):
-        url = "https://raw.githubusercontent.com/bq/web2board/master/README.md"
-
-        tempFile = utils.downloadFile(url)
-
-        lastModificationFile = os.stat(tempFile).st_mtime
-        lastModificationDiff = time.time() - lastModificationFile
-        self.assertTrue(abs(lastModificationDiff) < 0.5)
-        self.assertIn(libs.base.sys_path.get_tmp_path().lower(), tempFile.lower())
-
     def test_listDirectoriesInPath(self):
         directories = utils.listDirectoriesInPath(self.myTestFolder)
         directories = map(lambda x: x.lower(), directories)
@@ -90,13 +79,13 @@ class TestUtils(unittest.TestCase):
 
     def test_listSerialPorts_useSerialLib(self):
         ports = [(1,2,3), (4,5,6)]
-        serial.tools.list_ports.comports = lambda : ports
+        flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
         self.assertEqual(utils.listSerialPorts(), ports)
 
     def test_listSerialPorts_filterWithFunction(self):
         portsFilter = lambda x: x[0] == 1
         ports = [(1,2,3), (4,5,6)]
-        serial.tools.list_ports.comports = lambda : ports
+        flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
         self.assertEqual(utils.listSerialPorts(portsFilter), ports[0:1])

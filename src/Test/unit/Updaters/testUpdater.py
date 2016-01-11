@@ -31,19 +31,9 @@ class TestUpdater(unittest.TestCase):
         self.updater.onlineVersionUrl = "onlineVersionUrl"
         self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
 
-        self.originalGetDataFromUrl = utils.getDataFromUrl
-        self.originalDownloadFile = utils.downloadFile
-        self.originalExtractZip = utils.extractZip
-        self.originalListDirectoriesInPath = utils.listDirectoriesInPath
-
         self.zipToClearPath = None
 
     def tearDown(self):
-        utils.getDataFromUrl = self.originalGetDataFromUrl
-        utils.downloadFile = self.originalDownloadFile
-        utils.extractZip = self.originalExtractZip
-        utils.listDirectoriesInPath = self.originalListDirectoriesInPath
-
         for libraryName in versionTestData["librariesNames"]:
             if os.path.exists(self.updater.destinationPath + os.sep + libraryName):
                 shutil.rmtree(self.updater.destinationPath + os.sep + libraryName)

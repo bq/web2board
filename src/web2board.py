@@ -18,6 +18,7 @@ import ssl
 import threading
 import time
 import urllib2
+from copy import deepcopy
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
@@ -30,11 +31,11 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
-from libs.LibraryUpdater import getLibUpdater
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager
 from Scripts.testRunner import *
 from Scripts import afterInstallScript
+from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
 log = initLogging(__name__)  # initialized in main
 isAppRunning = False
@@ -89,11 +90,13 @@ def initializeServerAndCommunicationProtocol(options):
 
 
 def updateLibrariesIfNecessary():
-    libUpdater = getLibUpdater()
+    libUpdater = getBitbloqLibsUpdater()
     try:
-        libUpdater.downloadLibsIfNecessary()
+        libUpdater.onlineVersionInfo = deepcopy(libUpdater.currentVersionInfo)
+        if libUpdater.isNecessaryToUpdate():
+            libUpdater.update()
     except (HTTPError, URLError):
-        log.exception("unable to download libraries (might be a proxy problem)")
+        log.error("unable to download libraries (might be a proxy problem)")
         proxyName = raw_input("introduce proxy name: ")
         proxy = urllib2.ProxyHandler({'http': proxyName})
         opener = urllib2.build_opener(proxy)
@@ -107,68 +110,28 @@ def consoleViewer():
     global isAppRunning
     import sys
     import wx
-
-    class RedirectText(object):
-        def __init__(self):
-            self.out = ""
-
-        def write(self, string):
-            self.out += string
-
-        def flush(self, *args):
-            pass
-
-        def get(self):
-            aux = self.out
-            self.out = ""
-            return aux
-
-    class MyForm(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None, wx.ID_ANY, "Web2board", size=(900, 700))
-
-            # Add a panel so it looks the correct on all platforms
-            panel = wx.Panel(self, wx.ID_ANY)
-            self.log = wx.TextCtrl(panel, wx.ID_ANY, size=(400, 300),
-                                   style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
-
-            self.timer = wx.Timer(self, 123456)
-            self.Bind(wx.EVT_TIMER, self.onTimer)
-
-            self.timer.Start(100)  # 1 second interval
-
-            # Add widgets to a sizer
-            sizer = wx.BoxSizer(wx.VERTICAL)
-            sizer.Add(self.log, 1, wx.ALL | wx.EXPAND, 5)
-            panel.SetSizer(sizer)
-
-            # redirect text here
-            self.redir = RedirectText()
-            sys.stdout = self.redir
-
-        def onTimer(self, *args):
-            message = self.redir.get()
-            self.log.WriteText(message)
+    from frames.Web2boardWindow import Web2boardWindow
 
     app = wx.App(False)
-    frame = MyForm().Show()
+    w2bgui = Web2boardWindow(None)
+    w2bgui.Show()
+    w2bgui.Raise()
     isAppRunning = True
     app.MainLoop()
 
 
 def startConsoleViewerIfMac():
-    if utils.isMac():
+    if utils.isMac() or True:
         consoleViewer()
 
 
 def main():
     global w2bServer
-    while utils.isMac() and not isAppRunning:
+    while (utils.isMac() or True) and not isAppRunning:
         time.sleep(0.1)
     PathsManager.moveInternalConfigToExternalIfNecessary()
     options = handleSystemArguments()
     PathsManager.logRelevantEnvironmentalPaths()
-    compileUploader = getCompilerUploader()
     updateLibrariesIfNecessary()
     w2bServer = initializeServerAndCommunicationProtocol(options)
 
@@ -177,7 +140,7 @@ def main():
 
 
 def startMain():
-    if utils.isMac():
+    if utils.isMac() or True:
         t = threading.Thread(target=main)
         t.daemon = True
         t.start()

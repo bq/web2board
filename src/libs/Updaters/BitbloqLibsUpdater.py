@@ -1,6 +1,5 @@
 import logging
 import os
-import shutil
 
 from libs import utils
 from libs.PathsManager import PathsManager
@@ -38,7 +37,7 @@ class BitbloqLibsUpdater(Updater):
 
 def getBitbloqLibsUpdater():
     """
-    :rtype: CompilerUploader
+    :rtype: BitbloqLibsUpdater
     """
     global __globalBitbloqLibsUpdater
     if __globalBitbloqLibsUpdater is None:

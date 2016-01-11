@@ -18,10 +18,10 @@ class Result(object):
     def isDone(self):
         return not self.thread.isAlive()
 
-    def get(self, joinIfNecessary=True):
+    def get(self, joinIfNecessary=True, joinTimeout=None):
         if not self.isDone():
             if joinIfNecessary:
-                self.thread.join()
+                self.thread.join(joinTimeout)
             else:
                 raise AsynchronousNotDone("Asynchronous not done yet")
         if isinstance(self.result, Exception):
@@ -58,7 +58,6 @@ def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None):
         return wrapper
 
     return realWrapper
-
 
 # # EXAMPLE
 # import time

@@ -1,8 +1,8 @@
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_BOARD_NOT_SUPPORTED
-from libs.LibraryUpdater import getLibUpdater
 from libs.Packagers.Packager import Packager
+from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
 
 class BoardConfigHubException(Exception):
@@ -10,6 +10,8 @@ class BoardConfigHubException(Exception):
 
 
 class BoardConfigHub(Hub):
+    BITBLOQ_LIBS_URL_TEMPLATE = 'https://github.com/bq/bitbloqLibs/archive/v{}.zip'
+
     def __init__(self):
         super(BoardConfigHub, self).__init__()
         self.compilerUploader = getCompilerUploader()
@@ -42,8 +44,9 @@ class BoardConfigHub(Hub):
         return True  # if return None, client is not informed that the request is done
 
     def setLibVersion(self, version):
-        libUpdater = getLibUpdater()
-        if libUpdater.getBitbloqLibsVersion() != version:
-            libUpdater.setBitbloqLibsVersion(version)
-            libUpdater.downloadLibsIfNecessary()
+        libUpdater = getBitbloqLibsUpdater()
+        libUpdater.onlineVersionInfo.version = version
+        libUpdater.onlineVersionInfo.file2DownloadUrl = self.BITBLOQ_LIBS_URL_TEMPLATE.format(version)
+        if libUpdater.isNecessaryToUpdate():
+            libUpdater.update()
         return True

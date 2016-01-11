@@ -27,7 +27,8 @@ __globalCompilerUploader = None
 ERROR_BOARD_NOT_SET = {"code": 0, "message": "Necessary to define board before to run/compile"}
 ERROR_BOARD_NOT_SUPPORTED = {"code": 1, "message": "Board: {0} not Supported"}
 ERROR_NO_PORT_FOUND = {"code": 2, "message": "No port found, check the board is connected"}
-ERROR_MULTIPLE_BOARDS_CONNECTED = {"code": 3, "message": "More than one connected board was found. You should only have one board connected"}
+ERROR_MULTIPLE_BOARDS_CONNECTED = {"code": 3,
+                                   "message": "More than one connected board was found. You should only have one board connected"}
 
 
 class CompilerException(Exception):
@@ -90,22 +91,6 @@ class CompilerUploader:
         log.debug(err)
         return output, err
 
-    def _searchPorts(self, mcu, baudRate):
-        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
-        availablePorts = map(lambda x: x[0], portsToUpload)
-        if len(availablePorts) <= 0:
-            return []
-        portsToUpload = []
-        log.debug("Found available ports: {}".format(availablePorts))
-        portResultHashMap = {}
-        for port in availablePorts:
-            portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
-
-        for port, resultObject in portResultHashMap.items():
-            if resultObject.get():
-                portsToUpload.append(port)
-        return portsToUpload
-
     @asynchronous()
     def _checkPort(self, port, mcu, baudRate):
         args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
@@ -129,10 +114,29 @@ class CompilerUploader:
         if self._getIniConfig(self.board) is None:
             raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
-    def getPort(self):
+    def searchPorts(self):
         self._checkBoardConfiguration()
         options = self._getIniConfig(self.board)
-        portsToUpload = self._searchPorts(options["boardData"]["build"]["mcu"], options["boardData"]["upload"]["speed"])
+        mcu = options["boardData"]["build"]["mcu"]
+        baudRate = options["boardData"]["upload"]["speed"]
+        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        availablePorts = map(lambda x: x[0], portsToUpload)
+        if len(availablePorts) <= 0:
+            return []
+        portsToUpload = []
+        log.debug("Found available ports: {}".format(availablePorts))
+        portResultHashMap = {}
+        for port in availablePorts:
+            portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
+
+        for port, resultObject in portResultHashMap.items():
+            if resultObject.get(joinTimeout=5):
+                portsToUpload.append(port)
+        return portsToUpload
+
+    def getPort(self):
+        self._checkBoardConfiguration()
+        portsToUpload = self.searchPorts()
         if len(portsToUpload) == 0:
             raise CompilerException(ERROR_NO_PORT_FOUND)
         elif len(portsToUpload) > 1:
@@ -167,5 +171,3 @@ def getCompilerUploader():
     if __globalCompilerUploader is None:
         __globalCompilerUploader = CompilerUploader()
     return __globalCompilerUploader
-
-
