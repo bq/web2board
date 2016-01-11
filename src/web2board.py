@@ -31,7 +31,7 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from libs import utils
 from libs.LoggingUtils import initLogging
-from Scripts.TestRunner2 import *
+from Scripts.TestRunner import *
 from Scripts import afterInstallScript
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
