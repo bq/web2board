@@ -34,18 +34,18 @@ selection method.
 
 __revision__ = "src/engine/SCons/Tool/tex.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
+import glob
 import os.path
+import platform
 import re
 import shutil
 import sys
-import platform
-import glob
 
 import SCons.Action
 import SCons.Node
 import SCons.Node.FS
-import SCons.Util
 import SCons.Scanner.LaTeX
+import SCons.Util
 
 Verbose = False
 

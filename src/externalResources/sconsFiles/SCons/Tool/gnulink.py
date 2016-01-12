@@ -1,6 +1,6 @@
-"""SCons.Tool.g++
+"""SCons.Tool.gnulink
 
-Tool-specific initialization for g++.
+Tool-specific initialization for the gnu linker.
 
 There normally shouldn't be any need to import this module directly.
 It will usually be imported through the generic SCons.Tool.Tool()
@@ -31,47 +31,46 @@ selection method.
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "src/engine/SCons/Tool/g++.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+__revision__ = "src/engine/SCons/Tool/gnulink.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
-import os.path
-import re
-import subprocess
+import sys
 
 import SCons.Tool
 import SCons.Util
 
-import gcc
+import link
 
-cplusplus = __import__('c++', globals(), locals(), [])
-
-compilers = ['g++']
 
 def generate(env):
-    """Add Builders and construction variables for g++ to an Environment."""
-    static_obj, shared_obj = SCons.Tool.createObjBuilders(env)
+    """Add Builders and construction variables for gnulink to an Environment."""
+    link.generate(env)
 
-    if 'CXX' not in env:
-        env['CXX']    = env.Detect(compilers) or compilers[0]
+    if env['PLATFORM'] == 'hpux':
+        env['SHLINKFLAGS'] = SCons.Util.CLVar('$LINKFLAGS -shared -fPIC')
 
-    cplusplus.generate(env)
+    # __RPATH is set to $_RPATH in the platform specification if that
+    # platform supports it.
+    env['RPATHPREFIX'] = '-Wl,-rpath='
+    env['RPATHSUFFIX'] = ''
+    env['_RPATH'] = '${_concat(RPATHPREFIX, RPATH, RPATHSUFFIX, __env__)}'
 
-    # platform specific settings
-    if env['PLATFORM'] == 'aix':
-        env['SHCXXFLAGS'] = SCons.Util.CLVar('$CXXFLAGS -mminimal-toc')
-        env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME'] = 1
-        env['SHOBJSUFFIX'] = '$OBJSUFFIX'
-    elif env['PLATFORM'] == 'hpux':
-        env['SHOBJSUFFIX'] = '.pic.o'
-    elif env['PLATFORM'] == 'sunos':
-        env['SHOBJSUFFIX'] = '.pic.o'
-    # determine compiler version
-    version = gcc.detect_version(env, env['CXX'])
-    if version:
-        env['CXXVERSION'] = version
+    # OpenBSD doesn't usually use SONAME for libraries
+    use_soname = not sys.platform.startswith('openbsd')
+    link._setup_versioned_lib_variables(env, tool ='gnulink', use_soname = use_soname)
+    env['LINKCALLBACKS'] = link._versioned_lib_callbacks()
 
+    # For backward-compatiblity with older SCons versions
+    env['SHLIBVERSIONFLAGS'] = SCons.Util.CLVar('-Wl,-Bsymbolic')
+    
 def exists(env):
-    # is executable, and is a GNU compiler (or accepts '--version' at least)
-    return gcc.detect_version(env, env.Detect(env.get('CXX', compilers)))
+    # TODO: sync with link.smart_link() to choose a linker
+    linkers = { 'CXX': ['g++'], 'CC': ['gcc'] }
+    alltools = []
+    for langvar, linktools in linkers.items():
+        if langvar in env: # use CC over CXX when user specified CC but not CXX
+            return SCons.Tool.FindTool(linktools, env)
+        alltools.extend(linktools)
+    return SCons.Tool.FindTool(alltools, env) # find CXX or CC
 
 # Local Variables:
 # tab-width:4

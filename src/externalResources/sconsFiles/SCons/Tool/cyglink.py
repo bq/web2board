@@ -7,15 +7,16 @@ It will usually be imported through the generic SCons.Tool.Tool()
 selection method.
 
 """
-import re
 import os
+import re
 
 import SCons.Action
-import SCons.Util
 import SCons.Tool
+import SCons.Util
 
 import gnulink
 import link
+
 
 def _lib_generator(target, source, env, for_signature, **kw):
     try: cmd = kw['cmd']

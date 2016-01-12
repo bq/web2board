@@ -39,5 +39,5 @@ os.chdir(sys.argv.pop(-1))
 
 # atmelvarBinPath = os.path.join(PackageManager()._package_dir, "toolchain-atmelavr", "bin")
 # os.environ["PATH"] += atmelvarBinPath
-sys.path.extend([web2boardPath + 'scons'])
-execfile(web2boardPath + "scons" + os.sep + "scons.py")
+sys.path.extend([PathsManager.EXTERNAL_RESOURCES_PATH + 'sconsFiles'])
+execfile(PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles" + os.sep + "scons.py")

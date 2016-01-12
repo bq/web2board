@@ -35,9 +35,9 @@ selection method.
 __revision__ = "src/engine/SCons/Tool/pdflatex.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
 import SCons.Action
-import SCons.Util
 import SCons.Tool.pdf
 import SCons.Tool.tex
+import SCons.Util
 
 PDFLaTeXAction = None
 

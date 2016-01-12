@@ -34,14 +34,13 @@ __revision__ = "src/engine/SCons/Tool/MSCommon/vc.py rel_2.4.1:3453:73fefd3ea0b0
 
 __doc__ = """Module for Visual C/C++ detection and configuration.
 """
-import SCons.compat
-import SCons.Util
-
 import os
 import platform
 from string import digits as string_digits
 
+import SCons.Util
 import SCons.Warnings
+import SCons.compat
 
 import common
 

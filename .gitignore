@@ -17,6 +17,5 @@ src/serial_poc.py
 bin/
 include/
 src/res/
-src/externalResources/
 *_web2board*
 installers/

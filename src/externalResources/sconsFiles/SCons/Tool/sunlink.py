@@ -1,11 +1,10 @@
-"""SCons.Tool.gnulink
+"""SCons.Tool.sunlink
 
-Tool-specific initialization for the gnu linker.
+Tool-specific initialization for the Sun Solaris (Forte) linker.
 
 There normally shouldn't be any need to import this module directly.
 It will usually be imported through the generic SCons.Tool.Tool()
 selection method.
-
 """
 
 #
@@ -31,47 +30,48 @@ selection method.
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "src/engine/SCons/Tool/gnulink.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+__revision__ = "src/engine/SCons/Tool/sunlink.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+
+import os
+import os.path
 
 import SCons.Util
-import SCons.Tool
-import os
-import sys
-import re
 
 import link
 
+ccLinker = None
+
+# search for the acc compiler and linker front end
+
+try:
+    dirs = os.listdir('/opt')
+except (IOError, OSError):
+    # Not being able to read the directory because it doesn't exist
+    # (IOError) or isn't readable (OSError) is okay.
+    dirs = []
+
+for d in dirs:
+    linker = '/opt/' + d + '/bin/CC'
+    if os.path.exists(linker):
+        ccLinker = linker
+        break
 
 def generate(env):
-    """Add Builders and construction variables for gnulink to an Environment."""
+    """Add Builders and construction variables for Forte to an Environment."""
     link.generate(env)
+    
+    env['SHLINKFLAGS'] = SCons.Util.CLVar('$LINKFLAGS -G')
 
-    if env['PLATFORM'] == 'hpux':
-        env['SHLINKFLAGS'] = SCons.Util.CLVar('$LINKFLAGS -shared -fPIC')
-
-    # __RPATH is set to $_RPATH in the platform specification if that
-    # platform supports it.
-    env['RPATHPREFIX'] = '-Wl,-rpath='
+    env['RPATHPREFIX'] = '-R'
     env['RPATHSUFFIX'] = ''
     env['_RPATH'] = '${_concat(RPATHPREFIX, RPATH, RPATHSUFFIX, __env__)}'
 
-    # OpenBSD doesn't usually use SONAME for libraries
-    use_soname = not sys.platform.startswith('openbsd')
-    link._setup_versioned_lib_variables(env, tool = 'gnulink', use_soname = use_soname)
+    # Support for versioned libraries
+    link._setup_versioned_lib_variables(env, tool ='sunlink', use_soname = True)
     env['LINKCALLBACKS'] = link._versioned_lib_callbacks()
 
-    # For backward-compatiblity with older SCons versions
-    env['SHLIBVERSIONFLAGS'] = SCons.Util.CLVar('-Wl,-Bsymbolic')
-    
 def exists(env):
-    # TODO: sync with link.smart_link() to choose a linker
-    linkers = { 'CXX': ['g++'], 'CC': ['gcc'] }
-    alltools = []
-    for langvar, linktools in linkers.items():
-        if langvar in env: # use CC over CXX when user specified CC but not CXX
-            return SCons.Tool.FindTool(linktools, env)
-        alltools.extend(linktools)
-    return SCons.Tool.FindTool(alltools, env) # find CXX or CC
+    return ccLinker
 
 # Local Variables:
 # tab-width:4

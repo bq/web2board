@@ -38,7 +38,6 @@ __developer__ = "bdbaddog"
 
 import os
 import sys
-from libs import utils
 
 ##############################################################################
 # BEGIN STANDARD SCons SCRIPT HEADER
@@ -177,8 +176,9 @@ else:
 # then for 'scons'.
 libs.extend([os.path.join(x, scons_version) for x in prefs])
 libs.extend([os.path.join(x, 'scons') for x in prefs])
-libs.extend([PathsManager.MAIN_PATH + os.sep + "scons"])
-libs.extend([PathsManager.MAIN_PATH + os.sep + "scons" + os.sep + "SCons"])
+libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH])
+libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles"])
+libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles" + os.sep + "SCons"])
 
 sys.path = libs + sys.path
 

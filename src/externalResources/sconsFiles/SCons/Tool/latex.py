@@ -37,9 +37,10 @@ __revision__ = "src/engine/SCons/Tool/latex.py rel_2.4.1:3453:73fefd3ea0b0 2015/
 import SCons.Action
 import SCons.Defaults
 import SCons.Scanner.LaTeX
-import SCons.Util
 import SCons.Tool
 import SCons.Tool.tex
+import SCons.Util
+
 
 def LaTeXAuxFunction(target = None, source= None, env=None):
     result = SCons.Tool.tex.InternalLaTeXAuxAction( SCons.Tool.tex.LaTeXAction, target, source, env )

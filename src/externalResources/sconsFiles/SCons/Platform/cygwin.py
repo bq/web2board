@@ -1,6 +1,6 @@
-"""engine.SCons.Platform.darwin
+"""SCons.Platform.cygwin
 
-Platform-specific initialization for Mac OS X systems.
+Platform-specific initialization for Cygwin systems.
 
 There normally shouldn't be any need to import this module directly.  It
 will usually be imported through the generic SCons.Platform.Platform()
@@ -30,38 +30,25 @@ selection method.
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "src/engine/SCons/Platform/darwin.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+__revision__ = "src/engine/SCons/Platform/cygwin.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+
+from SCons.Platform import TempFileMunge
 
 import posix
-import os
+
 
 def generate(env):
     posix.generate(env)
-    env['SHLIBSUFFIX'] = '.dylib'
-    # put macports paths at front to override Apple's versions, fink path is after
-    # For now let people who want Macports or Fink tools specify it!
-    # env['ENV']['PATH'] = '/opt/local/bin:/opt/local/sbin:' + env['ENV']['PATH'] + ':/sw/bin'
-    
-    # Store extra system paths in env['ENV']['PATHOSX']
-    
-    filelist = ['/etc/paths',]
-    # make sure this works on Macs with Tiger or earlier
-    try:
-        dirlist = os.listdir('/etc/paths.d')
-    except:
-        dirlist = []
 
-    for file in dirlist:
-        filelist.append('/etc/paths.d/'+file)
-
-    for file in filelist:
-        if os.path.isfile(file):
-            f = open(file, 'r')
-            lines = f.readlines()
-            for line in lines:
-                if line:
-                    env.AppendENVPath('PATHOSX', line.strip('\n'))
-            f.close()
+    env['PROGPREFIX']  = ''
+    env['PROGSUFFIX']  = '.exe'
+    env['SHLIBPREFIX'] = ''
+    env['SHLIBSUFFIX'] = '.dll'
+    env['LIBPREFIXES'] = [ '$LIBPREFIX', '$SHLIBPREFIX', '$IMPLIBPREFIX' ]
+    env['LIBSUFFIXES'] = [ '$LIBSUFFIX', '$SHLIBSUFFIX', '$IMPLIBSUFFIX' ]
+    env['TEMPFILE']    = TempFileMunge
+    env['TEMPFILEPREFIX'] = '@'
+    env['MAXLINELENGTH']  = 2048
 
 # Local Variables:
 # tab-width:4

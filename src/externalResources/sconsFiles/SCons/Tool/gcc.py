@@ -33,12 +33,12 @@ selection method.
 
 __revision__ = "src/engine/SCons/Tool/gcc.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
-import cc
-import os
 import re
 import subprocess
 
 import SCons.Util
+
+import cc
 
 compilers = ['gcc', 'cc']
 

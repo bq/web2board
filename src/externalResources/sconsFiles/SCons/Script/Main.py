@@ -9,7 +9,6 @@ something that we expect other software to want to use, it should go in
 some other module.  If it's specific to the "scons" script invocation,
 it goes here.
 """
-from pprint import pprint
 
 unsupported_python_version = (2, 3, 0)
 deprecated_python_version = (2, 7, 0)
@@ -37,12 +36,12 @@ deprecated_python_version = (2, 7, 0)
 
 __revision__ = "src/engine/SCons/Script/Main.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
-import SCons.compat
-
 import os
 import sys
 import time
 import traceback
+
+import SCons.compat
 
 # Strip the script directory from sys.path() so on case-insensitive
 # (Windows) systems Python doesn't think that the "scons" script is the
