@@ -58,7 +58,7 @@ class PathsManager:
 
     @classmethod
     def getSonsExecutablePath(cls):
-        if utils.areWeFrozen() or utils.isMac():
+        if utils.areWeFrozen() and not utils.isWindows():
             if utils.isWindows():
                 return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.exe"
             else:
