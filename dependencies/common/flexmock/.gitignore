@@ -1,0 +1,9 @@
+*~
+*.bak
+pkg
+.DS_Store
+coverage
+html
+TAGS
+doc/examples/*.rdoc
+Gemfile.lock

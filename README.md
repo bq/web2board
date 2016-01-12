@@ -72,7 +72,7 @@ sudo apt-get install python-serial
 
 ### WSHubsAPI
 ```bash
-sudo pip install WSHubsAPI==0.5.0a7
+sudo pip install WSHubsAPI==0.5.1a0
 ```
 
 ### WXPython
