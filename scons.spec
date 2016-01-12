@@ -23,8 +23,8 @@ pyz = PYZ(a.pure, a.zipped_data,
 
 a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
 a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
-# a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
 
+# a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
 # a.datas += utils.findFilesForPyInstaller("scons", ["*", "**/*"])
 
 exe = EXE(pyz,

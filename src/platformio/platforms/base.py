@@ -445,7 +445,7 @@ class BasePlatform(object):
                 stdout=util.AsyncPipe(self.on_run_out),
                 stderr=util.AsyncPipe(self.on_run_err)
             )
-        except (OSError, AssertionError):
+        except (OSError, AssertionError) as e:
             raise exception.SConsNotInstalledError()
 
         assert "returncode" in result

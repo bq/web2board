@@ -112,10 +112,13 @@ class Packager:
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
                          self._getInstallerExternalResourcesPath())
 
+            log.debug("Gettings Scons Packages")
             self._getSconsPackages()
+            log.debug("Creating Web2board Executable")
             call(["pyinstaller", "--onefile", '-w', self.web2boardSpecPath])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName),
-                         self.installerCreationDistPath)
+            copyFunc = shutil.copy2 if not utils.isMac() else shutil.move
+            copyFunc(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName),
+                     self.installerCreationDistPath)
 
         finally:
             os.chdir(currentPath)

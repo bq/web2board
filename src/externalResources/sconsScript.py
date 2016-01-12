@@ -1,14 +1,16 @@
-import zipfile
+
 import os
 import sys
 from pprint import pprint
 
-from libs.utils import areWeFrozen
+sys.path.extend("..")
 from libs.PathsManager import PathsManager
-from platformio.pkgmanager import PackageManager
+from libs.LoggingUtils import initLogging
 
 PathsManager.moveInternalConfigToExternalIfNecessary()
+log = initLogging(__name__)
 
+PathsManager.logRelevantEnvironmentalPaths()
 # if areWeFrozen():
 #     with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "r") as z:
 #         z.extractall(PathsManager.MAIN_PATH)

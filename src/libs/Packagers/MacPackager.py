@@ -35,7 +35,10 @@ class MacPackager(Packager):
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
         shutil.copy2(self.licensePath, self.installerCreationDistPath)
-        copytree(self._getInstallerExternalResourcesPath(), self.installerCreationDistPath)
+        copytree(self._getInstallerExternalResourcesPath(), self.appResourcesPath)
+
+    def _moveInstallerToInstallerFolder(self):
+        shutil.copy2(self.installerCreationDistPath + os.sep + "Web2Board.pkg", self.installerPath)
 
     def createPackage(self):
         try:
@@ -45,9 +48,9 @@ class MacPackager(Packager):
             os.chdir(self.installerCreationDistPath)
             log.info("Creating Installer")
 
-            # call(["/usr/local/bin/packagesbuild", self.pkgprojPath])
-            # self._moveInstallerToInstallerFolder()
-            # log.info("installer created successfully")
+            call(["/usr/local/bin/packagesbuild", self.pkgprojPath])
+            self._moveInstallerToInstallerFolder()
+            log.info("installer created successfully")
         finally:
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)
