@@ -5,11 +5,9 @@ import sys
 sys.path.append(os.getcwd())
 import libs.utils as utils
 
-block_cipher = None
-
 pathEx = os.getcwd()
 
-a = Analysis(['web2board.py'],
+a = Analysis(['src/web2board.py'],
              pathex=[pathEx],
              hiddenimports=[],
              hookspath=None,
@@ -37,7 +35,6 @@ app = BUNDLE(exe,
              icon='res\web2board.icns',
              bundle_identifier=None,
              info_plist={
-                 'CFBundleIconFile': 'res/web2board.icns',
                  'CFBundleURLTypes': [
                      {
                          'CFBundleURLName': 'bitbloq.bq.com',
@@ -47,5 +44,4 @@ app = BUNDLE(exe,
                  'PyOptions': {
                      'argv_emulation': True
                  }
-             },
-             )
+             }, )

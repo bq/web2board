@@ -16,8 +16,7 @@ class WindowsPackager(Packager):
         self.pkgPlatformPath = os.path.join(self.pkgPath, "win32")
         self.resPlatformPath = os.path.join(self.resPath, "windows")
         self.web2boardExecutableName = "web2board.exe"
-        self.serialMonitorExecutableName = "SerialMonitor.exe"
-        self.sconsExecutableName = "scons.exe"
+        self.sconsExecutableName = "sconsScript.exe"
 
     def _addBatScripsToWinDist(self):
         batName = "afterInstall.bat"

@@ -50,6 +50,7 @@ class Web2boardWindow(Web2boardGui):
         self.redir = RedirectText(self, originalStdout)
         sys.stdout = self.redir
         self.serialMonitor = None
+        self.Bind(wx.EVT_CLOSE,self.OnClose)
 
         WX_Utils.initDecorators(self)
 
@@ -91,6 +92,10 @@ class Web2boardWindow(Web2boardGui):
             self.htmlBuffer += message
             self.consoleLog.SetPage(self.htmlBuffer)
             self.consoleLog.Scroll(0, self.consoleLog.GetScrollRange(wx.VERTICAL))
+
+        self.handlePendingActions()
+
+    def handlePendingActions(self):
         actions = self.actions
         for action in actions:
             if action[0] == "startSerialMonitor":
@@ -98,6 +103,9 @@ class Web2boardWindow(Web2boardGui):
                 self.serialMonitor.Show()
             elif action[0] == "closeSerialMonitor":
                 self.serialMonitor.Close()
+            elif action[0] == "showApp":
+                self.Show()
+                self.Raise()
         self.actions = []
 
     def startSerialMonitorApp(self, port):
@@ -106,8 +114,19 @@ class Web2boardWindow(Web2boardGui):
     def closeSerialMonitorApp(self):
         self.actions.append(["startSerialMonitor"])
 
+    def showApp(self):
+        self.actions.append(["showApp"])
+
     def isSerialMonitorRunning(self):
         return self.serialMonitor is not None and not self.serialMonitor.isClosed
+
+    def OnClose(self, event):
+        if event.CanVeto():
+            self.Hide()
+            return
+
+        self.Destroy()  # you may also do:  event.Skip()
+        # since the default event handler does call Destroy(), too
 
 
 if __name__ == '__main__':

@@ -15,6 +15,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
+from libs.Decorators.Asynchronous import asynchronous
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs import utils
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
@@ -25,7 +26,7 @@ log = logging.getLogger(__name__)
 __web2BoardApp = None
 
 
-class MainApp:
+class Web2boardApp:
     def __init__(self):
         self.w2bGui = None
         """:type : frames.Web2boardWindow.Web2boardWindow"""
@@ -104,11 +105,12 @@ class MainApp:
 
         app = wx.App(False)
         self.w2bGui = Web2boardWindow(None)
-        self.w2bGui.Show()
+        self.w2bGui.Hide()
         self.w2bGui.Raise()
         self.isAppRunning = True
         return app
 
+    @asynchronous
     def startServerForever(self):
         while not self.isAppRunning:
             time.sleep(0.1)
@@ -126,13 +128,10 @@ class MainApp:
         options = self.handleSystemArguments()
         # self.updateLibrariesIfNecessary()
         self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
+        self.startServerForever()
         log.info("listening...")
 
-
-        t = threading.Thread(target=self.startServerForever)
-        t.daemon = True
-        t.start()
-        app.MainLoop()
+        return app
 
     def isSerialMonitorRunning(self):
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
@@ -140,5 +139,5 @@ class MainApp:
 def getMainApp():
     global __web2BoardApp
     if __web2BoardApp is None:
-        __web2BoardApp = MainApp()
+        __web2BoardApp = Web2boardApp()
     return __web2BoardApp

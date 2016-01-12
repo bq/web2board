@@ -38,7 +38,6 @@ class Packager:
         self.version = getWeb2boardUpdater().currentVersionInfo.version
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
-        self.serialMonitorSpecPath = os.path.join(self.web2boardPath, "serialMonitor.spec")
         self.sconsSpecPath = os.path.join(self.web2boardPath, "scons.spec")
 
         # abstract attributes
@@ -50,10 +49,15 @@ class Packager:
         self.resPlatformPath = None
 
         self.web2boardExecutableName = None
-        self.serialMonitorExecutableName = None
         self.sconsExecutableName = None
 
         os.chdir(self.web2boardPath)
+
+    def _getInstallerExternalResourcesPath(self):
+        return self.installerCreationDistPath + pm.EXTERNAL_RESOURCES_PATH[len(pm.MAIN_PATH):]
+
+    def _getPlatformIOPackagesPath(self):
+        return os.path.join(self._getInstallerExternalResourcesPath(), "platformIoPackages.zip")
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
@@ -82,7 +86,7 @@ class Packager:
             shutil.rmtree(self.pyInstallerBuildFolder)
 
     def _addMetadataForInstaller(self):
-        resourcesInstallerPath = self.installerCreationDistPath + pm.EXTERNAL_RESOURCES_PATH[len(pm.MAIN_PATH):]
+        resourcesInstallerPath = self._getInstallerExternalResourcesPath()
         if not os.path.exists(resourcesInstallerPath):
             os.makedirs(resourcesInstallerPath)
 
@@ -92,6 +96,7 @@ class Packager:
         os.makedirs(self.installerCreationPath)
         os.makedirs(self.installerCreationDistPath)
         os.makedirs(self.installerPath)
+        os.makedirs(self._getInstallerExternalResourcesPath())
 
     def _restoreSrcResFolder(self):
         shutil.rmtree(self.srcResPath)
@@ -102,9 +107,10 @@ class Packager:
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            call(["pyinstaller", "--onefile", '-w', self.sconsSpecPath])
+            log.debug("Creating Scons Executable")
+            call(["pyinstaller", "--onefile", self.sconsSpecPath])
             shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
-                         self.srcPath)
+                         self._getInstallerExternalResourcesPath())
 
             self._getSconsPackages()
             call(["pyinstaller", "--onefile", '-w', self.web2boardSpecPath])
@@ -134,14 +140,16 @@ class Packager:
                 platform._install_default_packages()
 
             log.info("all packages where successfully installed")
-            platformIOPackagesSettingsPath = os.path.abspath(util.get_home_dir())
-            log.info("constructing zip file in : {}".format(pm.PLATFORMIO_PACKAGES_ZIP_PATH))
-            packagesFiles = findFiles(platformIOPackagesSettingsPath, ["appstate.json", "packages/**/*"])
-            packagesFiles = [x[len(platformIOPackagesSettingsPath) + 1:] for x in packagesFiles]
-            os.chdir(platformIOPackagesSettingsPath)
-            if not os.path.exists(pm.EXTERNAL_RESOURCES_PATH):
-                os.makedirs(pm.EXTERNAL_RESOURCES_PATH)
-            with zipfile.ZipFile(pm.PLATFORMIO_PACKAGES_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as z:
+            platformIOPackagesPath = os.path.abspath(util.get_home_dir())
+            log.info("constructing zip file in : {}".format(self._getPlatformIOPackagesPath()))
+            packagesFiles = findFiles(platformIOPackagesPath, ["appstate.json", "packages/**/*"])
+            isDoc = lambda filePath: "doc" not in filePath and not filePath.endswith('.html')
+            packagesFiles = [x[len(platformIOPackagesPath) + 1:] for x in packagesFiles if isDoc(x)]
+            os.chdir(platformIOPackagesPath)
+            if not os.path.exists(self._getInstallerExternalResourcesPath()):
+                os.makedirs(self._getInstallerExternalResourcesPath())
+
+            with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
                 for zipFilePath in packagesFiles:
                     log.debug("adding file: {}".format(zipFilePath))
                     z.write(zipFilePath)

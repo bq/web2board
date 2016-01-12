@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime
 from threading import Thread
 
 import threading
 
+log = logging.getLogger(__name__)
 
 class AsynchronousNotDone(Exception):
     pass
@@ -43,6 +45,7 @@ def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None):
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
+                log.exception("Error in asynchronous task")
                 result = e
             resultObject.result = result
             if callback is not None:

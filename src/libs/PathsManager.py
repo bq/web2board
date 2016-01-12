@@ -16,7 +16,6 @@ class PathsManager:
 
     EXECUTABLE_PATH = None
     MAIN_PATH = None
-    PLATFORMIO_PACKAGES_ZIP_PATH = None
     EXTERNAL_RESOURCES_PATH = None
 
     RES_PATH = None
@@ -59,11 +58,11 @@ class PathsManager:
     def getSonsExecutablePath(cls):
         if utils.areWeFrozen():
             if utils.isWindows():
-                return cls.MAIN_PATH + os.sep + "scons.exe"
+                return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.exe"
             else:
-                return cls.MAIN_PATH + os.sep + "scons"
+                return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript"
         else:
-            return cls.MAIN_PATH + os.sep + "scons.py"
+            return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.py"
 
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
@@ -99,6 +98,13 @@ class PathsManager:
             from Scripts import afterInstallScript
             afterInstallScript.run()
 
+    @staticmethod
+    def getExternalResourcesPath():
+        if pm.EXECUTABLE_PATH.endswith("externalResources"):
+            return pm.EXECUTABLE_PATH
+
+        return os.path.join(pm.EXECUTABLE_PATH, "externalResources")
+
 
 # set working directory to src
 if utils.areWeFrozen():
@@ -109,8 +115,7 @@ else:
 pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
-pm.EXTERNAL_RESOURCES_PATH = os.path.join(pm.EXECUTABLE_PATH, "externalResources")
-pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.EXTERNAL_RESOURCES_PATH, "platformPackages.zip")
+pm.EXTERNAL_RESOURCES_PATH = pm.getExternalResourcesPath()
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
 pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')
