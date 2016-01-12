@@ -31,8 +31,6 @@ class Updater:
         self.currentVersionInfoPath = None
         """:type : str """
 
-        self.onlineVersionInfo = None
-        """:type : VersionInfo """
         self.onlineVersionUrl = None
         """:type : str """
 
@@ -43,18 +41,15 @@ class Updater:
 
     def _reloadVersions(self):
         self.readCurrentVersionInfo()
-        self.downloadOnlineVersionInfo()
+        return self.downloadOnlineVersionInfo()
 
     def _getCurrentVersionNumber(self):
         return self.getVersionNumber(self.currentVersionInfo)
 
-    def _getOnlineVersionNumber(self):
-        return self.getVersionNumber(self.onlineVersionInfo)
-
-    def _areWeMissingLibraries(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
+    def _areWeMissingLibraries(self):
         log.debug("[{0}] Checking library names".format(self.name))
+        if not os.path.exists(self.destinationPath):
+            return True
         libraries = utils.listDirectoriesInPath(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
         for cLibrary in self.currentVersionInfo.librariesNames:
@@ -63,66 +58,70 @@ class Updater:
 
         return len(self.currentVersionInfo.librariesNames) > len(libraries)
 
-    def _checkVersions(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
-
-        return self._getCurrentVersionNumber() != self._getOnlineVersionNumber()
-
-    def _updateVersionInfo(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
-
-        log.debug("[{0}] Updating version to: {}".format(self.name, self.onlineVersionInfo.version))
-        with open(self.currentVersionInfoPath, 'w') as currentVersionFile:
-            json.dump(self.onlineVersionInfo.getDictionary(), currentVersionFile, indent=4)
-
-        self.currentVersionInfo = self.onlineVersionInfo
+    def _isVersionDifferentToCurrent(self, versionToCheck):
+        """
+        :type versionToCheck: VersionInfo
+        """
+        logArgs = self.name, self.currentVersionInfo.version, versionToCheck.version
+        log.debug("[{0}] Checking version {1} - {2}".format(*logArgs))
+        return self._getCurrentVersionNumber() != self.getVersionNumber(versionToCheck)
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         raise NotImplementedError
 
-    def _updateCurrentVersionInfo(self):
-        self.currentVersionInfo.version = self.onlineVersionInfo.version
-        self.currentVersionInfo.file2DownloadUrl = self.onlineVersionInfo.file2DownloadUrl
+    def _updateCurrentVersionInfoTo(self, versionToUpload):
+        """
+        :type versionToUpload: VersionInfo
+        """
+        log.debug("[{0}] Updating version to: {1}".format(self.name, versionToUpload.version))
+        self.currentVersionInfo.version = versionToUpload.version
+        self.currentVersionInfo.file2DownloadUrl = versionToUpload.file2DownloadUrl
         self.currentVersionInfo.librariesNames = utils.listDirectoriesInPath(self.destinationPath)
+        with open(self.currentVersionInfoPath, 'w') as cvpf:
+            json.dump(self.currentVersionInfo.getDictionary(), cvpf, indent=4)
+        log.debug("currentVersion updated")
 
-    def getVersionNumber(self, versionInfo):
+    def getVersionNumber(self, versionInfo=None):
         """
         :type versionInfo: VersionInfo
         """
+        versionInfo = self.currentVersionInfo if versionInfo is None else versionInfo
         return int(versionInfo.version.replace('.', ''))
 
     def readCurrentVersionInfo(self):
-        if not os.path.exists(self.currentVersionInfoPath):
+        try:
+            if not os.path.exists(self.currentVersionInfoPath):
+                self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
+                logText = "[{0}] Unable to find version in settings path: {1}"
+                log.warning(logText.format(self.name, self.currentVersionInfoPath))
+                return self.currentVersionInfo
+            with open(self.currentVersionInfoPath) as versionFile:
+                jsonVersion = json.load(versionFile)
+            self.currentVersionInfo = VersionInfo(**jsonVersion)
+            log.debug("[{0}] Read current version: {1}".format(self.name, self.currentVersionInfo.version))
+        except:
+            log.error("unable to read currentVersionInfo")
             self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
-            logText = "[{0}] Unable to find version in settings path: {1}"
-            log.warning(logText.format(self.name, self.currentVersionInfoPath))
-            return self.currentVersionInfo
-        with open(self.currentVersionInfoPath) as versionFile:
-            jsonVersion = json.load(versionFile)
-        self.currentVersionInfo = VersionInfo(**jsonVersion)
-        log.debug("[{0}] Read current version: {1}".format(self.name, self.currentVersionInfo.version))
+
         return self.currentVersionInfo
 
     def downloadOnlineVersionInfo(self):
         jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))
-        self.onlineVersionInfo = VersionInfo(**jsonVersion)
-        log.debug("[{0}] Downloaded online version: {1}".format(self.name, self.onlineVersionInfo.version))
-        return self.onlineVersionInfo
+        onlineVersionInfo = VersionInfo(**jsonVersion)
+        log.debug("[{0}] Downloaded online version: {1}".format(self.name, onlineVersionInfo.version))
+        return onlineVersionInfo
 
-    def isNecessaryToUpdate(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
+    def isNecessaryToUpdate(self, versionToCompare=None):
+        """
+        :type versionToCompare: VersionInfo
+        """
+        versionToCompare = self.currentVersionInfo if versionToCompare is None else versionToCompare
+        return self._isVersionDifferentToCurrent(versionToCompare) or self._areWeMissingLibraries()
 
-        return self._checkVersions() or self._areWeMissingLibraries()
-
-    def update(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
+    def update(self, versionToUpload):
         log.info('[{0}] Downloading version {1}, from {2}'
-                 .format(self.name, self.onlineVersionInfo.version, self.onlineVersionInfo.file2DownloadUrl))
-        downloadedFilePath = utils.downloadFile(self.onlineVersionInfo.file2DownloadUrl)
+                 .format(self.name, versionToUpload.version, versionToUpload.file2DownloadUrl))
+        downloadedFilePath = utils.downloadFile(versionToUpload.file2DownloadUrl)
         extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
         if not os.path.exists(extractFolder):
             os.mkdir(extractFolder)
@@ -130,7 +129,7 @@ class Updater:
             log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
             utils.extractZip(downloadedFilePath, extractFolder)
             self._moveDownloadedToDestinationPath(extractFolder)
-            self._updateCurrentVersionInfo()
+            self._updateCurrentVersionInfoTo(versionToUpload)
         finally:
             if os.path.exists(downloadedFilePath):
                 os.unlink(downloadedFilePath)

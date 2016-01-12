@@ -113,7 +113,7 @@ class TestCompilerUploader(unittest.TestCase):
 
         compileResult = self.compiler.compile(withLibrariesCpp)
 
-        self.assertTrue(compileResult[0])
+        self.assertTrue(compileResult[0], compileResult[1])
 
     def test_compile_ResultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)

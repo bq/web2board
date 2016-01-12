@@ -4,6 +4,8 @@ from wshubsapi.ConnectedClient import ConnectedClient
 from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
+
+from Test.testingUtils import restoreAllTestResources
 from libs.CompilerUploader import CompilerUploader, CompilerException, ERROR_NO_PORT_FOUND
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.WSCommunication.Hubs.BoardConfigHub import BoardConfigHub, BoardConfigHubException
@@ -15,6 +17,7 @@ from flexmock import flexmock
 
 
 class TestBoardConfigHub(unittest.TestCase):
+
     def setUp(self):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.libUpdater = getBitbloqLibsUpdater()
@@ -31,6 +34,7 @@ class TestBoardConfigHub(unittest.TestCase):
                                                         getPort=None)
         self.testLibVersion = "1.1.1"
 
+        restoreAllTestResources()
 
     def tearDown(self):
         self.boardConfigHub.compilerUploader.compile = self.original_compile
@@ -85,7 +89,7 @@ class TestBoardConfigHub(unittest.TestCase):
         self.assertTrue(self.boardConfigHub.setBoard("uno", self.sender))
 
     def test_setLibVersion_doesNotDownloadLibsIfHasRightVersion(self):
-        flexmock(self.libUpdater, isNecessaryToUpdate=lambda: False).should_receive("update").never()
+        flexmock(self.libUpdater, isNecessaryToUpdate=lambda **kwargs: False).should_receive("update").never()
         self.libUpdater.currentVersionInfo.version = self.testLibVersion
 
         self.boardConfigHub.setLibVersion(self.testLibVersion)

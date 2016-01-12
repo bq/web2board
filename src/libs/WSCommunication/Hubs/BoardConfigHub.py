@@ -3,6 +3,7 @@ from wshubsapi.Hub import Hub
 from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_BOARD_NOT_SUPPORTED
 from libs.Packagers.Packager import Packager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+from libs.Updaters.Updater import VersionInfo
 
 
 class BoardConfigHubException(Exception):
@@ -17,7 +18,7 @@ class BoardConfigHub(Hub):
         self.compilerUploader = getCompilerUploader()
 
     def getVersion(self):
-        #todo: check in bitbloq if this is what we want
+        # todo: check in bitbloq if this is what we want
         return Packager().version
 
     def setBoard(self, board, _sender):
@@ -35,7 +36,7 @@ class BoardConfigHub(Hub):
             if e.code == ERROR_BOARD_NOT_SUPPORTED["code"]:
                 raise BoardConfigHubException('NOT SUPPORTED BOARD')
 
-        #todo: do we need to set the port here??
+        # todo: do we need to set the port here??
         try:
             port = self.compilerUploader.getPort()
             _sender.isSettingPort(port)
@@ -45,8 +46,7 @@ class BoardConfigHub(Hub):
 
     def setLibVersion(self, version):
         libUpdater = getBitbloqLibsUpdater()
-        libUpdater.onlineVersionInfo.version = version
-        libUpdater.onlineVersionInfo.file2DownloadUrl = self.BITBLOQ_LIBS_URL_TEMPLATE.format(version)
-        if libUpdater.isNecessaryToUpdate():
-            libUpdater.update()
+        versionInfo = VersionInfo(version, self.BITBLOQ_LIBS_URL_TEMPLATE.format(version))
+        if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
+            libUpdater.update(versionInfo)
         return True

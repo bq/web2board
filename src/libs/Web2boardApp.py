@@ -110,13 +110,15 @@ class Web2boardApp:
         self.isAppRunning = True
         return app
 
-    @asynchronous
-    def startServerForever(self):
+    @asynchronous()
+    def updateLibrariesAndStartServer(self):
         while not self.isAppRunning:
             time.sleep(0.1)
 
         try:
+            getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
             self.w2bServer.serve_forever()
+            log.info("listening...")
         finally:
             os._exit(1)
 
@@ -128,8 +130,7 @@ class Web2boardApp:
         options = self.handleSystemArguments()
         # self.updateLibrariesIfNecessary()
         self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
-        self.startServerForever()
-        log.info("listening...")
+        self.updateLibrariesAndStartServer()
 
         return app
 

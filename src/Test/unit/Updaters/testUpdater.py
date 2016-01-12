@@ -5,6 +5,7 @@ import unittest
 import shutil
 from flexmock import flexmock
 
+from Test.testingUtils import restoreAllTestResources
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
@@ -35,6 +36,9 @@ class TestUpdater(unittest.TestCase):
         self.original_downloadFile = utils.downloadFile
         self.original_extractZip = utils.extractZip
         self.original_listDirsInPath = utils.listDirectoriesInPath
+        self.original_json_dump = json.dump
+
+        restoreAllTestResources()
 
         self.zipToClearPath = None
 
@@ -43,6 +47,7 @@ class TestUpdater(unittest.TestCase):
         utils.downloadFile = self.original_downloadFile
         utils.extractZip = self.original_extractZip
         utils.listDirectoriesInPath = self.original_listDirsInPath
+        json.dump = self.original_json_dump
 
         for libraryName in versionTestData["librariesNames"]:
             if os.path.exists(self.updater.destinationPath + os.sep + libraryName):
@@ -66,7 +71,7 @@ class TestUpdater(unittest.TestCase):
     def test_readCurrentVersionInfo_setsCurrentVersionInfoValues(self):
         self.updater.readCurrentVersionInfo()
 
-        self.assertEqual(self.updater.currentVersionInfo.version, "0.0.1")
+        self.assertEqual("0.0.1", self.updater.currentVersionInfo.version)
         self.assertTrue(len(self.updater.currentVersionInfo.librariesNames) >= 1)
 
     def test_readCurrentVersionInfo_returnsNoneVersionIfFileNotFound(self):
@@ -79,29 +84,16 @@ class TestUpdater(unittest.TestCase):
     def test_downloadOnlineVersionInfo_setsOnlineVersionInfoValues(self):
         self.__getMockForGetDataFromUrl().once()
 
-        self.updater.downloadOnlineVersionInfo()
+        onlineVersionInfo = self.updater.downloadOnlineVersionInfo()
 
-        self.assertEqual(self.updater.onlineVersionInfo.version, "9.9.9")
-        self.assertEqual(self.updater.onlineVersionInfo.librariesNames, ["l1"])
+        self.assertEqual(onlineVersionInfo.version, "9.9.9")
+        self.assertEqual(onlineVersionInfo.librariesNames, ["l1"])
 
     def test_isNecessaryToUpdate_raiseExceptionIfCurrentVersionIsNone(self):
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
 
         with self.assertRaises(Exception):
             self.updater.isNecessaryToUpdate()
-
-    def test_isNecessaryToUpdate_raiseExceptionIfOnlineVersionIsNone(self):
-        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
-
-        with self.assertRaises(Exception):
-            self.updater.isNecessaryToUpdate()
-
-    def test_isNecessaryToUpdate_ReloadsVersionsIfFlagIsTrue(self):
-        self.__getMockForGetDataFromUrl()
-        self.updater.isNecessaryToUpdate(reloadVersions=True)
-
-        self.assertIsNotNone(self.updater.onlineVersionInfo)
-        self.assertIsNotNone(self.updater.currentVersionInfo)
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreDifferent(self):
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
@@ -110,13 +102,13 @@ class TestUpdater(unittest.TestCase):
 
         self.assertTrue(self.updater.isNecessaryToUpdate())
 
-    def test_isNecessaryToUpdate_raisesExceptionIfDestinationPathDoesNotExist(self):
+    def test_isNecessaryToUpdate_returnsTrueIfDestinationPathDoesNotExist(self):
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         if os.path.exists(self.updater.destinationPath):
             shutil.rmtree(self.updater.destinationPath)
 
-        self.assertRaises(Exception, self.updater.isNecessaryToUpdate)
+        self.assertTrue(self.updater.isNecessaryToUpdate())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualButNoLibrariesInDestinationPath(self):
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
@@ -138,38 +130,29 @@ class TestUpdater(unittest.TestCase):
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
         self.__getMockForDownloadFile().never()
         self.__getMockForExtractZip().never()
+        flexmock(json).should_receive("dump").never()
 
         with self.assertRaises(Exception):
-            self.updater.update()
-
-    def test_update_ReloadsVersionsIfFlagIsTrue(self):
-        self.__getMockForGetDataFromUrl()
-        self.__getMockForDownloadFile().once()
-        self.__getMockForExtractZip().once()
-        flexmock(utils).should_receive("listDirectoriesInPath")
-        self.updater._moveDownloadedToDestinationPath = lambda x: x
-
-        self.updater.update(reloadVersions=True)
-
-        self.assertIsNotNone(self.updater.onlineVersionInfo)
-        self.assertIsNotNone(self.updater.currentVersionInfo)
+            self.updater.update(self.updater.currentVersionInfo)
 
     def test_update_updatesCurrentVersionInfo(self):
         self.__getMockForGetDataFromUrl()
         self.__getMockForDownloadFile().once()
         self.__getMockForExtractZip().once()
+        flexmock(json).should_receive("dump").once()
+        os.makedirs(self.updater.destinationPath)
         flexmock(utils).should_receive("listDirectoriesInPath").and_return(["l1", "l2"])
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
-        self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
         self.updater._moveDownloadedToDestinationPath = lambda x: x
 
-        self.updater.update(reloadVersions=True)
+        onlineVersionInfo = VersionInfo(**onlineVersionTestData)
+        self.updater.update(onlineVersionInfo)
 
         self.assertEqual(self.updater.currentVersionInfo.librariesNames, ["l1", "l2"])
-        self.assertEqual(self.updater.currentVersionInfo.version, self.updater.onlineVersionInfo.version)
-        self.assertEqual(self.updater.currentVersionInfo.version, self.updater.onlineVersionInfo.version)
+        self.assertEqual(self.updater.currentVersionInfo.version, onlineVersionInfo.version)
+        self.assertEqual(self.updater.currentVersionInfo.version, onlineVersionInfo.version)
         self.assertFalse(self.updater._areWeMissingLibraries())
-        self.assertFalse(self.updater._checkVersions())
+        self.assertFalse(self.updater._isVersionDifferentToCurrent(onlineVersionInfo))
         self.assertFalse(self.updater.isNecessaryToUpdate())
 
     @unittest.skip("_moveDownloadedToDestinationPath is not implemented in Updater")

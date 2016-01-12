@@ -22,8 +22,8 @@ class BitbloqLibsUpdater(Updater):
         self.name = "BitbloqLibsUpdater"
         self.readCurrentVersionInfo()
         # self._reloadVersions() # todo: this needs to be called when  urls work
-        self.currentVersionInfo = VersionInfo("0.0.1", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
-        self.onlineVersionInfo = VersionInfo("0.0.2", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
+        # self.currentVersionInfo = VersionInfo("0.0.1", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
+        # self.onlineVersionInfo = VersionInfo("0.0.2", "https://github.com/bq/bitbloqLibs/archive/master.zip", ["01"])
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         directoriesInUnzippedFolder = utils.listDirectoriesInPath(downloadedPath)
@@ -34,6 +34,13 @@ class BitbloqLibsUpdater(Updater):
         if not os.path.exists(self.destinationPath):
             os.makedirs(self.destinationPath)
         utils.copytree(downloadedPath, self.destinationPath, forceCopy=True)
+
+    def restoreCurrentVersionIfNecessary(self):
+        if self.isNecessaryToUpdate():
+            log.warning("It is necessary to upload BitbloqLibs")
+            self.update(self.currentVersionInfo)
+        else:
+            log.debug("BitbloqLibs is up to date")
 
 def getBitbloqLibsUpdater():
     """

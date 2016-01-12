@@ -58,7 +58,7 @@ class PathsManager:
 
     @classmethod
     def getSonsExecutablePath(cls):
-        if utils.areWeFrozen() or True:
+        if utils.areWeFrozen() or utils.isMac():
             if utils.isWindows():
                 return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.exe"
             else:
@@ -92,7 +92,7 @@ class PathsManager:
             if os.path.exists(cls.TEST_SETTINGS_PATH):
                 shutil.rmtree(cls.TEST_SETTINGS_PATH)
             os.makedirs(cls.TEST_SETTINGS_PATH)
-            copytree(cls.TEST_RES_PATH, cls.TEST_SETTINGS_PATH, ignore=".pioenvs")
+            copytree(cls.TEST_RES_PATH, cls.TEST_SETTINGS_PATH, ignore=".pioenvs", forceCopy=True)
 
             shutil.copyfile(web2boardUpdater.currentVersionInfoPath, web2boardUpdater.settingsVersionInfoPath)
             web2boardUpdater.readSettingsVersionInfo()
