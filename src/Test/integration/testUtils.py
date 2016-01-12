@@ -12,7 +12,5 @@ class TestUtils(unittest.TestCase):
 
         tempFile = utils.downloadFile(url)
 
-        lastModificationFile = os.stat(tempFile).st_mtime
-        lastModificationDiff = time.time() - lastModificationFile
-        self.assertTrue(abs(lastModificationDiff) < 0.5)
+        self.assertTrue(os.path.exists(tempFile))
         self.assertIn(libs.base.sys_path.get_tmp_path().lower(), tempFile.lower())

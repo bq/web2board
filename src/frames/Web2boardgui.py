@@ -34,7 +34,7 @@ class Web2boardGui ( wx.Frame ):
 		bSizer2.Add( self.portsLabel, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		portComboChoices = [ u"AUTO" ]
-		self.portCombo = wx.ComboBox( self.mainPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 120,-1 ), portComboChoices, wx.CB_DROPDOWN)
+		self.portCombo = wx.ComboBox( self.mainPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 120,-1 ), portComboChoices, wx.CB_DROPDOWN )
 		bSizer2.Add( self.portCombo, 0, wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.resfreshPortsButton = wx.Button( self.mainPanel, wx.ID_ANY, u"Search ports", wx.DefaultPosition, wx.DefaultSize, 0 )
