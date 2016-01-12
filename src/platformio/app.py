@@ -18,7 +18,10 @@ from os import environ, getenv
 from os.path import getmtime, isfile, join
 from time import time
 
-from lockfile import LockFile
+try:
+    from lockfile import LockFile
+except:
+    from lockfile import FileLock
 
 from platformio import __version__
 from platformio.exception import InvalidSettingName, InvalidSettingValue

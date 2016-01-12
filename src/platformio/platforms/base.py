@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 import os
 import re
 from imp import load_source
@@ -25,6 +25,7 @@ from libs.PathsManager import PathsManager
 from platformio import app, exception, util
 from platformio.app import get_state_item, set_state_item
 from platformio.pkgmanager import PackageManager
+log = logging.getLogger(__name__)
 
 PLATFORM_PACKAGES = {
 
@@ -446,6 +447,7 @@ class BasePlatform(object):
                 stderr=util.AsyncPipe(self.on_run_err)
             )
         except (OSError, AssertionError) as e:
+            log.exception("error running scons")
             raise exception.SConsNotInstalledError()
 
         assert "returncode" in result

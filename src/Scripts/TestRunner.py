@@ -3,6 +3,9 @@ import unittest
 
 import sys
 
+from libs.LoggingUtils import initLogging
+
+log = initLogging(__name__)
 
 def __runTests(suite, reportTitle="report"):
     from Test import setConfigurationFilesForTest
