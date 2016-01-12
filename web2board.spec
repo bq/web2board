@@ -36,5 +36,5 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False,
+          console=True,
           icon=os.getcwd() + os.sep + 'res/Web2board.ico')

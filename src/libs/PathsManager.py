@@ -17,6 +17,8 @@ class PathsManager:
     EXECUTABLE_PATH = None
     MAIN_PATH = None
     EXTERNAL_RESOURCES_PATH = None
+    PLATFORMIO_PACKAGES_ZIP_NAME = "platformIoPackages.zip"
+    PLATFORMIO_PACKAGES_ZIP_PATH = None
 
     RES_PATH = None
     RES_CONFIG_PATH = None
@@ -116,6 +118,7 @@ pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
 pm.EXTERNAL_RESOURCES_PATH = pm.getExternalResourcesPath()
+pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.getExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
 pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')

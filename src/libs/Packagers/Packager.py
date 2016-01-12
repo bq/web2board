@@ -57,7 +57,7 @@ class Packager:
         return self.installerCreationDistPath + pm.EXTERNAL_RESOURCES_PATH[len(pm.MAIN_PATH):]
 
     def _getPlatformIOPackagesPath(self):
-        return os.path.join(self._getInstallerExternalResourcesPath(), "platformIoPackages.zip")
+        return os.path.join(self._getInstallerExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
