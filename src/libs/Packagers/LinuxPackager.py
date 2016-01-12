@@ -18,8 +18,7 @@ class LinuxPackager(Packager):
 
         self.installerCreationPath = self.web2boardPath + os.sep + "deb_web2board_{}_{}".format(architecture, self.version)
         self.installerCreationName = os.path.basename(self.installerCreationPath)
-        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "usr", "lib", "python2.7", "dist-packages", "Scripts",
-                                           "web2board")
+        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "opt", "web2board")
 
         self.pkgPlatformPath = os.path.join(self.pkgPath, "linux")
         self.resPlatformPath = os.path.join(self.resPath, "linux")
