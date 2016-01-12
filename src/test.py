@@ -1,54 +1,46 @@
-#!/usr/bin/env python
-import os
+import gtk
 
-import signal
+def message(data=None):
+    "Function to display messages to the user."
 
-from libs.Decorators.Asynchronous import asynchronous
-from libs.LoggingUtils import initLogging
-from libs.PathsManager import PathsManager
-from libs.SysTrayIcon.winSysTryIcon import SysTrayIcon
-from libs.Web2boardApp import getMainApp
+    msg=gtk.MessageDialog(None, gtk.DIALOG_MODAL,
+                          gtk.MESSAGE_INFO, gtk.BUTTONS_OK, data)
+    msg.run()
+    msg.destroy()
 
-log = initLogging(__name__)  # initialized in main
+def open_app(data=None):
+    message(data)
 
+def close_app(data=None):
+    message(data)
+    gtk.main_quit()
 
-@asynchronous()
-def startsTrayIcon():
-    iconPath = PathsManager.RES_PATH + os.sep + "Web2board.ico"
-    hover_text = "Web2board application"
-    def showWeb2board(sysTrayIcon):
-        w2bApp = getMainApp()
-        w2bApp.w2bGui.showApp()
-    menu_options = (('Show app', iconPath, showWeb2board),)
-    SysTrayIcon(iconPath, hover_text, menu_options, default_menu_index=1)
+def make_menu(event_button, event_time, data=None):
+    menu = gtk.Menu()
+    open_item = gtk.MenuItem("Open App")
+    close_item = gtk.MenuItem("Close App")
 
+    #Append the menu items
+    menu.append(open_item)
+    menu.append(close_item)
+    #add callbacks
+    open_item.connect_object("activate", open_app, "Open App")
+    close_item.connect_object("activate", close_app, "Close App")
+    #Show the menu items
+    open_item.show()
+    close_item.show()
 
-# Minimal self test. You'll need a bunch of ICO files in the current working
-# directory in order for this to work...
+    #Popup the menu
+    menu.popup(None, None, None, event_button, event_time)
+
+def on_right_click(data, event_button, event_time):
+    make_menu(event_button, event_time)
+
+def on_left_click(event):
+    message("Status Icon Left Clicked")
+
 if __name__ == '__main__':
-    try:
-        def closeSigHandler(signal, frame):
-            log.warning("closing server")
-            getMainApp().w2bServer.server_close()
-            log.warning("server closed")
-            os._exit(1)
-
-
-        startsTrayIcon()
-        app = getMainApp()
-
-        signal.signal(signal.SIGINT, closeSigHandler)
-
-        wxApp = app.startMain()
-        app.w2bGui.Show()
-        wxApp.MainLoop()
-
-        # app.startConsoleViewer()
-    except SystemExit:
-        pass
-    except Exception as e:
-        if log is None:
-            raise e
-        else:
-            log.critical("critical exception", exc_info=1)
-    os._exit(1)
+    icon = gtk.status_icon_new_from_stock(gtk.STOCK_ABOUT)
+    icon.connect('popup-menu', on_right_click)
+    icon.connect('activate', on_left_click)
+    gtk.main()
