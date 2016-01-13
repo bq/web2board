@@ -3,7 +3,10 @@ import os
 import sys
 from pprint import pprint
 
-sys.path.extend("..")
+# print os.getcwd()
+# print os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+# pprint(list(sys.argv))
+# sys.path.append(sys.argv[-1])
 from libs.PathsManager import PathsManager
 from libs.LoggingUtils import initLogging
 
@@ -41,5 +44,5 @@ os.chdir(sys.argv.pop(-1))
 
 # atmelvarBinPath = os.path.join(PackageManager()._package_dir, "toolchain-atmelavr", "bin")
 # os.environ["PATH"] += atmelvarBinPath
-sys.path.extend([PathsManager.EXTERNAL_RESOURCES_PATH + 'sconsFiles'])
+sys.path.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + 'sconsFiles'])
 execfile(PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles" + os.sep + "scons.py")

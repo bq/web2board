@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from glob import glob
 from os.path import (abspath, basename, dirname, expanduser, isdir, isfile,
                      join, realpath)
@@ -225,9 +226,15 @@ def exec_command(*args, **kwargs):
         "returncode": None
     }
 
+    tempPath = tempfile.gettempdir() + os.sep + "w2bInAuxiliary.w2b" # [JORGE_GARCIA] modified for non console in windows
+    with open(tempPath, "w"):
+        pass
+
+
     default = dict(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        stdin=open(tempPath, "r"),  # [JORGE_GARCIA] modified for non console in windows
         shell=system() == "Windows"
     )
     default.update(kwargs)

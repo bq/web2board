@@ -1,5 +1,6 @@
 import os
 import unittest
+from pprint import pprint
 
 import click
 import sys
@@ -112,8 +113,8 @@ class TestCompilerUploader(unittest.TestCase):
             withLibrariesCpp = f.read()
 
         compileResult = self.compiler.compile(withLibrariesCpp)
-
-        self.assertTrue(compileResult[0], compileResult[1])
+        pprint(compileResult)
+        self.assertTrue(compileResult[0])
 
     def test_compile_ResultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
@@ -121,9 +122,8 @@ class TestCompilerUploader(unittest.TestCase):
             notWorkingCpp = f.read()
 
         compileResult = self.compiler.compile(notWorkingCpp)
-
+        pprint(compileResult)
         self.assertFalse(compileResult[0])
-        self.assertNotEqual(compileResult[1]["err"], "")
 
     def test_upload_RaisesExceptionIfBoardIsNotSet(self):
         self.assertIsNone(self.compiler.board)
@@ -137,18 +137,20 @@ class TestCompilerUploader(unittest.TestCase):
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
-        compileResult = self.compiler.upload(workingCpp)
+        uploadResult = self.compiler.upload(workingCpp)
 
-        self.assertTrue(compileResult[0])
+        pprint(uploadResult)
+        self.assertTrue(uploadResult[0])
 
     def test_upload_ResultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
 
-        compileResult = self.compiler.upload(notWorkingCpp)
+        uploadResult = self.compiler.upload(notWorkingCpp)
 
-        self.assertFalse(compileResult[0])
+        pprint(uploadResult)
+        self.assertFalse(uploadResult[0])
 
     def test_uploadAvrHex_CompilesSuccessfullyWithWorkingHexFile(self):
         self.compiler.setBoard(self.connectedBoard)

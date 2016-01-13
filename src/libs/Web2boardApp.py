@@ -51,7 +51,8 @@ class Web2boardApp:
 
         if options.afterInstall:
             afterInstallScript.run()
-            log.warning("exiting program...")
+            log.warning("exiting program in 3s")
+            time.sleep(3)
             os._exit(1)
 
         if not os.environ.get("platformioBoard", False):
@@ -66,7 +67,9 @@ class Web2boardApp:
                 runIntegrationTests()
             elif testing == "all":
                 runAllTests()
-            log.warning("exiting program...")
+
+            log.warning("\nexiting program in 10s")
+            time.sleep(10)
             os._exit(1)
 
         return options
@@ -114,6 +117,8 @@ class Web2boardApp:
     def updateLibrariesAndStartServer(self):
         while not self.isAppRunning:
             time.sleep(0.1)
+        options = self.handleSystemArguments()
+        self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
 
         try:
             getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
@@ -127,9 +132,7 @@ class Web2boardApp:
 
         PathsManager.logRelevantEnvironmentalPaths()
         PathsManager.moveInternalConfigToExternalIfNecessary()
-        options = self.handleSystemArguments()
         # self.updateLibrariesIfNecessary()
-        self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
         self.updateLibrariesAndStartServer()
 
         return app

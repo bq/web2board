@@ -576,11 +576,11 @@ class _TestResult(TestResult):
         output = self.complete_output()
         self.result.append((2, test, output, _exc_str))
         if self.verbosity > 1:
-            sys.stderr.write('E  ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
+            sys.stderr.write('ERROR!!!!\n')
         else:
-            sys.stderr.write('E')
+            sys.stderr.write('ERROR! ')
 
     def addFailure(self, test, err):
         self.failure_count += 1
@@ -589,11 +589,11 @@ class _TestResult(TestResult):
         output = self.complete_output()
         self.result.append((1, test, output, _exc_str))
         if self.verbosity > 1:
-            sys.stderr.write('F  ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
+            sys.stderr.write('FAILED!!!!!\n')
         else:
-            sys.stderr.write('F')
+            sys.stderr.write('FAILED! ')
 
 
 class HTMLTestRunner(Template_mixin):

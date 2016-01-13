@@ -28,22 +28,23 @@ class Web2BoardUpdater(Updater):
         self.readCurrentVersionInfo()
         self.readSettingsVersionInfo()
 
-    def _areWeMissingLibraries(self, reloadVersions=False):
+    def _areWeMissingLibraries(self):
         return False
 
     def _getSettingsVersionNumber(self):
         return self.getVersionNumber(self.settingsVersionInfo)
 
     def _getDownloadUrl(self):
+        onlineVersionInfo = self.downloadOnlineVersionInfo()
         if utils.isLinux():
             if utils.is64bits():
-                downloadUrl = self.onlineVersionInfo.file2DownloadUrl["linux64"]
+                downloadUrl = onlineVersionInfo.file2DownloadUrl["linux64"]
             else:
-                downloadUrl = self.onlineVersionInfo.file2DownloadUrl["linux32"]
+                downloadUrl = onlineVersionInfo.file2DownloadUrl["linux32"]
         elif utils.isMac():
-            downloadUrl = self.onlineVersionInfo.file2DownloadUrl["Mac"]
+            downloadUrl = onlineVersionInfo.file2DownloadUrl["Mac"]
         elif utils.isWindows():
-            downloadUrl = self.onlineVersionInfo.file2DownloadUrl["windows"]
+            downloadUrl = onlineVersionInfo.file2DownloadUrl["windows"]
         else:
             raise Exception("Platform: {} not supported".format(platform.system()))
         return downloadUrl
@@ -72,9 +73,8 @@ class Web2BoardUpdater(Updater):
         log.debug("[{0}] Read settings version: {1}".format(self.name, self.settingsVersionInfo.version))
         return self.settingsVersionInfo
 
-    def update(self, reloadVersions=False):
-        if reloadVersions:
-            self._reloadVersions()
+    def update(self, versionToUpload = None):
+
 
         downloadUrl = self._getDownloadUrl()
 

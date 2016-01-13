@@ -58,7 +58,7 @@ class PathsManager:
 
     @classmethod
     def getSonsExecutablePath(cls):
-        if utils.areWeFrozen() and not utils.isWindows():
+        if utils.areWeFrozen():
             if utils.isWindows():
                 return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.exe"
             else:
@@ -69,7 +69,7 @@ class PathsManager:
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
         _pathsLog.debug('sys.path[0]: {}'.format(sys.path[0]))
-        _pathsLog.debug('PWD: {}'.format(os.environ.get('PWD')))
+        _pathsLog.debug('SCONS_EXECUTABLE_PATH: {}'.format(cls.getSonsExecutablePath()))
         for key, path  in cls.__dict__.items():
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))

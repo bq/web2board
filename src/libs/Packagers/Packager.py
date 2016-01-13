@@ -48,6 +48,7 @@ class Packager:
         self.pkgPlatformPath = None
         self.resPlatformPath = None
 
+
         self.web2boardExecutableName = None
         self.sconsExecutableName = None
 
@@ -153,10 +154,9 @@ class Packager:
                 os.makedirs(self._getInstallerExternalResourcesPath())
 
             with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
-                for zipFilePath in packagesFiles:
-                    log.debug("adding file: {}".format(zipFilePath))
-                    z.write(zipFilePath)
-            log.info("zip file constructed")
+                with click.progressbar(packagesFiles, label='Compressing packages in zip file') as packagesFilesInProgressBar:
+                    for zipFilePath in packagesFilesInProgressBar:
+                        z.write(zipFilePath)
 
         finally:
             os.chdir(originalCurrentDirectory)

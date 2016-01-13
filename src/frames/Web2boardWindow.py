@@ -49,6 +49,7 @@ class Web2boardWindow(Web2boardGui):
         originalStdout = sys.stdout.write
         self.redir = RedirectText(self, originalStdout)
         sys.stdout = self.redir
+        sys.stderr = self.redir
         self.serialMonitor = None
         self.Bind(wx.EVT_CLOSE,self.OnClose)
 

@@ -25,6 +25,7 @@ from libs.PathsManager import PathsManager
 from platformio import app, exception, util
 from platformio.app import get_state_item, set_state_item
 from platformio.pkgmanager import PackageManager
+
 log = logging.getLogger(__name__)
 
 PLATFORM_PACKAGES = {
@@ -147,7 +148,6 @@ def get_packages():
 
 
 class PlatformFactory(object):
-
     @staticmethod
     def get_clsname(type_):
         return "%s%sPlatform" % (type_.upper()[0], type_.lower()[1:])
@@ -157,7 +157,7 @@ class PlatformFactory(object):
         module = None
         try:
             module = load_source(
-                "platformio.platforms.%s" % type_, path)
+                    "platformio.platforms.%s" % type_, path)
         except ImportError:
             raise exception.UnknownPlatform(type_)
         return module
@@ -172,14 +172,14 @@ class PlatformFactory(object):
                 continue
             for p in sorted(os.listdir(pdir)):
                 if (p in ("__init__.py", "base.py") or not
-                        p.endswith(".py")):
+                p.endswith(".py")):
                     continue
                 type_ = p[:-3]
                 path = join(pdir, p)
                 try:
                     isplatform = hasattr(
-                        cls.load_module(type_, path),
-                        cls.get_clsname(type_)
+                            cls.load_module(type_, path),
+                            cls.get_clsname(type_)
                     )
                     if isplatform:
                         platforms[type_] = path
@@ -207,15 +207,14 @@ class PlatformFactory(object):
             raise exception.UnknownPlatform(type_)
 
         _instance = getattr(
-            cls.load_module(type_, platforms[type_]),
-            cls.get_clsname(type_)
+                cls.load_module(type_, platforms[type_]),
+                cls.get_clsname(type_)
         )()
         assert isinstance(_instance, BasePlatform)
         return _instance
 
 
 class BasePlatform(object):
-
     PACKAGES = {}
     LINE_ERROR_RE = re.compile(r"(\s+error|error[:\s]+)", re.I)
 
@@ -292,9 +291,9 @@ class BasePlatform(object):
     def install(self, with_packages=None, without_packages=None,
                 skip_default_packages=False):
         with_packages = set(
-            self.pkg_aliases_to_names(with_packages or []))
+                self.pkg_aliases_to_names(with_packages or []))
         without_packages = set(
-            self.pkg_aliases_to_names(without_packages or []))
+                self.pkg_aliases_to_names(without_packages or []))
 
         upkgs = with_packages | without_packages
         ppkgs = set(self.get_packages().keys())
@@ -306,7 +305,7 @@ class BasePlatform(object):
             if name in without_packages:
                 continue
             elif (name in with_packages or (not skip_default_packages and
-                                            opts.get("default"))):
+                                                opts.get("default"))):
                 requirements.append(name)
 
         pm = PackageManager()
@@ -324,7 +323,7 @@ class BasePlatform(object):
     def uninstall(self):
         platform = self.get_type()
         installed_platforms = PlatformFactory.get_platforms(
-            installed=True).keys()
+                installed=True).keys()
 
         if platform not in installed_platforms:
             raise exception.PlatformNotInstalledYet(platform)
@@ -379,18 +378,18 @@ class BasePlatform(object):
 
     def _install_default_packages(self):
         installed_platforms = PlatformFactory.get_platforms(
-            installed=True).keys()
+                installed=True).keys()
 
         if (self.get_type() in installed_platforms and
-                set(self.get_default_packages()) <=
-                set(self.get_installed_packages())):
+                    set(self.get_default_packages()) <=
+                    set(self.get_installed_packages())):
             return True
 
         if (not app.get_setting("enable_prompts") or
-                self.get_type() in installed_platforms or
+                    self.get_type() in installed_platforms or
                 click.confirm(
-                    "The platform '%s' has not been installed yet. "
-                    "Would you like to install it now?" % self.get_type())):
+                            "The platform '%s' has not been installed yet. "
+                            "Would you like to install it now?" % self.get_type())):
             return self.install()
         else:
             raise exception.PlatformNotInstalledYet(self.get_type())
@@ -429,25 +428,34 @@ class BasePlatform(object):
             if "alias" not in options or name not in installed_packages:
                 continue
             variables.append(
-                "PIOPACKAGE_%s=%s" % (options['alias'].upper(), name))
+                    "PIOPACKAGE_%s=%s" % (options['alias'].upper(), name))
 
         self._found_error = False
         try:
             # test that SCons is installed correctly
             # assert util.test_scons()
             result = util.exec_command(
-                [
-                    PathsManager.getSonsExecutablePath(), # [JORGE_GARCIA] modified for scons compatibility
-                    "-Q",
-                    "-j %d" % self.get_job_nums(),
-                    "--warn=no-no-parallel-support",
-                    "-f", join(util.get_source_dir(), "builder", "main.py")
-                ] + variables + targets + [PathsManager.SETTINGS_PLATFORMIO_PATH], # [JORGE_GARCIA] modified for scons compatibility
-                stdout=util.AsyncPipe(self.on_run_out),
-                stderr=util.AsyncPipe(self.on_run_err)
+                    [
+                        PathsManager.getSonsExecutablePath(),  # [JORGE_GARCIA] modified for scons compatibility
+                        "-Q",
+                        "-j %d" % self.get_job_nums(),
+                        "--warn=no-no-parallel-support",
+                        "-f", join(util.get_source_dir(), "builder", "main.py")
+                    ] + variables + targets + [PathsManager.SETTINGS_PLATFORMIO_PATH],
+                    stdout=util.AsyncPipe(self.on_run_out),
+                    stderr=util.AsyncPipe(self.on_run_err)
             )
         except (OSError, AssertionError) as e:
-            log.exception("error running scons")
+            log.exception("error running scons with \n{}".format([
+                                                                     PathsManager.getSonsExecutablePath(),
+                                                                     # [JORGE_GARCIA] modified for scons compatibility
+                                                                     "-Q",
+                                                                     "-j %d" % self.get_job_nums(),
+                                                                     "--warn=no-no-parallel-support",
+                                                                     "-f",
+                                                                     join(util.get_source_dir(), "builder", "main.py")
+                                                                 ] + variables + targets + [
+                                                                     PathsManager.SETTINGS_PLATFORMIO_PATH]))
             raise exception.SConsNotInstalledError()
 
         assert "returncode" in result

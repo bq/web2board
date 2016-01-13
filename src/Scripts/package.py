@@ -1,4 +1,7 @@
+import os
 import sys
+print os.getcwd()
+sys.path.append(os.getcwd())
 
 from libs.Packagers.Packager import Packager
 from libs.LoggingUtils import initLogging
