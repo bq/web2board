@@ -5,7 +5,6 @@ from libs.utils import *
 
 
 class LinuxPackager(Packager):
-
     RELEASE_TYPES = ({"path": "web2board", "desktopName": "Web2Board-PROD"},
                      {"path": "dev/bet", "desktopName": "Web2Board-BETA"},
                      {"path": "dev/qa", "desktopName": "Web2Board-QA"},
@@ -16,14 +15,17 @@ class LinuxPackager(Packager):
         self.architecture = architecture
         self.installerPath = self.installerFolder + os.sep + "debian_{}".format(architecture)
 
-        self.installerCreationPath = self.web2boardPath + os.sep + "deb_web2board_{}_{}".format(architecture, self.version)
+        self.installerCreationPath = self.web2boardPath + os.sep + "deb_web2board_{}_{}".format(architecture,
+                                                                                                self.version)
         self.installerCreationName = os.path.basename(self.installerCreationPath)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "opt", "web2board")
 
         self.pkgPlatformPath = os.path.join(self.pkgPath, "linux")
         self.resPlatformPath = os.path.join(self.resPath, "linux")
         self.web2boardExecutableName = "web2board"
+        self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-linux.spec")
         self.sconsExecutableName = "sconsScript"
+        self.sconsSpecPath = os.path.join(self.web2boardPath, "scons-linux.spec")
 
         self.packageDebianMetadataPath = os.path.join(self.installerCreationPath, "DEBIAN")
         self.debDistPath = os.path.join(self.installerPath, "deb_dist")
@@ -63,8 +65,8 @@ class LinuxPackager(Packager):
             os.chdir(currentDirectory)
 
     def _moveDebToInstallerPath(self):
-        resultingDeb = self.installerCreationPath + os.sep + self.installerCreationName + ".deb"
-        shutil.copy2(resultingDeb, self.installerPath)
+        resultingDeb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
+        shutil.move(resultingDeb, self.installerPath + os.sep + "web2boar.deb")
 
     def createPackage(self):
         try:
@@ -82,4 +84,4 @@ class LinuxPackager(Packager):
             os.chdir(self.web2boardPath)
             self._restoreSrcResFolder()
             self._clearBuildFiles()
-            self._deleteInstallerCreationFolder()
+            # self._deleteInstallerCreationFolder()

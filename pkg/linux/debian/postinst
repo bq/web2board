@@ -16,7 +16,7 @@ echo "testing......"
 echo "[Desktop Entry]
 Version=0.0.1
 Type=Application
-Exec= xterm -iconic -e web2board
+Exec= /opt/web2board/web2board
 Icon=vncviewer
 StartupNotify=true
 Terminal=false
