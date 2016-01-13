@@ -23,6 +23,7 @@ try:
 except:
     from lockfile import FileLock as LockFile
 
+
 from platformio import __version__
 from platformio.exception import InvalidSettingName, InvalidSettingValue
 from platformio.util import get_home_dir, is_ci
