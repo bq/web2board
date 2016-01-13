@@ -4,6 +4,7 @@ from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_
 from libs.Packagers.Packager import Packager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
+from libs.WSCommunication.Hubs.CodeHub import CodeHub
 
 
 class BoardConfigHubException(Exception):
@@ -28,6 +29,8 @@ class BoardConfigHub(Hub):
         """
         if not board or board == "undefined":
             raise BoardConfigHubException('BOARD UNDEFINED')
+
+        CodeHub.tryToTerminateSerialCommProcess()
 
         _sender.isSettingBoard()
         try:

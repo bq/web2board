@@ -32,21 +32,21 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        self.__tryToTerminateSerialCommProcess()
+        self.tryToTerminateSerialCommProcess()
 
         _sender.isUploading(self.compilerUploader.getPort())
         compileReport = self.compilerUploader.upload(code)
-        if compileReport["status"] == "OK":
+        if compileReport[0]:
             return True
         else:
-            return self._constructUnsuccessfulReplay(compileReport["error"])
+            return self._constructUnsuccessfulReplay(compileReport[1]["err"])
 
     def uploadHexUrl(self, hexFileUrl, _sender):
         """
         :type hexFileUrl: str
         :type _sender: ConnectedClientsGroup
         """
-        self.__tryToTerminateSerialCommProcess()
+        self.tryToTerminateSerialCommProcess()
 
         _sender.isUploading(self.compilerUploader.getPort())
         hexFilePath = utils.downloadFile(hexFileUrl)
@@ -62,7 +62,8 @@ class CodeHub(Hub):
         """
         return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationProcess
 
-    def __tryToTerminateSerialCommProcess(self):
+    @staticmethod
+    def tryToTerminateSerialCommProcess():
         from libs.Web2boardApp import getMainApp
 
         if getMainApp().isSerialMonitorRunning():

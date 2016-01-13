@@ -43,7 +43,7 @@ class CompilerException(Exception):
 #
 class CompilerUploader:
     def __init__(self):
-        self.board = None  # we use the board name as the environment (check platformio.ini)
+        self.board = 'uno'  # we use the board name as the environment (check platformio.ini)
 
     def _getIniConfig(self, environment):
         """
@@ -101,6 +101,8 @@ class CompilerUploader:
         self._checkBoardConfiguration()
         target = ("upload",) if upload else ()
         uploadPort = self.getPort() if upload else None
+
+        code='#include "Arduino.h"\n' + code # todo do this only in Arduino frameworks
 
         with open(os.path.join(pm.SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
             mainCppFile.write(code)

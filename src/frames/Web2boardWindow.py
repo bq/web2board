@@ -2,6 +2,7 @@ import threading
 
 import sys
 import wx
+from wx._core import PyDeadObjectError
 
 from SerialMonitor import SerialMonitorUI
 from frames.Web2boardgui import Web2boardGui
@@ -44,7 +45,7 @@ class Web2boardWindow(Web2boardGui):
         self.actions = []
 
         if eventsRefreshTime > 0:
-            self.timer.Start(100)  # 1 second interval
+            self.timer.Start(300)  # 1 second interval
 
         # redirect text here
         originalStdout = sys.stdout.write
@@ -89,6 +90,8 @@ class Web2boardWindow(Web2boardGui):
     def onTimer(self, event):
         messages = self.redir.get()
         for message in messages:
+            messages = [m.replace("\r", "").replace("\n\n", "") for m in messages if m.strip() != ""]
+            self.consoleLog.SetInsertionPoint(self.consoleLog.GetLastPosition())
             if message.startswith("&&&"):
                 self.consoleLog.BeginBold()
                 message = message.replace("&&&", "")
@@ -108,7 +111,7 @@ class Web2boardWindow(Web2boardGui):
             self.consoleLog.EndTextColour()
             self.consoleLog.EndBold()
         if len(messages) > 0:
-            self.SetStatusText(message)
+            # self.SetStatusText(message)
             wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
             wx.CallAfter(self.consoleLog.Refresh)
 
@@ -116,7 +119,8 @@ class Web2boardWindow(Web2boardGui):
 
     def handlePendingActions(self):
         actions = self.actions
-        for action in actions:
+        while len(actions)>0:
+            action = actions.pop(-1)
             if action[0] == "startSerialMonitor":
                 self.serialMonitor = SerialMonitorUI(None, action[1])
                 self.serialMonitor.Show()
@@ -125,19 +129,21 @@ class Web2boardWindow(Web2boardGui):
             elif action[0] == "showApp":
                 self.Show()
                 self.Raise()
-        self.actions = []
 
     def startSerialMonitorApp(self, port):
         self.actions.append(["startSerialMonitor", port])
 
     def closeSerialMonitorApp(self):
-        self.actions.append(["startSerialMonitor"])
+        self.actions.append(["closeSerialMonitor"])
 
     def showApp(self):
         self.actions.append(["showApp"])
 
     def isSerialMonitorRunning(self):
-        return self.serialMonitor is not None and not self.serialMonitor.isClosed
+        try:
+            return self.serialMonitor is not None and not self.serialMonitor.isClosed
+        except PyDeadObjectError:
+            return False
 
     def OnClose(self, event):
         # if event.CanVeto():

@@ -62,8 +62,7 @@ class SerialMonitorUI(wx.Dialog):
         if port is None:
             getCompilerUploader().setBoard("uno")
             port = getCompilerUploader().getPort()
-        else:
-            port = sys.argv[1]
+
         style = wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX | wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX
         super(SerialMonitorUI, self).__init__(parent, title='bitbloq\'s Serial Monitor', size=(500, 500), style=style)
         self.serialConnection = SerialConnection(port)
@@ -92,7 +91,6 @@ class SerialMonitorUI(wx.Dialog):
         self.sendButton.Bind(wx.EVT_BUTTON, self.onSend)
         self.pauseButton.Bind(wx.EVT_BUTTON, self.onPause)
         self.clearButton.Bind(wx.EVT_BUTTON, self.onClear)
-        self.Bind(wx.EVT_CLOSE, self.onClose)
         self.dropdown.Bind(wx.EVT_COMBOBOX, self.onBaudRateChanged)
 
         # Layout
@@ -115,7 +113,9 @@ class SerialMonitorUI(wx.Dialog):
 
 
     def ParentFrameOnClose(self, event):
+        self.serialConnection.close()
         self.isClosed = True
+        time.sleep(3.0)  # todo iter ports untill it is open again
         self.DestroyChildren()
         self.Destroy()
 
@@ -172,11 +172,7 @@ class SerialMonitorUI(wx.Dialog):
     def onBaudRateChanged(self, event):
         self.serialConnection.changeBaudRate(self.dropdown.GetValue())
 
-    def onClose(self, event):
-        self.serialConnection.close()
-        time.sleep(0.5)
-        os._exit(1)
-        self.Destroy()
+
 
 
 if __name__ == "__main__":
