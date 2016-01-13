@@ -9,7 +9,7 @@
 
 import wx
 import wx.xrc
-import wx.html
+import wx.richtext
 
 ###########################################################################
 ## Class Web2boardGui
@@ -34,7 +34,7 @@ class Web2boardGui ( wx.Frame ):
 		bSizer2.Add( self.portsLabel, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		portComboChoices = [ u"AUTO" ]
-		self.portCombo = wx.ComboBox( self.mainPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 120,-1 ), portComboChoices, wx.CB_DROPDOWN )
+		self.portCombo = wx.ComboBox( self.mainPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 120,-1 ), portComboChoices, wx.CB_DROPDOWN|wx.CB_SORT )
 		bSizer2.Add( self.portCombo, 0, wx.ALL|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL, 5 )
 		
 		self.resfreshPortsButton = wx.Button( self.mainPanel, wx.ID_ANY, u"Search ports", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -45,8 +45,8 @@ class Web2boardGui ( wx.Frame ):
 		
 		bSizer6 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.consoleLog = wx.html.HtmlWindow( self.mainPanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.html.HW_SCROLLBAR_AUTO )
-		bSizer6.Add( self.consoleLog, 1, wx.ALL|wx.EXPAND, 5 )
+		self.consoleLog = wx.richtext.RichTextCtrl( self.mainPanel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0|wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER|wx.WANTS_CHARS )
+		bSizer6.Add( self.consoleLog, 1, wx.EXPAND |wx.ALL, 5 )
 		
 		
 		bSizer7.Add( bSizer6, 1, wx.EXPAND, 5 )

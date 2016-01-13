@@ -121,9 +121,10 @@ class Web2boardApp:
         self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
 
         try:
+            getBitbloqLibsUpdater().readCurrentVersionInfo()
             getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
-            self.w2bServer.serve_forever()
             log.info("listening...")
+            self.w2bServer.serve_forever()
         finally:
             os._exit(1)
 

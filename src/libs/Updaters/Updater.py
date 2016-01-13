@@ -79,7 +79,7 @@ class Updater:
         self.currentVersionInfo.librariesNames = utils.listDirectoriesInPath(self.destinationPath)
         with open(self.currentVersionInfoPath, 'w') as cvpf:
             json.dump(self.currentVersionInfo.getDictionary(), cvpf, indent=4)
-        log.debug("currentVersion updated")
+        log.info("Current version updated")
 
     def getVersionNumber(self, versionInfo=None):
         """

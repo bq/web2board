@@ -14,18 +14,18 @@ class RedirectText(object):
     def __init__(self, parent, originalStdout):
         self.parent = parent
         self.originalStdout = originalStdout
-        self.out = ""
+        self.outs = []
 
     def write(self, string):
-        self.out += string
+        self.outs.append(string)
         self.originalStdout(string)
 
     def flush(self, *args):
         pass
 
     def get(self):
-        aux = self.out
-        self.out = ""
+        aux = self.outs
+        self.outs = []
         return aux
 
 
@@ -36,6 +36,7 @@ class Web2boardWindow(Web2boardGui):
         self.availablePorts = ["AUTO"]
         self.autoPort = None
         self.portCombo.SetSelection(0)
+        self.consoleLog.BeginFontSize(10)
 
         self.timer = wx.Timer(self, 123456)
         self.Bind(wx.EVT_TIMER, self.onTimer)
@@ -51,7 +52,7 @@ class Web2boardWindow(Web2boardGui):
         sys.stdout = self.redir
         sys.stderr = self.redir
         self.serialMonitor = None
-        self.Bind(wx.EVT_CLOSE,self.OnClose)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         WX_Utils.initDecorators(self)
 
@@ -86,13 +87,30 @@ class Web2boardWindow(Web2boardGui):
         self.resfreshPortsButton.Enable()
 
     def onTimer(self, event):
-        message = self.redir.get()
-        if message != "":
-            message = message.replace("\n", "<br/>")
-            message = "<b>{}</b>".format(message)
-            self.htmlBuffer += message
-            self.consoleLog.SetPage(self.htmlBuffer)
-            self.consoleLog.Scroll(0, self.consoleLog.GetScrollRange(wx.VERTICAL))
+        messages = self.redir.get()
+        for message in messages:
+            if message.startswith("&&&"):
+                self.consoleLog.BeginBold()
+                message = message.replace("&&&", "")
+                fg = message[:3]
+                message = message[3:]
+                if fg == "red":
+                    self.consoleLog.BeginTextColour((255, 0, 0))
+                elif fg == "whi":
+                    self.consoleLog.BeginTextColour((255, 255, 255))
+                elif fg == "mag":
+                    self.consoleLog.BeginTextColour((180, 40, 205))
+                elif fg == "gre":
+                    self.consoleLog.BeginTextColour((0, 180, 0))
+                elif fg == "cya":
+                    self.consoleLog.BeginTextColour((50, 50, 255))
+            self.consoleLog.WriteText(message)
+            self.consoleLog.EndTextColour()
+            self.consoleLog.EndBold()
+        if len(messages) > 0:
+            self.SetStatusText(message)
+            wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
+            wx.CallAfter(self.consoleLog.Refresh)
 
         self.handlePendingActions()
 

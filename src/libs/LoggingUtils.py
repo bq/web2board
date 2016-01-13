@@ -5,6 +5,7 @@ import logging.config
 import os
 
 import click
+import sys
 
 from libs.PathsManager import PathsManager
 
@@ -26,10 +27,10 @@ class ColoredConsoleHandler(logging.StreamHandler):
             myRecord.msg = "Unable to format record"
             self.format(myRecord)
         style = self.__getStyle(myRecord)
-        click.secho(self.format(myRecord), **style)
+        # click.secho(self.format(myRecord), **style)
         # self.__addColor(myRecord)
 
-        # logging.StreamHandler.emit(self, myRecord)
+        sys.stdout.write("&&&"+style["fg"]+self.format(myRecord)+"&&&\n")
         # if myRecord.levelno >= 50:
         #     os._exit(1)
 
@@ -55,16 +56,16 @@ class ColoredConsoleHandler(logging.StreamHandler):
             levelNo = myRecord.levelno
             if levelNo >= 50:  # CRITICAL / FATAL
                 style["fg"] = 'red'
-                style["bg"] = 'white'
+                style["bg"] = 'whi'
                 style["underline"] = True
             elif levelNo >= 40:  # ERROR
                 style["fg"] = 'red'
             elif levelNo >= 30:  # WARNING
-                style["fg"] = 'magenta'
+                style["fg"] = 'mag'
             elif levelNo >= 20:  # INFO
-                style["fg"] = 'green'
+                style["fg"] = 'gre'
             elif levelNo >= 10:  # DEBUG
-                style["fg"] = 'cyan'
+                style["fg"] = 'cya'
             else:  # NOTSET and anything else
                 pass
         except:

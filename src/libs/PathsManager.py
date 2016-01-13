@@ -77,7 +77,9 @@ class PathsManager:
     @classmethod
     def moveInternalConfigToExternalIfNecessary(cls):
         from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+        from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
         web2boardUpdater = getWeb2boardUpdater()
+        bitbloqLibsUpdater = getBitbloqLibsUpdater()
         if web2boardUpdater.isNecessaryToUpdateSettings():
             _pathsLog.info("Creating settings folder structure in: {}".format(cls.TEST_SETTINGS_PATH))
             shutil.copyfile(cls.RES_CONFIG_PATH, cls.SETTINGS_CONFIG_PATH)
@@ -96,6 +98,9 @@ class PathsManager:
 
             shutil.copyfile(web2boardUpdater.currentVersionInfoPath, web2boardUpdater.settingsVersionInfoPath)
             web2boardUpdater.readSettingsVersionInfo()
+
+            bitbloqLibVersionResPath = os.path.join(cls.RES_PATH, os.path.basename(bitbloqLibsUpdater.currentVersionInfoPath))
+            shutil.copyfile(bitbloqLibVersionResPath, bitbloqLibsUpdater.currentVersionInfoPath)
 
             from Scripts import afterInstallScript
             afterInstallScript.run()
