@@ -21,7 +21,7 @@ from time import time
 try:
     from lockfile import LockFile
 except:
-    from lockfile import FileLock
+    from lockfile import FileLock as LockFile
 
 from platformio import __version__
 from platformio.exception import InvalidSettingName, InvalidSettingValue
