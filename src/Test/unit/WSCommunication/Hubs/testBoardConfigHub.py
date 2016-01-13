@@ -100,6 +100,6 @@ class TestBoardConfigHub(unittest.TestCase):
         self.boardConfigHub.setLibVersion(self.testLibVersion)
 
     def test_setLibVersion_returnsTrue(self):
-        self.libUpdater = flexmock(self.libUpdater, update=lambda: None)
+        self.libUpdater = flexmock(self.libUpdater, update=lambda x: None)
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))

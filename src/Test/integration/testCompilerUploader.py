@@ -8,9 +8,11 @@ import os
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
+from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
 
+log = initLogging(__name__)
 
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None
