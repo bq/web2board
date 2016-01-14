@@ -15,7 +15,7 @@ class TaskBarIcon(wx.TaskBarIcon):
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
-        self.create_menu_item(menu, 'Ahow app', lambda *args:getWebBoardApp().w2bGui.Show())
+        self.create_menu_item(menu, 'Show app', lambda *args:getWebBoardApp().w2bGui.Show())
         menu.AppendSeparator()
         self.create_menu_item(menu, 'Exit', self.on_exit)
         return menu

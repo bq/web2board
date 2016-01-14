@@ -34,7 +34,6 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, closeSigHandler)
 
         wxApp = app.startMain()
-        TaskBarIcon()
         wxApp.MainLoop()
     except SystemExit:
         pass

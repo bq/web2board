@@ -5,6 +5,7 @@ import wx
 from wx._core import PyDeadObjectError
 
 from SerialMonitor import SerialMonitorUI
+from frames.SystemTrayIcon import TaskBarIcon
 from frames.Web2boardgui import Web2boardGui
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
@@ -61,12 +62,15 @@ class Web2boardWindow(Web2boardGui):
         self.SetIcon(icon)
 
         WX_Utils.initDecorators(self)
+        self.taskBarIcon = TaskBarIcon()
 
     @asynchronous()
     def __getPorts(self):
-        self.availablePorts = self.compileUpdater.getAvailablePorts()
-        self.autoPort = self.compileUpdater.getPort()
-        self.onRefreshFinished()
+        try:
+            self.availablePorts = self.compileUpdater.getAvailablePorts()
+            self.autoPort = self.compileUpdater.getPort()
+        finally:
+            self.onRefreshFinished()
 
     def __handlePendingActions(self):
         actions = self.actions
