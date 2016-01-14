@@ -3,14 +3,12 @@ import logging
 import os
 import time
 import urllib2
-from copy import deepcopy
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
 
 import sys
 
-import gtk
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler

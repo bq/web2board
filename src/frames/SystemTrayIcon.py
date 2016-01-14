@@ -1,24 +1,34 @@
 import os
+import wx
 
 from libs.PathsManager import PathsManager
 from libs.Web2boardApp import getWebBoardApp
 from libs import utils
+
 TRAY_TOOLTIP = 'Web2board app'
 
-import wx
+
+
 class TaskBarIcon(wx.TaskBarIcon):
     def __init__(self):
         super(TaskBarIcon, self).__init__()
         self.set_icon(PathsManager.RES_ICO_PATH)
-        self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, lambda *args:getWebBoardApp().w2bGui.Show())
-        self.ShowBalloon("Web2boar", "Web2board is running in background", 1000)
+        self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.showApp)
+        self.ShowMessage("Web2boar", "Web2board is running in background", 1000)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
-        self.create_menu_item(menu, 'Show app', lambda *args:getWebBoardApp().w2bGui.Show())
+        self.create_menu_item(menu, 'Show app', self.showApp)
         menu.AppendSeparator()
         self.create_menu_item(menu, 'Exit', self.on_exit)
         return menu
+
+    def showApp(self, *args):
+        w2bGui = getWebBoardApp().w2bGui
+        if not w2bGui.IsShown():
+            w2bGui.Show()
+        w2bGui.Raise()
+
 
     def set_icon(self, path):
         icon = wx.IconFromBitmap(wx.Bitmap(path))
@@ -34,11 +44,9 @@ class TaskBarIcon(wx.TaskBarIcon):
         menu.AppendItem(item)
         return item
 
-    def ShowBalloon(self, *args, **kwargs):
+    def ShowMessage(self, *args, **kwargs):
         if not utils.isLinux():
-            super(TaskBarIcon, self).ShowBalloon(*args, **kwargs)
+            self.ShowBalloon(*args, **kwargs)
 
     def RemoveIcon(*args, **kwargs):
         super(TaskBarIcon, args).RemoveIcon(**kwargs)
-
-

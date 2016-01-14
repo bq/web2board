@@ -35,9 +35,9 @@ class CodeHub(Hub):
         :type _sender: ConnectedClientsGroup
         """
         self.tryToTerminateSerialCommProcess()
-
-        _sender.isUploading(self.compilerUploader.getPort())
-        compileReport = self.compilerUploader.upload(code)
+        uploadPort = self.compilerUploader.getPort()
+        _sender.isUploading(uploadPort)
+        compileReport = self.compilerUploader.upload(code, uploadPort=uploadPort)
         if compileReport[0]:
             return True
         else:

@@ -101,7 +101,7 @@ class CompilerUploader:
     def _run(self, code, upload=False, uploadPort=None):
         self._checkBoardConfiguration()
         target = ("upload",) if upload else ()
-        uploadPort = self.getPort() if upload else uploadPort
+        uploadPort = self.getPort() if upload and uploadPort is None else uploadPort
 
         code = '#include "Arduino.h"\n' + code  # todo do this only in Arduino frameworks
 
