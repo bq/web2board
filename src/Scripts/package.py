@@ -15,6 +15,6 @@ if len(sys.argv) > 1:
     architectureInt = int(sys.argv[1])
 
 architecture = Packager.ARCH_32 if architectureInt == 32 else Packager.ARCH_64
-
+print "packaging for architecture: {}".format(architecture)
 packager = Packager.constructCurrentPlatformPackager(architecture=architecture)
 packager.createPackage()
