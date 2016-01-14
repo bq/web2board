@@ -21,6 +21,7 @@ class PathsManager:
     PLATFORMIO_PACKAGES_ZIP_PATH = None
 
     RES_PATH = None
+    RES_ICO_PATH = None
     RES_CONFIG_PATH = None
     RES_BOARDS_PATH = None
     RES_PLATFORMIO_PATH = None
@@ -128,6 +129,7 @@ pm.EXTERNAL_RESOURCES_PATH = pm.getExternalResourcesPath()
 pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.getExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
+pm.RES_ICO_PATH = os.path.join(pm.RES_PATH, 'Web2board.ico')
 pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')
 pm.RES_CONFIG_PATH = os.path.join(pm.RES_PATH, 'config.json')
 pm.RES_BOARDS_PATH = os.path.join(pm.RES_PATH, 'boards.txt')

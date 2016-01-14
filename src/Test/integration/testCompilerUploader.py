@@ -1,4 +1,5 @@
 import os
+import tempfile
 import unittest
 from pprint import pprint
 
@@ -47,31 +48,32 @@ class TestCompilerUploader(unittest.TestCase):
         self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.cpp")
         self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader()
+        self.compiler.board = None
 
-        self.original_searchPorts = self.compiler.searchPorts
+        self.original_searchPorts = self.compiler._searchBoardPorts
 
     def tearDown(self):
-        self.compiler.searchPorts = self.original_searchPorts
+        self.compiler._searchBoardPorts = self.original_searchPorts
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.assertIsNone(self.compiler.board)
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfNotReturningPort(self):
-        self.compiler = flexmock(self.compiler, searchPorts=lambda: [])
+        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [])
 
         self.compiler.setBoard('uno')
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfReturnsMoreThanOnePort(self):
-        self.compiler = flexmock(self.compiler, searchPorts=lambda: [1, 2])
+        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [1, 2])
         self.compiler.setBoard('uno')
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_returnPortIfSearchPortsReturnsOnePort(self):
-        self.compiler = flexmock(self.compiler, searchPorts=lambda: [1])
+        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [1])
         self.compiler.setBoard('uno')
 
         port = self.compiler.getPort()
@@ -93,14 +95,14 @@ class TestCompilerUploader(unittest.TestCase):
 
         self.__assertRightPortName(port)
 
-    def test_compile_RaisesExceptionIfBoardIsNotSet(self):
+    def test_compile_raisesExceptionIfBoardIsNotSet(self):
         self.assertIsNone(self.compiler.board)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
         self.assertRaises(CompilerException, self.compiler.compile, workingCpp)
 
-    def test_compile_CompilesSuccessfullyWithWorkingCpp(self):
+    def test_compile_compilesSuccessfullyWithWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
@@ -109,7 +111,7 @@ class TestCompilerUploader(unittest.TestCase):
 
         self.assertTrue(compileResult[0])
 
-    def test_compile_CompilesSuccessfullyWithLibraries(self):
+    def test_compile_compilesSuccessfullyWithLibraries(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.withLibrariesCppPath) as f:
             withLibrariesCpp = f.read()
@@ -118,7 +120,7 @@ class TestCompilerUploader(unittest.TestCase):
         pprint(compileResult)
         self.assertTrue(compileResult[0])
 
-    def test_compile_ResultErrorIsFalseUsingNotWorkingCpp(self):
+    def test_compile_resultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
@@ -127,14 +129,14 @@ class TestCompilerUploader(unittest.TestCase):
         pprint(compileResult)
         self.assertFalse(compileResult[0])
 
-    def test_upload_RaisesExceptionIfBoardIsNotSet(self):
+    def test_upload_raisesExceptionIfBoardIsNotSet(self):
         self.assertIsNone(self.compiler.board)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
         self.assertRaises(CompilerException, self.compiler.upload, workingCpp)
 
-    def test_upload_CompilesSuccessfullyWithWorkingCpp(self):
+    def test_upload_compilesSuccessfullyWithWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
@@ -144,7 +146,7 @@ class TestCompilerUploader(unittest.TestCase):
         pprint(uploadResult)
         self.assertTrue(uploadResult[0])
 
-    def test_upload_ResultErrorIsFalseUsingNotWorkingCpp(self):
+    def test_upload_resultErrorIsFalseUsingNotWorkingCpp(self):
         self.compiler.setBoard(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
@@ -154,8 +156,16 @@ class TestCompilerUploader(unittest.TestCase):
         pprint(uploadResult)
         self.assertFalse(uploadResult[0])
 
-    def test_uploadAvrHex_CompilesSuccessfullyWithWorkingHexFile(self):
+    def test_uploadAvrHex_returnsOkResultWithWorkingHexFile(self):
         self.compiler.setBoard(self.connectedBoard)
-        output, err = self.compiler.uploadAvrHex(self.hexFilePath)
+        result = self.compiler.uploadAvrHex(self.hexFilePath)
 
-        self.assertTrue("done.  Thank you" in output or "done.  Thank you" in err)
+        self.assertTrue(result[0])
+
+    def test_uploadAvrHex_returnsBadResultWithNonExistingFile(self):
+        self.compiler.setBoard(self.connectedBoard)
+
+        result = self.compiler.uploadAvrHex("notExistingFile")
+
+        self.assertFalse(result[0])
+

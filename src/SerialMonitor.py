@@ -108,14 +108,21 @@ class SerialMonitorUI(wx.Dialog):
         vbox.Add(hbox1, 0, wx.EXPAND, 12)
         self.SetSizer(vbox)
         # self.ShowModal()
-        self.Bind( wx.EVT_CLOSE, self.ParentFrameOnClose)
+        self.Bind(wx.EVT_CLOSE, self.ParentFrameOnClose)
         self.isClosed = False
-
 
     def ParentFrameOnClose(self, event):
         self.serialConnection.close()
         self.isClosed = True
-        time.sleep(3.0)  # todo iter ports untill it is open again
+        i = 0
+        while i < 30: # 3 seconds of timeout
+            try:
+                i += 1
+                SerialConnection(self.serialConnection.serial.port)
+                break
+            except:
+                time.sleep(0.1)
+
         self.DestroyChildren()
         self.Destroy()
 
@@ -171,13 +178,3 @@ class SerialMonitorUI(wx.Dialog):
 
     def onBaudRateChanged(self, event):
         self.serialConnection.changeBaudRate(self.dropdown.GetValue())
-
-
-
-
-if __name__ == "__main__":
-    # app = wx.App(redirect=True)
-    app = wx.App()
-    serialMonitor = SerialMonitorUI(None, port)
-    serialMonitor.Show()
-    app.MainLoop()

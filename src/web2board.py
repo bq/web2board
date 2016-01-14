@@ -17,7 +17,7 @@ from Scripts.TestRunner import *
 from libs.LoggingUtils import initLogging
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
-from libs.Web2boardApp import getMainApp
+from libs.Web2boardApp import getWebBoardApp
 
 log = initLogging(__name__)  # initialized in main
 
@@ -27,12 +27,12 @@ if __name__ == "__main__":
 
         def closeSigHandler(signal, frame):
             log.warning("closing server")
-            getMainApp().w2bServer.server_close()
+            getWebBoardApp().w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
 
 
-        app = getMainApp()
+        app = getWebBoardApp()
 
         signal.signal(signal.SIGINT, closeSigHandler)
 

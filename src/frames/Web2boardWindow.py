@@ -9,6 +9,7 @@ from frames.Web2boardgui import Web2boardGui
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.wxAsynchronous import WX_Utils
+from libs.PathsManager import PathsManager
 
 
 class RedirectText(object):
@@ -55,42 +56,35 @@ class Web2boardWindow(Web2boardGui):
         self.serialMonitor = None
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
+        icon = wx.EmptyIcon()
+        icon.CopyFromBitmap(wx.Bitmap(PathsManager.RES_ICO_PATH, wx.BITMAP_TYPE_ANY))
+        self.SetIcon(icon)
+
         WX_Utils.initDecorators(self)
 
     @asynchronous()
     def __getPorts(self):
-        self.availablePorts = self.compileUpdater.searchPorts()
-        self.onRefreshFinished("como molo")
+        self.availablePorts = self.compileUpdater.getAvailablePorts()
         self.autoPort = self.compileUpdater.getPort()
+        self.onRefreshFinished()
 
-    def onRefreshPorts(self, event):
-        self.compileUpdater.setBoard("diemilanove")
-        self.resfreshPortsButton.Disable()
-        self.SetStatusText("Finding ports...")
-        self.__getPorts()
+    def __handlePendingActions(self):
+        actions = self.actions
+        while len(actions)>0:
+            action = actions.pop(-1)
+            if action[0] == "startSerialMonitor":
+                self.serialMonitor = SerialMonitorUI(None, action[1])
+                self.serialMonitor.Show()
+            elif action[0] == "closeSerialMonitor":
+                self.serialMonitor.Close()
+            elif action[0] == "showApp":
+                self.Show()
+                self.Raise()
 
-    @WX_Utils.onGuiThread()
-    def onRefreshFinished(self, test):
-        lastPortSelection = self.portCombo.GetStringSelection()
-        self.SetStatusText("")
-        self.portCombo.Clear()
-        portsInCombo = ["AUTO"] + self.availablePorts
-        for i, port in enumerate(portsInCombo):
-            if port == self.autoPort:
-                portsInCombo[i] = self.autoPort + " (auto)"
-        self.portCombo.AppendItems(portsInCombo)
-        try:
-            selectionIndex = portsInCombo.index(lastPortSelection)
-        except:
-            selectionIndex = 0
-        self.portCombo.SetSelection(selectionIndex)
-
-        self.resfreshPortsButton.Enable()
-
-    def onTimer(self, event):
+    def __handleStdMessages(self):
         messages = self.redir.get()
         for message in messages:
-            messages = [m.replace("\r", "").replace("\n\n", "") for m in messages if m.strip() != ""]
+            messages = [m.replace("\n\n", "").replace("\r", "") for m in messages if m.strip() != ""]
             self.consoleLog.SetInsertionPoint(self.consoleLog.GetLastPosition())
             if message.startswith("&&&"):
                 self.consoleLog.BeginBold()
@@ -104,7 +98,7 @@ class Web2boardWindow(Web2boardGui):
                 elif fg == "mag":
                     self.consoleLog.BeginTextColour((180, 40, 205))
                 elif fg == "gre":
-                    self.consoleLog.BeginTextColour((0, 180, 0))
+                    self.consoleLog.BeginTextColour((0, 150, 30))
                 elif fg == "cya":
                     self.consoleLog.BeginTextColour((50, 50, 255))
             self.consoleLog.WriteText(message)
@@ -115,20 +109,33 @@ class Web2boardWindow(Web2boardGui):
             wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
             wx.CallAfter(self.consoleLog.Refresh)
 
-        self.handlePendingActions()
+    def onRefreshPorts(self, event):
+        # self.compileUpdater.setBoard("diemilanove")
+        self.resfreshPortsButton.Disable()
+        self.SetStatusText("Finding ports...")
+        self.__getPorts()
 
-    def handlePendingActions(self):
-        actions = self.actions
-        while len(actions)>0:
-            action = actions.pop(-1)
-            if action[0] == "startSerialMonitor":
-                self.serialMonitor = SerialMonitorUI(None, action[1])
-                self.serialMonitor.Show()
-            elif action[0] == "closeSerialMonitor":
-                self.serialMonitor.Close()
-            elif action[0] == "showApp":
-                self.Show()
-                self.Raise()
+    @WX_Utils.onGuiThread()
+    def onRefreshFinished(self):
+        lastPortSelection = self.portCombo.GetStringSelection()
+        self.SetStatusText("")
+        self.portCombo.Clear()
+        portsInCombo = ["AUTO"] + self.availablePorts
+        for i, port in enumerate(portsInCombo):
+            if port == self.autoPort:
+                portsInCombo[i] = self.autoPort + " (ok)"
+        self.portCombo.AppendItems(portsInCombo)
+        try:
+            selectionIndex = portsInCombo.index(lastPortSelection)
+        except:
+            selectionIndex = 0
+        self.portCombo.SetSelection(selectionIndex)
+
+        self.resfreshPortsButton.Enable()
+
+    def onTimer(self, event):
+        self.__handleStdMessages()
+        self.__handlePendingActions()
 
     def startSerialMonitorApp(self, port):
         self.actions.append(["startSerialMonitor", port])

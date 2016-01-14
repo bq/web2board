@@ -38,10 +38,12 @@ def runIntegrationTests():
     from Test.integration.testCompilerUploader import TestCompilerUploader
     from Test.integration.testUtils import TestUtils
     from Test.integration.Updaters.testBitbloqLibsUpdater import TestBitbloqLibsUpdater
+    from Test.integration.testSerialConnection import TestSerialConnection
     suite = unittest.TestSuite()
     suite.addTests(unittest.makeSuite(TestCompilerUploader))
     suite.addTests(unittest.makeSuite(TestUtils))
     suite.addTests(unittest.makeSuite(TestBitbloqLibsUpdater))
+    suite.addTests(unittest.makeSuite(TestSerialConnection))
     __runTests(suite, "integrationTestReport")
 
 

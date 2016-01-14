@@ -30,7 +30,7 @@ exe = EXE(pyz,
           strip=None,
           upx=True,
           console=False,
-          icon=os.getcwd() + os.sep + 'res' + os.sep + 'Web2board.ico')
+          icon=PathsManager.RES_ICO_PATH)
 
 app = BUNDLE(exe,
              name='web2board.app',

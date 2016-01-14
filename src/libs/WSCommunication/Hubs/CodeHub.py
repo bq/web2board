@@ -1,8 +1,10 @@
 import logging
-
+import os
+import tempfile
 from wshubsapi.Hub import Hub
 from wshubsapi.HubsInspector import HubsInspector
 
+from libs.PathsManager import PathsManager
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs.CompilerUploader import getCompilerUploader
 from libs import utils
@@ -41,20 +43,21 @@ class CodeHub(Hub):
         else:
             return self._constructUnsuccessfulReplay(compileReport[1]["err"])
 
-    def uploadHexUrl(self, hexFileUrl, _sender):
+    def uploadHex(self, hexText, _sender):
         """
-        :type hexFileUrl: str
+        :type hexText: str
         :type _sender: ConnectedClientsGroup
         """
         self.tryToTerminateSerialCommProcess()
-
-        _sender.isUploading(self.compilerUploader.getPort())
-        hexFilePath = utils.downloadFile(hexFileUrl)
-        compileReport = self.compilerUploader.upload(code)
-        if compileReport["status"] == "OK":
+        with open(PathsManager.SETTINGS_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
+            tmpHexFile.write(hexText)
+        uploadPort = self.compilerUploader.getPort()
+        _sender.isUploading(uploadPort)
+        compileReport = self.compilerUploader.uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)
+        if compileReport[0]:
             return True
         else:
-            return self._constructUnsuccessfulReplay(compileReport["error"])
+            return self._constructUnsuccessfulReplay(compileReport[1]["err"])
 
     def __getSerialCommProcess(self):
         """
@@ -64,10 +67,10 @@ class CodeHub(Hub):
 
     @staticmethod
     def tryToTerminateSerialCommProcess():
-        from libs.Web2boardApp import getMainApp
+        from libs.Web2boardApp import getWebBoardApp
 
-        if getMainApp().isSerialMonitorRunning():
+        if getWebBoardApp().isSerialMonitorRunning():
             try:
-                getMainApp().w2bGui.closeSerialMonitorApp()
+                getWebBoardApp().w2bGui.closeSerialMonitorApp()
             except:
                 log.exception("unable to terminate process")

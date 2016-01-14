@@ -1,7 +1,6 @@
 import importlib
 import logging
 import os
-import threading
 import time
 import urllib2
 from copy import deepcopy
@@ -15,13 +14,14 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
+from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
-from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs import utils
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from Scripts import afterInstallScript
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+
 log = logging.getLogger(__name__)
 __web2BoardApp = None
 
@@ -33,32 +33,8 @@ class Web2boardApp:
         self.w2bServer = None
         self.isAppRunning = False
 
-    def handleSystemArguments(self):
-        parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
-        parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
-        parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
-        parser.add_option("--example", default='echo', type='string', action="store", dest="example", help="echo, chat")
-        parser.add_option("--test", default='none', type='string', action="store", dest="testing",
-                          help="options: [none, unit, integration, all]")
-        parser.add_option("--afterInstall", default=False, action="store_true", dest="afterInstall",
-                          help="setup packages and folder structure")
-
-        parser.add_option("--board", default="uno", type='string', action="store", dest="board",
-                          help="board connected for integration tests")
-
-        options, args = parser.parse_args()
-        log.info("init web2board with options: {}, and args: {}".format(options, args))
-
-        if options.afterInstall:
-            afterInstallScript.run()
-            log.warning("exiting program in 3s")
-            time.sleep(3)
-            os._exit(1)
-
-        if not os.environ.get("platformioBoard", False):
-            os.environ["platformioBoard"] = options.board
-
-        testing = options.testing.lower()
+    @asynchronous()
+    def __handleTestingOptions(self, testing):
         sys.argv[1:] = []
         if testing != "none":
             if testing == "unit":
@@ -71,6 +47,39 @@ class Web2boardApp:
             log.warning("\nexiting program in 10s")
             time.sleep(10)
             os._exit(1)
+
+    def handleSystemArguments(self):
+        parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
+        parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
+        parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
+        parser.add_option("--example", default='echo', type='string', action="store", dest="example", help="echo, chat")
+        parser.add_option("--test", default='none', type='string', action="store", dest="testing",
+                          help="options: [none, unit, integration, all]")
+        parser.add_option("--afterInstall", default=False, action="store_true", dest="afterInstall",
+                          help="setup packages and folder structure")
+        parser.add_option("--board", default="uno", type='string', action="store", dest="board",
+                          help="board connected for integration tests")
+        parser.add_option("--logLevel", default="info", type='string', action="store", dest="logLevel",
+                          help="show more or less info, options[debug, info, warning, error, critical")
+
+        options, args = parser.parse_args()
+        log.info("init web2board with options: {}, and args: {}".format(options, args))
+
+        if options.afterInstall:
+            afterInstallScript.run()
+            log.warning("exiting program in 3s")
+            time.sleep(3)
+            os._exit(1)
+
+        if not os.environ.get("platformioBoard", False):
+            os.environ["platformioBoard"] = options.board
+            getCompilerUploader().setBoard(options.board)
+
+        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
+                     "error": logging.ERROR,"critical": logging.CRITICAL}
+        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
+
+        self.__handleTestingOptions(options.testing.lower())
 
         return options
 
@@ -87,11 +96,9 @@ class Web2boardApp:
         return self.w2bServer
 
     def updateLibrariesIfNecessary(self):
-        libUpdater = getBitbloqLibsUpdater()
         try:
-            libUpdater.onlineVersionInfo = deepcopy(libUpdater.currentVersionInfo)
-            if libUpdater.isNecessaryToUpdate():
-                libUpdater.update()
+            getBitbloqLibsUpdater().readCurrentVersionInfo()
+            getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
         except (HTTPError, URLError):
             log.error("unable to download libraries (might be a proxy problem)")
             proxyName = raw_input("introduce proxy name: ")
@@ -114,15 +121,13 @@ class Web2boardApp:
         return app
 
     @asynchronous()
-    def updateLibrariesAndStartServer(self):
+    def updateLibrariesAndStartServer(self, options):
         while not self.isAppRunning:
             time.sleep(0.1)
-        options = self.handleSystemArguments()
+
         self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
 
         try:
-            getBitbloqLibsUpdater().readCurrentVersionInfo()
-            getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
             log.info("listening...")
             self.w2bServer.serve_forever()
         finally:
@@ -130,18 +135,19 @@ class Web2boardApp:
 
     def startMain(self):
         app = self.startConsoleViewer()
-
+        options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
         PathsManager.moveInternalConfigToExternalIfNecessary()
         # self.updateLibrariesIfNecessary()
-        self.updateLibrariesAndStartServer()
+        self.updateLibrariesAndStartServer(options)
 
         return app
 
     def isSerialMonitorRunning(self):
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
 
-def getMainApp():
+
+def getWebBoardApp():
     global __web2BoardApp
     if __web2BoardApp is None:
         __web2BoardApp = Web2boardApp()

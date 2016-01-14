@@ -5,7 +5,7 @@ import zipfile
 
 sys.path.append(os.getcwd())
 import libs.utils as utils
-
+from libs.PathsManager import PathsManager
 
 block_cipher = None
 print os.getcwd()
@@ -31,4 +31,4 @@ exe = EXE(pyz,
           strip=None,
           upx=True,
           console=False,
-          icon=os.getcwd() + os.sep + 'res/Web2board.ico')
+          icon=PathsManager.RES_ICO_PATH)

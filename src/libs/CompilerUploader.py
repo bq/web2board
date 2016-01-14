@@ -82,7 +82,7 @@ class CompilerUploader:
             raise Exception("Platform not supported")
 
         cmd = avrExePath + "-C " + avrConfigPath + args
-        log.info("Command executed: {}".format(cmd))
+        log.debug("Command executed: {}".format(cmd))
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              close_fds=(not utils.isWindows()))
         output = p.stdout.read()
@@ -93,16 +93,17 @@ class CompilerUploader:
 
     @asynchronous()
     def _checkPort(self, port, mcu, baudRate):
+        log.debug("Checking port: {}".format(port))
         args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
         output, err = self._callAvrdude(args)
         return 'Device signature =' in output or 'Device signature =' in err
 
-    def _run(self, code, upload=False):
+    def _run(self, code, upload=False, uploadPort=None):
         self._checkBoardConfiguration()
         target = ("upload",) if upload else ()
-        uploadPort = self.getPort() if upload else None
+        uploadPort = self.getPort() if upload else uploadPort
 
-        code='#include "Arduino.h"\n' + code # todo do this only in Arduino frameworks
+        code = '#include "Arduino.h"\n' + code  # todo do this only in Arduino frameworks
 
         with open(os.path.join(pm.SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
             mainCppFile.write(code)
@@ -116,17 +117,16 @@ class CompilerUploader:
         if self._getIniConfig(self.board) is None:
             raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
-    def searchPorts(self):
+    def _searchBoardPorts(self):
         self._checkBoardConfiguration()
         options = self._getIniConfig(self.board)
         mcu = options["boardData"]["build"]["mcu"]
         baudRate = options["boardData"]["upload"]["speed"]
-        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
-        availablePorts = map(lambda x: x[0], portsToUpload)
+        availablePorts = self.getAvailablePorts()
         if len(availablePorts) <= 0:
             return []
         portsToUpload = []
-        log.debug("Found available ports: {}".format(availablePorts))
+        log.info("Found available ports: {}".format(availablePorts))
         portResultHashMap = {}
         for port in availablePorts:
             portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
@@ -134,11 +134,17 @@ class CompilerUploader:
         for port, resultObject in portResultHashMap.items():
             if resultObject.get(joinTimeout=4):
                 portsToUpload.append(port)
+        log.info("Found board ports: {}".format(portsToUpload))
         return portsToUpload
+
+    def getAvailablePorts(self):
+        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        availablePorts = map(lambda x: x[0], portsToUpload)
+        return availablePorts
 
     def getPort(self):
         self._checkBoardConfiguration()
-        portsToUpload = self.searchPorts()
+        portsToUpload = self._searchBoardPorts()
         if len(portsToUpload) == 0:
             raise CompilerException(ERROR_NO_PORT_FOUND)
         elif len(portsToUpload) > 1:
@@ -152,17 +158,20 @@ class CompilerUploader:
     def compile(self, code):
         return self._run(code, upload=False)
 
-    def upload(self, code):
-        return self._run(code, upload=True)
+    def upload(self, code, uploadPort=None):
+        return self._run(code, upload=True, uploadPort=uploadPort)
 
-    def uploadAvrHex(self, hexFilePath):
+    def uploadAvrHex(self, hexFilePath, uploadPort=None):
         self._checkBoardConfiguration()
         options = self._getIniConfig(self.board)
-        port = self.getPort()
+        port = uploadPort if uploadPort is not None else self.getPort()
         mcu = options["boardData"]["build"]["mcu"]
         baudRate = str(options["boardData"]["upload"]["speed"])
         args = "-V " + " -P " + port + " -p " + mcu + " -b " + baudRate + " -c arduino -D -U flash:w:" + hexFilePath + ":i"
-        return self._callAvrdude(args)
+        output, err = self._callAvrdude(args)
+        okText = "bytes of flash written"
+        resultOk = okText in output or okText in err
+        return resultOk, {"out": output, "err": err}
 
 
 def getCompilerUploader():

@@ -16,7 +16,7 @@ import libs.WSCommunication.Hubs
 from flexmock import flexmock
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
-from libs.Web2boardApp import getMainApp
+from libs.Web2boardApp import getWebBoardApp
 from libs.utils import areWeFrozen
 
 
@@ -55,7 +55,7 @@ class TestSerialMonitorHub(unittest.TestCase):
 
     def test_startApp_callsStartsSerialMonitorApp(self):
         import wx
-        mainApp = getMainApp()
+        mainApp = getWebBoardApp()
         app = wx.App(False)
         wx = flexmock(wx, BitmapButton=lambda *args, **kwargs: wx.Button)
         mainApp.w2bGui = Web2boardWindow(None, 0)

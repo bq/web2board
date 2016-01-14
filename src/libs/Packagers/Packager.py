@@ -27,9 +27,8 @@ class Packager:
         self.srcPath = os.path.join(self.web2boardPath, "src")
         self.resPath = os.path.join(self.web2boardPath, "res")
         self.resCommonPath = os.path.join(self.resPath, "common")
-        self.iconPath = os.path.join(self.resPath, "common", "Web2board.ico")
+        self.iconPath = pm.RES_ICO_PATH
         self.srcResPath = os.path.join(self.srcPath, "res")
-        self.auxiliarySrcResPath = os.path.join(self.srcPath, "auxiliaryRes")
         self.pkgPath = os.path.join(self.web2boardPath, "pkg")
         self.pyInstallerDistFolder = self.srcPath + os.sep + "dist"
         self.pyInstallerBuildFolder = self.srcPath + os.sep + "build"
@@ -62,7 +61,9 @@ class Packager:
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
-            shutil.move(self.srcResPath, self.auxiliarySrcResPath)
+            shutil.rmtree(self.srcResPath)
+        os.makedirs(self.srcResPath)
+
         utils.copytree(self.resCommonPath, self.srcResPath)
         utils.copytree(self.resPlatformPath, self.srcResPath)
 
@@ -75,8 +76,6 @@ class Packager:
             os.remove(os.path.join(self.srcPath, self.sconsExecutableName))
         if os.path.exists(self.installerPath):
             shutil.rmtree(self.installerPath)
-        if os.path.exists(self.auxiliarySrcResPath):
-            shutil.rmtree(self.auxiliarySrcResPath)
         self._clearBuildFiles()
         self._deleteInstallerCreationFolder()
 
@@ -98,11 +97,6 @@ class Packager:
         os.makedirs(self.installerCreationDistPath)
         os.makedirs(self.installerPath)
         os.makedirs(self._getInstallerExternalResourcesPath())
-
-    def _restoreSrcResFolder(self):
-        shutil.rmtree(self.srcResPath)
-        if os.path.exists(self.auxiliarySrcResPath):
-            shutil.move(self.auxiliarySrcResPath, self.srcResPath)
 
     def _constructAndMoveExecutable(self):
         currentPath = os.getcwd()

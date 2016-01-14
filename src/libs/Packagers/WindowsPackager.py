@@ -50,6 +50,5 @@ class WindowsPackager(Packager):
         finally:
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)
-            self._restoreSrcResFolder()
             self._clearBuildFiles()
             #self._deleteInstallerCreationFolder()
