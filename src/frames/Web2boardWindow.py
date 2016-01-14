@@ -1,3 +1,4 @@
+import os
 import threading
 
 import sys
@@ -11,7 +12,7 @@ from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.wxAsynchronous import WX_Utils
 from libs.PathsManager import PathsManager
-
+from libs import utils
 
 class RedirectText(object):
     def __init__(self, parent, originalStdout):
@@ -63,6 +64,11 @@ class Web2boardWindow(Web2boardGui):
 
         WX_Utils.initDecorators(self)
         self.taskBarIcon = TaskBarIcon()
+
+        if utils.isLinux():
+            self.Show()
+        else:
+            self.Hide()
 
     @asynchronous()
     def __getPorts(self):
@@ -157,12 +163,12 @@ class Web2boardWindow(Web2boardGui):
             return False
 
     def OnClose(self, event):
-        if event.CanVeto():
+        if event.CanVeto() and not utils.isLinux():
             self.Hide()
             return
 
-        self.Destroy()  # you may also do:  event.Skip()
-        # since the default event handler does call Destroy(), too
+        self.Destroy()
+        os._exit(1)
 
 
 if __name__ == '__main__':

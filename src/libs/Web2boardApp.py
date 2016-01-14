@@ -117,7 +117,6 @@ class Web2boardApp:
 
         app = wx.App(False)
         self.w2bGui = Web2boardWindow(None)
-        self.w2bGui.Hide()
         self.w2bGui.Raise()
         self.isAppRunning = True
         return app

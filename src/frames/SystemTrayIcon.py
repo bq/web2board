@@ -2,7 +2,7 @@ import os
 
 from libs.PathsManager import PathsManager
 from libs.Web2boardApp import getWebBoardApp
-
+from libs import utils
 TRAY_TOOLTIP = 'Web2board app'
 
 import wx
@@ -33,3 +33,12 @@ class TaskBarIcon(wx.TaskBarIcon):
         menu.Bind(wx.EVT_MENU, func, id=item.GetId())
         menu.AppendItem(item)
         return item
+
+    def ShowBalloon(self, *args, **kwargs):
+        if not utils.isLinux():
+            super(TaskBarIcon, self).ShowBalloon(*args, **kwargs)
+
+    def RemoveIcon(*args, **kwargs):
+        super(TaskBarIcon, args).RemoveIcon(**kwargs)
+
+
