@@ -14,17 +14,14 @@
 import signal
 
 from Scripts.TestRunner import *
+from frames.SystemTrayIcon import TaskBarIcon
 from libs.LoggingUtils import initLogging
-from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
-from libs.Updaters.Updater import VersionInfo
 from libs.Web2boardApp import getWebBoardApp
 
 log = initLogging(__name__)  # initialized in main
 
 if __name__ == "__main__":
     try:
-
-
         def closeSigHandler(signal, frame):
             log.warning("closing server")
             getWebBoardApp().w2bServer.server_close()
@@ -37,11 +34,8 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, closeSigHandler)
 
         wxApp = app.startMain()
-        app.w2bGui.Show()
-
+        TaskBarIcon()
         wxApp.MainLoop()
-
-        # app.startConsoleViewer()
     except SystemExit:
         pass
     except Exception as e:

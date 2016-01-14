@@ -153,9 +153,9 @@ class Web2boardWindow(Web2boardGui):
             return False
 
     def OnClose(self, event):
-        # if event.CanVeto():
-        #     self.Hide()
-        #     return
+        if event.CanVeto():
+            self.Hide()
+            return
 
         self.Destroy()  # you may also do:  event.Skip()
         # since the default event handler does call Destroy(), too

@@ -212,9 +212,9 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'upload', arguments);
         },
 
-        uploadHexUrl : function (hexFileUrl){
+        uploadHex : function (hexText){
             
-            return constructMessage('CodeHub', 'uploadHexUrl', arguments);
+            return constructMessage('CodeHub', 'uploadHex', arguments);
         }
     };
     this.CodeHub.client = {};
