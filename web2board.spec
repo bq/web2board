@@ -9,7 +9,7 @@ from libs.PathsManager import PathsManager
 
 block_cipher = None
 
-a = Analysis(['src/web2board.py'],
+a = Analysis(['src' + os.sep + 'web2board.py'],
              pathex=[os.getcwd()],
              binaries=None,
              datas=None,
@@ -29,12 +29,18 @@ a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
+          exclude_binaries=True,
           name='web2board',
           debug=False,
           strip=None,
           upx=True,
-          console=False,
+          console=True,
           icon=PathsManager.RES_ICO_PATH)
+
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               name='web2board')

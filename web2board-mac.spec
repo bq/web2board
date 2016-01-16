@@ -9,7 +9,7 @@ from libs.PathsManager import PathsManager
 
 pathEx = os.getcwd()
 
-a = Analysis([PathsManager.EXECUTABLE_PATH + os.sep + 'web2board.py'],
+a = Analysis(["src" + os.sep + 'web2board.py'],
              pathex=[pathEx],
              hiddenimports=[],
              hookspath=None,

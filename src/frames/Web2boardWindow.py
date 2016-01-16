@@ -115,9 +115,11 @@ class Web2boardWindow(Web2boardGui):
             self.consoleLog.EndTextColour()
             self.consoleLog.EndBold()
         if len(messages) > 0:
-            # self.SetStatusText(message)
-            wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
-            wx.CallAfter(self.consoleLog.Refresh)
+            try:
+                wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
+                wx.CallAfter(self.consoleLog.Refresh)
+            except:
+                pass
 
     def onRefreshPorts(self, event):
         # self.compileUpdater.setBoard("diemilanove")

@@ -8,7 +8,7 @@ from libs.PathsManager import PathsManager
 
 pathEx = os.getcwd()
 
-a = Analysis([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep +'sconsScript.py'],
+a = Analysis([os.path.join(os.getcwd(), PathsManager.RES_PATH, 'sconsScript.py')],
              pathex=[pathEx],
              hiddenimports=['UserList', 'UserString', 'ConfigParser'],
              hookspath=None,

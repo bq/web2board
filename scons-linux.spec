@@ -8,9 +8,9 @@ from libs.PathsManager import PathsManager
 block_cipher = None
 
 print os.getcwd()
-print PathsManager.EXTERNAL_RESOURCES_PATH + os.sep +'sconsScript.py'
+print PathsManager.RES_PATH + os.sep +'sconsScript.py'
 
-a = Analysis([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep +'sconsScript.py'],
+a = Analysis([os.path.join(os.getcwd(), PathsManager.RES_PATH, 'sconsScript.py')],
              pathex=[os.getcwd()],
              hiddenimports=['UserList', 'UserString', 'ConfigParser'],
              hookspath=None,

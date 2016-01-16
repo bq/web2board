@@ -3,7 +3,6 @@ import json
 import logging
 import logging.config
 import os
-
 import click
 import sys
 
@@ -13,6 +12,7 @@ __author__ = 'jorge.garcia'
 
 
 class ColoredConsoleHandler(logging.StreamHandler):
+    FILE_ENCODING = sys.getfilesystemencoding()
     def __init__(self, stream=None):
         super(ColoredConsoleHandler, self).__init__(stream)
 
@@ -24,15 +24,20 @@ class ColoredConsoleHandler(logging.StreamHandler):
         try:
             self.format(myRecord)
         except:
-            myRecord.msg = "Unable to format record"
-            self.format(myRecord)
+            try:
+                myRecord.msg = myRecord.msg.decode(self.FILE_ENCODING)
+            except:
+                try:
+                    myRecord.msg = myRecord.msg.decode("utf-8", errors="replace")
+                except:
+                    myRecord.msg = "Unable to format record"
+
+        self.format(myRecord)
         style = self.__getStyle(myRecord)
-        # click.secho(self.format(myRecord), **style)
-        # self.__addColor(myRecord)
 
         sys.stdout.write("&&&"+style["fg"]+self.format(myRecord)+"&&&\n")
-        # if myRecord.levelno >= 50:
-        #     os._exit(1)
+        if myRecord.levelno >= 50:
+            os._exit(1)
 
     def __getStyle(self, myRecord):
         """

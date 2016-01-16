@@ -16,7 +16,6 @@ class PathsManager:
 
     EXECUTABLE_PATH = None
     MAIN_PATH = None
-    EXTERNAL_RESOURCES_PATH = None
     PLATFORMIO_PACKAGES_ZIP_NAME = "platformIoPackages.zip"
     PLATFORMIO_PACKAGES_ZIP_PATH = None
 
@@ -35,16 +34,21 @@ class PathsManager:
     SETTINGS_LOGGING_CONFIG_PATH = None
     TEST_SETTINGS_PATH = None
 
+    SCONS_EXECUTABLE_PATH = None
+
     @classmethod
     def getMainPath(cls):
         return cls.getBasePath()
 
     @staticmethod
     def getBasePath():
-        if utils.areWeFrozen():
-            return sys._MEIPASS
-        else:
-            return os.getcwd()
+        # if utils.areWeFrozen():
+        #     if os.getcwd() in sys._MEIPASS or os.getcwd() == sys._MEIPASS:
+        #         return sys._MEIPASS.replace(os.getcwd() + os.sep, "")
+        #     return sys._MEIPASS
+        # else:
+        #     return ""
+        return "" #this will not work with --onefile
 
     @staticmethod
     def getExternalDataFolder():
@@ -61,16 +65,17 @@ class PathsManager:
     def getSonsExecutablePath(cls):
         if utils.areWeFrozen():
             if utils.isWindows():
-                return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.exe"
+                scriptName = "sconsScript.exe"
             else:
-                return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript"
+                scriptName = "sconsScript"
+            return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", scriptName))
         else:
-            return cls.EXTERNAL_RESOURCES_PATH + os.sep + "sconsScript.py"
+            scriptName = "sconsScript.py"
+        return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", scriptName))
 
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
-        _pathsLog.debug('sys.path[0]: {}'.format(sys.path[0]))
-        _pathsLog.debug('SCONS_EXECUTABLE_PATH: {}'.format(cls.getSonsExecutablePath()))
+        _pathsLog.debug('Working directory: {}'.format(os.getcwd()))
         for key, path  in cls.__dict__.items():
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
@@ -82,7 +87,7 @@ class PathsManager:
         web2boardUpdater = getWeb2boardUpdater()
         bitbloqLibsUpdater = getBitbloqLibsUpdater()
         if web2boardUpdater.isNecessaryToUpdateSettings():
-            _pathsLog.info("Creating settings folder structure in: {}".format(cls.TEST_SETTINGS_PATH))
+            _pathsLog.info("Creating settings folder structure in: {}".format(cls.SETTINGS_PATH))
             shutil.copyfile(cls.RES_CONFIG_PATH, cls.SETTINGS_CONFIG_PATH)
 
             if os.path.exists(cls.SETTINGS_PLATFORMIO_PATH):
@@ -125,7 +130,6 @@ else:
 pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
-pm.EXTERNAL_RESOURCES_PATH = pm.getExternalResourcesPath()
 pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.getExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
@@ -144,6 +148,9 @@ pm.SETTINGS_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, '.web2boardconfig')
 pm.SETTINGS_LOGGING_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, 'logging.json')
 pm.TEST_SETTINGS_PATH = os.path.join(pm.SETTINGS_PATH, 'Test', 'resources')
 
+pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()
+
 # construct External_data_path if not exists
 if not os.path.exists(pm.SETTINGS_PATH):
     os.makedirs(pm.SETTINGS_PATH)
+

@@ -45,7 +45,7 @@ class Web2boardApp:
                 runAllTests()
 
             log.warning("\nexiting program in 10s")
-            time.sleep(10)
+            time.sleep(3)
             os._exit(1)
 
     def handleSystemArguments(self):
@@ -65,19 +65,16 @@ class Web2boardApp:
         options, args = parser.parse_args()
         log.info("init web2board with options: {}, and args: {}".format(options, args))
 
+        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
+                     "error": logging.ERROR,"critical": logging.CRITICAL}
+        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
+
         if options.afterInstall:
             afterInstallScript.run()
-            log.warning("exiting program in 3s")
-            time.sleep(3)
-            os._exit(1)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
             getCompilerUploader().setBoard(options.board)
-
-        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
-                     "error": logging.ERROR,"critical": logging.CRITICAL}
-        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -95,6 +92,7 @@ class Web2boardApp:
         self.w2bServer.initialize_websockets_manager()
         return self.w2bServer
 
+    @asynchronous()
     def updateLibrariesIfNecessary(self):
         try:
             getBitbloqLibsUpdater().readCurrentVersionInfo()
@@ -119,7 +117,6 @@ class Web2boardApp:
         self.isAppRunning = True
         return app
 
-
     @asynchronous()
     def updateLibrariesAndStartServer(self, options):
         while not self.isAppRunning:
@@ -135,11 +132,13 @@ class Web2boardApp:
 
     def startMain(self):
         app = self.startConsoleViewer()
+        PathsManager.moveInternalConfigToExternalIfNecessary()
+        self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
-        PathsManager.moveInternalConfigToExternalIfNecessary()
         # self.updateLibrariesIfNecessary()
-        self.updateLibrariesAndStartServer(options)
+        if not options.afterInstall:
+            self.updateLibrariesAndStartServer(options)
 
         return app
 

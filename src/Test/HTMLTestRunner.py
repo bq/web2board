@@ -549,6 +549,7 @@ class _TestResult(TestResult):
             sys.stderr = self.stderr0
             self.stdout0 = None
             self.stderr0 = None
+        self.outputBuffer.buflist = [x.encode("utf-8") if isinstance(x, unicode) else x for x in self.outputBuffer.buflist]
         return self.outputBuffer.getvalue()
 
     def stopTest(self, test):

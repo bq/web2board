@@ -42,7 +42,6 @@ import time
 import traceback
 
 import SCons.compat
-
 # Strip the script directory from sys.path() so on case-insensitive
 # (Windows) systems Python doesn't think that the "scons" script is the
 # "SCons" package.  Replace it with our own version directory so, if

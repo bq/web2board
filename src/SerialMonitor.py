@@ -178,3 +178,5 @@ class SerialMonitorUI(wx.Dialog):
 
     def onBaudRateChanged(self, event):
         self.serialConnection.changeBaudRate(self.dropdown.GetValue())
+
+

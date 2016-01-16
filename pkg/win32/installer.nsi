@@ -2,7 +2,6 @@
   !define VERSION 'DEV'
 !endif
 !addplugindir "nsisPlugins"
-
 ; The name of the installer
 Name "Web2board"
 
@@ -108,7 +107,7 @@ SectionEnd
 Function LaunchLink
   ; Write start menu entries for all users
   SetShellVarContext all
-  ExecShell "" "$SMPROGRAMS\Web2board\Web2board.lnk"
+  ShellExecAsUser::ShellExecAsUser "" "$SMPROGRAMS\Web2board\Web2board.lnk"
 FunctionEnd
 
 
