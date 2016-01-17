@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\Ui_web2board2.ui'
+# Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\UI_web2board.ui'
 #
-# Created: Sun Jan 17 18:26:21 2016
+# Created: Sun Jan 17 18:27:48 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
