@@ -113,8 +113,9 @@ class MainApp:
 
         app = QtGui.QApplication(sys.argv)
         self.w2bGui = Web2boardWindow(None)
-        self.w2bGui.show()
-        self.w2bGui.raise_()
+        if not utils.isTrayIconAvailable():
+            self.w2bGui.show()
+            self.w2bGui.raise_()
         self.isAppRunning = True
         return app
 

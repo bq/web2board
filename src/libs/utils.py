@@ -6,6 +6,7 @@ import platform
 import shutil
 import sys
 import zipfile
+from PySide import QtGui
 from urllib2 import urlopen
 
 import glob2
@@ -121,3 +122,6 @@ def isMac():
 
 def is64bits():
     return sys.maxsize > 2 ** 32
+
+def isTrayIconAvailable():
+    return not isLinux() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()

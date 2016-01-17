@@ -18,6 +18,7 @@ import logging
 
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
+from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
@@ -42,10 +43,12 @@ class Web2boardWindow(QtGui.QMainWindow):
 
         self.trayIcon = None
         self.trayIconMenu = None
-        self.createTrayIcon()
-        self.trayIcon.show()
+        if utils.isTrayIconAvailable():
+            self.createTrayIcon()
+
 
     def __getConsoleKwargs(self, record):
+        record.msg = record.msg.encode("utf-8")
         style = dict(fg=None, bg=None, bold="normal", underline="none", msg=record.msg)
         try:
             levelNo = record.levelno
@@ -91,9 +94,10 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.setToolTip("Web2board application")
         self.trayIcon.activated.connect(onTrayIconActivated)
         self.trayIcon.messageClicked.connect(self.show)
+        self.trayIcon.show()
 
     def closeEvent(self, event):
-        if self.trayIcon.isSystemTrayAvailable():
+        if utils.isTrayIconAvailable():
             self.hide()
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
             event.ignore()
@@ -109,13 +113,14 @@ class Web2boardWindow(QtGui.QMainWindow):
             message = message[:-1]
         message = message.replace("\n", "<br>")
         message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
-        self.ui.console.append(message)
+        self.ui.console.append(message.decode("utf-8"))
         if record.levelno >= logging.ERROR:
             self.showBalloonMessage("Critical error occurred\nPlease check the history log", icon=QtGui.QSystemTrayIcon.Warning)
 
     @InGuiThread()
     def showBalloonMessage(self, message, title="Web2board", icon=QtGui.QSystemTrayIcon.Information):
-        self.trayIcon.showMessage(title, message, icon)
+        if utils.isTrayIconAvailable():
+            self.trayIcon.showMessage(title, message, icon)
 
     @asynchronous()
     def __getPorts(self):
