@@ -7,7 +7,7 @@ from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 from wshubsapi.utils import WSMessagesReceivedQueue
 
-from frames.Web2boardWindow2 import Web2boardWindow
+from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 
 # do not remove
@@ -54,17 +54,11 @@ class TestSerialMonitorHub(unittest.TestCase):
         self.assertIsNone(self.serialMonitorHub.serialCommunicationProcess)
 
     def test_startApp_callsStartsSerialMonitorApp(self):
-        import wx
         mainApp = getMainApp()
-        app = wx.App(False)
-        wx = flexmock(wx, BitmapButton=lambda *args, **kwargs: wx.Button)
         mainApp.w2bGui = Web2boardWindow(None, 0)
         original_startSerialMonitorApp = mainApp.w2bGui.startSerialMonitorApp
         try:
             flexmock(mainApp.w2bGui).should_receive("startSerialMonitorApp").once()
-
             self.serialMonitorHub.startApp()
-            wx.CallAfter(app.Exit)
-            app.MainLoop()
         finally:
             mainApp.w2bGui.startSerialMonitorApp = original_startSerialMonitorApp

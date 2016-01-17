@@ -29,47 +29,92 @@ from libs.PathsManager import PathsManager
 log = logging.getLogger(__name__)
 
 
-
-class RedirectText(object):
-    def __init__(self, parent, originalStdOut, writeCallback):
-        self.parent = parent
-        self.originalStdOut = originalStdOut
-        self.outs = []
-        self.writeCallback = writeCallback
-
-    def write(self, string):
-        self.writeCallback(string)
-        self.originalStdOut(string)
-
-    def flush(self, *args):
-        pass
-
-    def get(self):
-        aux = self.outs
-        self.outs = []
-        return aux
-
 class Web2boardWindow(QtGui.QMainWindow):
+    CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
+
+
     def __init__(self, *args, **kwargs):
         super(Web2boardWindow, self).__init__(*args, **kwargs)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.ui = Ui_Web2board()
         self.ui.setupUi(self)
-        self.availablePorts =[]
+        self.availablePorts = []
         self.autoPort = None
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.compileUpdater = getCompilerUploader()
-
-        originalStdOut = sys.stdout.write
-        self.redir = RedirectText(self, originalStdOut, self.logInConsole)
-        sys.stdout = self.redir
-        sys.stderr = self.redir
         self.serialMonitor = None
+
+        self.trayIcon = None
+        self.trayIconMenu = None
+        self.createTrayIcon()
+        self.trayIcon.show()
+
+    def __getConsoleKwargs(self, record):
+        style = dict(fg=None, bg=None, bold="normal", underline="none", msg=record.msg)
+        try:
+            levelNo = record.levelno
+            if levelNo >= 50:  # CRITICAL / FATAL
+                style["fg"] = 'red'
+                style["bold"] = "bold"
+                style["underline"] = "underline"
+            elif levelNo >= 40:  # ERROR
+                style["fg"] = 'red'
+                style["bold"] = "bold"
+            elif levelNo >= 30:  # WARNING
+                style["fg"] = 'orange'
+            elif levelNo >= 20:  # INFO
+                style["fg"] = 'green'
+            elif levelNo >= 10:  # DEBUG
+                style["fg"] = 'blue'
+            else:  # NOTSET and anything else
+                pass
+
+        except:
+            pass
+        return style
 
     def onSearchPorts(self):
         self.ui.searchPorts.setEnabled(False)
         self.ui.statusbar.showMessage("Searching ports...")
         self.__getPorts()
+
+    def createTrayIcon(self):
+        showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
+        quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
+
+        self.trayIconMenu = QtGui.QMenu(self)
+        self.trayIconMenu.addAction(showAppAction)
+        self.trayIconMenu.addSeparator()
+        self.trayIconMenu.addAction(quitAction)
+
+        self.trayIcon = QtGui.QSystemTrayIcon(self)
+        self.trayIcon.setContextMenu(self.trayIconMenu)
+        self.trayIcon.setIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
+        self.trayIcon.setToolTip("Web2board application")
+        self.trayIcon.activated.connect(self.show)
+
+    def closeEvent(self, event):
+        if self.trayIcon.isSystemTrayAvailable():
+            self.hide()
+            self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
+            event.ignore()
+        else:
+            event.accept()
+
+    @InGuiThread()
+    def logInConsole(self, record):
+        kwargs = self.__getConsoleKwargs(record)
+        message = self.CONSOLE_MESSAGE_DIV.format(**kwargs)
+
+        if message.endswith("\n"):
+            message = message[:-1]
+        message = message.replace("\n", "<br>")
+        message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+        self.ui.console.append(message)
+
+    @InGuiThread()
+    def showBalloonMessage(self, message, title="Web2board"):
+        self.trayIcon.showMessage(title, message, QtGui.QSystemTrayIcon.Information)
 
     @asynchronous()
     def __getPorts(self):
@@ -98,14 +143,6 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.searchPorts.setEnabled(True)
 
     @InGuiThread()
-    def logInConsole(self, message):
-        if message.endswith("\n"):
-            message = message[:-1]
-        message = message.replace("\n","<br>")
-        message = message.replace("  ","&nbsp;&nbsp;&nbsp;&nbsp;")
-        self.ui.console.append(message)
-
-    @InGuiThread()
     def startSerialMonitorApp(self, port):
         self.serialMonitor = SerialMonitorDialog(None, port)
         self.serialMonitor.show()
@@ -120,6 +157,21 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def showApp(self):
-        self.show()
-        self.raise_()
+        if not self.isVisible():
+            self.show()
+            self.raise_()
 
+
+
+@asynchronous()
+def onThread(serialMonitor):
+    time.sleep(2)
+    serialMonitor.showBalloonMessage("Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details.")
+
+
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+    mySW = Web2boardWindow(None)
+    onThread(mySW)
+    mySW.show()
+    sys.exit(app.exec_())

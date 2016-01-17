@@ -109,11 +109,7 @@ class MainApp:
             log.exception("unable to copy libraries files, there could be a permissions problem.")
 
     def startConsoleViewer(self):
-        import wx
-        from frames.Web2boardWindow2 import Web2boardWindow
-
-
-
+        from frames.Web2boardWindow import Web2boardWindow
 
         app = QtGui.QApplication(sys.argv)
         self.w2bGui = Web2boardWindow(None)

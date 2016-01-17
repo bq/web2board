@@ -1,19 +1,21 @@
 import os
-import tempfile
 import unittest
 from pprint import pprint
 
 import click
 import sys
-import os
+from PySide.QtGui import QApplication
 from flexmock import flexmock
 
+from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader, CompilerException
 from libs.LoggingUtils import initLogging
+from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
 
 log = initLogging(__name__)
+QApplication(sys.argv)
 
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None

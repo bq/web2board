@@ -76,7 +76,9 @@ class PathsManager:
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
         _pathsLog.debug('Working directory: {}'.format(os.getcwd()))
-        for key, path  in cls.__dict__.items():
+        items = cls.__dict__.items()
+        items = sorted(items, key=lambda x: x[0])
+        for key, path  in items:
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
 

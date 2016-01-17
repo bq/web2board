@@ -15,7 +15,6 @@
 import signal
 
 from Scripts.TestRunner import *
-from frames.SystemTrayIcon import TaskBarIcon
 from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
 
