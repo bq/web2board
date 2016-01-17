@@ -23,7 +23,7 @@ class SerialMonitorHub(Hub):
         """:type : subprocess.Popen """
 
     def startApp(self, port=None):
-        from libs.Web2boardApp import getWebBoardApp
-        mainApp = getWebBoardApp()
+        from libs.MainApp import getMainApp
+        mainApp = getMainApp()
         mainApp.w2bGui.startSerialMonitorApp(port)
         return True

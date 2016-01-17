@@ -67,10 +67,10 @@ class CodeHub(Hub):
 
     @staticmethod
     def tryToTerminateSerialCommProcess():
-        from libs.Web2boardApp import getWebBoardApp
+        from libs.MainApp import getMainApp
 
-        if getWebBoardApp().isSerialMonitorRunning():
+        if getMainApp().isSerialMonitorRunning():
             try:
-                getWebBoardApp().w2bGui.closeSerialMonitorApp()
+                getMainApp().w2bGui.closeSerialMonitorApp()
             except:
                 log.exception("unable to terminate process")

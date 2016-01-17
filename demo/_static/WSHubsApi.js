@@ -202,14 +202,19 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'compile', arguments);
         },
 
+        tryToTerminateSerialCommProcess : function (){
+            
+            return constructMessage('CodeHub', 'tryToTerminateSerialCommProcess', arguments);
+        },
+
         upload : function (code){
             
             return constructMessage('CodeHub', 'upload', arguments);
         },
 
-        uploadHexUrl : function (hexFileUrl){
+        uploadHex : function (hexText){
             
-            return constructMessage('CodeHub', 'uploadHexUrl', arguments);
+            return constructMessage('CodeHub', 'uploadHex', arguments);
         }
     };
     this.CodeHub.client = {};

@@ -17,7 +17,7 @@ import signal
 from Scripts.TestRunner import *
 from frames.SystemTrayIcon import TaskBarIcon
 from libs.LoggingUtils import initLogging
-from libs.Web2boardApp import getWebBoardApp
+from libs.MainApp import getMainApp
 
 log = initLogging(__name__)  # initialized in main
 
@@ -25,17 +25,17 @@ if __name__ == "__main__":
     try:
         def closeSigHandler(signal, frame):
             log.warning("closing server")
-            getWebBoardApp().w2bServer.server_close()
+            getMainApp().w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
 
 
-        app = getWebBoardApp()
+        app = getMainApp()
 
         signal.signal(signal.SIGINT, closeSigHandler)
 
-        wxApp = app.startMain()
-        wxApp.MainLoop()
+        qtApp = app.startMain()
+        sys.exit(qtApp.exec_())
     except SystemExit:
         pass
     except Exception as e:

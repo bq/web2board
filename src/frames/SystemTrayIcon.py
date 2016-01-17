@@ -2,7 +2,7 @@ import os
 import wx
 
 from libs.PathsManager import PathsManager
-from libs.Web2boardApp import getWebBoardApp
+from libs.MainApp import getMainApp
 from libs import utils
 
 TRAY_TOOLTIP = 'Web2board app'
@@ -24,7 +24,7 @@ class TaskBarIcon(wx.TaskBarIcon):
         return menu
 
     def showApp(self, *args):
-        w2bGui = getWebBoardApp().w2bGui
+        w2bGui = getMainApp().w2bGui
         if not w2bGui.IsShown():
             w2bGui.Show()
         w2bGui.Raise()

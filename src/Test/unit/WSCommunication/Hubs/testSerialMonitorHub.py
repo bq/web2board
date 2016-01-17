@@ -7,7 +7,7 @@ from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 from wshubsapi.utils import WSMessagesReceivedQueue
 
-from frames.Web2boardWindow import Web2boardWindow
+from frames.Web2boardWindow2 import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 
 # do not remove
@@ -16,7 +16,7 @@ import libs.WSCommunication.Hubs
 from flexmock import flexmock
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
-from libs.Web2boardApp import getWebBoardApp
+from libs.MainApp import getMainApp
 from libs.utils import areWeFrozen
 
 
@@ -55,7 +55,7 @@ class TestSerialMonitorHub(unittest.TestCase):
 
     def test_startApp_callsStartsSerialMonitorApp(self):
         import wx
-        mainApp = getWebBoardApp()
+        mainApp = getMainApp()
         app = wx.App(False)
         wx = flexmock(wx, BitmapButton=lambda *args, **kwargs: wx.Button)
         mainApp.w2bGui = Web2boardWindow(None, 0)

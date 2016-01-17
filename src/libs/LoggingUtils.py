@@ -13,6 +13,7 @@ __author__ = 'jorge.garcia'
 
 class ColoredConsoleHandler(logging.StreamHandler):
     FILE_ENCODING = sys.getfilesystemencoding()
+    MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
     def __init__(self, stream=None):
         super(ColoredConsoleHandler, self).__init__(stream)
 
@@ -33,9 +34,10 @@ class ColoredConsoleHandler(logging.StreamHandler):
                     myRecord.msg = "Unable to format record"
 
         self.format(myRecord)
-        style = self.__getStyle(myRecord)
+        data = self.__getStyle(myRecord)
+        data["msg"] = self.format(myRecord)
 
-        sys.stdout.write("&&&"+style["fg"]+self.format(myRecord)+"&&&\n")
+        sys.stdout.write(self.MESSAGE_DIV.format(**data))
         if myRecord.levelno >= 50:
             os._exit(1)
 
@@ -56,21 +58,22 @@ class ColoredConsoleHandler(logging.StreamHandler):
         :param myRecord:
         :return: Dict
         """
-        style = {"fg": None, "bg": None, "bold": True, "blink": None, "underline": None}
+        style = {"fg": None, "bg": None, "bold": "normal", "underline": "none"}
         try:
             levelNo = myRecord.levelno
             if levelNo >= 50:  # CRITICAL / FATAL
                 style["fg"] = 'red'
-                style["bg"] = 'whi'
-                style["underline"] = True
+                style["bold"] = "bold"
+                style["underline"] = "underline"
             elif levelNo >= 40:  # ERROR
                 style["fg"] = 'red'
+                style["bold"] = "bold"
             elif levelNo >= 30:  # WARNING
-                style["fg"] = 'mag'
+                style["fg"] = 'orange'
             elif levelNo >= 20:  # INFO
-                style["fg"] = 'gre'
+                style["fg"] = 'green'
             elif levelNo >= 10:  # DEBUG
-                style["fg"] = 'cya'
+                style["fg"] = 'blue'
             else:  # NOTSET and anything else
                 pass
         except:

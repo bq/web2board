@@ -3,6 +3,7 @@ import logging
 import os
 import time
 import urllib2
+from PySide import QtGui
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
@@ -23,10 +24,10 @@ from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
 log = logging.getLogger(__name__)
-__web2BoardApp = None
+__mainApp = None
 
 
-class Web2boardApp:
+class MainApp:
     def __init__(self):
         self.w2bGui = None
         """:type : frames.Web2boardWindow.Web2boardWindow"""
@@ -109,11 +110,15 @@ class Web2boardApp:
 
     def startConsoleViewer(self):
         import wx
-        from frames.Web2boardWindow import Web2boardWindow
+        from frames.Web2boardWindow2 import Web2boardWindow
 
-        app = wx.App(False)
+
+
+
+        app = QtGui.QApplication(sys.argv)
         self.w2bGui = Web2boardWindow(None)
-        self.w2bGui.Raise()
+        self.w2bGui.show()
+        self.w2bGui.raise_()
         self.isAppRunning = True
         return app
 
@@ -146,8 +151,8 @@ class Web2boardApp:
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
 
 
-def getWebBoardApp():
-    global __web2BoardApp
-    if __web2BoardApp is None:
-        __web2BoardApp = Web2boardApp()
-    return __web2BoardApp
+def getMainApp():
+    global __mainApp
+    if __mainApp is None:
+        __mainApp = MainApp()
+    return __mainApp
