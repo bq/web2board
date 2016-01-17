@@ -98,6 +98,9 @@ import sys
 import time
 import unittest
 from xml.sax import saxutils
+import logging
+
+log = logging.getLogger(__name__)
 
 
 # ------------------------------------------------------------------------
@@ -565,10 +568,14 @@ class _TestResult(TestResult):
         self.result.append((0, test, output, ''))
         if self.verbosity > 1:
             sys.stderr.write('ok ')
+            log.info('ok ')
             sys.stderr.write(str(test))
+            log.info(str(test))
             sys.stderr.write('\n')
+            log.info('\n')
         else:
             sys.stderr.write('.')
+            log.info('.')
 
     def addError(self, test, err):
         self.error_count += 1
@@ -578,10 +585,14 @@ class _TestResult(TestResult):
         self.result.append((2, test, output, _exc_str))
         if self.verbosity > 1:
             sys.stderr.write(str(test))
+            log.info(str(test))
             sys.stderr.write('\n')
+            log.info('\n')
             sys.stderr.write('ERROR!!!!\n')
+            log.info('ERROR!!!!\n')
         else:
             sys.stderr.write('ERROR! ')
+            log.info("ERROR!")
 
     def addFailure(self, test, err):
         self.failure_count += 1
@@ -591,10 +602,14 @@ class _TestResult(TestResult):
         self.result.append((1, test, output, _exc_str))
         if self.verbosity > 1:
             sys.stderr.write(str(test))
+            log.info(str(test))
             sys.stderr.write('\n')
+            log.info('\n')
             sys.stderr.write('FAILED!!!!!\n')
+            log.info('FAILED!!!!!\n')
         else:
             sys.stderr.write('FAILED! ')
+            log.info('FAILED! ')
 
 
 class HTMLTestRunner(Template_mixin):

@@ -17,17 +17,24 @@ import signal
 from Scripts.TestRunner import *
 from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
+import psutil
 
 log = initLogging(__name__)  # initialized in main
 
 if __name__ == "__main__":
     try:
+        precess = []
+        for proc in psutil.process_iter():
+            # check whether the process name matches
+            if proc.name() in ("web2board.exe", "web2board", "web2board.app") and proc.pid != os.getpid():
+                log.warning("killing a running web2board application")
+                proc.kill()
+
         def closeSigHandler(signal, frame):
             log.warning("closing server")
             getMainApp().w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
-
 
         app = getMainApp()
 

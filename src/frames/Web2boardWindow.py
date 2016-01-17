@@ -14,10 +14,7 @@
 import sys
 import time
 from PySide import QtGui
-
 import logging
-
-from PySide.QtCore import QTimer
 
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
@@ -31,7 +28,6 @@ log = logging.getLogger(__name__)
 
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
-
 
     def __init__(self, *args, **kwargs):
         super(Web2boardWindow, self).__init__(*args, **kwargs)
@@ -68,7 +64,6 @@ class Web2boardWindow(QtGui.QMainWindow):
                 style["fg"] = 'blue'
             else:  # NOTSET and anything else
                 pass
-
         except:
             pass
         return style
@@ -79,6 +74,9 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.__getPorts()
 
     def createTrayIcon(self):
+        def onTrayIconActivated(reason):
+            if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
+                self.show()
         showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
         quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
 
@@ -91,7 +89,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.setContextMenu(self.trayIconMenu)
         self.trayIcon.setIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.trayIcon.setToolTip("Web2board application")
-        self.trayIcon.activated.connect(self.show)
+        self.trayIcon.activated.connect(onTrayIconActivated)
+        self.trayIcon.messageClicked.connect(self.show)
 
     def closeEvent(self, event):
         if self.trayIcon.isSystemTrayAvailable():
@@ -111,10 +110,12 @@ class Web2boardWindow(QtGui.QMainWindow):
         message = message.replace("\n", "<br>")
         message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
         self.ui.console.append(message)
+        if record.levelno >= logging.ERROR:
+            self.showBalloonMessage("Critical error occurred\nPlease check the history log", icon=QtGui.QSystemTrayIcon.Warning)
 
     @InGuiThread()
-    def showBalloonMessage(self, message, title="Web2board"):
-        self.trayIcon.showMessage(title, message, QtGui.QSystemTrayIcon.Information)
+    def showBalloonMessage(self, message, title="Web2board", icon=QtGui.QSystemTrayIcon.Information):
+        self.trayIcon.showMessage(title, message, icon)
 
     @asynchronous()
     def __getPorts(self):
@@ -162,11 +163,11 @@ class Web2boardWindow(QtGui.QMainWindow):
             self.raise_()
 
 
-
 @asynchronous()
 def onThread(serialMonitor):
     time.sleep(2)
-    serialMonitor.showBalloonMessage("Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details.")
+    serialMonitor.showBalloonMessage(
+            "Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details.")
 
 
 if __name__ == '__main__':
