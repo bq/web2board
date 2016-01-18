@@ -42,13 +42,10 @@ class PathsManager:
 
     @staticmethod
     def getBasePath():
-        # if utils.areWeFrozen():
-        #     if os.getcwd() in sys._MEIPASS or os.getcwd() == sys._MEIPASS:
-        #         return sys._MEIPASS.replace(os.getcwd() + os.sep, "")
-        #     return sys._MEIPASS
-        # else:
-        #     return ""
-        return "" #this will not work with --onefile
+        if utils.areWeFrozen():
+            return sys._MEIPASS
+        else:
+            return os.getcwd()
 
     @staticmethod
     def getExternalDataFolder():

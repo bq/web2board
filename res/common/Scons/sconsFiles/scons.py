@@ -22,6 +22,8 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+from libs.utils import getModulePath
+
 from libs.PathsManager import PathsManager
 
 __revision__ = "src/script/scons.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
@@ -176,9 +178,9 @@ else:
 # then for 'scons'.
 libs.extend([os.path.join(x, scons_version) for x in prefs])
 libs.extend([os.path.join(x, 'scons') for x in prefs])
-libs.extend([PathsManager.RES_PATH])
-libs.extend([PathsManager.RES_PATH + os.sep + "sconsFiles"])
-libs.extend([PathsManager.RES_PATH + os.sep + "sconsFiles" + os.sep + "SCons"])
+libs.extend([getModulePath()])
+libs.extend([getModulePath() + os.sep + "sconsFiles"])
+libs.extend([getModulePath() + os.sep + "sconsFiles" + "SCons"])
 
 sys.path = libs + sys.path
 
