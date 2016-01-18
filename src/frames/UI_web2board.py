@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\UI_web2board.ui'
+# Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Sun Jan 17 18:27:48 2016
+# Created: Mon Jan 18 12:31:57 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,15 +12,26 @@ from PySide import QtCore, QtGui
 class Ui_Web2board(object):
     def setupUi(self, Web2board):
         Web2board.setObjectName("Web2board")
-        Web2board.resize(825, 417)
+        Web2board.resize(838, 431)
         self.centralwidget = QtGui.QWidget(Web2board)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.forceClose = QtGui.QPushButton(self.centralwidget)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.forceClose.setIcon(icon)
+        self.forceClose.setObjectName("forceClose")
+        self.horizontalLayout.addWidget(self.forceClose)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
+        self.wsConnectedLabel = QtGui.QLabel(self.centralwidget)
+        self.wsConnectedLabel.setObjectName("wsConnectedLabel")
+        self.horizontalLayout.addWidget(self.wsConnectedLabel)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
@@ -47,6 +58,8 @@ class Ui_Web2board(object):
 
     def retranslateUi(self, Web2board):
         Web2board.setWindowTitle(QtGui.QApplication.translate("Web2board", "Web2board", None, QtGui.QApplication.UnicodeUTF8))
+        self.forceClose.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
+        self.wsConnectedLabel.setText(QtGui.QApplication.translate("Web2board", "Not connected", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))

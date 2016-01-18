@@ -1,5 +1,6 @@
 from subprocess import call
 
+from libs import utils
 from libs.Packagers.Packager import Packager
 from libs.utils import *
 
@@ -28,14 +29,33 @@ class MacPackager(Packager):
         self.licensePath = os.path.join(self.web2boardPath, "LICENSE.txt")
 
         self.appResourcesPath = os.path.join(self.installerCreationDistPath, self.web2boardExecutableName, "Contents",
-                                             "Resources")
+                                             "MacOS", "res")
+
+    def _constructAndMoveExecutable(self):
+        currentPath = os.getcwd()
+        os.chdir(self.srcPath)
+        try:
+            log.debug("Creating Scons Executable")
+            call(["pyinstaller", self.sconsSpecPath])
+            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"),
+                           os.path.join(self._getInstallerCreationResPath(), "Scons"))
+
+            log.debug("Gettings Scons Packages")
+            self._getSconsPackages()
+
+            log.debug("Creating Web2board Executable")
+            call(["pyinstaller", '-w', self.web2boardSpecPath])
+            shutil.move(os.path.join(self.pyInstallerDistFolder, "web2board.app"), self.installerCreationDistPath)
+
+        finally:
+            os.chdir(currentPath)
 
     def _addMetadataForInstaller(self):
         Packager._addMetadataForInstaller(self)
         copytree(self.pkgPlatformPath, self.installerCreationPath)
         shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
         shutil.copy2(self.licensePath, self.installerCreationDistPath)
-        copytree(self._getInstallerExternalResourcesPath(), self.appResourcesPath)
+        copytree(self._getInstallerCreationResPath(), self.appResourcesPath)
 
     def _moveInstallerToInstallerFolder(self):
         shutil.copy2(self.installerCreationDistPath + os.sep + "Web2Board.pkg", self.installerPath)

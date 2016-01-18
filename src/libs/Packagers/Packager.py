@@ -97,15 +97,15 @@ class Packager:
         try:
             log.debug("Creating Scons Executable")
             call(["pyinstaller", self.sconsSpecPath])
-            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"), os.path.join(self._getInstallerCreationResPath(), "Scons"))
+            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"),
+                           os.path.join(self._getInstallerCreationResPath(), "Scons"))
 
             log.debug("Gettings Scons Packages")
             self._getSconsPackages()
+
             log.debug("Creating Web2board Executable")
             call(["pyinstaller", '-w', self.web2boardSpecPath])
-            copyFunc = utils.copytree if not utils.isMac() else shutil.move
-            copyFunc(os.path.join(self.pyInstallerDistFolder, "web2board"),
-                     self.installerCreationDistPath)
+            utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationDistPath)
 
         finally:
             os.chdir(currentPath)
@@ -136,16 +136,15 @@ class Packager:
             packagesFiles = findFiles(platformIOPackagesPath, ["appstate.json", "packages/**/*"])
 
             def isDoc(filePath):
-                isDoc = os.sep + "doc"+ os.sep not in filePath
-                isDoc = isDoc and os.sep + "examples"+ os.sep not in filePath
-                isDoc = isDoc and os.sep + "tool-scons"+ os.sep not in filePath
+                isDoc = os.sep + "doc" + os.sep not in filePath
+                isDoc = isDoc and os.sep + "examples" + os.sep not in filePath
+                isDoc = isDoc and os.sep + "tool-scons" + os.sep not in filePath
                 return isDoc and os.sep + "README" not in filePath.upper()
 
             packagesFiles = [x[len(platformIOPackagesPath) + 1:] for x in packagesFiles if isDoc(x)]
 
             if not os.path.exists(os.path.dirname(self._getPlatformIOPackagesPath())):
                 os.makedirs(os.path.dirname(self._getPlatformIOPackagesPath()))
-
 
             with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
                 os.chdir(platformIOPackagesPath)

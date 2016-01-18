@@ -123,5 +123,6 @@ def isMac():
 def is64bits():
     return sys.maxsize > 2 ** 32
 
+
 def isTrayIconAvailable():
-    return not isLinux() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
+    return isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()

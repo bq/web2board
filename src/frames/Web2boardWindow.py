@@ -10,11 +10,13 @@
 # Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
 #                                                                       #
 # -----------------------------------------------------------------------#
-
+import os
 import sys
 import time
 from PySide import QtGui
 import logging
+
+from PySide.QtCore import Qt
 
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
@@ -96,13 +98,15 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.messageClicked.connect(self.show)
         self.trayIcon.show()
 
+        self.ui.forceClose.clicked.connect(lambda *args: os._exit(1))
+
     def closeEvent(self, event):
         if utils.isTrayIconAvailable():
             self.hide()
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
-            event.ignore()
         else:
-            event.accept()
+            self.setWindowState(Qt.WindowMinimized)
+        event.ignore()
 
     @InGuiThread()
     def logInConsole(self, record):
@@ -165,7 +169,12 @@ class Web2boardWindow(QtGui.QMainWindow):
     def showApp(self):
         if not self.isVisible():
             self.show()
+            self.setWindowState(Qt.WindowNoState)
             self.raise_()
+
+    @InGuiThread()
+    def changeConnectedStatus(self):
+        self.ui.wsConnectedLabel.setText("Connected")
 
 
 @asynchronous()

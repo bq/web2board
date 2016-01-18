@@ -10,9 +10,10 @@ from wsgiref.simple_server import make_server
 
 import sys
 
+from PySide.QtCore import Qt
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
-from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
+from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import getCompilerUploader
@@ -89,7 +90,7 @@ class MainApp:
             HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
         self.w2bServer = make_server(options.host, options.port, server_class=WSGIServer,
                                      handler_class=WebSocketWSGIRequestHandler,
-                                     app=WebSocketWSGIApplication(handler_cls=ConnectionHandler))
+                                     app=WebSocketWSGIApplication(handler_cls=WSConnectionHandler))
         self.w2bServer.initialize_websockets_manager()
         return self.w2bServer
 
@@ -114,13 +115,13 @@ class MainApp:
         app = QtGui.QApplication(sys.argv)
         self.w2bGui = Web2boardWindow(None)
         if not utils.isTrayIconAvailable():
+            self.w2bGui.setWindowState(Qt.WindowMinimized)
             self.w2bGui.show()
-            self.w2bGui.raise_()
         self.isAppRunning = True
         return app
 
     @asynchronous()
-    def updateLibrariesAndStartServer(self, options):
+    def startServer(self, options):
         while not self.isAppRunning:
             time.sleep(0.1)
 
@@ -140,7 +141,7 @@ class MainApp:
         PathsManager.logRelevantEnvironmentalPaths()
         # self.updateLibrariesIfNecessary()
         if not options.afterInstall:
-            self.updateLibrariesAndStartServer(options)
+            self.startServer(options)
 
         return app
 

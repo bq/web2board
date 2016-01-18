@@ -14,6 +14,9 @@
 # -----------------------------------------------------------------------#
 import signal
 
+from psutil import ZombieProcess
+
+from libs import utils
 from Scripts.TestRunner import *
 from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
@@ -26,9 +29,14 @@ if __name__ == "__main__":
         precess = []
         for proc in psutil.process_iter():
             # check whether the process name matches
-            if proc.name() in ("web2board.exe", "web2board", "web2board.app") and proc.pid != os.getpid():
-                log.warning("killing a running web2board application")
-                proc.kill()
+            try:
+                if proc.name() in ("web2board.exe", "web2board", "web2board.app") and proc.pid != os.getpid():
+                    if not utils.isMac():
+                        log.warning("killing a running web2board application")
+                        proc.kill()
+            except ZombieProcess:
+                pass
+
 
         def closeSigHandler(signal, frame):
             log.warning("closing server")
