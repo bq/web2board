@@ -1,11 +1,10 @@
 import os
-import tempfile
+import sys
 import unittest
 from pprint import pprint
 
 import click
-import sys
-import os
+from PySide.QtGui import QApplication
 from flexmock import flexmock
 
 from libs.CompilerUploader import CompilerUploader, CompilerException
@@ -14,6 +13,11 @@ from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
 
 log = initLogging(__name__)
+try:
+    QApplication(sys.argv)
+except:
+    pass
+
 
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None
@@ -21,10 +25,10 @@ class TestCompilerUploader(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.platformToUse = cls.__getPlatformToUse()
-        print """\n\n
+        log.info("""\n\n
         #######################################
         Remember to connect a {} board
-        #######################################\n""".format(cls.platformToUse)
+        #######################################\n""".format(cls.platformToUse))
 
         def clickConfirm(message):
             print message

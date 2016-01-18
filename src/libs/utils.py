@@ -6,6 +6,7 @@ import platform
 import shutil
 import sys
 import zipfile
+from PySide import QtGui
 from urllib2 import urlopen
 
 import glob2
@@ -63,15 +64,19 @@ def findFilesForPyInstaller(path, patterns):
     files = findFiles(path, patterns)
     return [(f, f, 'DATA') for f in files if os.path.isfile(f)]
 
+
 def findModulesForPyInstaller(path, patterns):
     files = findFiles(path, patterns)
+
     def getModuleFromFile(file):
         """
         :type file: str
         """
         module = file.replace(os.sep, ".")
-        return module[:-3] #removing .py
-    listModules = [getModuleFromFile(f) for f in files if os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
+        return module[:-3]  # removing .py
+
+    listModules = [getModuleFromFile(f) for f in files if
+                   os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
     return list(set(listModules))
 
 
@@ -114,5 +119,9 @@ def isWindows():
 def isMac():
     return platform.system() == 'Darwin'
 
+
 def is64bits():
-    return sys.maxsize > 2**32
+    return sys.maxsize > 2 ** 32
+
+def isTrayIconAvailable():
+    return not isLinux() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()

@@ -2,11 +2,12 @@
 import os
 import zipfile
 
+from libs.Decorators.Asynchronous import asynchronous
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager
 from platformio import util
 
-
+@asynchronous(daemon=False)
 def run():
     log = initLogging(__name__)
     log.info("running afterInstallScript")

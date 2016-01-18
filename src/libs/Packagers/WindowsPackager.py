@@ -46,6 +46,7 @@ class WindowsPackager(Packager):
             self._moveInstallerToInstallerFolder()
             log.info("installer created successfully")
         except Exception as e:
+            log.exception("Error compiling")
             print str(e)
         finally:
             log.debug("Cleaning files")

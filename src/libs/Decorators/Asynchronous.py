@@ -34,7 +34,7 @@ class Result(object):
         return self.result
 
 
-def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None):
+def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None, daemon=True):
     if callbackKwargs is None:
         callbackKwargs = {}
 
@@ -54,6 +54,7 @@ def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None):
         def wrapper(*args, **kwargs):
             kwargs.update({"__func__": fun})
             _mainThread = threading.Thread(target=overFunction, args=args, kwargs=kwargs)
+            _mainThread.setDaemon(daemon)
             resultObject = Result(_mainThread)
             _mainThread.functionsArgs = args
             kwargs.update({"__ResultObject__": resultObject})

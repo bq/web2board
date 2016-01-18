@@ -1,74 +1,126 @@
-import os
-import threading
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------#
+#                                                                       #
+# This file is part of the web2board project                            #
+#                                                                       #
+# Copyright (C) 2015 Mundo Reader S.L.                                  #
+#                                                                       #
+# Date: August 2015                                                     #
+# Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
+#                                                                       #
+# -----------------------------------------------------------------------#
 
 import sys
-import wx
-from wx._core import PyDeadObjectError
+import time
+from PySide import QtGui
+import logging
 
-from SerialMonitor import SerialMonitorUI
-from frames.SystemTrayIcon import TaskBarIcon
-from frames.Web2boardgui import Web2boardGui
+from frames.SerialMonitorDialog import SerialMonitorDialog
+from frames.UI_web2board import Ui_Web2board
+from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
-from libs.Decorators.wxAsynchronous import WX_Utils
+from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
-from libs import utils
 
-class RedirectText(object):
-    def __init__(self, parent, originalStdout):
-        self.parent = parent
-        self.originalStdout = originalStdout
-        self.outs = []
-
-    def write(self, string):
-        self.outs.append(string)
-        self.originalStdout(string)
-
-    def flush(self, *args):
-        pass
-
-    def get(self):
-        aux = self.outs
-        self.outs = []
-        return aux
+log = logging.getLogger(__name__)
 
 
-class Web2boardWindow(Web2boardGui):
-    def __init__(self, parent, eventsRefreshTime=100):
-        super(Web2boardWindow, self).__init__(parent)
-        self.compileUpdater = getCompilerUploader()
-        self.availablePorts = ["AUTO"]
+class Web2boardWindow(QtGui.QMainWindow):
+    CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
+
+    def __init__(self, *args, **kwargs):
+        super(Web2boardWindow, self).__init__(*args, **kwargs)
+        self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
+        self.ui = Ui_Web2board()
+        self.ui.setupUi(self)
+        self.availablePorts = []
         self.autoPort = None
-        self.portCombo.SetSelection(0)
-        self.consoleLog.BeginFontSize(10)
-
-        self.timer = wx.Timer(self, 123456)
-        self.Bind(wx.EVT_TIMER, self.onTimer)
-        self.htmlBuffer = ""
-        self.actions = []
-
-        if eventsRefreshTime > 0:
-            self.timer.Start(300)  # 1 second interval
-
-        # redirect text here
-        originalStdout = sys.stdout.write
-        self.redir = RedirectText(self, originalStdout)
-        sys.stdout = self.redir
-        sys.stderr = self.redir
+        self.ui.searchPorts.clicked.connect(self.onSearchPorts)
+        self.compileUpdater = getCompilerUploader()
         self.serialMonitor = None
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-        icon = wx.EmptyIcon()
-        icon.CopyFromBitmap(wx.Bitmap(PathsManager.RES_ICO_PATH, wx.BITMAP_TYPE_ANY))
-        self.SetIcon(icon)
+        self.trayIcon = None
+        self.trayIconMenu = None
+        if utils.isTrayIconAvailable():
+            self.createTrayIcon()
 
-        WX_Utils.initDecorators(self)
-        self.taskBarIcon = TaskBarIcon()
 
-        if utils.isLinux():
-            self.Show()
+    def __getConsoleKwargs(self, record):
+        record.msg = record.msg.encode("utf-8")
+        style = dict(fg=None, bg=None, bold="normal", underline="none", msg=record.msg)
+        try:
+            levelNo = record.levelno
+            if levelNo >= 50:  # CRITICAL / FATAL
+                style["fg"] = 'red'
+                style["bold"] = "bold"
+                style["underline"] = "underline"
+            elif levelNo >= 40:  # ERROR
+                style["fg"] = 'red'
+                style["bold"] = "bold"
+            elif levelNo >= 30:  # WARNING
+                style["fg"] = 'orange'
+            elif levelNo >= 20:  # INFO
+                style["fg"] = 'green'
+            elif levelNo >= 10:  # DEBUG
+                style["fg"] = 'blue'
+            else:  # NOTSET and anything else
+                pass
+        except:
+            pass
+        return style
+
+    def onSearchPorts(self):
+        self.ui.searchPorts.setEnabled(False)
+        self.ui.statusbar.showMessage("Searching ports...")
+        self.__getPorts()
+
+    def createTrayIcon(self):
+        def onTrayIconActivated(reason):
+            if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
+                self.show()
+        showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
+        quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
+
+        self.trayIconMenu = QtGui.QMenu(self)
+        self.trayIconMenu.addAction(showAppAction)
+        self.trayIconMenu.addSeparator()
+        self.trayIconMenu.addAction(quitAction)
+
+        self.trayIcon = QtGui.QSystemTrayIcon(self)
+        self.trayIcon.setContextMenu(self.trayIconMenu)
+        self.trayIcon.setIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
+        self.trayIcon.setToolTip("Web2board application")
+        self.trayIcon.activated.connect(onTrayIconActivated)
+        self.trayIcon.messageClicked.connect(self.show)
+        self.trayIcon.show()
+
+    def closeEvent(self, event):
+        if utils.isTrayIconAvailable():
+            self.hide()
+            self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
+            event.ignore()
         else:
-            self.Hide()
+            event.accept()
+
+    @InGuiThread()
+    def logInConsole(self, record):
+        kwargs = self.__getConsoleKwargs(record)
+        message = self.CONSOLE_MESSAGE_DIV.format(**kwargs)
+
+        if message.endswith("\n"):
+            message = message[:-1]
+        message = message.replace("\n", "<br>")
+        message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+        self.ui.console.append(message.decode("utf-8"))
+        if record.levelno >= logging.ERROR:
+            self.showBalloonMessage("Critical error occurred\nPlease check the history log", icon=QtGui.QSystemTrayIcon.Warning)
+
+    @InGuiThread()
+    def showBalloonMessage(self, message, title="Web2board", icon=QtGui.QSystemTrayIcon.Information):
+        if utils.isTrayIconAvailable():
+            self.trayIcon.showMessage(title, message, icon)
 
     @asynchronous()
     def __getPorts(self):
@@ -78,102 +130,54 @@ class Web2boardWindow(Web2boardGui):
         finally:
             self.onRefreshFinished()
 
-    def __handlePendingActions(self):
-        actions = self.actions
-        while len(actions)>0:
-            action = actions.pop(-1)
-            if action[0] == "startSerialMonitor":
-                self.serialMonitor = SerialMonitorUI(None, action[1])
-                self.serialMonitor.Show()
-            elif action[0] == "closeSerialMonitor":
-                self.serialMonitor.Close()
-            elif action[0] == "showApp":
-                self.Show()
-                self.Raise()
-
-    def __handleStdMessages(self):
-        messages = self.redir.get()
-        for message in messages:
-            messages = [m.replace("\n\n", "").replace("\r", "") for m in messages if m.strip() != ""]
-            self.consoleLog.SetInsertionPoint(self.consoleLog.GetLastPosition())
-            if message.startswith("&&&"):
-                self.consoleLog.BeginBold()
-                message = message.replace("&&&", "")
-                fg = message[:3]
-                message = message[3:]
-                if fg == "red":
-                    self.consoleLog.BeginTextColour((255, 0, 0))
-                elif fg == "whi":
-                    self.consoleLog.BeginTextColour((255, 255, 255))
-                elif fg == "mag":
-                    self.consoleLog.BeginTextColour((180, 40, 205))
-                elif fg == "gre":
-                    self.consoleLog.BeginTextColour((0, 150, 30))
-                elif fg == "cya":
-                    self.consoleLog.BeginTextColour((50, 50, 255))
-            self.consoleLog.WriteText(message)
-            self.consoleLog.EndTextColour()
-            self.consoleLog.EndBold()
-        if len(messages) > 0:
-            # self.SetStatusText(message)
-            wx.CallAfter(self.consoleLog.Scroll, 0, self.consoleLog.GetScrollRange(wx.VERTICAL))
-            wx.CallAfter(self.consoleLog.Refresh)
-
-    def onRefreshPorts(self, event):
-        # self.compileUpdater.setBoard("diemilanove")
-        self.resfreshPortsButton.Disable()
-        self.SetStatusText("Finding ports...")
-        self.__getPorts()
-
-    @WX_Utils.onGuiThread()
+    @InGuiThread()
     def onRefreshFinished(self):
-        lastPortSelection = self.portCombo.GetStringSelection()
-        self.SetStatusText("")
-        self.portCombo.Clear()
-        portsInCombo = ["AUTO"] + self.availablePorts
+        lastPortSelection = self.ui.ports.currentText()
+        self.ui.statusbar.showMessage("")
+        self.ui.ports.clear()
+        portsInCombo = ["AUTO sadfsdfsdf"] + self.availablePorts
         for i, port in enumerate(portsInCombo):
             if port == self.autoPort:
                 portsInCombo[i] = self.autoPort + " (ok)"
-        self.portCombo.AppendItems(portsInCombo)
+        self.ui.ports.addItems(portsInCombo)
         try:
             selectionIndex = portsInCombo.index(lastPortSelection)
         except:
             selectionIndex = 0
-        self.portCombo.SetSelection(selectionIndex)
+        self.ui.ports.setCurrentIndex(selectionIndex)
 
-        self.resfreshPortsButton.Enable()
+        self.ui.searchPorts.setEnabled(True)
 
-    def onTimer(self, event):
-        self.__handleStdMessages()
-        self.__handlePendingActions()
-
+    @InGuiThread()
     def startSerialMonitorApp(self, port):
-        self.actions.append(["startSerialMonitor", port])
+        self.serialMonitor = SerialMonitorDialog(None, port)
+        self.serialMonitor.show()
 
+    @InGuiThread()
     def closeSerialMonitorApp(self):
-        self.actions.append(["closeSerialMonitor"])
-
-    def showApp(self):
-        self.actions.append(["showApp"])
+        self.serialMonitor.Close()
+        self.serialMonitor = None
 
     def isSerialMonitorRunning(self):
-        try:
-            return self.serialMonitor is not None and not self.serialMonitor.isClosed
-        except PyDeadObjectError:
-            return False
+        return self.serialMonitor is not None
 
-    def OnClose(self, event):
-        if event.CanVeto() and not utils.isLinux():
-            self.Hide()
-            return
+    @InGuiThread()
+    def showApp(self):
+        if not self.isVisible():
+            self.show()
+            self.raise_()
 
-        self.Destroy()
-        os._exit(1)
+
+@asynchronous()
+def onThread(serialMonitor):
+    time.sleep(2)
+    serialMonitor.showBalloonMessage(
+            "Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details.")
 
 
 if __name__ == '__main__':
-    app = wx.App(False)
-    w2bgui = Web2boardWindow(None)
-    w2bgui.Show()
-    w2bgui.Raise()
-    app.MainLoop()
+    app = QtGui.QApplication(sys.argv)
+    mySW = Web2boardWindow(None)
+    onThread(mySW)
+    mySW.show()
+    sys.exit(app.exec_())

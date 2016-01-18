@@ -3,6 +3,7 @@ import logging
 import os
 import time
 import urllib2
+from PySide import QtGui
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
@@ -23,10 +24,10 @@ from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 
 log = logging.getLogger(__name__)
-__web2BoardApp = None
+__mainApp = None
 
 
-class Web2boardApp:
+class MainApp:
     def __init__(self):
         self.w2bGui = None
         """:type : frames.Web2boardWindow.Web2boardWindow"""
@@ -45,7 +46,7 @@ class Web2boardApp:
                 runAllTests()
 
             log.warning("\nexiting program in 10s")
-            time.sleep(10)
+            time.sleep(3)
             os._exit(1)
 
     def handleSystemArguments(self):
@@ -65,19 +66,16 @@ class Web2boardApp:
         options, args = parser.parse_args()
         log.info("init web2board with options: {}, and args: {}".format(options, args))
 
+        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
+                     "error": logging.ERROR,"critical": logging.CRITICAL}
+        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
+
         if options.afterInstall:
             afterInstallScript.run()
-            log.warning("exiting program in 3s")
-            time.sleep(3)
-            os._exit(1)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
             getCompilerUploader().setBoard(options.board)
-
-        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
-                     "error": logging.ERROR,"critical": logging.CRITICAL}
-        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -95,6 +93,7 @@ class Web2boardApp:
         self.w2bServer.initialize_websockets_manager()
         return self.w2bServer
 
+    @asynchronous()
     def updateLibrariesIfNecessary(self):
         try:
             getBitbloqLibsUpdater().readCurrentVersionInfo()
@@ -110,15 +109,15 @@ class Web2boardApp:
             log.exception("unable to copy libraries files, there could be a permissions problem.")
 
     def startConsoleViewer(self):
-        import wx
         from frames.Web2boardWindow import Web2boardWindow
 
-        app = wx.App(False)
+        app = QtGui.QApplication(sys.argv)
         self.w2bGui = Web2boardWindow(None)
-        self.w2bGui.Raise()
+        if not utils.isTrayIconAvailable():
+            self.w2bGui.show()
+            self.w2bGui.raise_()
         self.isAppRunning = True
         return app
-
 
     @asynchronous()
     def updateLibrariesAndStartServer(self, options):
@@ -135,11 +134,13 @@ class Web2boardApp:
 
     def startMain(self):
         app = self.startConsoleViewer()
+        PathsManager.moveInternalConfigToExternalIfNecessary()
+        self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
-        PathsManager.moveInternalConfigToExternalIfNecessary()
         # self.updateLibrariesIfNecessary()
-        self.updateLibrariesAndStartServer(options)
+        if not options.afterInstall:
+            self.updateLibrariesAndStartServer(options)
 
         return app
 
@@ -147,8 +148,8 @@ class Web2boardApp:
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
 
 
-def getWebBoardApp():
-    global __web2BoardApp
-    if __web2BoardApp is None:
-        __web2BoardApp = Web2boardApp()
-    return __web2BoardApp
+def getMainApp():
+    global __mainApp
+    if __mainApp is None:
+        __mainApp = MainApp()
+    return __mainApp

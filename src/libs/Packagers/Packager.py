@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import zipfile
@@ -47,17 +48,14 @@ class Packager:
         self.pkgPlatformPath = None
         self.resPlatformPath = None
 
-
         self.web2boardExecutableName = None
         self.sconsExecutableName = None
 
-        os.chdir(self.web2boardPath)
-
-    def _getInstallerExternalResourcesPath(self):
-        return self.installerCreationDistPath + pm.EXTERNAL_RESOURCES_PATH[len(pm.MAIN_PATH):]
+    def _getInstallerCreationResPath(self):
+        return os.path.join(self.installerCreationDistPath, 'res')
 
     def _getPlatformIOPackagesPath(self):
-        return os.path.join(self._getInstallerExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
+        return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
@@ -86,33 +84,27 @@ class Packager:
             shutil.rmtree(self.pyInstallerBuildFolder)
 
     def _addMetadataForInstaller(self):
-        resourcesInstallerPath = self._getInstallerExternalResourcesPath()
-        if not os.path.exists(resourcesInstallerPath):
-            os.makedirs(resourcesInstallerPath)
-
-        copytree(pm.EXTERNAL_RESOURCES_PATH, resourcesInstallerPath)
+        pass
 
     def _makeMainDirs(self):
         os.makedirs(self.installerCreationPath)
         os.makedirs(self.installerCreationDistPath)
         os.makedirs(self.installerPath)
-        os.makedirs(self._getInstallerExternalResourcesPath())
 
     def _constructAndMoveExecutable(self):
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
             log.debug("Creating Scons Executable")
-            call(["pyinstaller", "--onefile", self.sconsSpecPath])
-            shutil.copy2(os.path.join(self.pyInstallerDistFolder, self.sconsExecutableName),
-                         self._getInstallerExternalResourcesPath())
+            call(["pyinstaller", self.sconsSpecPath])
+            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"), os.path.join(self._getInstallerCreationResPath(), "Scons"))
 
             log.debug("Gettings Scons Packages")
             self._getSconsPackages()
             log.debug("Creating Web2board Executable")
-            call(["pyinstaller", "--onefile", '-w', self.web2boardSpecPath])
-            copyFunc = shutil.copy2 if not utils.isMac() else shutil.move
-            copyFunc(os.path.join(self.pyInstallerDistFolder, self.web2boardExecutableName),
+            call(["pyinstaller", '-w', self.web2boardSpecPath])
+            copyFunc = utils.copytree if not utils.isMac() else shutil.move
+            copyFunc(os.path.join(self.pyInstallerDistFolder, "web2board"),
                      self.installerCreationDistPath)
 
         finally:
@@ -136,19 +128,29 @@ class Packager:
                 log.info("getting packages for: {}".format(envOptionsDict))
                 platform.configure_default_packages(envOptionsDict, ["upload"])
                 platform._install_default_packages()
+            os.chdir(originalCurrentDirectory)
 
             log.info("all packages where successfully installed")
             platformIOPackagesPath = os.path.abspath(util.get_home_dir())
             log.info("constructing zip file in : {}".format(self._getPlatformIOPackagesPath()))
             packagesFiles = findFiles(platformIOPackagesPath, ["appstate.json", "packages/**/*"])
-            isDoc = lambda filePath: "doc" not in filePath and not filePath.endswith('.html')
+
+            def isDoc(filePath):
+                isDoc = os.sep + "doc"+ os.sep not in filePath
+                isDoc = isDoc and os.sep + "examples"+ os.sep not in filePath
+                isDoc = isDoc and os.sep + "tool-scons"+ os.sep not in filePath
+                return isDoc and os.sep + "README" not in filePath.upper()
+
             packagesFiles = [x[len(platformIOPackagesPath) + 1:] for x in packagesFiles if isDoc(x)]
-            os.chdir(platformIOPackagesPath)
-            if not os.path.exists(self._getInstallerExternalResourcesPath()):
-                os.makedirs(self._getInstallerExternalResourcesPath())
+
+            if not os.path.exists(os.path.dirname(self._getPlatformIOPackagesPath())):
+                os.makedirs(os.path.dirname(self._getPlatformIOPackagesPath()))
+
 
             with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
-                with click.progressbar(packagesFiles, label='Compressing packages in zip file') as packagesFilesInProgressBar:
+                os.chdir(platformIOPackagesPath)
+                with click.progressbar(packagesFiles,
+                                       label='Compressing packages in zip file') as packagesFilesInProgressBar:
                     for zipFilePath in packagesFilesInProgressBar:
                         z.write(zipFilePath)
 

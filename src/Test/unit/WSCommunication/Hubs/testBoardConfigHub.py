@@ -72,7 +72,7 @@ class TestBoardConfigHub(unittest.TestCase):
         self.sender.should_receive("isSettingPort").never()
 
         def newGetPort():
-            raise CompilerException(ERROR_NO_PORT_FOUND)
+            raise CompilerException(ERROR_NO_PORT_FOUND, self.boardConfigHub.compilerUploader.board)
 
         self.boardConfigHub.compilerUploader.getPort = newGetPort
         with self.assertRaises(BoardConfigHubException) as cm:

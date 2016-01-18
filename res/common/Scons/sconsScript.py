@@ -37,7 +37,9 @@ PathsManager.logRelevantEnvironmentalPaths()
 pprint(sys.argv)
 web2boardPath = sys.argv[5].split("platformio" + os.sep)[0]
 print web2boardPath
-os.chdir(sys.argv.pop(-1))
+platformioPath = sys.argv.pop(-1)
+pathDiff = os.path.relpath(os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), platformioPath)
+os.chdir(platformioPath)
 
-sys.path.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + 'sconsFiles'])
-execfile(PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles" + os.sep + "scons.py")
+sys.path.extend([pathDiff + os.sep + 'sconsFiles'])
+execfile(pathDiff + os.sep + "sconsFiles" + os.sep + "scons.py")

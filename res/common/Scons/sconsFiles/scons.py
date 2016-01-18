@@ -176,9 +176,9 @@ else:
 # then for 'scons'.
 libs.extend([os.path.join(x, scons_version) for x in prefs])
 libs.extend([os.path.join(x, 'scons') for x in prefs])
-libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH])
-libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles"])
-libs.extend([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep + "sconsFiles" + os.sep + "SCons"])
+libs.extend([PathsManager.RES_PATH])
+libs.extend([PathsManager.RES_PATH + os.sep + "sconsFiles"])
+libs.extend([PathsManager.RES_PATH + os.sep + "sconsFiles" + os.sep + "SCons"])
 
 sys.path = libs + sys.path
 

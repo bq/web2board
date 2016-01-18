@@ -26,7 +26,7 @@ __globalCompilerUploader = None
 
 ERROR_BOARD_NOT_SET = {"code": 0, "message": "Necessary to define board before to run/compile"}
 ERROR_BOARD_NOT_SUPPORTED = {"code": 1, "message": "Board: {0} not Supported"}
-ERROR_NO_PORT_FOUND = {"code": 2, "message": "No port found, check the board is connected"}
+ERROR_NO_PORT_FOUND = {"code": 2, "message": "No port found, check the board: \"{0}\" is connected"}
 ERROR_MULTIPLE_BOARDS_CONNECTED = {"code": 3,
                                    "message": "More than one connected board was found. You should only have one board connected"}
 
@@ -146,7 +146,7 @@ class CompilerUploader:
         self._checkBoardConfiguration()
         portsToUpload = self._searchBoardPorts()
         if len(portsToUpload) == 0:
-            raise CompilerException(ERROR_NO_PORT_FOUND)
+            raise CompilerException(ERROR_NO_PORT_FOUND, self.board)
         elif len(portsToUpload) > 1:
             raise CompilerException(ERROR_MULTIPLE_BOARDS_CONNECTED)
         return portsToUpload[0]

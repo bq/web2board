@@ -8,9 +8,9 @@ from libs.PathsManager import PathsManager
 block_cipher = None
 
 print os.getcwd()
-print PathsManager.EXTERNAL_RESOURCES_PATH + os.sep +'sconsScript.py'
+print PathsManager.RES_PATH + os.sep +'sconsScript.py'
 
-a = Analysis([PathsManager.EXTERNAL_RESOURCES_PATH + os.sep +'sconsScript.py'],
+a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), 'sconsScript.py')],
              pathex=[os.getcwd()],
              hiddenimports=['UserList', 'UserString', 'ConfigParser'],
              hookspath=None,
@@ -26,11 +26,17 @@ a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
+          exclude_binaries=True,
           name='sconsScript',
           debug=False,
           strip=False,
           upx=True,
           console=True )
+
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               name='sconsScript')

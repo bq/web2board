@@ -2,7 +2,7 @@ import unittest
 
 from serial.serialutil import SerialException
 
-from SerialMonitor import SerialConnection
+from frames.SerialMonitorDialog import SerialConnection
 from libs import utils
 
 

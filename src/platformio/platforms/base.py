@@ -436,7 +436,7 @@ class BasePlatform(object):
             # assert util.test_scons()
             result = util.exec_command(
                     [
-                        PathsManager.getSonsExecutablePath(),  # [JORGE_GARCIA] modified for scons compatibility
+                        PathsManager.SCONS_EXECUTABLE_PATH,  # [JORGE_GARCIA] modified for scons compatibility
                         "-Q",
                         "-j %d" % self.get_job_nums(),
                         "--warn=no-no-parallel-support",
@@ -447,7 +447,7 @@ class BasePlatform(object):
             )
         except (OSError, AssertionError) as e:
             log.exception("error running scons with \n{}".format([
-                                                                     PathsManager.getSonsExecutablePath(),
+                                                                     PathsManager.SCONS_EXECUTABLE_PATH,
                                                                      # [JORGE_GARCIA] modified for scons compatibility
                                                                      "-Q",
                                                                      "-j %d" % self.get_job_nums(),
