@@ -14,6 +14,8 @@ import logging
 import os
 import subprocess
 
+from datetime import timedelta, datetime
+
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
 from platformio.platformioUtils import run as platformioRun
@@ -117,7 +119,7 @@ class CompilerUploader:
         if self._getIniConfig(self.board) is None:
             raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
-    def _searchBoardPorts(self):
+    def _searchBoardPort(self):
         self._checkBoardConfiguration()
         options = self._getIniConfig(self.board)
         mcu = options["boardData"]["build"]["mcu"]
@@ -125,17 +127,17 @@ class CompilerUploader:
         availablePorts = self.getAvailablePorts()
         if len(availablePorts) <= 0:
             return []
-        portsToUpload = []
         log.info("Found available ports: {}".format(availablePorts))
         portResultHashMap = {}
         for port in availablePorts:
             portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
 
-        for port, resultObject in portResultHashMap.items():
-            if resultObject.get(joinTimeout=4):
-                portsToUpload.append(port)
-        log.info("Found board ports: {}".format(portsToUpload))
-        return portsToUpload
+        watchdog = datetime.now()
+        while datetime.now() - watchdog < timedelta(seconds=4):
+            for port, resultObject in portResultHashMap.items():
+                if resultObject.isDone() and resultObject.get():
+                    log.info("Found board port: {}".format(port))
+                    return port
 
     def getAvailablePorts(self):
         portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
@@ -144,12 +146,11 @@ class CompilerUploader:
 
     def getPort(self):
         self._checkBoardConfiguration()
-        portsToUpload = self._searchBoardPorts()
-        if len(portsToUpload) == 0:
+        portToUpload = self._searchBoardPort()
+        if portToUpload is None:
             raise CompilerException(ERROR_NO_PORT_FOUND, self.board)
-        elif len(portsToUpload) > 1:
-            raise CompilerException(ERROR_MULTIPLE_BOARDS_CONNECTED)
-        return portsToUpload[0]
+
+        return portToUpload
 
     def setBoard(self, board):
         self.board = board

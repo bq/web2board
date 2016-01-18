@@ -54,30 +54,24 @@ class TestCompilerUploader(unittest.TestCase):
         self.compiler = CompilerUploader()
         self.compiler.board = None
 
-        self.original_searchPorts = self.compiler._searchBoardPorts
+        self.original_searchPorts = self.compiler._searchBoardPort
 
     def tearDown(self):
-        self.compiler._searchBoardPorts = self.original_searchPorts
+        self.compiler._searchBoardPort = self.original_searchPorts
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.assertIsNone(self.compiler.board)
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfNotReturningPort(self):
-        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [])
+        self.compiler = flexmock(self.compiler, _searchBoardPort=lambda: None)
 
-        self.compiler.setBoard('uno')
-
-        self.assertRaises(CompilerException, self.compiler.getPort)
-
-    def test_getPort_raiseExceptionIfReturnsMoreThanOnePort(self):
-        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [1, 2])
         self.compiler.setBoard('uno')
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_returnPortIfSearchPortsReturnsOnePort(self):
-        self.compiler = flexmock(self.compiler, _searchBoardPorts=lambda: [1])
+        self.compiler = flexmock(self.compiler, _searchBoardPort=lambda: 1)
         self.compiler.setBoard('uno')
 
         port = self.compiler.getPort()

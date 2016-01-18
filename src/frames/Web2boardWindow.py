@@ -16,7 +16,7 @@ import time
 from PySide import QtGui
 import logging
 
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QTimer
 
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
@@ -47,7 +47,6 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIconMenu = None
         if utils.isTrayIconAvailable():
             self.createTrayIcon()
-
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
@@ -82,6 +81,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         def onTrayIconActivated(reason):
             if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
                 self.show()
+
         showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
         quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
 
@@ -119,7 +119,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
         self.ui.console.append(message.decode("utf-8"))
         if record.levelno >= logging.ERROR:
-            self.showBalloonMessage("Critical error occurred\nPlease check the history log", icon=QtGui.QSystemTrayIcon.Warning)
+            self.showBalloonMessage("Critical error occurred\nPlease check the history log",
+                                    icon=QtGui.QSystemTrayIcon.Warning)
 
     @InGuiThread()
     def showBalloonMessage(self, message, title="Web2board", icon=QtGui.QSystemTrayIcon.Information):
@@ -156,6 +157,8 @@ class Web2boardWindow(QtGui.QMainWindow):
     def startSerialMonitorApp(self, port):
         self.serialMonitor = SerialMonitorDialog(None, port)
         self.serialMonitor.show()
+        self.serialMonitor.raise_()
+        self.serialMonitor.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
 
     @InGuiThread()
     def closeSerialMonitorApp(self):

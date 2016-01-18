@@ -207,12 +207,12 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'tryToTerminateSerialCommProcess', arguments);
         },
 
-        upload : function (code){
+        upload : function (code, board){
             
             return constructMessage('CodeHub', 'upload', arguments);
         },
 
-        uploadHex : function (hexText){
+        uploadHex : function (hexText, board){
             
             return constructMessage('CodeHub', 'uploadHex', arguments);
         }

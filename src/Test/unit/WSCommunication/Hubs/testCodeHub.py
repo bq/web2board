@@ -26,8 +26,10 @@ class TestCodeHub(unittest.TestCase):
         self.original_getPort = self.codeHub.compilerUploader.getPort
 
         self.codeHub.compilerUploader = flexmock(self.codeHub.compilerUploader,
-                                                 compile=None,
+                                                 compile=lambda *args: [True, None],
                                                  getPort=None)
+
+        self.board = self.codeHub.compilerUploader.board
 
     def tearDown(self):
         self.codeHub.compilerUploader.compile = self.original_compile
@@ -47,46 +49,46 @@ class TestCodeHub(unittest.TestCase):
         (self.codeHub.compilerUploader
          .should_receive("compile")
          .once()
-         .with_args(code))
+         .with_args(code)
+         .and_return([True, None]))
 
         self.codeHub.compile(code, self.sender)
 
     def test_upload_senderIsAdvisedCodeIsUploadingWithPort(self):
         port = "PORT"
         self.codeHub.compilerUploader.should_receive("getPort").and_return(port).once()
-        self.codeHub.compilerUploader.should_receive("upload").and_return((True,{})).once()
+        self.codeHub.compilerUploader.should_receive("upload").and_return((True, {})).once()
 
-        self.codeHub.upload("myCode", self.sender)
+        self.codeHub.upload("myCode",self.board, self.sender)
 
     def test_upload_successfulUploadReturnsTrue(self):
-        self.codeHub.compilerUploader.should_receive("upload").and_return((True,{})).once()
+        self.codeHub.compilerUploader.should_receive("upload").and_return((True, {})).once()
 
-        result = self.codeHub.upload("myCode", self.sender)
+        result = self.codeHub.upload("myCode",self.board, self.sender)
 
         self.assertEqual(result, True)
 
     def test_upload_unsuccessfulUploadReturnsErrorString(self):
-        uploadReturn = (False,{"err": "errorMessage"},)
+        uploadReturn = (False, {"err": "errorMessage"},)
         self.codeHub.compilerUploader.should_receive("upload").and_return(uploadReturn).once()
 
-        result = self.codeHub.upload("myCode", self.sender)
+        result = self.codeHub.upload("myCode",self.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
         self.assertEqual(result.replay, uploadReturn[1]["err"])
 
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
-        self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return((True,{})).once()
+        self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return((True, {})).once()
 
-        result = self.codeHub.uploadHex("hexText", self.sender)
+        result = self.codeHub.uploadHex("hexText", self.codeHub.compilerUploader.board, self.sender)
 
         self.assertTrue(result)
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
-        uploadReturn = (False,{"err": "errorMessage"},)
+        uploadReturn = (False, {"err": "errorMessage"},)
         self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return(uploadReturn).once()
 
-        result = self.codeHub.uploadHex("hexText", self.sender)
+        result = self.codeHub.uploadHex("hexText", self.codeHub.compilerUploader.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
         self.assertEqual(result.replay, uploadReturn[1]["err"])
-
