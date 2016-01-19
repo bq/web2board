@@ -85,14 +85,19 @@ def getDataFromUrl(url):
     return f.read()
 
 
-def downloadFile(url):
+def downloadFile(url, downloadPath=None):
     log.info("downloading " + url)
     extension = url.rsplit(".", 1)
     extension = extension[1] if len(extension) == 2 else ""
     urlData = getDataFromUrl(url)
 
-    with tempfile.NamedTemporaryFile(suffix="." + extension, delete=False) as downloadedTempFile:
+    if downloadPath is None:
+        downloadedTempFile = tempfile.NamedTemporaryFile(suffix="." + extension, delete=False)
+    else:
+        downloadedTempFile = open(downloadPath, "w")
+    with downloadedTempFile:
         downloadedTempFile.write(urlData)
+
     return os.path.abspath(downloadedTempFile.name)
 
 

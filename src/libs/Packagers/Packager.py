@@ -6,7 +6,7 @@ from subprocess import call
 import logging
 import click
 
-from libs.utils import findFiles, copytree
+from libs.utils import findFiles
 from platformio import util
 
 from libs import utils
@@ -99,6 +99,9 @@ class Packager:
             call(["pyinstaller", self.sconsSpecPath])
             utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"),
                            os.path.join(self._getInstallerCreationResPath(), "Scons"))
+
+            utils.copytree(os.path.join(self.srcResPath, "Scons"),
+                       os.path.join(self._getInstallerCreationResPath(), "Scons"))
 
             log.debug("Gettings Scons Packages")
             self._getSconsPackages()

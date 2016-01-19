@@ -45,6 +45,7 @@ class CompilerException(Exception):
 #
 class CompilerUploader:
     def __init__(self):
+        self.lastPortUsed = None
         self.board = 'uno'  # we use the board name as the environment (check platformio.ini)
 
     def _getIniConfig(self, environment):
@@ -72,20 +73,21 @@ class CompilerUploader:
 
     def _callAvrdude(self, args):
         if utils.isWindows():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude.exe ')
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude.exe')
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
         elif utils.isMac():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude ')
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude')
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
         elif utils.isLinux():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude64 ' if utils.is64bits() else "avrdude")
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf ')
+            avrExePath = os.path.join(pm.RES_PATH, 'avrdude64' if utils.is64bits() else "avrdude")
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
         else:
             raise Exception("Platform not supported")
 
-        cmd = avrExePath + "-C " + avrConfigPath + args
+        cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
-        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
                              close_fds=(not utils.isWindows()))
         output = p.stdout.read()
         err = p.stderr.read()
@@ -95,10 +97,15 @@ class CompilerUploader:
 
     @asynchronous()
     def _checkPort(self, port, mcu, baudRate):
-        log.debug("Checking port: {}".format(port))
-        args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
-        output, err = self._callAvrdude(args)
-        return 'Device signature =' in output or 'Device signature =' in err
+        try:
+            log.debug("Checking port: {}".format(port))
+            args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
+            output, err = self._callAvrdude(args)
+            log.debug("{2}: {0}, {1}".format(output, err, port))
+            return 'Device signature =' in output or 'Device signature =' in err
+        except:
+            log.debug("Error searching port: {}".format(port))
+            return False
 
     def _run(self, code, upload=False, uploadPort=None):
         self._checkBoardConfiguration()
@@ -133,16 +140,17 @@ class CompilerUploader:
             portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
 
         watchdog = datetime.now()
-        while datetime.now() - watchdog < timedelta(seconds=4):
+        while datetime.now() - watchdog < timedelta(seconds=30):
             for port, resultObject in portResultHashMap.items():
                 if resultObject.isDone() and resultObject.get():
                     log.info("Found board port: {}".format(port))
+                    self.lastPortUsed = port
                     return port
 
     def getAvailablePorts(self):
         portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
         availablePorts = map(lambda x: x[0], portsToUpload)
-        return availablePorts
+        return sorted(availablePorts, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 
     def getPort(self):
         self._checkBoardConfiguration()
