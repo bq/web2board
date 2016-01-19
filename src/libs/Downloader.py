@@ -33,3 +33,4 @@ class Downloader:
 
         if finishCallback is not None:
             finishCallback(downloadTask.get())
+        return downloadTask.get()
