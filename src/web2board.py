@@ -13,29 +13,30 @@
 #                                                                       #
 # -----------------------------------------------------------------------#
 import signal
+import shutil
 
-from psutil import ZombieProcess
-
-from libs import utils
 from Scripts.TestRunner import *
+from libs import utils
 from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
-import psutil
+from libs.PathsManager import PathsManager
 
 log = initLogging(__name__)  # initialized in main
 
 if __name__ == "__main__":
     try:
-        precess = []
-        for proc in psutil.process_iter():
-            # check whether the process name matches
-            try:
-                if proc.name() in ("web2board.exe", "web2board", "web2board.app") and proc.pid != os.getpid():
-                    if not utils.isMac():
-                        log.warning("killing a running web2board application")
-                        proc.kill()
-            except ZombieProcess:
-                pass
+        utils.killProcess("web2boardLink")
+
+        if PathsManager.MAIN_PATH == PathsManager.getCopyPathForUpdate() and len(sys.argv) > 1:
+            print "updating process"
+            print "killing original web2board"
+            utils.killProcess("web2board")
+            if os.path.exists(PathsManager.getOriginalPathForUpdate()):
+                print "removing original files"
+                shutil.rmtree(PathsManager.getOriginalPathForUpdate())
+            print "extracting files"
+            utils.extractZip(sys.argv[1], PathsManager.getOriginalPathForUpdate())
+            sys.exit(1)
 
 
         def closeSigHandler(signal, frame):
@@ -43,6 +44,7 @@ if __name__ == "__main__":
             getMainApp().w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
+
 
         app = getMainApp()
 

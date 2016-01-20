@@ -2,11 +2,14 @@
 import sys
 import os
 
-sys.path.append(os.getcwd())
-from libs import utils
+sys.path.append(os.path.join(os.getcwd()))
+
+originalWorkingPath = os.getcwd()
 from libs.PathsManager import PathsManager
+
 PathsManager.logRelevantEnvironmentalPaths()
 block_cipher = None
+os.chdir(os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH)))
 
 a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), 'sconsScript.py')],
              pathex=[os.getcwd()],
@@ -21,12 +24,6 @@ a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECU
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
-
-a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
-
-# a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
-# a.datas += utils.findFilesForPyInstaller("scons", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,

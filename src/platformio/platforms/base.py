@@ -441,7 +441,7 @@ class BasePlatform(object):
                         "-j %d" % self.get_job_nums(),
                         "--warn=no-no-parallel-support",
                         "-f", join(util.get_source_dir(), "builder", "main.py")
-                    ] + variables + targets + [PathsManager.SETTINGS_PLATFORMIO_PATH],
+                    ] + variables + targets + [PathsManager.PLATFORMIO_WORKSPACE_PATH],
                     stdout=util.AsyncPipe(self.on_run_out),
                     stderr=util.AsyncPipe(self.on_run_err)
             )
@@ -455,7 +455,7 @@ class BasePlatform(object):
                                                                      "-f",
                                                                      join(util.get_source_dir(), "builder", "main.py")
                                                                  ] + variables + targets + [
-                                                                     PathsManager.SETTINGS_PLATFORMIO_PATH]))
+                                                                     PathsManager.PLATFORMIO_WORKSPACE_PATH]))
             raise exception.SConsNotInstalledError()
 
         assert "returncode" in result

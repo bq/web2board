@@ -52,7 +52,7 @@ class CompilerUploader:
         """
         :type environment: str
             """
-        with util.cd(pm.SETTINGS_PLATFORMIO_PATH):
+        with util.cd(pm.PLATFORMIO_WORKSPACE_PATH):
             config = util.get_project_config()
 
             if not config.sections():
@@ -114,10 +114,10 @@ class CompilerUploader:
 
         code = '#include "Arduino.h"\n' + code  # todo do this only in Arduino frameworks
 
-        with open(os.path.join(pm.SETTINGS_PLATFORMIO_PATH, "src", "main.cpp"), 'w') as mainCppFile:
+        with open(os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src", "main.cpp"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
-        return platformioRun(target=target, environment=(self.board,), project_dir=pm.SETTINGS_PLATFORMIO_PATH,
+        return platformioRun(target=target, environment=(self.board,), project_dir=pm.PLATFORMIO_WORKSPACE_PATH,
                              upload_port=uploadPort)[0]
 
     def _checkBoardConfiguration(self):

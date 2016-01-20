@@ -1,11 +1,9 @@
 import logging
 import os
-import platform
-import shutil
 import sys
+from os.path import expanduser
+import platform
 from libs import utils
-from libs.base import sys_path
-from libs.utils import copytree
 
 _pathsLog = logging.getLogger(__name__)
 
@@ -21,7 +19,6 @@ class PathsManager:
 
     RES_PATH = None
     RES_ICO_PATH = None
-    RES_CONFIG_PATH = None
     RES_BOARDS_PATH = None
     RES_PLATFORMIO_PATH = None
     RES_LOGGING_CONFIG_PATH = None
@@ -29,9 +26,7 @@ class PathsManager:
     TEST_RES_PATH = None
 
     SETTINGS_PATH = None
-    SETTINGS_PLATFORMIO_PATH = None
-    SETTINGS_CONFIG_PATH = None
-    SETTINGS_LOGGING_CONFIG_PATH = None
+    PLATFORMIO_WORKSPACE_PATH = None
     TEST_SETTINGS_PATH = None
 
     SCONS_EXECUTABLE_PATH = None
@@ -49,12 +44,13 @@ class PathsManager:
 
     @staticmethod
     def getExternalDataFolder():
+        home = expanduser("~")
         if utils.isLinux():
-            return os.path.join(sys_path.get_home_path(), ".web2board")
+            return os.path.join(home, ".web2board")
         elif utils.isWindows():
             return os.path.join(os.getenv('APPDATA'), 'web2board')
         elif utils.isMac():
-            return sys_path.get_home_path() + os.sep + ".web2board"
+            return os.path.join(home, ".web2board")
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
 
@@ -79,37 +75,6 @@ class PathsManager:
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
 
-    @classmethod
-    def moveInternalConfigToExternalIfNecessary(cls):
-        from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
-        from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
-        web2boardUpdater = getWeb2boardUpdater()
-        bitbloqLibsUpdater = getBitbloqLibsUpdater()
-        if web2boardUpdater.isNecessaryToUpdateSettings():
-            _pathsLog.info("Creating settings folder structure in: {}".format(cls.SETTINGS_PATH))
-            shutil.copyfile(cls.RES_CONFIG_PATH, cls.SETTINGS_CONFIG_PATH)
-
-            if os.path.exists(cls.SETTINGS_PLATFORMIO_PATH):
-                shutil.rmtree(cls.SETTINGS_PLATFORMIO_PATH)
-            os.makedirs(cls.SETTINGS_PLATFORMIO_PATH)
-            copytree(cls.RES_PLATFORMIO_PATH, cls.SETTINGS_PLATFORMIO_PATH)
-
-            shutil.copyfile(cls.RES_LOGGING_CONFIG_PATH, cls.SETTINGS_LOGGING_CONFIG_PATH)
-
-            if os.path.exists(cls.TEST_SETTINGS_PATH):
-                shutil.rmtree(cls.TEST_SETTINGS_PATH)
-            os.makedirs(cls.TEST_SETTINGS_PATH)
-            copytree(cls.TEST_RES_PATH, cls.TEST_SETTINGS_PATH, ignore=".pioenvs", forceCopy=True)
-
-            shutil.copyfile(web2boardUpdater.currentVersionInfoPath, web2boardUpdater.settingsVersionInfoPath)
-            web2boardUpdater.readSettingsVersionInfo()
-
-            bitbloqLibVersionResPath = os.path.join(cls.RES_PATH, os.path.basename(bitbloqLibsUpdater.currentVersionInfoPath))
-            shutil.copyfile(bitbloqLibVersionResPath, bitbloqLibsUpdater.currentVersionInfoPath)
-
-            from Scripts import afterInstallScript
-            afterInstallScript.run()
-
     @staticmethod
     def getExternalResourcesPath():
         if utils.areWeFrozen() and utils.isMac():
@@ -118,6 +83,14 @@ class PathsManager:
             return pm.EXECUTABLE_PATH
 
         return os.path.join(pm.EXECUTABLE_PATH, "externalResources")
+
+    @classmethod
+    def getCopyPathForUpdate(cls):
+        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board_copy"))
+
+    @classmethod
+    def getOriginalPathForUpdate(cls):
+        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board"))
 
 
 # set working directory to src
@@ -129,27 +102,19 @@ else:
 pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
-pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.getExternalResourcesPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
 pm.RES_ICO_PATH = os.path.join(pm.RES_PATH, 'Web2board.ico')
 pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')
-pm.RES_CONFIG_PATH = os.path.join(pm.RES_PATH, 'config.json')
 pm.RES_BOARDS_PATH = os.path.join(pm.RES_PATH, 'boards.txt')
 pm.RES_PLATFORMIO_PATH = os.path.join(pm.RES_PATH, 'platformio')
 pm.RES_LOGGING_CONFIG_PATH = os.path.join(pm.RES_PATH, 'logging.json')
 pm.RES_SCONS_ZIP_PATH = os.path.join(pm.MAIN_PATH, "res", "sconsRes.zip")
 
-
 pm.SETTINGS_PATH = pm.getExternalDataFolder()
-pm.SETTINGS_PLATFORMIO_PATH = os.path.join(pm.SETTINGS_PATH, 'platformio')
-pm.SETTINGS_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, '.web2boardconfig')
-pm.SETTINGS_LOGGING_CONFIG_PATH = os.path.join(pm.SETTINGS_PATH, 'logging.json')
-pm.TEST_SETTINGS_PATH = os.path.join(pm.SETTINGS_PATH, 'Test', 'resources')
-
+pm.PLATFORMIO_WORKSPACE_PATH = os.path.join(pm.RES_PATH, 'platformioWorkSpace')
+pm.TEST_SETTINGS_PATH = os.path.join(pm.RES_PATH, 'TestSettings', 'resources')
 pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()
 
-# construct External_data_path if not exists
-if not os.path.exists(pm.SETTINGS_PATH):
-    os.makedirs(pm.SETTINGS_PATH)
+pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 

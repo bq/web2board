@@ -12,7 +12,6 @@ def run():
     log = initLogging(__name__)
     log.info("running afterInstallScript")
     log.info("adding settings files...")
-    PathsManager.moveInternalConfigToExternalIfNecessary()
     if not os.path.exists(PathsManager.PLATFORMIO_PACKAGES_ZIP_PATH):
         log.warning("No platformio packages zip found. (ignored)")
     else:
@@ -22,7 +21,7 @@ def run():
         log.info("afterInstallScript was successfully executed")
 
     assert os.path.exists(util.get_home_dir())
-    assert os.path.exists(PathsManager.SETTINGS_PATH)
+    assert os.path.exists(PathsManager.RES_PATH)
 
 if __name__ == '__main__':
     run()

@@ -15,11 +15,6 @@ a = Analysis([os.path.join(os.getcwd(), PathsManager.RES_PATH, 'sconsScript.py')
              runtime_hooks=None)
 pyz = PYZ(a.pure)
 
-a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
-
-# a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
-# a.datas += utils.findFilesForPyInstaller("scons", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,

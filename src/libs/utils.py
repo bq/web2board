@@ -1,15 +1,14 @@
 import inspect
-import tempfile
 import logging
 import os
 import platform
 import shutil
 import sys
+import tempfile
 import zipfile
-from PySide import QtGui
 from urllib2 import urlopen
-
 import glob2
+import psutil
 import serial.tools.list_ports
 
 log = logging.getLogger(__name__)
@@ -57,7 +56,7 @@ def findFiles(path, patterns):
     files = []
     for pattern in patterns:
         files += glob2.glob(path + os.sep + pattern)
-    return files
+    return list(set(files))
 
 
 def findFilesForPyInstaller(path, patterns):
@@ -129,5 +128,21 @@ def is64bits():
     return sys.maxsize > 2 ** 32
 
 
-def isTrayIconAvailable():
-    return isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
+def killProcess(name):
+    for proc in psutil.process_iter():
+        # check whether the process name matches
+        try:
+            if proc.name() in [name + getOsExecutableExtension()]:
+                print "killing a running web2board application"
+                proc.kill()
+        except psutil.ZombieProcess:
+            pass
+
+
+def getOsExecutableExtension():
+    if isMac():
+        return ".app"
+    elif isWindows():
+        return ".exe"
+    elif isLinux():
+        return ""

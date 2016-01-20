@@ -16,9 +16,9 @@ class BitbloqLibsUpdaterError(Exception):
 class BitbloqLibsUpdater(Updater):
     def __init__(self):
         Updater.__init__(self)
-        self.currentVersionInfoPath = os.path.join(PathsManager.SETTINGS_PATH, "bitbloqLibs.version")
+        self.currentVersionInfoPath = os.path.join(PathsManager.RES_PATH, "bitbloqLibs.version")
         self.onlineVersionUrl = "https://github.com/bq/bitbloqLibs/archive/master.zip"  # todo: recheck this
-        self.destinationPath = os.path.join(PathsManager.SETTINGS_PLATFORMIO_PATH, "lib")
+        self.destinationPath = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_PATH, "lib")
         self.name = "BitbloqLibsUpdater"
         self.readCurrentVersionInfo()
         # self._reloadVersions() # todo: this needs to be called when  urls work

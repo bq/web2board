@@ -13,6 +13,7 @@ class WindowsPackager(Packager):
         self.installerCreationPath = self.web2boardPath + os.sep + "win_web2board_{}".format(self.version)
         self.installerCreationName = os.path.basename(self.installerCreationPath)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")
+        self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
         self.pkgPlatformPath = os.path.join(self.pkgPath, "win32")
         self.resPlatformPath = os.path.join(self.resPath, "windows")
         self.web2boardExecutableName = "web2board.exe"

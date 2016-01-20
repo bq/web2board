@@ -1,17 +1,15 @@
-import sys
+import logging
 import os
 import shutil
 import zipfile
-from subprocess import call
-import logging
+
 import click
 
+from libs import utils
+from libs.PathsManager import PathsManager as pm
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater, Web2BoardUpdater
 from libs.utils import findFiles
 from platformio import util
-
-from libs import utils
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater, Web2BoardUpdater
-from libs.PathsManager import PathsManager as pm
 from platformio.platforms.base import PlatformFactory
 
 pDir = os.path.pardir
@@ -43,6 +41,7 @@ class Packager:
         # abstract attributes
         self.installerPath = None
         self.installerCreationPath = None
+        self.installerCreationExecutablesPath = None
         self.installerCreationDistPath = None
         self.installerCreationName = None
         self.pkgPlatformPath = None
@@ -51,9 +50,11 @@ class Packager:
         self.web2boardExecutableName = None
         self.sconsExecutableName = None
 
+    # todo move this to attribute
     def _getInstallerCreationResPath(self):
-        return os.path.join(self.installerCreationDistPath, 'res')
+        return os.path.join(self.installerCreationExecutablesPath, 'res')
 
+    # todo move this to attribute
     def _getPlatformIOPackagesPath(self):
         return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
 
@@ -89,31 +90,55 @@ class Packager:
     def _makeMainDirs(self):
         os.makedirs(self.installerCreationPath)
         os.makedirs(self.installerCreationDistPath)
+        os.makedirs(self.installerCreationExecutablesPath)
         os.makedirs(self.installerPath)
 
     def _constructAndMoveExecutable(self):
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            log.debug("Creating Scons Executable")
-            call(["pyinstaller", self.sconsSpecPath])
-            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"),
-                           os.path.join(self._getInstallerCreationResPath(), "Scons"))
-
-            utils.copytree(os.path.join(self.srcResPath, "Scons"),
-                       os.path.join(self._getInstallerCreationResPath(), "Scons"))
-
-            log.debug("Gettings Scons Packages")
+            self._constructSconsExecutable()
             self._getSconsPackages()
-
-            log.debug("Creating Web2board Executable")
-            call(["pyinstaller", '-w', self.web2boardSpecPath])
-            utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationDistPath)
-
+            self._constructWeb2boardExecutable()
+            self._compressExecutables()
+            self._constructLinkExecutable()
         finally:
             os.chdir(currentPath)
+            shutil.rmtree(self.installerCreationExecutablesPath)
+
+    def _constructLinkExecutable(self):
+        os.chdir(self.srcPath)
+        log.debug("Creating Web2boardLink Executable")
+        os.system("pyinstaller -w \"{}\"".format("web2boardLink.py"))
+        utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2boardLink"), self.installerCreationDistPath)
+
+    def _constructWeb2boardExecutable(self):
+        log.debug("Creating Web2board Executable")
+        os.system("pyinstaller  -w \"{}\"".format(self.web2boardSpecPath))
+        utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationExecutablesPath)
+
+    def _constructSconsExecutable(self):
+        log.debug("Creating Scons Executable")
+        os.system("pyinstaller \"{}\"".format(self.sconsSpecPath))
+
+        installerSconsPath = os.path.join(self._getInstallerCreationResPath(), "Scons")
+        utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"), installerSconsPath)
+
+        shutil.copytree(os.path.join(self.srcPath, "platformio"), os.path.join(installerSconsPath, "plarformio"))
+        shutil.copytree(self.srcResPath, os.path.join(installerSconsPath, "res"))
+
+    def _compressExecutables(self):
+        packagesFiles = findFiles(self.installerCreationExecutablesPath, ["*", "**/*"])
+        packagesFiles = [x[len(self.installerCreationExecutablesPath) + 1:] for x in packagesFiles]
+        with zipfile.ZipFile(self.installerCreationDistPath + os.sep + "web2board.zip", "w",
+                             zipfile.ZIP_DEFLATED) as z:
+            os.chdir(self.installerCreationExecutablesPath)
+            with click.progressbar(packagesFiles, label='Compressing...') as packagesFilesInProgressBar:
+                for zipFilePath in packagesFilesInProgressBar:
+                    z.write(zipFilePath)
 
     def _getSconsPackages(self):
+        log.debug("Gettings Scons Packages")
         originalCurrentDirectory = os.getcwd()
         originalClickConfirm = click.confirm
 
@@ -123,7 +148,7 @@ class Packager:
 
         click.confirm = clickConfirm
         try:
-            os.chdir(pm.SETTINGS_PLATFORMIO_PATH)
+            os.chdir(pm.PLATFORMIO_WORKSPACE_PATH)
             config = util.get_project_config()
             for section in config.sections():
                 envOptionsDict = {x[0]: x[1] for x in config.items(section)}
@@ -151,8 +176,7 @@ class Packager:
 
             with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
                 os.chdir(platformIOPackagesPath)
-                with click.progressbar(packagesFiles,
-                                       label='Compressing packages in zip file') as packagesFilesInProgressBar:
+                with click.progressbar(packagesFiles, label='Compressing...') as packagesFilesInProgressBar:
                     for zipFilePath in packagesFilesInProgressBar:
                         z.write(zipFilePath)
 

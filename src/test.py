@@ -1,25 +1,37 @@
-# coding=utf-8
 import os
-
-# print os.path.join(__file__, "ñññ", "hola")
-# os.system('"C:\\Program Files (x86)\\Web2board\\web2board.exe"')
+import sys
 import time
 
-from libs.Downloader import Downloader
-from libs.LoggingUtils import initLogging
 
-log = initLogging(__name__)
-
-
-def downloaderCallback(*args):
-    """
-    :type args: list
-    """
-    list(args).pop(-1)
-    print args
+def main():
+    fh = open('log', 'a')
+    while True:
+        fh.write('Still alive!')
+        fh.flush()
+        time.sleep(1)
 
 
-Downloader().download("https://github.com/bq/web2board/archive/master.zip", infoCallback=downloaderCallback)
+def _fork():
+    try:
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(0)
+    except OSError, e:
+        print >> sys.stderr, 'Unable to fork: %d (%s)' % (e.errno, e.strerror)
+        sys.exit(1)
 
-while True:
-    time.sleep(2)
+
+def fork():
+    _fork()
+
+    # remove references from the main process
+    os.chdir('/')
+    os.setsid()
+    os.umask(0)
+
+    _fork()
+
+
+if __name__ == '__main__':
+    fork()
+    main()

@@ -7,6 +7,7 @@ import shutil
 import subprocess
 
 from libs import utils
+from libs.Downloader import Downloader
 
 from libs.PathsManager import PathsManager
 from libs.Updaters.Updater import Updater, VersionInfo
@@ -19,14 +20,15 @@ class Web2BoardUpdater(Updater):
     def __init__(self):
         Updater.__init__(self)
         self.currentVersionInfoPath = os.path.join(PathsManager.RES_PATH, "web2board.version")
-        self.settingsVersionInfoPath = os.path.join(PathsManager.SETTINGS_PATH, "web2board.version")
+        self.settingsVersionInfoPath = os.path.join(PathsManager.RES_PATH, "web2board.version")
         self.settingsVersionInfo = None
         self.onlineVersionUrl = "https://raw.githubusercontent.com/bq/web2board/devel/res/common/web2board.version"  # todo: recheck this
-        self.destinationPath = PathsManager.SETTINGS_PATH + os.sep + "web2board_installer.txt"
+        self.destinationPath = PathsManager.RES_PATH + os.sep + "web2board_installer.txt"
         self.name = "Web2BoardUpdater"
 
         self.readCurrentVersionInfo()
         self.readSettingsVersionInfo()
+        self.downloader = Downloader()
 
     def _areWeMissingLibraries(self):
         return False
@@ -73,9 +75,10 @@ class Web2BoardUpdater(Updater):
         log.debug("[{0}] Read settings version: {1}".format(self.name, self.settingsVersionInfo.version))
         return self.settingsVersionInfo
 
-    def update(self, versionToUpload = None):
-
-
+    def update(self, versionToUpload=None):
+        """
+        :type versionToUpload: VersionInfo
+        """
         downloadUrl = self._getDownloadUrl()
 
         log.debug("[{0}] Downloading installer from: {1}".format(self.name, downloadUrl))

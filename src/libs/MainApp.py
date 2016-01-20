@@ -115,7 +115,7 @@ class MainApp:
         app = QtGui.QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
         self.w2bGui = Web2boardWindow(None)
-        if not utils.isTrayIconAvailable():
+        if not isTrayIconAvailable():
             self.w2bGui.setWindowState(Qt.WindowMinimized)
             self.w2bGui.show()
         self.isAppRunning = True
@@ -136,7 +136,6 @@ class MainApp:
 
     def startMain(self):
         app = self.startConsoleViewer()
-        PathsManager.moveInternalConfigToExternalIfNecessary()
         self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
@@ -155,3 +154,7 @@ def getMainApp():
     if __mainApp is None:
         __mainApp = MainApp()
     return __mainApp
+
+
+def isTrayIconAvailable():
+    return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()

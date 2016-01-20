@@ -53,7 +53,7 @@ class CodeHub(Hub):
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort
 
-        with open(PathsManager.SETTINGS_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
+        with open(PathsManager.RES_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
             tmpHexFile.write(hexText)
 
         compileReport = self.compilerUploader.uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)

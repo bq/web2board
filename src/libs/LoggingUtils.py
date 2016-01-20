@@ -1,4 +1,5 @@
 import copy
+import importlib
 import json
 import logging
 import logging.config
@@ -19,7 +20,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
         return super(ColoredConsoleHandler, self).handle(record)
 
     def emit(self, record):
-        import libs.MainApp
+        module = importlib.import_module("libs.MainApp")
         # Need to make a actual copy of the record
         # to prevent altering the message for other loggers
 
@@ -39,7 +40,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
 
         super(ColoredConsoleHandler, self).emit(record)
 
-        gui = libs.MainApp.getMainApp().w2bGui
+        gui = module.getMainApp().w2bGui
         if gui is not None:
             myRecord.msg = self.format(myRecord)
             gui.logInConsole(myRecord)
@@ -52,10 +53,7 @@ def initLogging(name):
     """
     :rtype: logging.Logger
     """
-    if os.path.isfile(PathsManager.SETTINGS_LOGGING_CONFIG_PATH):
-        logging.config.dictConfig(json.load(open(PathsManager.SETTINGS_LOGGING_CONFIG_PATH)))
-    else:
-        logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))
+    logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))
     logging.getLogger("ws4py").setLevel(logging.ERROR)
 
     return logging.getLogger(name)

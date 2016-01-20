@@ -18,6 +18,7 @@ import logging
 
 from PySide.QtCore import Qt, QTimer
 
+import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
 from libs import utils
@@ -45,7 +46,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
         self.trayIcon = None
         self.trayIconMenu = None
-        if utils.isTrayIconAvailable():
+        if libs.MainApp.isTrayIconAvailable():
             self.createTrayIcon()
 
     def __getConsoleKwargs(self, record):
@@ -101,7 +102,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.forceClose.clicked.connect(lambda *args: os._exit(1))
 
     def closeEvent(self, event):
-        if utils.isTrayIconAvailable():
+        if libs.MainApp.isTrayIconAvailable():
             self.hide()
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
         else:
@@ -124,7 +125,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def showBalloonMessage(self, message, title="Web2board", icon=QtGui.QSystemTrayIcon.Information):
-        if utils.isTrayIconAvailable():
+        if libs.MainApp.isTrayIconAvailable():
             self.trayIcon.showMessage(title, message, icon)
 
     @asynchronous()

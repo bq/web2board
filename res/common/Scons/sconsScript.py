@@ -4,12 +4,8 @@ import sys
 from pprint import pprint
 
 from libs.PathsManager import PathsManager
-from libs.LoggingUtils import initLogging
 
-PathsManager.moveInternalConfigToExternalIfNecessary()
-log = initLogging(__name__)
-
-PathsManager.logRelevantEnvironmentalPaths()
+# PathsManager.logRelevantEnvironmentalPaths()
 
 # if areWeFrozen():
 #     with zipfile.ZipFile(PathsManager.RES_SCONS_ZIP_PATH, "r") as z:

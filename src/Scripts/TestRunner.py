@@ -12,7 +12,7 @@ def __runTests(suite, reportTitle="report"):
     from Test.HTMLTestRunner import HTMLTestRunner
     from libs.PathsManager import PathsManager
     setConfigurationFilesForTest.run()
-    reportPath = PathsManager.SETTINGS_PATH + os.sep + reportTitle + '.html'
+    reportPath = PathsManager.RES_PATH + os.sep + reportTitle + '.html'
     runner = HTMLTestRunner(stream=file(reportPath, 'wb'), title=" Web2Board " + reportTitle, verbosity=1)
     # runner = unittest.TextTestRunner(verbosity=1)
     runner.run(suite)

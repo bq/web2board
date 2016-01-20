@@ -15,6 +15,7 @@ class MacPackager(Packager):
         self.installerCreationPath = self.web2boardPath + os.sep + "darwin_web2board_{}".format(self.version)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")
         self.installerCreationName = os.path.basename(self.installerCreationPath)
+        self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
         self.pkgPlatformPath = os.path.join(self.pkgPath, "darwin")
         self.resPlatformPath = os.path.join(self.resPath, "darwin")
 

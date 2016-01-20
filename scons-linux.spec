@@ -4,11 +4,11 @@ import os
 
 sys.path.append(os.getcwd())
 from libs import utils
-from libs.PathsManager import PathsManager
-block_cipher = None
+originalWorkingPath = os.getcwd()
 
-print os.getcwd()
-print PathsManager.RES_PATH + os.sep +'sconsScript.py'
+from libs.PathsManager import PathsManager
+
+os.chdir(os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH)))
 
 a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), 'sconsScript.py')],
              pathex=[os.getcwd()],
@@ -17,12 +17,8 @@ a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECU
              runtime_hooks=None)
 pyz = PYZ(a.pure)
 
-a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
-
-# a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
-# a.datas += utils.findFilesForPyInstaller("scons", ["*", "**/*"])
-
+# a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
+# a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,
@@ -31,7 +27,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=True)
 
 coll = COLLECT(exe,
                a.binaries,
