@@ -56,7 +56,7 @@ class Packager:
 
     # todo move this to attribute
     def _getPlatformIOPackagesPath(self):
-        return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_ZIP_NAME)
+        return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_PATH)
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
@@ -100,11 +100,10 @@ class Packager:
             self._constructSconsExecutable()
             self._getSconsPackages()
             self._constructWeb2boardExecutable()
-            self._compressExecutables()
+            shutil.move(self.installerCreationExecutablesPath, self.installerCreationDistPath + os.sep + "web2board")
             self._constructLinkExecutable()
         finally:
             os.chdir(currentPath)
-            shutil.rmtree(self.installerCreationExecutablesPath)
 
     def _constructLinkExecutable(self):
         os.chdir(self.srcPath)
@@ -160,8 +159,6 @@ class Packager:
 
             log.info("all packages where successfully installed")
             platformIOPackagesPath = os.path.abspath(util.get_home_dir())
-            log.info("constructing zip file in : {}".format(self._getPlatformIOPackagesPath()))
-            packagesFiles = findFiles(platformIOPackagesPath, ["appstate.json", "packages/**/*"])
 
             def isDoc(filePath):
                 isDoc = os.sep + "doc" + os.sep not in filePath
@@ -169,16 +166,13 @@ class Packager:
                 isDoc = isDoc and os.sep + "tool-scons" + os.sep not in filePath
                 return isDoc and os.sep + "README" not in filePath.upper()
 
-            packagesFiles = [x[len(platformIOPackagesPath) + 1:] for x in packagesFiles if isDoc(x)]
+            installerPlatformioPackagesPath = self._getPlatformIOPackagesPath()
+            if os.path.exists(installerPlatformioPackagesPath):
+                shutil.rmtree(installerPlatformioPackagesPath)
 
-            if not os.path.exists(os.path.dirname(self._getPlatformIOPackagesPath())):
-                os.makedirs(os.path.dirname(self._getPlatformIOPackagesPath()))
+            os.makedirs(installerPlatformioPackagesPath)
+            utils.copytree(platformIOPackagesPath, installerPlatformioPackagesPath, isDoc)
 
-            with zipfile.ZipFile(self._getPlatformIOPackagesPath(), "w", zipfile.ZIP_DEFLATED) as z:
-                os.chdir(platformIOPackagesPath)
-                with click.progressbar(packagesFiles, label='Compressing...') as packagesFilesInProgressBar:
-                    for zipFilePath in packagesFilesInProgressBar:
-                        z.write(zipFilePath)
 
         finally:
             os.chdir(originalCurrentDirectory)

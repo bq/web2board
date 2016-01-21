@@ -14,7 +14,7 @@ class PathsManager:
 
     EXECUTABLE_PATH = None
     MAIN_PATH = None
-    PLATFORMIO_PACKAGES_ZIP_NAME = "platformIoPackages.zip"
+    PLATFORMIO_PACKAGES_PATH = "platformIoPackages"
     PLATFORMIO_PACKAGES_ZIP_PATH = None
 
     RES_PATH = None
@@ -116,5 +116,5 @@ pm.PLATFORMIO_WORKSPACE_PATH = os.path.join(pm.RES_PATH, 'platformioWorkSpace')
 pm.TEST_SETTINGS_PATH = os.path.join(pm.RES_PATH, 'TestSettings', 'resources')
 pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()
 
-pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_ZIP_NAME)
+pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_PATH)
 

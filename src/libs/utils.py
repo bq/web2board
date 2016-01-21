@@ -31,16 +31,21 @@ def getModulePath(frame=None):
         return os.path.dirname(os.path.abspath(unicode(sys.executable, encoding)))
 
 
-def copytree(src, dst, symlinks=False, ignore=None, forceCopy=False):
+def copytree(src, dst, filter=None, ignore=None, forceCopy=False):
+    if filter is None:
+        filter = lambda x: True
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
         if ignore is not None and ignore in item:
             continue
         s = os.path.join(src, item)
+
+        if not filter(s):
+            continue
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            copytree(s, d, symlinks, ignore, forceCopy)
+            copytree(s, d, filter, ignore, forceCopy)
         else:
             if forceCopy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)

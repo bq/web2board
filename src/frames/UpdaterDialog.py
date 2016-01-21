@@ -73,8 +73,8 @@ class UpdaterDialog(QtGui.QDialog):
     def downloadEnded(self, task):
         self.ui.progressBar.hide()
         self.ui.title.setText("Extracting new version")
+        self.ui.info.hide()
         self.web2boardUpdater.update(self.destinationZipFile)
-        utils.extractZip(self.destinationZipFile, PathsManager.getOriginalPathForUpdate())
 
 
 if __name__ == '__main__':
