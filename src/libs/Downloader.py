@@ -26,7 +26,7 @@ class Downloader:
 
         while not downloadTask.isDone():
             if os.path.exists(dst):
-                pathSize = os.path.getsize("master.zip")
+                pathSize = os.path.getsize(dst)
                 if infoCallback is not None:
                     infoCallback(pathSize, totalSize, pathSize * 100.0 / float(totalSize))
                 time.sleep(self.refreshTime)

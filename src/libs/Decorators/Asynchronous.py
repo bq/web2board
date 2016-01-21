@@ -6,6 +6,7 @@ import threading
 
 log = logging.getLogger(__name__)
 
+
 class AsynchronousNotDone(Exception):
     pass
 
@@ -25,8 +26,9 @@ class Result(object):
     def get(self, joinIfNecessary=True, joinTimeout=None):
         if not self.isDone():
             if joinIfNecessary:
-                realTimeout = max([0, joinTimeout-(datetime.now() - self.startTime).seconds])
-                self.thread.join(realTimeout)
+                if joinTimeout is not None:
+                    joinTimeout = max([0, joinTimeout - (datetime.now() - self.startTime).seconds])
+                self.thread.join(joinTimeout)
             else:
                 raise AsynchronousNotDone("Asynchronous not done yet")
         if isinstance(self.result, Exception):

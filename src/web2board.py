@@ -20,6 +20,7 @@ from libs import utils
 from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 
 log = initLogging(__name__)  # initialized in main
 
@@ -27,16 +28,10 @@ if __name__ == "__main__":
     try:
         utils.killProcess("web2boardLink")
 
-        if PathsManager.MAIN_PATH == PathsManager.getCopyPathForUpdate() and len(sys.argv) > 1:
-            print "updating process"
-            print "killing original web2board"
-            utils.killProcess("web2board")
-            if os.path.exists(PathsManager.getOriginalPathForUpdate()):
-                print "removing original files"
-                shutil.rmtree(PathsManager.getOriginalPathForUpdate())
-            print "extracting files"
-            utils.extractZip(sys.argv[1], PathsManager.getOriginalPathForUpdate())
-            sys.exit(1)
+        if PathsManager.MAIN_PATH == PathsManager.getCopyPathForUpdate():
+            getWeb2boardUpdater().update()
+        else:
+            getWeb2boardUpdater().makeAnAuxiliaryCopyAndRunIt()
 
 
         def closeSigHandler(signal, frame):
