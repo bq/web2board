@@ -14,7 +14,9 @@
 import logging
 import os
 import sys
+from datetime import datetime
 
+import time
 from PySide import QtGui
 
 from frames.UI_Updater import Ui_Updater
@@ -28,20 +30,26 @@ log = logging.getLogger(__name__)
 
 
 class UpdaterDialog(QtGui.QDialog):
-    def __init__(self, parent, port=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(UpdaterDialog, self).__init__(*args, **kwargs)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.ui = Ui_Updater()
         self.ui.setupUi(self)
         self.web2boardUpdater = getWeb2boardUpdater()
-        self.downloader = Downloader()
+        self.downloader = self.web2boardUpdater.downloader
         self.destinationZipFile = os.path.join(PathsManager.MAIN_PATH, os.pardir, "000.zip")
+        self.__lastCurrentSize = 0
+        self.__lastProgressChecked = None
 
     def closeEvent(self, event):
         self.hide()
+        event.ignore()
 
-    def download(self):
-        url = self.web2boardUpdater.downloadOnlineVersionInfo().file2DownloadUrl
+    def download(self, versionInfo=None):
+        self.ui.info.setText("Starting the download process")
+        self.ui.title.setText("Downloading")
+        self.__lastProgressChecked = time.clock()
+        url = self.web2boardUpdater.getDownloadUrl(versionInfo)
         self.downloader.download(url,
                                  infoCallback=self.refreshProgressBar,
                                  dst=self.destinationZipFile,
@@ -49,13 +57,23 @@ class UpdaterDialog(QtGui.QDialog):
 
     @InGuiThread()
     def refreshProgressBar(self, current, total, percentage):
-        self.ui.info.setText("downloaded {0} of {1}".format(current, total))
+        period = (time.clock() - self.__lastProgressChecked)
+        self.__lastProgressChecked = time.clock()
+        vel = (current - self.__lastCurrentSize) / (period * 1000.0)
+        self.__lastCurrentSize = current
+        if vel != 0:
+            remaining = (long(total) - current) / (vel * 1000.0)
+        else:
+            remaining = "infinite"
+        text = "downloading {0:.1f} Kb/s, {1} of {2}, remaining: {3:.0f} s"
+        self.ui.info.setText(text.format(vel, current, total, remaining))
         self.ui.progressBar.setValue(int(percentage) + 1)
 
     @InGuiThread()
     def downloadEnded(self, task):
         self.ui.progressBar.hide()
         self.ui.title.setText("Extracting new version")
+        self.web2boardUpdater.update(self.destinationZipFile)
         utils.extractZip(self.destinationZipFile, PathsManager.getOriginalPathForUpdate())
 
 

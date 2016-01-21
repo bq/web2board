@@ -1,9 +1,11 @@
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_BOARD_NOT_SUPPORTED
+from libs.MainApp import getMainApp
 from libs.Packagers.Packager import Packager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
 
 
@@ -53,3 +55,7 @@ class BoardConfigHub(Hub):
         if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
             libUpdater.update(versionInfo)
         return True
+
+    def setWeb2boardVersion(self, version):
+        getWeb2boardUpdater().makeAnAuxiliaryCopyAndRunIt(version)
+

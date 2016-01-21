@@ -140,9 +140,11 @@ def killProcess(name):
 
 
 def getOsExecutableExtension():
+    if areWeFrozen():
+        return ".py"
     if isMac():
-        return ".app"
-    elif isWindows():
+        return ""
+    if isWindows():
         return ".exe"
-    elif isLinux():
+    if isLinux():
         return ""

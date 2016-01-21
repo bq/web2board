@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_Updater.ui'
 #
-# Created: Thu Jan 21 09:56:40 2016
+# Created: Thu Jan 21 16:47:40 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,7 +27,7 @@ class Ui_Updater(object):
         self.title.setObjectName("title")
         self.verticalLayout.addWidget(self.title)
         self.progressBar = QtGui.QProgressBar(Updater)
-        self.progressBar.setProperty("value", 24)
+        self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.verticalLayout.addWidget(self.progressBar)
         self.info = QtGui.QLabel(Updater)

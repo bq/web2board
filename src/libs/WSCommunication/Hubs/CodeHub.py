@@ -1,13 +1,12 @@
 import logging
 import os
-import tempfile
+
 from wshubsapi.Hub import Hub, UnsuccessfulReplay
 from wshubsapi.HubsInspector import HubsInspector
 
+from libs.CompilerUploader import getCompilerUploader, CompilerException
 from libs.PathsManager import PathsManager
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
-from libs.CompilerUploader import getCompilerUploader, CompilerException
-from libs import utils
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +28,6 @@ class CodeHub(Hub):
         _sender.isCompiling()
         compileReport = self.compilerUploader.compile(code)
         return self.__handleCompileReport(compileReport)
-
 
     def upload(self, code, board, _sender):
         """
@@ -59,6 +57,8 @@ class CodeHub(Hub):
         compileReport = self.compilerUploader.uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)
         return self.__handleCompileReport(compileReport)
 
+
+
     @staticmethod
     def tryToTerminateSerialCommProcess():
         from libs.MainApp import getMainApp
@@ -85,9 +85,3 @@ class CodeHub(Hub):
         _sender.isUploading(uploadPort)
 
         return uploadPort
-
-    def __getSerialCommProcess(self):
-        """
-        :rtype: subprocess.Popen|None
-        """
-        return HubsInspector.getHubInstance(SerialMonitorHub).serialCommunicationProcess

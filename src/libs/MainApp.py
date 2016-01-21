@@ -13,6 +13,9 @@ import sys
 from PySide.QtCore import Qt
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
+
+from libs.Updaters.Updater import VersionInfo
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
@@ -63,6 +66,9 @@ class MainApp:
                           help="board connected for integration tests")
         parser.add_option("--logLevel", default="info", type='string', action="store", dest="logLevel",
                           help="show more or less info, options[debug, info, warning, error, critical")
+        parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
+                          help="auto update to version")
+
 
         options, args = parser.parse_args()
         log.info("init web2board with options: {}, and args: {}".format(options, args))
@@ -77,6 +83,10 @@ class MainApp:
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
             getCompilerUploader().setBoard(options.board)
+
+        if options.update2version is not None:
+            versionInfo = VersionInfo(options.update2version)
+            self.w2bGui.startUpdaterDialog(versionInfo)
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -139,7 +149,6 @@ class MainApp:
         self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
-        # self.updateLibrariesIfNecessary()
         if not options.afterInstall:
             self.startServer(options)
 

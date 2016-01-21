@@ -180,6 +180,11 @@ function HubsAPI(url, serverTimeout) {
         setLibVersion : function (version){
             
             return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
+        },
+
+        setWeb2boardVersion : function (version){
+            
+            return constructMessage('BoardConfigHub', 'setWeb2boardVersion', arguments);
         }
     };
     this.BoardConfigHub.client = {};

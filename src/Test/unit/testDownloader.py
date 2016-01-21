@@ -1,15 +1,9 @@
 import time
 import unittest
 import urllib
-
 from flexmock import flexmock
 
 from libs.Downloader import Downloader
-
-onlineVersionTestData = {
-    "version": "90.90.90",
-    "file2DownloadUrl": "file2DownloadUrl",
-}
 
 
 class TestDownloader(unittest.TestCase):

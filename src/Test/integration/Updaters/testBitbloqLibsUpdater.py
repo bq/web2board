@@ -1,15 +1,11 @@
-import json
 import os
-import unittest
-
 import shutil
-from flexmock import flexmock
+import unittest
 
 from Test.testingUtils import restoreAllTestResources
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
-from libs.Updaters.Updater import Updater, VersionInfo
-from libs import utils
+from libs.Updaters.Updater import Updater
 
 
 class TestBitbloqLibsUpdater(unittest.TestCase):

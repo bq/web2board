@@ -21,6 +21,7 @@ from PySide.QtCore import Qt, QTimer
 import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
+from frames.UpdaterDialog import UpdaterDialog
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
@@ -43,6 +44,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.compileUpdater = getCompilerUploader()
         self.serialMonitor = None
+        self.updaterDialog = None
 
         self.trayIcon = None
         self.trayIconMenu = None
@@ -179,6 +181,12 @@ class Web2boardWindow(QtGui.QMainWindow):
     @InGuiThread()
     def changeConnectedStatus(self):
         self.ui.wsConnectedLabel.setText("Connected")
+
+    @InGuiThread()
+    def startUpdaterDialog(self, versionInfo):
+        self.updaterDialog = UpdaterDialog()
+        self.updaterDialog.show()
+        self.updaterDialog.download(versionInfo)
 
 
 @asynchronous()

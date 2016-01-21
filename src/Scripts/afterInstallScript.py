@@ -18,10 +18,12 @@ def run():
         log.info("extracting platformIO packages...")
         with zipfile.ZipFile(PathsManager.PLATFORMIO_PACKAGES_ZIP_PATH, "r") as z:
             z.extractall(os.path.abspath(util.get_home_dir()))
-        log.info("afterInstallScript was successfully executed")
 
     assert os.path.exists(util.get_home_dir())
     assert os.path.exists(PathsManager.RES_PATH)
+    log.info("afterInstallScript was successfully executed")
+    os._exit(1)
+
 
 if __name__ == '__main__':
     run()
