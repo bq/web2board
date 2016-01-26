@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/bq/web2board.png?label=ready&title=Ready)](https://waffle.io/bq/web2board)
 # web2board
 Native program that connects a website and a Arduino compatible board. It compiles Arduino sketches and uploads them onto a board.
 
