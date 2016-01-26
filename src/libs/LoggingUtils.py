@@ -5,7 +5,9 @@ import logging
 import logging.config
 import os
 import sys
+import time
 
+from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 
 __author__ = 'jorge.garcia'
@@ -46,7 +48,12 @@ class ColoredConsoleHandler(logging.StreamHandler):
             gui.logInConsole(myRecord)
 
         if myRecord.levelno >= 50:
-            os._exit(1)
+            self.asyncEnding()
+
+    @asynchronous()
+    def asyncEnding(self):
+        time.sleep(2)
+        os._exit(1)
 
 
 def initLogging(name):

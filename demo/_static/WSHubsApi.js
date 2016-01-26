@@ -82,7 +82,11 @@ function HubsAPI(url, serverTimeout) {
                     }
                 } else {
                     f = thisApi[msgObj.hub].client[msgObj.function];
-                    f.apply(f, msgObj.args);
+                    if(f === undefined){
+                      this.onClientFunctionNotFound(msgObj.hub,msgObj.function)
+                    }else {
+                      f.apply(f, msgObj.args);
+                    }
                 }
             } catch (err) {
                 this.onMessageError(err);
@@ -104,7 +108,8 @@ function HubsAPI(url, serverTimeout) {
         onClose: function (error) {},
         onOpen: function () {},
         onReconnecting: function () {},
-        onMessageError: function (error){}
+        onMessageError: function (error){},
+        onClientFunctionNotFound: function(hub, functionName){}
     };
 
     this.defaultErrorHandler = null;
@@ -180,6 +185,11 @@ function HubsAPI(url, serverTimeout) {
         setLibVersion : function (version){
             
             return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
+        },
+
+        setWeb2boardVersion : function (version){
+            
+            return constructMessage('BoardConfigHub', 'setWeb2boardVersion', arguments);
         }
     };
     this.BoardConfigHub.client = {};
@@ -207,12 +217,12 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'tryToTerminateSerialCommProcess', arguments);
         },
 
-        upload : function (code){
+        upload : function (code, board){
             
             return constructMessage('CodeHub', 'upload', arguments);
         },
 
-        uploadHex : function (hexText){
+        uploadHex : function (hexText, board){
             
             return constructMessage('CodeHub', 'uploadHex', arguments);
         }

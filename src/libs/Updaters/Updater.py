@@ -39,10 +39,6 @@ class Updater:
 
         self.name = "Updater"
 
-    def _reloadVersions(self):
-        self.readCurrentVersionInfo()
-        return self.downloadOnlineVersionInfo()
-
     def _getCurrentVersionNumber(self):
         return self.getVersionNumber(self.currentVersionInfo)
 

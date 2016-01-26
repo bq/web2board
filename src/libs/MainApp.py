@@ -1,31 +1,28 @@
 import importlib
 import logging
 import os
+import sys
 import time
 import urllib2
-from PySide import QtGui
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 from wsgiref.simple_server import make_server
 
-import sys
-
+from PySide import QtGui
 from PySide.QtCore import Qt
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
-
-from libs.Updaters.Updater import VersionInfo
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
-from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from wshubsapi.HubsInspector import HubsInspector
 
+from Scripts import afterInstallScript
+from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
+from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
-from libs import utils
-from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
-from Scripts import afterInstallScript
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+from libs.Updaters.Updater import VersionInfo
+from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
 log = logging.getLogger(__name__)
 __mainApp = None
@@ -69,13 +66,12 @@ class MainApp:
         parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
                           help="auto update to version")
 
-
         options, args = parser.parse_args()
         log.info("init web2board with options: {}, and args: {}".format(options, args))
 
-        logLevels = {"debug": logging.DEBUG,"info": logging.INFO,"warning": logging.WARNING,
-                     "error": logging.ERROR,"critical": logging.CRITICAL}
-        logging.getLogger().setLevel(logLevels[options.logLevel.lower()])
+        logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
+                     "error": logging.ERROR, "critical": logging.CRITICAL}
+        logging.getLogger().handlers[0].level = logLevels[options.logLevel.lower()]
 
         if options.afterInstall:
             afterInstallScript.run()
@@ -107,7 +103,6 @@ class MainApp:
     @asynchronous()
     def updateLibrariesIfNecessary(self):
         try:
-            getBitbloqLibsUpdater().readCurrentVersionInfo()
             getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
         except (HTTPError, URLError):
             log.error("unable to download libraries (might be a proxy problem)")
@@ -149,8 +144,7 @@ class MainApp:
         self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
-        if not options.afterInstall:
-            self.startServer(options)
+        self.startServer(options)
 
         return app
 

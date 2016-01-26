@@ -16,6 +16,7 @@ class PathsManager:
     MAIN_PATH = None
     PLATFORMIO_PACKAGES_PATH = "platformIoPackages"
     PLATFORMIO_PACKAGES_ZIP_PATH = None
+    CONFIG_PATH = None
 
     RES_PATH = None
     RES_ICO_PATH = None
@@ -25,7 +26,7 @@ class PathsManager:
     RES_SCONS_ZIP_PATH = None
     TEST_RES_PATH = None
 
-    SETTINGS_PATH = None
+    PROGRAM_PATH = None
     PLATFORMIO_WORKSPACE_PATH = None
     TEST_SETTINGS_PATH = None
 
@@ -42,17 +43,32 @@ class PathsManager:
         else:
             return os.getcwd()
 
-    @staticmethod
-    def getExternalDataFolder():
-        home = expanduser("~")
+    @classmethod
+    def getExternalDataFolder(cls):
         if utils.isLinux():
-            return os.path.join(home, ".web2board")
+            folder = ".web2board"
         elif utils.isWindows():
-            return os.path.join(os.getenv('APPDATA'), 'web2board')
+            folder = "web2board"
         elif utils.isMac():
-            return os.path.join(home, ".web2board")
+            folder = ".web2board"
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
+        return os.path.join(cls.getHomePath(), folder)
+
+    @staticmethod
+    def getHomePath():
+        if utils.isLinux():
+            return expanduser("~")
+        elif utils.isWindows():
+            return os.getenv('APPDATA')
+        elif utils.isMac():
+            return expanduser("~")
+        else:
+            raise Exception("Not supported platform: {}".format(platform.system()))
+
+    @classmethod
+    def getDstPathForUpdate(cls, version):
+        return os.path.join(cls.getHomePath(), "web2board_{}".format(version))
 
     @classmethod
     def getSonsExecutablePath(cls):
@@ -75,15 +91,6 @@ class PathsManager:
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
 
-    @staticmethod
-    def getExternalResourcesPath():
-        if utils.areWeFrozen() and utils.isMac():
-            return os.path.join(pm.EXECUTABLE_PATH, os.path.pardir, "Resources")
-        if pm.EXECUTABLE_PATH.endswith("externalResources"):
-            return pm.EXECUTABLE_PATH
-
-        return os.path.join(pm.EXECUTABLE_PATH, "externalResources")
-
     @classmethod
     def getCopyPathForUpdate(cls):
         return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board_copy"))
@@ -102,6 +109,7 @@ else:
 pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
+pm.CONFIG_PATH = os.path.join(pm.MAIN_PATH, 'config.json')
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
 pm.RES_ICO_PATH = os.path.join(pm.RES_PATH, 'Web2board.ico')
@@ -111,7 +119,7 @@ pm.RES_PLATFORMIO_PATH = os.path.join(pm.RES_PATH, 'platformio')
 pm.RES_LOGGING_CONFIG_PATH = os.path.join(pm.RES_PATH, 'logging.json')
 pm.RES_SCONS_ZIP_PATH = os.path.join(pm.MAIN_PATH, "res", "sconsRes.zip")
 
-pm.SETTINGS_PATH = pm.getExternalDataFolder()
+pm.PROGRAM_PATH = pm.getExternalDataFolder()
 pm.PLATFORMIO_WORKSPACE_PATH = os.path.join(pm.RES_PATH, 'platformioWorkSpace')
 pm.TEST_SETTINGS_PATH = os.path.join(pm.RES_PATH, 'TestSettings', 'resources')
 pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()

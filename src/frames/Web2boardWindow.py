@@ -10,19 +10,19 @@
 # Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import logging
 import os
 import sys
 import time
-from PySide import QtGui
-import logging
 
-from PySide.QtCore import Qt, QTimer
+from PySide import QtGui
+from PySide.QtCore import Qt
+from PySide.QtGui import QMessageBox
 
 import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
 from frames.UpdaterDialog import UpdaterDialog
-from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
@@ -130,6 +130,16 @@ class Web2boardWindow(QtGui.QMainWindow):
         if libs.MainApp.isTrayIconAvailable():
             self.trayIcon.showMessage(title, message, icon)
 
+    @InGuiThread()
+    def showConfirmDialog(self, text, title="Confirm"):
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Question)
+        msgBox.setText(title)
+        msgBox.setInformativeText(text)
+        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msgBox.setDefaultButton(QMessageBox.Ok)
+        return msgBox.exec_() == QMessageBox.Ok
+
     @asynchronous()
     def __getPorts(self):
         try:
@@ -165,7 +175,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def closeSerialMonitorApp(self):
-        self.serialMonitor.Close()
+        self.serialMonitor.close()
         self.serialMonitor = None
 
     def isSerialMonitorRunning(self):

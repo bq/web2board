@@ -6,9 +6,10 @@ import sys
 import time
 
 from libs import utils
+from libs.Decorators.Asynchronous import asynchronous
 from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager
-from libs.Updaters.Updater import Updater
+from libs.Updaters.Updater import Updater, VersionInfo
 
 __globalWeb2BoardUpdater = None
 
@@ -50,21 +51,38 @@ class Web2BoardUpdater(Updater):
 
         return self.DOWNLOAD_LINK_TEMPLATE.format(**args)
 
+    @asynchronous()
+    def downloadVersion(self, version):
+        confirmationPath = PathsManager.getDstPathForUpdate(version) + ".confirm"
+        zipDstPath = PathsManager.getDstPathForUpdate(version) + ".zip"
+        if not os.path.exists(confirmationPath):
+            url = getWeb2boardUpdater().getDownloadUrl(VersionInfo(version))
+            self.downloader.download(url, dst=zipDstPath,
+                                     infoCallback=lambda x, y, p: sys.stdout.write(str(p) + "\n")).get()
+            utils.extractZip(zipDstPath, PathsManager.getDstPathForUpdate(version))
+            os.remove(zipDstPath)
+            with open(confirmationPath, "w"):
+                pass
+
     def makeAnAuxiliaryCopyAndRunIt(self, version):
         try:
             self.log.info("Creating an auxiliary copy of the program")
-            if not os.path.exists(PathsManager.getCopyPathForUpdate()):
-                os.mkdir(PathsManager.getCopyPathForUpdate())
-            shutil.rmtree(PathsManager.getCopyPathForUpdate())
-            utils.copytree(PathsManager.MAIN_PATH, PathsManager.getCopyPathForUpdate(), ignore=".zip")
+            if os.path.exists(PathsManager.getCopyPathForUpdate()):
+                shutil.rmtree(PathsManager.getCopyPathForUpdate())
+            shutil.copytree("C:\Users\jorgarira\AppData\Roaming\web2board", PathsManager.getCopyPathForUpdate())
             os.rename(self.__copyOriginName, self.__copyNewName)
+        except Exception:
+            self.log.critical("Upload process finished due to a problem in the uploader", exc_info=1)
+
+    def runAuxiliaryCopy(self, version):
+        try:
             self.log.info("Running auxiliary copy")
             os.popen('"{0} --update2version {1}" &'.format(self.__copyNewName, version))
             self.log.info("waiting to be finished")
             time.sleep(10)
             raise Exception("Program not ended after calling copy")
-        except:
-            self.log.critical("Upload process finished due to a problem in the uploader")
+        except Exception:
+            self.log.critical("Upload process finished due to a problem in the uploader", exc_info=1)
 
     def update(self, zipFilePath):
         if PathsManager.MAIN_PATH != PathsManager.getCopyPathForUpdate():

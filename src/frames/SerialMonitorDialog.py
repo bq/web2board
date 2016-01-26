@@ -140,21 +140,9 @@ class SerialMonitorDialog(QtGui.QDialog):
     def onBaudRateChanged(self, event):
         self.serialConnection.changeBaudRate(self.dropdown.GetValue())
 
-    @InGuiThread()
-    def onThread(self):
-        self.logText("testing")
-
-@asynchronous()
-def onThread(serialMonitor):
-    time.sleep(2)
-    for i in range(10):
-        serialMonitor.onThread()
-        time.sleep(1)
-
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    mySW = SerialMonitor(None)
-    onThread(mySW)
+    mySW = SerialMonitorDialog(None, port= "COM7")
     mySW.show()
     sys.exit(app.exec_())

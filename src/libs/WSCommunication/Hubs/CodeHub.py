@@ -57,8 +57,6 @@ class CodeHub(Hub):
         compileReport = self.compilerUploader.uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)
         return self.__handleCompileReport(compileReport)
 
-
-
     @staticmethod
     def tryToTerminateSerialCommProcess():
         from libs.MainApp import getMainApp

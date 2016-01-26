@@ -103,3 +103,6 @@ class TestBoardConfigHub(unittest.TestCase):
         self.libUpdater = flexmock(self.libUpdater, update=lambda x: None)
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))
+
+    def test_setWeb2boardVersion_returnsTrue(self):
+        self.boardConfigHub.setWeb2boardVersion("0.0.1")

@@ -18,4 +18,3 @@ class WSConnectionHandler(ConnectionHandler):
 
     def closed(self, code, reason=None):
         super(WSConnectionHandler, self).closed(code, reason)
-        os._exit(1)

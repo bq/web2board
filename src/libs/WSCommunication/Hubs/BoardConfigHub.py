@@ -57,5 +57,9 @@ class BoardConfigHub(Hub):
         return True
 
     def setWeb2boardVersion(self, version):
-        getWeb2boardUpdater().makeAnAuxiliaryCopyAndRunIt(version)
+        getWeb2boardUpdater().downloadVersion(version).get()
+        l = lambda: getWeb2boardUpdater().makeAnAuxiliaryCopyAndRunIt(version)
 
+        result = getMainApp().w2bGui.showConfirmDialog("Testing", "title").get()
+
+        return result

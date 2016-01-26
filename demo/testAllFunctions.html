@@ -15,7 +15,7 @@
 </div>
 <script>
     var hubsApi = new HubsAPI('ws://127.0.0.1:9876/');
-    hubsApi.connect();
+    hubsApi.connect(2);
 
     var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
     var ARGUMENT_NAMES = /([^\s,]+)/g;
