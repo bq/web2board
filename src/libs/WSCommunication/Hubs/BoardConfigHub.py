@@ -1,6 +1,7 @@
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_BOARD_NOT_SUPPORTED
+from libs.Config import Config
 from libs.MainApp import getMainApp
 from libs.Packagers.Packager import Packager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
@@ -51,15 +52,15 @@ class BoardConfigHub(Hub):
 
     def setLibVersion(self, version):
         libUpdater = getBitbloqLibsUpdater()
-        versionInfo = VersionInfo(version, self.BITBLOQ_LIBS_URL_TEMPLATE.format(version))
+        versionInfo = VersionInfo(version, Config.bitbloqLibsDownloadUrlTemplate.format(version=version))
         if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
             libUpdater.update(versionInfo)
-        return True
+        return True  # if return None, client is not informed that the request is done
 
     def setWeb2boardVersion(self, version):
-        getWeb2boardUpdater().downloadVersion(version).get()
-        l = lambda: getWeb2boardUpdater().makeAnAuxiliaryCopyAndRunIt(version)
-
-        result = getMainApp().w2bGui.showConfirmDialog("Testing", "title").get()
-
-        return result
+        gui = getMainApp().w2bGui
+        w2bUpdater = getWeb2boardUpdater()
+        gui.startDownload(version)
+        w2bUpdater.downloadVersion(version, gui.refreshProgressBar, gui.downloadEnded).get()
+        w2bUpdater.makeAnAuxiliaryCopy()
+        w2bUpdater.runAuxiliaryCopy(version)

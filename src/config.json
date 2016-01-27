@@ -1,0 +1,26 @@
+{
+    "bitbloqLibsLibraries": [
+        "BitbloqBatteryReader", 
+        "BitbloqButtonPad", 
+        "BitbloqEnableInterrupt", 
+        "BitbloqEncoder", 
+        "BitbloqHTS221", 
+        "BitbloqJoystick", 
+        "BitbloqLedMatrix", 
+        "BitbloqLineFollower", 
+        "BitbloqLiquidCrystal", 
+        "BitbloqOscillator", 
+        "BitbloqRGB", 
+        "BitbloqRTC", 
+        "BitbloqSoftwareSerial", 
+        "BitbloqUS", 
+        "BitbloqZowi", 
+        "BitbloqZowiSerialCommand"
+    ], 
+    "checkOnlineUpdates": true, 
+    "version": "2.0.1", 
+    "proxy": null, 
+    "bitbloqLibsDownloadUrlTemplate": "https://github.com/bq/bitbloqLibs/archive/v{version}.zip", 
+    "downloadUrlTemplate": "https://github.com/bq/web2board/archive/devel.zip", 
+    "bitbloqLibsVersion": "0.0.5"
+}

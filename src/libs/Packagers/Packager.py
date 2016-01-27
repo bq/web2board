@@ -56,7 +56,7 @@ class Packager:
 
     # todo move this to attribute
     def _getPlatformIOPackagesPath(self):
-        return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_PATH)
+        return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_NAME)
 
     def _prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):

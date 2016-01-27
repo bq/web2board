@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Mon Jan 18 12:31:57 2016
+# Created: Wed Jan 27 09:27:04 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,6 +48,18 @@ class Ui_Web2board(object):
         self.console.setReadOnly(True)
         self.console.setObjectName("console")
         self.verticalLayout_2.addWidget(self.console)
+        self.updateGroupbox = QtGui.QGroupBox(self.centralwidget)
+        self.updateGroupbox.setObjectName("updateGroupbox")
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.updateGroupbox)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.progressBar = QtGui.QProgressBar(self.updateGroupbox)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName("progressBar")
+        self.verticalLayout_3.addWidget(self.progressBar)
+        self.info = QtGui.QLabel(self.updateGroupbox)
+        self.info.setObjectName("info")
+        self.verticalLayout_3.addWidget(self.info)
+        self.verticalLayout_2.addWidget(self.updateGroupbox)
         Web2board.setCentralWidget(self.centralwidget)
         self.statusbar = QtGui.QStatusBar(Web2board)
         self.statusbar.setObjectName("statusbar")
@@ -63,4 +75,6 @@ class Ui_Web2board(object):
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateGroupbox.setTitle(QtGui.QApplication.translate("Web2board", "Downloading", None, QtGui.QApplication.UnicodeUTF8))
+        self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))
 

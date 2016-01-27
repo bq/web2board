@@ -60,7 +60,16 @@ def initLogging(name):
     """
     :rtype: logging.Logger
     """
-    logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))
-    logging.getLogger("ws4py").setLevel(logging.ERROR)
+    if PathsManager.MAIN_PATH == PathsManager.getCopyPathForUpdate():
+        fileh = logging.FileHandler(PathsManager.getCopyPathForUpdate() + os.sep + "info.log", 'a')
+        fileh.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fileh.setFormatter(formatter)
+        log = logging.getLogger()
+        log.addHandler(fileh)
+        log.setLevel(logging.DEBUG)
+    else:
+        logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))
+        logging.getLogger("ws4py").setLevel(logging.ERROR)
 
     return logging.getLogger(name)

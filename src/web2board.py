@@ -23,7 +23,7 @@ log = initLogging(__name__)  # initialized in main
 
 if __name__ == "__main__":
     try:
-        utils.killProcess("web2boardLink")
+        utils.killProcess("web2board")
 
         def closeSigHandler(signal, frame):
             log.warning("closing server")

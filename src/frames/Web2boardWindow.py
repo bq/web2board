@@ -22,7 +22,6 @@ from PySide.QtGui import QMessageBox
 import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.UI_web2board import Ui_Web2board
-from frames.UpdaterDialog import UpdaterDialog
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
@@ -50,6 +49,11 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIconMenu = None
         if libs.MainApp.isTrayIconAvailable():
             self.createTrayIcon()
+        self.ui.updateGroupbox.hide()
+
+        self.__lastCurrentSize = 0
+        self.__lastProgressChecked = None
+        self.__lastVersionDownloaded = ""
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
@@ -193,22 +197,33 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.wsConnectedLabel.setText("Connected")
 
     @InGuiThread()
-    def startUpdaterDialog(self, versionInfo):
-        self.updaterDialog = UpdaterDialog()
-        self.updaterDialog.show()
-        self.updaterDialog.download(versionInfo)
+    def startDownload(self, version):
+        self.__lastVersionDownloaded = version
+        self.ui.updateGroupbox.show()
+        self.ui.info.setText("Starting the download process")
+        self.__lastProgressChecked = time.clock()
 
+    @InGuiThread()
+    def refreshProgressBar(self, current, total, percentage):
+        period = (time.clock() - self.__lastProgressChecked)
+        self.__lastProgressChecked = time.clock()
+        vel = (current - self.__lastCurrentSize) / (period * 1000.0)
+        self.__lastCurrentSize = current
+        if vel != 0:
+            remaining = (long(total) - current) / (vel * 1000.0)
+        else:
+            remaining = "infinite"
+        text = "downloading {0:.1f} Kb/s, {1} of {2}, remaining: {3:.0f} s"
+        self.ui.info.setText(text.format(vel, current, total, remaining))
+        self.ui.progressBar.setValue(int(percentage) + 1)
 
-@asynchronous()
-def onThread(serialMonitor):
-    time.sleep(2)
-    serialMonitor.showBalloonMessage(
-            "Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details.")
-
+    @InGuiThread()
+    def downloadEnded(self, task):
+        self.ui.updateGroupbox.hide()
+        self.ui.progressBar.setValue(0)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     mySW = Web2boardWindow(None)
-    onThread(mySW)
     mySW.show()
     sys.exit(app.exec_())

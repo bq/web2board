@@ -50,6 +50,17 @@ def copytree(src, dst, filter=None, ignore=None, forceCopy=False):
             if forceCopy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
+def rmtree(folder):
+    for the_file in os.listdir(folder):
+        file_path = os.path.join(folder, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except:
+            log.exception("error removing file")
+
 
 def listDirectoriesInPath(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
@@ -137,7 +148,7 @@ def killProcess(name):
     for proc in psutil.process_iter():
         # check whether the process name matches
         try:
-            if proc.name() in [name + getOsExecutableExtension()]:
+            if proc.name() in [name + getOsExecutableExtension()] and proc.pid != os.getpid():
                 print "killing a running web2board application"
                 proc.kill()
         except psutil.ZombieProcess:

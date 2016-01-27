@@ -1,13 +1,19 @@
 import unittest
 
+import sys
+from PySide.QtGui import QApplication
 from wshubsapi.ConnectedClient import ConnectedClient
 from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
 from Test.testingUtils import restoreAllTestResources
+from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader, CompilerException, ERROR_NO_PORT_FOUND
+from libs.Decorators.InGuiThread import Result
+from libs.MainApp import getMainApp
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 from libs.WSCommunication.Hubs.BoardConfigHub import BoardConfigHub, BoardConfigHubException
 
 # do not remove
@@ -15,12 +21,17 @@ import libs.WSCommunication.Hubs
 
 from flexmock import flexmock
 
+try:
+    QApplication(sys.argv)
+except:
+    pass
 
 class TestBoardConfigHub(unittest.TestCase):
 
     def setUp(self):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.libUpdater = getBitbloqLibsUpdater()
+        self.updater = getWeb2boardUpdater()
         self.boardConfigHub = HubsInspector.getHubInstance(BoardConfigHub)
         client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x, lambda x=0: x)
         self.sender = flexmock(isSettingPort=lambda x: x, isSettingBoard=lambda: None)
@@ -28,6 +39,10 @@ class TestBoardConfigHub(unittest.TestCase):
         self.original_compile = self.boardConfigHub.compilerUploader.compile
         self.original_getPort = self.boardConfigHub.compilerUploader.getPort
         self.original_lib_update = self.libUpdater.update
+
+        self.original_updater_downloadVersion = self.updater.downloadVersion
+        self.original_updater_makeAnAuxiliaryCopy = self.updater.makeAnAuxiliaryCopy
+        self.original_updater_runAuxiliaryCopy = self.updater.runAuxiliaryCopy
 
         self.boardConfigHub.compilerUploader = flexmock(self.boardConfigHub.compilerUploader,
                                                         compile=None,
@@ -40,6 +55,11 @@ class TestBoardConfigHub(unittest.TestCase):
         self.boardConfigHub.compilerUploader.compile = self.original_compile
         self.boardConfigHub.compilerUploader.getPort = self.original_compile
         self.libUpdater.update = self.original_lib_update
+
+        self.updater.downloadVersion = self.original_updater_downloadVersion
+        self.updater.makeAnAuxiliaryCopy = self.original_updater_makeAnAuxiliaryCopy
+        self.updater.runAuxiliaryCopy = self.original_updater_runAuxiliaryCopy
+
         removeHubsSubclasses()
 
     def test_construct_getCompilerUploader(self):
@@ -105,4 +125,11 @@ class TestBoardConfigHub(unittest.TestCase):
         self.assertTrue(self.boardConfigHub.setLibVersion(self.testLibVersion))
 
     def test_setWeb2boardVersion_returnsTrue(self):
+        resultObject = Result()
+        resultObject.actionDone()
+        flexmock(self.updater).should_receive("downloadVersion").and_return(resultObject).once()
+        flexmock(self.updater).should_receive("makeAnAuxiliaryCopy").once()
+        flexmock(self.updater).should_receive("runAuxiliaryCopy").once()
+        getMainApp().w2bGui = flexmock(Web2boardWindow())
+
         self.boardConfigHub.setWeb2boardVersion("0.0.1")

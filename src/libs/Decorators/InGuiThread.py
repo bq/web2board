@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import time
@@ -38,6 +39,7 @@ class Result(object):
 
 # todo, override QObject to work with PyQt too
 class InGuiThread(QObject):
+    log = logging.getLogger(__name__)
     mainSignal = Signal(object, object)  # *args,**kwargs
 
     def __init__(self):
@@ -54,6 +56,7 @@ class InGuiThread(QObject):
         try:
             resultObject.result = self.wrappedFunction(*args, **kwargs)
         except Exception as e:
+            self.log.exception("Error in GuiThread")
             resultObject.result = e
         resultObject.actionDone()
 

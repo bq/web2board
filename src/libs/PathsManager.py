@@ -14,9 +14,11 @@ class PathsManager:
 
     EXECUTABLE_PATH = None
     MAIN_PATH = None
-    PLATFORMIO_PACKAGES_PATH = "platformIoPackages"
-    PLATFORMIO_PACKAGES_ZIP_PATH = None
+    PLATFORMIO_PACKAGES_NAME = "platformIoPackages"
+    PLATFORMIO_PACKAGES_PATH = None
     CONFIG_PATH = None
+    COPY_PATH = None
+    ORIGINAL_PATH = None
 
     RES_PATH = None
     RES_ICO_PATH = None
@@ -87,7 +89,7 @@ class PathsManager:
         _pathsLog.debug('Working directory: {}'.format(os.getcwd()))
         items = cls.__dict__.items()
         items = sorted(items, key=lambda x: x[0])
-        for key, path  in items:
+        for key, path in items:
             if "PATH" in key:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
 
@@ -110,6 +112,8 @@ pm = PathsManager
 pm.EXECUTABLE_PATH = os.getcwd()
 pm.MAIN_PATH = pm.getMainPath()
 pm.CONFIG_PATH = os.path.join(pm.MAIN_PATH, 'config.json')
+pm.COPY_PATH = pm.getCopyPathForUpdate()
+pm.ORIGINAL_PATH = pm.getOriginalPathForUpdate()
 
 pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
 pm.RES_ICO_PATH = os.path.join(pm.RES_PATH, 'Web2board.ico')
@@ -124,5 +128,4 @@ pm.PLATFORMIO_WORKSPACE_PATH = os.path.join(pm.RES_PATH, 'platformioWorkSpace')
 pm.TEST_SETTINGS_PATH = os.path.join(pm.RES_PATH, 'TestSettings', 'resources')
 pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()
 
-pm.PLATFORMIO_PACKAGES_ZIP_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_PATH)
-
+pm.PLATFORMIO_PACKAGES_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_NAME)

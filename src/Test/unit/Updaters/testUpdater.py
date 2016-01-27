@@ -6,6 +6,7 @@ import shutil
 from flexmock import flexmock
 
 from Test.testingUtils import restoreAllTestResources
+from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
@@ -68,19 +69,6 @@ class TestUpdater(unittest.TestCase):
     def __getMockForExtractZip(self):
         return flexmock(utils).should_receive("extractZip")
 
-    def test_readCurrentVersionInfo_setsCurrentVersionInfoValues(self):
-        self.updater.readCurrentVersionInfo()
-
-        self.assertEqual("0.0.1", self.updater.currentVersionInfo.version)
-        self.assertTrue(len(self.updater.currentVersionInfo.librariesNames) >= 1)
-
-    def test_readCurrentVersionInfo_returnsNoneVersionIfFileNotFound(self):
-        self.updater.currentVersionInfoPath = "nonExistingPath"
-
-        self.updater.readCurrentVersionInfo()
-
-        self.assertEqual(self.updater.currentVersionInfo.version, self.updater.NONE_VERSION)
-
     def test_downloadOnlineVersionInfo_setsOnlineVersionInfoValues(self):
         self.__getMockForGetDataFromUrl().once()
 
@@ -139,13 +127,12 @@ class TestUpdater(unittest.TestCase):
         self.__getMockForGetDataFromUrl()
         self.__getMockForDownloadFile().once()
         self.__getMockForExtractZip().once()
-        flexmock(json).should_receive("dump").once()
         os.makedirs(self.updater.destinationPath)
         flexmock(utils).should_receive("listDirectoriesInPath").and_return(["l1", "l2"])
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
         self.updater._moveDownloadedToDestinationPath = lambda x: x
-
         onlineVersionInfo = VersionInfo(**onlineVersionTestData)
+
         self.updater.update(onlineVersionInfo)
 
         self.assertEqual(self.updater.currentVersionInfo.librariesNames, ["l1", "l2"])

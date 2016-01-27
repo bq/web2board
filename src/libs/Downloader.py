@@ -17,7 +17,7 @@ class Downloader:
         urllib.urlretrieve(url, dst)
 
     @asynchronous()
-    def download(self, url, dst=None, infoCallback=None, finishCallback=None):
+    def download(self, url, dst=None, infoCallback=None, endCallback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
 
@@ -29,7 +29,7 @@ class Downloader:
                 totalSize = meta.getheaders("Content-Length")[0]
                 break
             except:
-                self.log.error("Unable to get download file info. retraing in 0.5s")
+                self.log.warning("Unable to get download file info. retraing in 0.5s")
                 time.sleep(0.5)
         else:
             raise Exception("Unable to download new version")
@@ -41,6 +41,6 @@ class Downloader:
                     infoCallback(pathSize, totalSize, pathSize * 100.0 / float(totalSize))
                 time.sleep(self.refreshTime)
 
-        if finishCallback is not None:
-            finishCallback(downloadTask.get())
+        if endCallback is not None:
+            endCallback(downloadTask.get())
         return downloadTask.get()

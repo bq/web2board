@@ -18,10 +18,11 @@ from Scripts import afterInstallScript
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
+from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
-from libs.Updaters.Updater import VersionInfo
+from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
 log = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ class MainApp:
                      "error": logging.ERROR, "critical": logging.CRITICAL}
         logging.getLogger().handlers[0].level = logLevels[options.logLevel.lower()]
 
-        if options.afterInstall:
+        if options.afterInstall or os.path.exists(PathsManager.PLATFORMIO_PACKAGES_PATH):
             afterInstallScript.run()
 
         if not os.environ.get("platformioBoard", False):
@@ -81,8 +82,8 @@ class MainApp:
             getCompilerUploader().setBoard(options.board)
 
         if options.update2version is not None:
-            versionInfo = VersionInfo(options.update2version)
-            self.w2bGui.startUpdaterDialog(versionInfo)
+            log.debug("updating version")
+            getWeb2boardUpdater().update(PathsManager.getDstPathForUpdate(options.update2version))
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -140,11 +141,13 @@ class MainApp:
             os._exit(1)
 
     def startMain(self):
+        Config.readConfigFile()
         app = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()
         options = self.handleSystemArguments()
         PathsManager.logRelevantEnvironmentalPaths()
-        self.startServer(options)
+        if options.update2version is None:
+            self.startServer(options)
 
         return app
 

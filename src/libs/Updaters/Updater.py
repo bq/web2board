@@ -28,8 +28,6 @@ class Updater:
     def __init__(self):
         self.currentVersionInfo = None
         """:type : VersionInfo """
-        self.currentVersionInfoPath = None
-        """:type : str """
 
         self.onlineVersionUrl = None
         """:type : str """
@@ -73,8 +71,6 @@ class Updater:
         self.currentVersionInfo.version = versionToUpload.version
         self.currentVersionInfo.file2DownloadUrl = versionToUpload.file2DownloadUrl
         self.currentVersionInfo.librariesNames = utils.listDirectoriesInPath(self.destinationPath)
-        with open(self.currentVersionInfoPath, 'w') as cvpf:
-            json.dump(self.currentVersionInfo.getDictionary(), cvpf, indent=4)
         log.info("Current version updated")
 
     def getVersionNumber(self, versionInfo=None):
@@ -83,23 +79,6 @@ class Updater:
         """
         versionInfo = self.currentVersionInfo if versionInfo is None else versionInfo
         return int(versionInfo.version.replace('.', ''))
-
-    def readCurrentVersionInfo(self):
-        try:
-            if not os.path.exists(self.currentVersionInfoPath):
-                self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
-                logText = "[{0}] Unable to find version in settings path: {1}"
-                log.warning(logText.format(self.name, self.currentVersionInfoPath))
-                return self.currentVersionInfo
-            with open(self.currentVersionInfoPath) as versionFile:
-                jsonVersion = json.load(versionFile)
-            self.currentVersionInfo = VersionInfo(**jsonVersion)
-            log.debug("[{0}] Read current version: {1}".format(self.name, self.currentVersionInfo.version))
-        except:
-            log.error("unable to read currentVersionInfo")
-            self.currentVersionInfo = VersionInfo(self.NONE_VERSION)
-
-        return self.currentVersionInfo
 
     def downloadOnlineVersionInfo(self):
         jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))

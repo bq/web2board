@@ -61,4 +61,4 @@ class TestDownloader(unittest.TestCase):
         flexmock(self).should_receive("__finishCallbackMock").at_least().times(1)
         flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
 
-        self.downloader.download(url, dst, finishCallback=self.__finishCallbackMock).get()
+        self.downloader.download(url, dst, endCallback=self.__finishCallbackMock).get()
