@@ -113,7 +113,7 @@ class Packager:
 
     def _constructWeb2boardExecutable(self):
         log.debug("Creating Web2board Executable")
-        os.system("pyinstaller  -w \"{}\"".format(self.web2boardSpecPath))
+        os.system("pyinstaller \"{}\"".format(self.web2boardSpecPath))
         utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationExecutablesPath)
 
     def _constructSconsExecutable(self):

@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 from copy import deepcopy
 
@@ -20,6 +21,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
         self.original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
         self.original_sleep = time.sleep
         self.original_logCritical = Web2BoardUpdater.log.critical
+        self.original_shutil_copy = shutil.copytree
 
         self.osMock = flexmock(os, popen=lambda x: None)
         restoreAllTestResources()
@@ -27,13 +29,13 @@ class TestWeb2boardUpdater(unittest.TestCase):
     def tearDown(self):
         os.popen = self.original_osPopen
         time.sleep = self.original_sleep
+        shutil.copytree = self.original_shutil_copy
         Web2BoardUpdater.log.critical = self.original_logCritical
         PathsManager.__dict__ = {x: y for x, y in self.original_pathManagerDict.items()}
 
     def __setUpForMakeAuxiliaryCopy(self):
         PathsManager.MAIN_PATH = self.mainPath
         flexmock(PathsManager).should_receive("getCopyPathForUpdate").and_return(self.copyPath).at_least().times(1)
-        flexmock(Web2BoardUpdater.log).should_receive("critical").once()
         time.sleep = lambda x: None
         self.updater = Web2BoardUpdater("readme", "readme_copy")
 
@@ -44,13 +46,6 @@ class TestWeb2boardUpdater(unittest.TestCase):
 
         self.assertTrue(os.path.exists(self.copyPath))
         self.assertTrue(os.path.isfile(self.copyPath + os.sep + "readme_copy"))
-
-    def test_makeAuxiliaryCopy_zipIsNotCopied(self):
-        self.__setUpForMakeAuxiliaryCopy()
-
-        self.updater.makeAnAuxiliaryCopyAndRunIt("0.0.0")
-
-        self.assertFalse(os.path.isfile(self.copyPath + os.sep + "0.zip"))
 
     def test_makeAuxiliaryCopy_runsCopyProgram(self):
         self.__setUpForMakeAuxiliaryCopy()

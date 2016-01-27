@@ -1,5 +1,5 @@
+import json
 import logging
-import os
 
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 
@@ -18,3 +18,10 @@ class WSConnectionHandler(ConnectionHandler):
 
     def closed(self, code, reason=None):
         super(WSConnectionHandler, self).closed(code, reason)
+
+    def received_message(self, message):
+        if message.data == "version":  # bitbloq thinks we are in version 1
+            # send an empty dict to alert bitbloq we are in version 2
+            self._connectedClient.writeMessage(json.dumps(dict()))
+        else:
+            super(WSConnectionHandler, self).received_message(message)

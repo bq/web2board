@@ -69,7 +69,7 @@ class Web2BoardUpdater(Updater):
             self.log.info("Creating an auxiliary copy of the program")
             if os.path.exists(PathsManager.getCopyPathForUpdate()):
                 shutil.rmtree(PathsManager.getCopyPathForUpdate())
-            shutil.copytree("C:\Users\jorgarira\AppData\Roaming\web2board", PathsManager.getCopyPathForUpdate())
+            shutil.copytree(PathsManager.MAIN_PATH, PathsManager.getCopyPathForUpdate())
             os.rename(self.__copyOriginName, self.__copyNewName)
         except Exception:
             self.log.critical("Upload process finished due to a problem in the uploader", exc_info=1)

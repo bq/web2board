@@ -145,7 +145,7 @@ def killProcess(name):
 
 
 def getOsExecutableExtension():
-    if areWeFrozen():
+    if not areWeFrozen():
         return ".py"
     if isMac():
         return ""

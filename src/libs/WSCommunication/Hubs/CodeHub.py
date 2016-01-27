@@ -68,7 +68,7 @@ class CodeHub(Hub):
                 log.exception("unable to terminate process")
 
     def __handleCompileReport(self, compileReport):
-        if compileReport[0]:
+        if compileReport[0] or "Writing | ##" in compileReport[1]["err"]: # second check to prevent problem with bluetooth
             return True
         else:
             return self._constructUnsuccessfulReplay(compileReport[1]["err"])
