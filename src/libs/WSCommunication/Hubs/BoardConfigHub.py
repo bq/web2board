@@ -15,7 +15,6 @@ class BoardConfigHubException(Exception):
 
 
 class BoardConfigHub(Hub):
-    BITBLOQ_LIBS_URL_TEMPLATE = 'https://github.com/bq/bitbloqLibs/archive/v{}.zip'
 
     def __init__(self):
         super(BoardConfigHub, self).__init__()
