@@ -55,6 +55,11 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.__lastProgressChecked = None
         self.__lastVersionDownloaded = ""
 
+        def quit(*args):
+            os._exit(1)
+
+        self.ui.forceClose.clicked.connect(quit)
+
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
         style = dict(fg=None, bg=None, bold="normal", underline="none", msg=record.msg)
@@ -105,7 +110,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.messageClicked.connect(self.show)
         self.trayIcon.show()
 
-        self.ui.forceClose.clicked.connect(lambda *args: os._exit(1))
+
 
     def closeEvent(self, event):
         if libs.MainApp.isTrayIconAvailable():

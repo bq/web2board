@@ -17,10 +17,9 @@ class LinuxPackager(Packager):
 
         self.installerCreationPath = self.web2boardPath + os.sep + "deb_web2board_{}_{}".format(architecture,
                                                                                                 self.version)
-        self.installerCreationPath = os.path.basename(self.installerCreationPath)
-        self.installerCreationName = os.path.join(self.installerCreationPath, "executables")
-        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "opt", "web2board")
+        self.installerCreationName = os.path.basename(self.installerCreationPath)
         self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
+        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "opt", "web2board")
 
         self.pkgPlatformPath = os.path.join(self.pkgPath, "linux")
         self.resPlatformPath = os.path.join(self.resPath, "linux")
@@ -71,6 +70,7 @@ class LinuxPackager(Packager):
         shutil.move(resultingDeb, self.installerPath + os.sep + "web2boar.deb")
 
     def createPackage(self):
+
         try:
             self._createMainStructureAndExecutables()
             log.debug("Adding metadata for installer")
@@ -78,6 +78,8 @@ class LinuxPackager(Packager):
             self._createDesktops()
             os.chdir(self.installerCreationPath)
             log.info("Creating Installer")
+            # shutil.make_archive(self.installerCreationPath, "zip", self.installerCreationPath )
+
             call(["dpkg-deb", "--build", self.installerCreationPath])
             self._moveDebToInstallerPath()
             log.info("installer created successfully")

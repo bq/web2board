@@ -3,8 +3,11 @@
 import os
 import subprocess
 import getpass
-
 import sys
+
+from libs.PathsManager import PathsManager
+from libs.Downloader import Downloader
+from libs import utils
 
 """
 sudo adduser $userName dialout
@@ -28,6 +31,8 @@ print "-----------------------------"
 print "Instalando..."
 print "Installing..."
 
+userName = getpass.getuser()
+
 euid = os.geteuid()
 if euid != 0:
     print "Script not started as root. Running sudo.."
@@ -37,8 +42,13 @@ if euid != 0:
 
 print 'Running. Your euid is', euid
 
-userName = getpass.getuser()
-subprocess.call(["sudo", "adduser", "jorgeportatil", "dialout"])
+# add all users to dialout gourp: awk -F: '$3 > 999 {print $1}' /etc/passwd | xargs -I USERNAME sudo usermod -A dialout USERNAME
+# listing all users
+# import pwd, grp
+# for p in pwd.getpwall():
+#     print p[0], grp.getgrgid(p[3])[0]
+
+subprocess.call(["sudo", "adduser", userName, "dialout"])
 subprocess.call(["sudo", "apt-get", "-y", "install", "gdedbi"])
 subprocess.call(["sudo", "gdebi", "--non-interactive", "web2board.deb"])
 subprocess.call(["sudo", "chown", "-R", userName, "~/Arduino"])
@@ -49,4 +59,8 @@ INSTALACIÓN TERMINADA CORRECTAMENTE. PUEDE CERRAR LA VENTANA
 INSTALLATION SUCCESSFULLY FINISHED. YOU MAY CLOSE THE WINDOW
 REINICIE EL ORDENADOR
 REBOOT THE COMPUTER
---------------------------------------------------\n\n\n""")
+--------------------------------------------------
+
+Presiona intro para terminar
+Press enter to finish
+\n\n\n""")
