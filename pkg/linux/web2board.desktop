@@ -2,9 +2,8 @@
 Type=Application
 Name=web2board
 Comment=web2board
-Icon=/opt/web2board/externalResources/Web2board.ico
+Icon=/opt/web2board/res/Web2board.ico
 Exec=/opt/web2board/web2board
-Path=/usr/lib/python2.7/dist-packages/web2board/
 StartupNotify=true
 Terminal=false
 Categories=GNOME;GTK;Utility;

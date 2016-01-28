@@ -58,7 +58,7 @@ class Packager:
     def _getPlatformIOPackagesPath(self):
         return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_NAME)
 
-    def _prepareResFolderForExecutable(self):
+    def prepareResFolderForExecutable(self):
         if os.path.exists(self.srcResPath):
             shutil.rmtree(self.srcResPath)
         os.makedirs(self.srcResPath)
@@ -180,7 +180,7 @@ class Packager:
 
     def _createMainStructureAndExecutables(self):
         if self.version == Web2BoardUpdater.NONE_VERSION:
-            self._prepareResFolderForExecutable()
+            self.prepareResFolderForExecutable()
             self.__init__()
             return self._createMainStructureAndExecutables()
 
@@ -188,8 +188,6 @@ class Packager:
         self._clearMainFolders()
         log.debug("Creating main folders")
         self._makeMainDirs()
-        log.debug("Adding resources for executable")
-        self._prepareResFolderForExecutable()
         log.info("Constructing executable")
         self._constructAndMoveExecutable()
 
