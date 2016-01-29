@@ -74,7 +74,7 @@ class LinuxInstallerWindow(QtGui.QMainWindow):
         if not os.path.exists(self.installationPath):
             os.makedirs(self.installationPath)
 
-        utils.extractZip(PathsManager.RES_PATH + os.sep + "web2board.zip", self.installationPath)
+        utils.extractZip(PathsManager.MAIN_PATH + os.sep + "web2board.zip", self.installationPath)
 
     @asynchronous()
     def installWeb2board(self):
