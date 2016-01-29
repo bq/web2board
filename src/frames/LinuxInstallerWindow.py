@@ -83,6 +83,7 @@ class LinuxInstallerWindow(QtGui.QMainWindow):
             self.extractWeb2board()
             self.ui.progressBar.setValue(90)
             time.sleep(0.5)  # wait a little bit for user experience
+            subprocess.call(["sudo", "chmod", "-R", "+rwxrwxrwx", self.installationPath])
             self.installationCompleted()
         except:
             self.log.exception("failed installing web2board")
