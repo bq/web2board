@@ -149,9 +149,8 @@ class CompilerUploader:
                     self.lastPortUsed = port
                     return port
 
-
     def getAvailablePorts(self):
-        portsToUpload = utils.listSerialPorts()
+        portsToUpload = utils.listSerialPorts(lambda x: x[2] != "n/a")
         availablePorts = map(lambda x: x[0], portsToUpload)
         return sorted(availablePorts, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 

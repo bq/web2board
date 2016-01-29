@@ -23,6 +23,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 a.datas += utils.findFilesForPyInstaller(".", "*.zip")
+a.datas += utils.findFilesForPyInstaller("res", "logging.json")
 
 print a.datas
 

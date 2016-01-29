@@ -3,14 +3,13 @@ from datetime import datetime
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
 
-import threading
-
 log = logging.getLogger(__name__)
 __executor = ThreadPoolExecutor(max_workers=10)
 
 
 class AsynchronousNotDone(Exception):
     pass
+
 
 # todo, return a Future object and not a Result
 class Result(object):
@@ -32,8 +31,8 @@ class Result(object):
             self.result = self.future.result(joinTimeout)
         return self.future.result(joinTimeout)
 
-def asynchronous(daemon=True):
 
+def asynchronous(daemon=True):
     def realWrapper(fun):
         def overFunction(*args, **kwargs):
             func = kwargs.pop("__func__")
