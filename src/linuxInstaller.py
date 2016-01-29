@@ -4,55 +4,85 @@ import os
 import subprocess
 import getpass
 import sys
+import click
+import pwd
 
+import time
+
+from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 from libs.Downloader import Downloader
 from libs import utils
 
-"""
-sudo adduser $userName dialout
-sudo apt-get -y install gdebi
-read name
-sudo gdebi --non-interactive web2board.deb
-read name
-echo $ "\n\n\n-------------------------------------------------- "
-echo  "INSTALACIÓN TERMINADA. PUEDE CERRAR LA VENTANA "
-echo  "INSTALLATION FINISHED. YOU MAY CLOSE THE WINDOW "
-echo  "REINICIE EL ORDENADOR "
-echo  "REBOOT THE COMPUTER "
-echo $ "--------------------------------------------------\n\n\n "
-sudo chown -R $userName ~/Arduino && read name'
-"""
-
-print "-----------------------------"
-print "INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR "
-print "INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\n\n\n"
-print "-----------------------------"
-print "Instalando..."
-print "Installing..."
+print """
+-----------------------------
+INSTALANDO WEB2BOARD PARA BITBLOQ. NO CERRAR
+INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE\n\n\n
+-----------------------------
+Instalando...
+Installing..."""
 
 userName = getpass.getuser()
+downloadInfo = dict(currentSize=0, speed=0, totalSize=0, finished=False)
+installationPath = "/opt/web2board"
 
-euid = os.geteuid()
-if euid != 0:
-    print "Script not started as root. Running sudo.."
-    args = ['sudo', sys.executable] + sys.argv + [os.environ]
-    # the next line replaces the currently-running process with the sudo
-    os.execlpe('sudo', *args)
 
-print 'Running. Your euid is', euid
+def askForSudo():
+    global euid
+    euid = os.geteuid()
+    if euid != 0:
+        print "Script not started as root. Running sudo.."
+        args = ['sudo', sys.executable] + sys.argv + [os.environ]
+        # the next line replaces the currently-running process with the sudo
+        os.execlpe('sudo', *args)
 
-# add all users to dialout gourp: awk -F: '$3 > 999 {print $1}' /etc/passwd | xargs -I USERNAME sudo usermod -A dialout USERNAME
-# listing all users
-# import pwd, grp
-# for p in pwd.getpwall():
-#     print p[0], grp.getgrgid(p[3])[0]
 
-subprocess.call(["sudo", "adduser", userName, "dialout"])
-subprocess.call(["sudo", "apt-get", "-y", "install", "gdedbi"])
-subprocess.call(["sudo", "gdebi", "--non-interactive", "web2board.deb"])
-subprocess.call(["sudo", "chown", "-R", userName, "~/Arduino"])
+def addAllUsersToDialOut():
+    allUsers = [p[0] for p in pwd.getpwall()]
+    for user in allUsers:
+        subprocess.call(["sudo", "adduser", user, "dialout"])
 
+
+def downloadVersion():
+    downloader = Downloader()
+    showDownloadProgressBar()
+    downloader.download("https://github.com/bq/web2board/archive/v1.0.0.zip",
+                        infoCallback=updateDownloadInfo,
+                        endCallback=setDownloadFinished).get()
+
+
+@asynchronous()
+def showDownloadProgressBar():
+    global downloadInfo
+    while downloadInfo["totalSize"] == 0:
+        time.sleep(0.1)
+    with click.progressbar(length=downloadInfo["totalSize"], label="Downloading") as bar:
+        lastCurrent = 0
+        while not downloadInfo["finished"]:
+            bar.update(downloadInfo["currentSize"] - lastCurrent)
+            lastCurrent = downloadInfo["currentSize"]
+            time.sleep(0.5)
+
+
+def updateDownloadInfo(currentSize, totalSize, percent):
+    downloadInfo["totalSize"] = totalSize
+    downloadInfo["currentSize"] = currentSize
+
+
+def setDownloadFinished(*args):
+    downloadInfo["finished"] = True
+
+askForSudo()
+# addAllUsersToDialOut()
+
+# downloadVersion()
+
+if not os.path.exists(installationPath):
+    os.makedirs(installationPath)
+
+utils.extractZip(PathsManager.RES_PATH + os.sep + "web2board.zip", installationPath)
+
+subprocess.call(["sudo", "chmod", "-R", "+rwxrwxrwx",  installationPath])
 raw_input("""
 --------------------------------------------------
 INSTALACIÓN TERMINADA CORRECTAMENTE. PUEDE CERRAR LA VENTANA

@@ -2,6 +2,7 @@ from subprocess import call
 
 from libs.Packagers.Packager import Packager
 from libs.utils import *
+from os.path import join
 
 
 class LinuxPackager(Packager):
@@ -15,22 +16,22 @@ class LinuxPackager(Packager):
         self.architecture = architecture
         self.installerPath = self.installerFolder + os.sep + "debian_{}".format(architecture)
 
-        self.installerCreationPath = self.web2boardPath + os.sep + "deb_web2board_{}_{}".format(architecture,
-                                                                                                self.version)
+        self.installerCreationPath = join(self.web2boardPath, "deb_web2board_{}_{}".format(architecture, self.version))
         self.installerCreationName = os.path.basename(self.installerCreationPath)
-        self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
-        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "opt", "web2board")
+        self.installerCreationExecutablesPath = join(self.installerCreationPath, "executables")
+        self.installerCreationDistPath = join(self.installerCreationPath, "web2board")
 
-        self.pkgPlatformPath = os.path.join(self.pkgPath, "linux")
-        self.resPlatformPath = os.path.join(self.resPath, "linux")
+        self.pkgPlatformPath = join(self.pkgPath, "linux")
+        self.resPlatformPath = join(self.resPath, "linux")
         self.web2boardExecutableName = "web2board"
-        self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-linux.spec")
+        self.web2boardSpecPath = join(self.web2boardPath, "web2board-linux.spec")
         self.sconsExecutableName = "sconsScript"
-        self.sconsSpecPath = os.path.join(self.web2boardPath, "scons-linux.spec")
+        self.sconsSpecPath = join(self.web2boardPath, "scons-linux.spec")
+        self.installerSpecPath = join(self.web2boardPath, "linuxInstaller.spec")
 
-        self.packageDebianMetadataPath = os.path.join(self.installerCreationPath, "DEBIAN")
-        self.debDistPath = os.path.join(self.installerPath, "deb_dist")
-        self.debianMetadataPath = os.path.join(self.pkgPlatformPath, "debian")
+        self.packageDebianMetadataPath = join(self.installerCreationPath, "DEBIAN")
+        self.debDistPath = join(self.installerPath, "deb_dist")
+        self.debianMetadataPath = join(self.pkgPlatformPath, "debian")
         with open(self.packagerResPath + os.sep + "Web2Board-template.desktop") as desktopFile:
             self.Web2BoardDesktopTemplate = desktopFile.read()
 
@@ -39,50 +40,23 @@ class LinuxPackager(Packager):
         os.makedirs(self.debDistPath)
 
     def _addMetadataForInstaller(self):
-        Packager._addMetadataForInstaller(self)
-        copytree(self.debianMetadataPath, self.packageDebianMetadataPath)
-        with open(self.packageDebianMetadataPath + os.sep + "control", "r") as controlFile:
-            controlText = controlFile.read()
-        with open(self.packageDebianMetadataPath + os.sep + "control", "w") as controlFile:
-            controlFile.write(controlText.format(version=self.version, architecture=self.architecture))
+        os.system("pyinstaller \"{0}\" -F --distpath {1}".format(self.installerSpecPath, self.installerCreationPath))
 
-        os.chmod(self.debianMetadataPath + os.sep + "postinst", int("775", 8))
-        os.chmod(self.debianMetadataPath + os.sep + "postrm", int("775", 8))
-
-    def _createDesktops(self):
-        tarTypePathTemplate = self.debDistPath + os.sep + "{desktopName}.tar.gz"
-        desktopPath = self.debDistPath + os.sep + "Web2board.desktop"
-        currentDirectory = os.getcwd()
-        try:
-            os.chdir(self.debDistPath)
-            for releaseType in self.RELEASE_TYPES:
-                tarPath = tarTypePathTemplate.format(**releaseType)
-                with open(desktopPath, "w") as desktopFile:
-                    desktopFile.write(self.Web2BoardDesktopTemplate.format(**releaseType))
-                call(["tar", "-czpf", tarPath, os.path.basename(desktopPath)])
-
-            os.remove(desktopPath)
-        finally:
-            os.chdir(currentDirectory)
-
-    def _moveDebToInstallerPath(self):
-        resultingDeb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
-        shutil.move(resultingDeb, self.installerPath + os.sep + "web2boar.deb")
+    def _clearBuildFiles(self):
+        Packager._clearBuildFiles(self)
+        if os.path.exists(self.srcPath + os.sep + "web2board.zip"):
+            os.remove(self.srcPath + os.sep + "web2board.zip")
 
     def createPackage(self):
-
         try:
             self._createMainStructureAndExecutables()
             log.debug("Adding metadata for installer")
-            self._addMetadataForInstaller()
-            self._createDesktops()
-            os.chdir(self.installerCreationPath)
             log.info("Creating Installer")
-            # shutil.make_archive(self.installerCreationPath, "zip", self.installerCreationPath )
+            shutil.make_archive(self.installerCreationDistPath, "zip", self.installerCreationPath)
+            shutil.rmtree(self.installerCreationDistPath)
+            shutil.copy(self.installerCreationDistPath + ".zip", self.srcPath + os.sep + "web2board.zip")
+            self._addMetadataForInstaller()
 
-            call(["dpkg-deb", "--build", self.installerCreationPath])
-            self._moveDebToInstallerPath()
-            log.info("installer created successfully")
         finally:
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)

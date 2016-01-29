@@ -110,8 +110,6 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.messageClicked.connect(self.show)
         self.trayIcon.show()
 
-
-
     def closeEvent(self, event):
         if libs.MainApp.isTrayIconAvailable():
             self.hide()

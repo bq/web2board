@@ -26,13 +26,13 @@ class Downloader:
             try:
                 site = urllib.urlopen(url)
                 meta = site.info()
-                totalSize = meta.getheaders("Content-Length")[0]
+                totalSize = int(meta.getheaders("Content-Length")[0])
                 break
             except:
                 self.log.warning("Unable to get download file info. retraing in 0.5s")
                 time.sleep(0.5)
         else:
-            raise Exception("Unable to download new version")
+            raise Exception("Unable to download file")
 
         while not downloadTask.isDone():
             if os.path.exists(dst):

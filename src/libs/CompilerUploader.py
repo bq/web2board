@@ -86,7 +86,7 @@ class CompilerUploader:
 
         cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
-        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        p = subprocess.Popen(cmd, shell=utils.isWindows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              close_fds=(not utils.isWindows()))
         output = p.stdout.read()
@@ -140,15 +140,18 @@ class CompilerUploader:
             portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
 
         watchdog = datetime.now()
-        while datetime.now() - watchdog < timedelta(seconds=30):
+        while datetime.now() - watchdog < timedelta(seconds=30) and len(portResultHashMap) > 0:
             for port, resultObject in portResultHashMap.items():
+                if resultObject.isDone():
+                    portResultHashMap.pop(port)
                 if resultObject.isDone() and resultObject.get():
                     log.info("Found board port: {}".format(port))
                     self.lastPortUsed = port
                     return port
 
+
     def getAvailablePorts(self):
-        portsToUpload = utils.listSerialPorts(lambda x: "Bluetooth" not in x[0])
+        portsToUpload = utils.listSerialPorts()
         availablePorts = map(lambda x: x[0], portsToUpload)
         return sorted(availablePorts, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 

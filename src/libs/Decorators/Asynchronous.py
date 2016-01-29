@@ -1,67 +1,54 @@
 import logging
 from datetime import datetime
 from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 import threading
 
 log = logging.getLogger(__name__)
+__executor = ThreadPoolExecutor(max_workers=10)
 
 
 class AsynchronousNotDone(Exception):
     pass
 
-
+# todo, return a Future object and not a Result
 class Result(object):
-    def __init__(self, thread):
+    def __init__(self, future):
         """
         @type thread: Thread
         """
         self.result = None
-        self.thread = thread
+        self.future = future
+        """:type: concurrent.futures._base.Future"""
         self.startTime = datetime.now()
 
     def isDone(self):
-        return not self.thread.isAlive()
+        return self.future.done()
 
-    def get(self, joinIfNecessary=True, joinTimeout=None):
-        if not self.isDone():
-            if joinIfNecessary:
-                if joinTimeout is not None:
-                    joinTimeout = max([0, joinTimeout - (datetime.now() - self.startTime).seconds])
-                self.thread.join(joinTimeout)
-            else:
-                raise AsynchronousNotDone("Asynchronous not done yet")
-        if isinstance(self.result, Exception):
-            raise self.result
-        return self.result
+    def get(self, joinTimeout=None):
+        if joinTimeout is not None:
+            joinTimeout = max([0, joinTimeout - (datetime.now() - self.startTime).seconds])
+            self.result = self.future.result(joinTimeout)
+        return self.future.result(joinTimeout)
 
-
-def asynchronous(callback=None, callbackArgs=(), callbackKwargs=None, daemon=True):
-    if callbackKwargs is None:
-        callbackKwargs = {}
+def asynchronous(daemon=True):
 
     def realWrapper(fun):
         def overFunction(*args, **kwargs):
             func = kwargs.pop("__func__")
-            resultObject = kwargs.pop("__ResultObject__")
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
                 log.exception("Error in asynchronous task")
                 result = e
-            resultObject.result = result
-            if callback is not None:
-                callback(result, *callbackArgs, **callbackKwargs)
+            return result
 
         def wrapper(*args, **kwargs):
             kwargs.update({"__func__": fun})
-            _mainThread = threading.Thread(target=overFunction, args=args, kwargs=kwargs)
-            _mainThread.setDaemon(daemon)
-            resultObject = Result(_mainThread)
-            _mainThread.functionsArgs = args
+            future = __executor.submit(overFunction, *args, **kwargs)
+            resultObject = Result(future)
             kwargs.update({"__ResultObject__": resultObject})
-            _mainThread.functionKwargs = kwargs
-            _mainThread.start()
             return resultObject
 
         return wrapper
