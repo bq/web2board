@@ -44,6 +44,7 @@ class LinuxInstallerWindow(QtGui.QMainWindow):
         flags |= QtGui.QMessageBox.StandardButton.No
         self.log = None
         self.startLogger()
+        self.askForSudo()
 
     def startLogger(self):
         fileHandler = logging.FileHandler(PathsManager.EXECUTABLE_PATH + os.sep + "error.log", 'a')
@@ -58,9 +59,9 @@ class LinuxInstallerWindow(QtGui.QMainWindow):
         euid = os.geteuid()
         if euid != 0:
             print "Script not started as root. Running sudo.."
-            args = ['sudo', sys.executable] + sys.argv + [os.environ]
+            args = ['gksudo', sys.executable] + sys.argv + [os.environ]
             # the next line replaces the currently-running process with the sudo
-            os.execlpe('sudo', *args)
+            os.execlpe('gksudo', *args)
 
     def addAllUsersToDialOut(self):
         self.notifyAllUsersInDialOut()
@@ -78,7 +79,6 @@ class LinuxInstallerWindow(QtGui.QMainWindow):
     @asynchronous()
     def installWeb2board(self):
         try:
-            self.askForSudo()
             self.addAllUsersToDialOut()
             self.extractWeb2board()
             self.ui.progressBar.setValue(90)
