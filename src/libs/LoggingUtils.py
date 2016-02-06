@@ -23,9 +23,9 @@ class ColoredConsoleHandler(logging.StreamHandler):
 
     def emit(self, record):
         module = importlib.import_module("libs.MainApp")
-        # Need to make a actual copy of the record
-        # to prevent altering the message for other loggers
 
+        # Need to make an actual copy of the record
+        # to prevent altering the message for other loggers
         myRecord = copy.copy(record)
         try:
             self.format(myRecord)
@@ -40,7 +40,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
                 except:
                     myRecord.msg = "Unable to format record"
 
-        super(ColoredConsoleHandler, self).emit(record)
+        super(ColoredConsoleHandler, self).emit(myRecord)
 
         gui = module.getMainApp().w2bGui
         if gui is not None:

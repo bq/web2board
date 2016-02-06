@@ -2,11 +2,9 @@ import logging
 import os
 
 from wshubsapi.Hub import Hub, UnsuccessfulReplay
-from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import getCompilerUploader, CompilerException
 from libs.PathsManager import PathsManager
-from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +54,15 @@ class CodeHub(Hub):
 
         compileReport = self.compilerUploader.uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)
         return self.__handleCompileReport(compileReport)
+
+    def uploadHexFile(self, hexFilePath, board, _sender):
+        """
+        :type hexFilePath: str
+        :type _sender: ConnectedClientsGroup
+        """
+        with open(hexFilePath) as hexFile:
+            hexText = hexFile.read()
+        self.uploadHex(hexText, board, _sender)
 
     @staticmethod
     def tryToTerminateSerialCommProcess():

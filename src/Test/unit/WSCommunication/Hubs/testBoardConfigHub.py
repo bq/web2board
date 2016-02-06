@@ -33,7 +33,7 @@ class TestBoardConfigHub(unittest.TestCase):
         self.libUpdater = getBitbloqLibsUpdater()
         self.updater = getWeb2boardUpdater()
         self.boardConfigHub = HubsInspector.getHubInstance(BoardConfigHub)
-        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x, lambda x=0: x)
+        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
         self.sender = flexmock(isSettingPort=lambda x: x, isSettingBoard=lambda: None)
 
         self.original_compile = self.boardConfigHub.compilerUploader.compile

@@ -16,9 +16,9 @@ def run():
     log.info("running afterInstallScript")
     log.info("adding settings files...")
     if not os.path.exists(PathsManager.PLATFORMIO_PACKAGES_PATH):
-        log.warning("No platformio packages zip found. (ignored)")
+        log.warning("No platformio packages found. (ignored)")
     else:
-        log.info("extracting platformIO packages...")
+        log.info("moving platformIO packages...")
         utils.copytree(PathsManager.PLATFORMIO_PACKAGES_PATH, util.get_home_dir(), forceCopy=True)
 
     log.info("Removing platformioPackages")

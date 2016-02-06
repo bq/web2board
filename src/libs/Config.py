@@ -10,6 +10,8 @@ my_lock = Lock()
 
 class Config:
     _log = logging.getLogger(__name__)
+    webSocketIP = "localhost"
+    webSocketPort = 9876
     proxy = None
     version = "2.0.1"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
@@ -34,6 +36,8 @@ class Config:
     ]
     bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     checkOnlineUpdates = True
+    logLevel = logging.INFO
+    pluginsPath = PathsManager.MAIN_PATH + os.sep + "plugins"
 
     @classmethod
     def readConfigFile(cls):

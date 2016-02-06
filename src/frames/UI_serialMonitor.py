@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\UI_serialMonitor.ui'
 #
-# Created: Sun Jan 17 12:54:13 2016
+# Created: Thu Feb 04 12:49:02 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,6 +42,8 @@ class Ui_SerialMonitor(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
         self.comboBox = QtGui.QComboBox(SerialMonitor)
+        self.comboBox.setMaxVisibleItems(20)
+        self.comboBox.setSizeAdjustPolicy(QtGui.QComboBox.AdjustToContents)
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
@@ -59,6 +61,7 @@ class Ui_SerialMonitor(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
 
         self.retranslateUi(SerialMonitor)
+        self.comboBox.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(SerialMonitor)
 
     def retranslateUi(self, SerialMonitor):

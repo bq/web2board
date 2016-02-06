@@ -21,7 +21,6 @@ class Web2BoardUpdater(Updater):
     def __init__(self, copyOriginName=None, copyNewName=None):
         Updater.__init__(self)
         self.currentVersionInfo = VersionInfo(Config.version)
-        self.onlineVersionUrl = "https://raw.githubusercontent.com/bq/web2board/devel/res/common/web2board.version"  # todo: recheck this
         self.destinationPath = pm.ORIGINAL_PATH
         self.name = "Web2BoardUpdater"
 

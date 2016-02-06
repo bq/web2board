@@ -21,6 +21,7 @@ from PySide.QtGui import QMessageBox
 
 import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
+from frames.SettingsDialog import SettingsDialog
 from frames.UI_web2board import Ui_Web2board
 from libs.CompilerUploader import getCompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
@@ -40,10 +41,11 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.availablePorts = []
         self.autoPort = None
-        self.ui.searchPorts.clicked.connect(self.onSearchPorts)
+
         self.compileUpdater = getCompilerUploader()
         self.serialMonitor = None
         self.updaterDialog = None
+        self.settingsDialog = SettingsDialog(self)
 
         self.trayIcon = None
         self.trayIconMenu = None
@@ -59,6 +61,9 @@ class Web2boardWindow(QtGui.QMainWindow):
             os._exit(1)
 
         self.ui.forceClose.clicked.connect(quit)
+        self.ui.searchPorts.clicked.connect(self.onSearchPorts)
+        self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
+        self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
@@ -174,7 +179,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.searchPorts.setEnabled(True)
 
     @InGuiThread()
-    def startSerialMonitorApp(self, port):
+    def startSerialMonitorApp(self, port=None):
         self.serialMonitor = SerialMonitorDialog(None, port)
         self.serialMonitor.show()
         self.serialMonitor.raise_()
@@ -197,7 +202,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def changeConnectedStatus(self):
-        self.ui.wsConnectedLabel.setText("Connected")
+        self.ui.actionConnected.setChecked(True)
 
     @InGuiThread()
     def startDownload(self, version):
@@ -224,6 +229,7 @@ class Web2boardWindow(QtGui.QMainWindow):
     def downloadEnded(self, task):
         self.ui.updateGroupbox.hide()
         self.ui.progressBar.setValue(0)
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

@@ -78,6 +78,15 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <widget class="QComboBox" name="comboBox">
+         <property name="currentIndex">
+          <number>4</number>
+         </property>
+         <property name="maxVisibleItems">
+          <number>20</number>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QComboBox::AdjustToContents</enum>
+         </property>
          <item>
           <property name="text">
            <string>300</string>

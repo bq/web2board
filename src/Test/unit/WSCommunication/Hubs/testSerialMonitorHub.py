@@ -25,7 +25,7 @@ class TestSerialMonitorHub(unittest.TestCase):
         global subprocess
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.serialMonitorHub = HubsInspector.getHubInstance(SerialMonitorHub)
-        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x, lambda x=0: x)
+        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
         self.sender = flexmock(isCompiling=lambda: None, isUploading=lambda x: None)
 
         self.original_compile = self.serialMonitorHub.compilerUploader.compile
@@ -51,7 +51,6 @@ class TestSerialMonitorHub(unittest.TestCase):
 
     def test_construct_getCompilerUploader(self):
         self.assertIsInstance(self.serialMonitorHub.compilerUploader, CompilerUploader)
-        self.assertIsNone(self.serialMonitorHub.serialCommunicationProcess)
 
     def test_startApp_callsStartsSerialMonitorApp(self):
         mainApp = getMainApp()
