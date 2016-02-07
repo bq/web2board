@@ -53,16 +53,15 @@ class MainApp:
 
     def handleSystemArguments(self):
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
-        parser.add_option("--host", default='', type='string', action="store", dest="host", help="hostname (localhost)")
-        parser.add_option("--port", default=9876, type='int', action="store", dest="port", help="port (9876)")
-        parser.add_option("--example", default='echo', type='string', action="store", dest="example", help="echo, chat")
+        parser.add_option("--host", default=Config.webSocketIP, type='string', action="store", dest="host", help="hostname (localhost)")
+        parser.add_option("--port", default=Config.webSocketPort, type='int', action="store", dest="port", help="port (9876)")
         parser.add_option("--test", default='none', type='string', action="store", dest="testing",
                           help="options: [none, unit, integration, all]")
         parser.add_option("--afterInstall", default=False, action="store_true", dest="afterInstall",
                           help="setup packages and folder structure")
         parser.add_option("--board", default="uno", type='string', action="store", dest="board",
                           help="board connected for integration tests")
-        parser.add_option("--logLevel", default="info", type='string', action="store", dest="logLevel",
+        parser.add_option("--logLevel", default=Config.logLevel, type='string', action="store", dest="logLevel",
                           help="show more or less info, options[debug, info, warning, error, critical")
         parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
                           help="auto update to version")
@@ -72,7 +71,9 @@ class MainApp:
 
         logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
                      "error": logging.ERROR, "critical": logging.CRITICAL}
-        logging.getLogger().handlers[0].level = logLevels[options.logLevel.lower()]
+
+        logLevel = options.logLevel if isinstance(options.logLevel, int) else logLevels[options.logLevel.lower()]
+        logging.getLogger().handlers[0].level = logLevel
 
         if options.afterInstall or os.path.exists(PathsManager.PLATFORMIO_PACKAGES_PATH):
             afterInstallScript.run()
@@ -95,6 +96,7 @@ class MainApp:
         # do not call this line in executable
         if not utils.areWeFrozen():
             HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
+            HubsInspector.constructPythonFile(path="libs/WSCommunication/Clients")
         self.w2bServer = make_server(options.host, options.port, server_class=WSGIServer,
                                      handler_class=WebSocketWSGIRequestHandler,
                                      app=WebSocketWSGIApplication(handler_cls=WSConnectionHandler))

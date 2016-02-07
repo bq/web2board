@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>838</width>
-    <height>431</height>
+    <width>942</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,26 +26,6 @@
          <iconset theme="warning">
           <normaloff/>
          </iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="wsConnectedLabel">
-        <property name="text">
-         <string>Not connected</string>
         </property>
        </widget>
       </item>
@@ -126,6 +106,61 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>942</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuTest">
+    <property name="title">
+     <string>Actions</string>
+    </property>
+    <widget class="QMenu" name="menuPlugins">
+     <property name="title">
+      <string>Plugins</string>
+     </property>
+     <addaction name="actionSerialMonitor"/>
+    </widget>
+    <addaction name="actionSettings"/>
+    <addaction name="actionConnected"/>
+    <addaction name="separator"/>
+    <addaction name="menuPlugins"/>
+   </widget>
+   <addaction name="menuTest"/>
+  </widget>
+  <action name="actionConnected">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Connected</string>
+   </property>
+   <property name="toolTip">
+    <string>Show if bitbloq is connected</string>
+   </property>
+  </action>
+  <action name="actionPlugins">
+   <property name="text">
+    <string>Plugins</string>
+   </property>
+  </action>
+  <action name="actionSerialMonitor">
+   <property name="text">
+    <string>SerialMonitor</string>
+   </property>
+   <property name="toolTip">
+    <string>Serial monitor</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

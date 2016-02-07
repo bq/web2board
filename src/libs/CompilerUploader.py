@@ -84,6 +84,7 @@ class CompilerUploader:
         else:
             raise Exception("Platform not supported")
 
+        os.chmod(avrExePath, int("755", 8)) # force to have executable rights in avrdude
         cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
         p = subprocess.Popen(cmd, shell=utils.isWindows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,

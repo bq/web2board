@@ -10,7 +10,7 @@ log.addHandler(logging.NullHandler())
 class WSConnectionHandler(ConnectionHandler):
     def opened(self, *args):
         from libs.MainApp import getMainApp
-        self._connectedClient = self.commEnvironment.constructConnectedClient(self.writeMessage, self.close)
+        self._connectedClient = self.commEnvironment.constructConnectedClient(self.writeMessage)
         clientId = "Bitbloq"
         self.ID = self._connectedClient.onOpen(clientId)
         log.debug("open new connection with ID: %s " % str(self.ID))

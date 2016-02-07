@@ -3,7 +3,6 @@ from wshubsapi.Hub import Hub
 from libs.CompilerUploader import getCompilerUploader, CompilerException, ERROR_BOARD_NOT_SUPPORTED
 from libs.Config import Config
 from libs.MainApp import getMainApp
-from libs.Packagers.Packager import Packager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
@@ -22,7 +21,7 @@ class BoardConfigHub(Hub):
 
     def getVersion(self):
         # todo: check in bitbloq if this is what we want
-        return Packager().version
+        return Config.version
 
     def setBoard(self, board, _sender):
         """

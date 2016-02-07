@@ -7,6 +7,7 @@ import click
 from PySide.QtGui import QApplication
 from flexmock import flexmock
 
+from Test.testingUtils import restoreAllTestResources
 from libs.CompilerUploader import CompilerUploader, CompilerException
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
@@ -55,6 +56,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.compiler.board = None
 
         self.original_searchPorts = self.compiler._searchBoardPort
+        restoreAllTestResources()
 
     def tearDown(self):
         self.compiler._searchBoardPort = self.original_searchPorts

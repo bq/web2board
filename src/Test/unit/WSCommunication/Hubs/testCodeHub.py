@@ -19,7 +19,7 @@ class TestCodeHub(unittest.TestCase):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         self.codeHub = HubsInspector.getHubInstance(CodeHub)
-        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x, lambda x=0: x)
+        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
         self.sender = flexmock(isCompiling=lambda: None, isUploading=lambda x: None)
 
         self.original_compile = self.codeHub.compilerUploader.compile

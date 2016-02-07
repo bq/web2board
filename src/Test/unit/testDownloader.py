@@ -1,7 +1,7 @@
 import time
 import unittest
 import urllib
-from flexmock import flexmock
+from flexmock import flexmock, flexmock_teardown
 
 from libs.Downloader import Downloader
 
@@ -48,7 +48,7 @@ class TestDownloader(unittest.TestCase):
         urllib.urlretrieve = __waitingFunction
         self.urlopenMock.once()
         flexmock(self).should_call("__infoCallbackMock") \
-            .with_args(long, 1000, float).at_least().times(1)
+            .with_args(object, 1000, float).at_least().times(1)
         flexmock(urllib).should_call("urlretrieve").with_args(url, dst).once()
 
         self.downloader.download(url, dst, infoCallback=self.__infoCallbackMock).get()

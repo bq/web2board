@@ -10,7 +10,7 @@ pathEx = os.getcwd()
 
 a = Analysis([os.path.join(os.getcwd(), PathsManager.RES_PATH, 'sconsScript.py')],
              pathex=[pathEx],
-             hiddenimports=['UserList', 'UserString', 'ConfigParser'],
+             hiddenimports=['UserList', 'UserString', 'ConfigParser', 'json'],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)

@@ -1,72 +1,74 @@
-#!/bin/bash
- 
-set -e
+#!/usr/bin/env python
+# coding=utf-8
+import os
+import subprocess
+import pwd
+import logging
+from os.path import expanduser
 
 
+def startLogger():
 
-################# REGISTER #################
-# echo $USERNAME
-# sudo adduser $USERNAME dialout
+        if os.geteuid() != 0:
+            fileHandler = logging.FileHandler("installer.log", 'a')
+        else:
+            fileHandler = logging.FileHandler("/opt/web2board/installer.log", 'a')
+        fileHandler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fileHandler.setFormatter(formatter)
+        log = logging.getLogger()
+        log.addHandler(fileHandler)
+        log.setLevel(logging.DEBUG)
+        return logging.getLogger(__name__)
 
-#Create route if it does not exist previously 
-mkdir -p ~/.local/share/applications/
+def addAllUsersToDialOut():
+    allUsers = [p[0] for p in pwd.getpwall()]
+    for user in allUsers:
+        subprocess.call(["sudo", "adduser", user, "dialout"])
 
-echo "testing......"
-
-echo "[Desktop Entry]
-Version=0.0.1
-Type=Application
-Exec= /opt/web2board/web2board
-Icon=vncviewer
-StartupNotify=true
-Terminal=false
-Categories=Utility;X-XFCE;X-Xfce-Toplevel;
-MimeType=x-scheme-handler/vnc
-Name=web2board Launcher
-Comment=Launch web2board
-Name[en_US]=web2board-handler" > ~/.local/share/applications/web2board-handler.desktop
-
-
-echo "
-
+def addHandlerInMimeapps():
+    BITBLOQS_HANDLER1 = """
 
 #custom handler for bitbloqs web2board:
 x-scheme-handler/web2board=web2board-handler.desktop
-" >> ~/.local/share/applications/mimeapps.list
+"""
+    BITBLOQS_HANDLER2 = """
+
+#custom handler for bitbloqs web2board:
+x-scheme-handler/web2board=/opt/web2board/web2boardLink
+#END_WEB2BOARD_HANDLER
+"""
+
+    homePath = expanduser("~")
+    applicationsPath = os.path.join(homePath, ".local/share/applications")
+    mineAppsFilePath = os.path.join(applicationsPath, "mimeapps.list")
+
+    if not os.path.exists(applicationsPath):
+        os.makedirs(applicationsPath)
 
 
-################# LIBRARIES #################
+    if os.path.isfile(mineAppsFilePath):
+        with open(mineAppsFilePath) as f:
+            fContent = f.read()
+        fContent = fContent.replace(BITBLOQS_HANDLER2, "")
+        fContent = fContent.replace(BITBLOQS_HANDLER1, "")
+        if "[Default Applications]" not in fContent:
+            fContent = "[Default Applications]\n" + fContent
+        with open(mineAppsFilePath, "w") as f:
+            f.write(fContent)
 
-# #OLDER VERSIONS  --> if home/sketchbook exists, we copy the libraries so they can be used in the old sketchbook directory
-# if [ -d "$HOME/sketchbook" ]; then
-#   #Create route if it does not exist previously
-#   mkdir -p $HOME/sketchbook/libraries/
+    with open(mineAppsFilePath, 'a') as f:
+        f.write(BITBLOQS_HANDLER2)
 
-#   #Remove previous bitbloqLibs library if it exists:
-#   rm -rf $HOME/sketchbook/libraries/bitbloqLibs
+if __name__ == '__main__':
+    try:
+        log = startLogger()
+        log.info("Script started")
+        log.info("Adding users to dialout")
+        addAllUsersToDialOut()
+        log.info("Adding handler in Mine Apps file")
+        addHandlerInMimeapps()
+    except:
+        log.exception("Failed performing postinst")
+        raise
 
-#   cd $HOME/sketchbook/libraries/
-
-#   #Download the new version:
-#   wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-#   unzip v0.0.1.zip -d .
-#   rm -rf v0.0.1.zip*
-#   mv bitbloqLibs-0.0.1 bitbloqLibs
-# fi
-
-# #NEWER VERSIONS
-# #Create route if it does not exist previously
-# mkdir -p $HOME/Arduino/libraries/
-
-# #Remove previous bitbloqLibs library if it exists:
-# rm -rf $HOME/Arduino/libraries/bitbloqLibs
-
-# cd $HOME/Arduino/libraries/
-
-# #Download the new version:
-# wget https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip
-# unzip v0.0.1.zip -d .
-# rm -rf v0.0.1.zip*
-# mv bitbloqLibs-0.0.1 bitbloqLibs
-
-exit 0

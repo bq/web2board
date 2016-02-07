@@ -6,6 +6,7 @@ import zipfile
 import click
 
 from libs import utils
+from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater, Web2BoardUpdater
 from libs.utils import findFiles
@@ -33,7 +34,7 @@ class Packager:
         self.pyInstallerBuildFolder = self.srcPath + os.sep + "build"
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
 
-        self.version = getWeb2boardUpdater().currentVersionInfo.version
+        self.version = Config.version
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
         self.sconsSpecPath = os.path.join(self.web2boardPath, "scons.spec")

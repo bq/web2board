@@ -18,16 +18,16 @@ from PySide import QtGui
 import logging
 
 import serial
-from PySide.QtCore import QTimer
+from PySide.QtGui import QTextCursor
 
 from frames.UI_serialMonitor import Ui_SerialMonitor
 from libs.CompilerUploader import getCompilerUploader
-from libs.Decorators.Asynchronous import asynchronous
+from libs.Config import Config
 from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
+from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
 
 log = logging.getLogger(__name__)
-
 
 
 class SerialConnection:
@@ -63,17 +63,15 @@ class SerialConnection:
 class SerialMonitorDialog(QtGui.QDialog):
     def __init__(self, parent, port=None, *args, **kwargs):
         super(SerialMonitorDialog, self).__init__(*args, **kwargs)
+        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
+        self.api.connect()
+        self.api.defaultOnError = lambda error: "failed executing action due to: {}".format(error)
         self.isClosed = False
         self.ui = Ui_SerialMonitor()
         self.ui.setupUi(self)
         self.ui.sendButton.clicked.connect(self.onSend)
-        self.serialConnection = SerialConnection(port if port is not None else getCompilerUploader().getPort())
         self.messagesBuffer = []
 
-        self.timer = QTimer(self)
-        self.timer.setInterval(100)
-        self.timer.timeout.connect(self.refreshConsole)
-        self.timer.start()
         self.ui.clearButton.clicked.connect(self.onClear)
 
         self.ui.sendLineEdit.returnPressed.connect(self.onSend)
@@ -81,26 +79,32 @@ class SerialMonitorDialog(QtGui.QDialog):
 
         self.ui.pauseButton.clicked.connect(self.onPauseButtonClicked)
 
+        self.port = port if port is not None else getCompilerUploader().getPort()
+
+        self.api.SerialMonitorHub.client.received = self.refreshConsole
+        self.api.SerialMonitorHub.server.startConnection(self.port) \
+            .done(lambda x: log.debug("Successfully connected to serial port"),
+                  lambda error: log.error("Unable to connect to serial port due to: {}".format(error)))
+        self.api.SerialMonitorHub.server.subscribeToHub()
+
     def closeEvent(self, event):
-        self.serialConnection.close()
         self.isClosed = True
-        i = 0
-        while i < 30:  # 3 seconds of timeout
-            try:
-                i += 1
-                SerialConnection(self.serialConnection.serial.port)
-                break
-            except:
-                time.sleep(0.1)
+        self.api.SerialMonitorHub.server.closeConnection(self.port)
+        time.sleep(0.5)
+        self.api.wsClient.close()
         event.accept()
 
+    @InGuiThread()
     def logText(self, message):
         if message is not None:
+            message = message.replace("\r", "")
             textLines = self.ui.consoleTextEdit.toPlainText().split("\n")
             if len(textLines) >= 800 or len(textLines[-1]) > 300:
                 self.ui.consoleTextEdit.setText(message)
             else:
-                self.ui.consoleTextEdit.append(message)
+                self.ui.consoleTextEdit.moveCursor(QTextCursor.End)
+                self.ui.consoleTextEdit.insertPlainText(message)
+                self.ui.consoleTextEdit.moveCursor(QTextCursor.End)
 
     def onPauseButtonClicked(self):
         if self.ui.pauseButton.isChecked():
@@ -109,10 +113,10 @@ class SerialMonitorDialog(QtGui.QDialog):
         else:
             self.ui.pauseButton.setText("Pause")
 
-    def refreshConsole(self):
-        if not self.ui.pauseButton.isChecked():
+    def refreshConsole(self, port, data):
+        if not self.ui.pauseButton.isChecked() and port == self.port:
             try:
-                self.logText(self.serialConnection.getData())
+                self.logText(data)
             except:
                 log.exception("Error reading serial")
                 pass
@@ -122,27 +126,22 @@ class SerialMonitorDialog(QtGui.QDialog):
         if message == "":
             return
         self.logText(message)
+        self.api.SerialMonitorHub.server.write(self.port, message)
         self.serialConnection.write(message)
         self.ui.sendLineEdit.setText('')
-
-    def onPause(self):
-        if self.pauseButton.GetLabel() == 'Pause':
-            self.pauseButton.SetLabel('Continue')
-            self.Pause = True
-        else:
-            self.pauseButton.SetLabel('Pause')
-            self.Pause = False
 
     def onClear(self):
         self.ui.consoleTextEdit.clear()
         self.ui.sendLineEdit.setText("")
 
-    def onBaudRateChanged(self, event):
-        self.serialConnection.changeBaudRate(self.dropdown.GetValue())
+    def onBaudrateChanged(self, event):
+        self.api.SerialMonitorHub.server.changeBaudrate(self.port, self.dropdown.GetValue()) \
+            .done(lambda x: log.debug("Successfully changed baudrate to serial port"),
+                  lambda error: log.error("Unable to change baudrate due to: {}".format(error)))
 
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    mySW = SerialMonitorDialog(None, port= "COM7")
+    mySW = SerialMonitorDialog(None, port="COM7")
     mySW.show()
     sys.exit(app.exec_())

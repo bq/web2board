@@ -5,7 +5,7 @@ function HubsAPI(url, serverTimeout) {
 
     var messageID = 0,
         returnFunctions = {},
-        respondTimeout = (serverTimeout || 5) * 1000,
+        defaultRespondTimeout = (serverTimeout || 5) * 1000,
         thisApi = this,
         messagesBeforeOpen = [],
         onOpenTriggers = [];
@@ -14,13 +14,13 @@ function HubsAPI(url, serverTimeout) {
     this.clearTriggers = function () {
         messagesBeforeOpen = [];
         onOpenTriggers = [];
-    }
+    };
 
     this.connect = function (reconnectTimeout) {
         reconnectTimeout = reconnectTimeout || -1;
         var openPromise = {
             onSuccess : function() {},
-            onError : function(error) {},
+            onError : function(error) {}
         };
         function reconnect(error) {
             if (reconnectTimeout !== -1) {
@@ -78,14 +78,14 @@ function HubsAPI(url, serverTimeout) {
                     if (!msgObj.success) {
                         if (f !== undefined && f.onError !== undefined) {
                             f.onError(msgObj.replay);
-			}
+                        }
                     }
                 } else {
                     f = thisApi[msgObj.hub].client[msgObj.function];
-                    if(f === undefined){
-                      this.onClientFunctionNotFound(msgObj.hub,msgObj.function)
-                    }else {
-                      f.apply(f, msgObj.args);
+                    if (f!== undefined) {
+                        f.apply(f, msgObj.args);
+                    } else {
+                        this.onClientFunctionNotFound(msgObj.hub, msgObj.function);
                     }
                 }
             } catch (err) {
@@ -109,7 +109,7 @@ function HubsAPI(url, serverTimeout) {
         onOpen: function () {},
         onReconnecting: function () {},
         onMessageError: function (error){},
-        onClientFunctionNotFound: function(hub, functionName){}
+        onClientFunctionNotFound: function (hub, func) {}
     };
 
     this.defaultErrorHandler = null;
@@ -128,7 +128,7 @@ function HubsAPI(url, serverTimeout) {
                 var f = returnFunctions[id];
                 if (f !== undefined && f.onError !== undefined) {
                     f.onError('webSocket not connected');
-		}
+                }
             }, 0);
             return {done: getReturnFunction(id, {hubName: hubName, functionName: functionName, args: args})};
         }
@@ -138,7 +138,7 @@ function HubsAPI(url, serverTimeout) {
         return {done: getReturnFunction(id, {hubName: hubName, functionName: functionName, args: args})};
     };
     var getReturnFunction = function (ID, callInfo) {
-        return function (onSuccess, onError) {
+        return function (onSuccess, onError, respondsTimeout) {
             if (returnFunctions[ID] === undefined) {
                 returnFunctions[ID] = {};
             }
@@ -159,22 +159,125 @@ function HubsAPI(url, serverTimeout) {
                 delete returnFunctions[ID];
             };
             //check returnFunctions, memory leak
-            setTimeout(function () {
-                if (returnFunctions[ID] && returnFunctions[ID].onError) {
-                    returnFunctions[ID].onError('timeOut Error');
-                }
-            }, respondTimeout);
+            respondsTimeout = undefined ? defaultRespondTimeout : respondsTimeout;
+            if(respondsTimeout >=0) {
+                setTimeout(function () {
+                    if (returnFunctions[ID] && returnFunctions[ID].onError) {
+                        returnFunctions[ID].onError('timeOut Error');
+                    }
+                }, defaultRespondTimeout);
+            }
         };
     };
 
     
+    this.UtilsAPIHub = {};
+    this.UtilsAPIHub.server = {
+        __HUB_NAME : 'UtilsAPIHub',
+        
+        unsubscribeToHub : function (){
+            
+            return constructMessage('UtilsAPIHub', 'unsubscribeToHub', arguments);
+        },
+
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('UtilsAPIHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        getId : function (){
+            
+            return constructMessage('UtilsAPIHub', 'getId', arguments);
+        },
+
+        isClientConnected : function (clientId){
+            
+            return constructMessage('UtilsAPIHub', 'isClientConnected', arguments);
+        },
+
+        subscribeToHub : function (){
+            
+            return constructMessage('UtilsAPIHub', 'subscribeToHub', arguments);
+        },
+
+        setId : function (clientId){
+            
+            return constructMessage('UtilsAPIHub', 'setId', arguments);
+        },
+
+        getHubsStructure : function (){
+            
+            return constructMessage('UtilsAPIHub', 'getHubsStructure', arguments);
+        }
+    };
+    this.UtilsAPIHub.client = {};
+    this.CodeHub = {};
+    this.CodeHub.server = {
+        __HUB_NAME : 'CodeHub',
+        
+        unsubscribeToHub : function (){
+            
+            return constructMessage('CodeHub', 'unsubscribeToHub', arguments);
+        },
+
+        uploadHex : function (hexText, board){
+            
+            return constructMessage('CodeHub', 'uploadHex', arguments);
+        },
+
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('CodeHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        upload : function (code, board){
+            
+            return constructMessage('CodeHub', 'upload', arguments);
+        },
+
+        compile : function (code){
+            
+            return constructMessage('CodeHub', 'compile', arguments);
+        },
+
+        subscribeToHub : function (){
+            
+            return constructMessage('CodeHub', 'subscribeToHub', arguments);
+        },
+
+        uploadHexFile : function (hexFilePath, board){
+            
+            return constructMessage('CodeHub', 'uploadHexFile', arguments);
+        },
+
+        tryToTerminateSerialCommProcess : function (){
+            
+            return constructMessage('CodeHub', 'tryToTerminateSerialCommProcess', arguments);
+        }
+    };
+    this.CodeHub.client = {};
     this.BoardConfigHub = {};
     this.BoardConfigHub.server = {
         __HUB_NAME : 'BoardConfigHub',
         
-        getVersion : function (){
+        setLibVersion : function (version){
             
-            return constructMessage('BoardConfigHub', 'getVersion', arguments);
+            return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
+        },
+
+        unsubscribeToHub : function (){
+            
+            return constructMessage('BoardConfigHub', 'unsubscribeToHub', arguments);
+        },
+
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('BoardConfigHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        subscribeToHub : function (){
+            
+            return constructMessage('BoardConfigHub', 'subscribeToHub', arguments);
         },
 
         setBoard : function (board){
@@ -182,9 +285,9 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('BoardConfigHub', 'setBoard', arguments);
         },
 
-        setLibVersion : function (version){
+        getVersion : function (){
             
-            return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
+            return constructMessage('BoardConfigHub', 'getVersion', arguments);
         },
 
         setWeb2boardVersion : function (version){
@@ -197,37 +300,62 @@ function HubsAPI(url, serverTimeout) {
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
         
+        unsubscribeToHub : function (){
+            
+            return constructMessage('SerialMonitorHub', 'unsubscribeToHub', arguments);
+        },
+
+        findBoardPort : function (){
+            
+            return constructMessage('SerialMonitorHub', 'findBoardPort', arguments);
+        },
+
+        changeBaudrate : function (port, baudrate){
+            
+            return constructMessage('SerialMonitorHub', 'changeBaudrate', arguments);
+        },
+
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('SerialMonitorHub', 'getSubscribedClientsToHub', arguments);
+        },
+
         startApp : function (port){
             arguments[0] = port === undefined ? null : port;
             return constructMessage('SerialMonitorHub', 'startApp', arguments);
+        },
+
+        write : function (port, data){
+            
+            return constructMessage('SerialMonitorHub', 'write', arguments);
+        },
+
+        closeConnection : function (port){
+            
+            return constructMessage('SerialMonitorHub', 'closeConnection', arguments);
+        },
+
+        subscribeToHub : function (){
+            
+            return constructMessage('SerialMonitorHub', 'subscribeToHub', arguments);
+        },
+
+        getAvailablePorts : function (){
+            
+            return constructMessage('SerialMonitorHub', 'getAvailablePorts', arguments);
+        },
+
+        startConnection : function (port, baudrate){
+            arguments[0] = port === undefined ? 9600 : port;
+            return constructMessage('SerialMonitorHub', 'startConnection', arguments);
+        },
+
+        isPortConnected : function (port){
+            
+            return constructMessage('SerialMonitorHub', 'isPortConnected', arguments);
         }
     };
     this.SerialMonitorHub.client = {};
-    this.CodeHub = {};
-    this.CodeHub.server = {
-        __HUB_NAME : 'CodeHub',
-        
-        compile : function (code){
-            
-            return constructMessage('CodeHub', 'compile', arguments);
-        },
-
-        tryToTerminateSerialCommProcess : function (){
-            
-            return constructMessage('CodeHub', 'tryToTerminateSerialCommProcess', arguments);
-        },
-
-        upload : function (code, board){
-            
-            return constructMessage('CodeHub', 'upload', arguments);
-        },
-
-        uploadHex : function (hexText, board){
-            
-            return constructMessage('CodeHub', 'uploadHex', arguments);
-        }
-    };
-    this.CodeHub.client = {};
 }
 /* jshint ignore:end */
 /* ignore jslint end */
