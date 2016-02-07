@@ -2,8 +2,8 @@
 Type=Application
 Name=web2board
 Comment=web2board
-Icon=/opt/web2board/res/Web2board.ico
-Exec=/opt/web2board/web2board
+Icon=/opt/web2board/web2board/res/Web2board.ico
+Exec=/opt/web2board/web2boardLink
 StartupNotify=true
 Terminal=false
 Categories=GNOME;GTK;Utility;
