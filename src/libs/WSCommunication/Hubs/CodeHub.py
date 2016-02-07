@@ -4,6 +4,7 @@ import os
 from wshubsapi.Hub import Hub, UnsuccessfulReplay
 
 from libs.CompilerUploader import getCompilerUploader, CompilerException
+from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
 
 log = logging.getLogger(__name__)
@@ -75,7 +76,8 @@ class CodeHub(Hub):
                 log.exception("unable to terminate process")
 
     def __handleCompileReport(self, compileReport):
-        if compileReport[0] or "Writing | ##" in compileReport[1]["err"]: # second check to prevent problem with bluetooth
+        # second check to prevent problem with bluetooth
+        if compileReport[0] or "Writing | #" in compileReport[1]["err"]:
             return True
         else:
             return self._constructUnsuccessfulReplay(compileReport[1]["err"])
@@ -83,10 +85,12 @@ class CodeHub(Hub):
     def __prepareUpload(self, board, _sender):
         self.compilerUploader.setBoard(board)
         self.tryToTerminateSerialCommProcess()
-        try:
-            uploadPort = self.compilerUploader.getPort()
-        except CompilerException as e:
-            return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
+        uploadPort = getMainApp().w2bGui.getSelectedPort()
+        if uploadPort is None:
+            try:
+                uploadPort = self.compilerUploader.getPort()
+            except CompilerException as e:
+                return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
         _sender.isUploading(uploadPort)
 
         return uploadPort

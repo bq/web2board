@@ -60,8 +60,8 @@ class SettingsDialog(QtGui.QDialog):
         else:
             reply = QtGui.QMessageBox.question(self, "Are you sure you want to quit? ",
                                                "Changes will be lost",
-                                               QtGui.QMessageBox.Yes,
-                                               QtGui.QMessageBox.No)
+                                               QtGui.QMessageBox.No,
+                                               QtGui.QMessageBox.Yes)
             if reply == QtGui.QMessageBox.Yes:
                 event.accept()
             else:

@@ -5,8 +5,6 @@ import unittest
 import sys
 import libs.LoggingUtils
 
-log = libs.LoggingUtils.initLogging(__name__)
-
 def __runTests(suite, reportTitle="report"):
     from Test import setConfigurationFilesForTest
     from Test.HTMLTestRunner import HTMLTestRunner
@@ -20,17 +18,21 @@ def __runTests(suite, reportTitle="report"):
 
 def runUnitTests():
     from Test.unit.Updaters.testUpdater import TestUpdater
+    from Test.unit.Updaters.testWeb2boardUpdater import TestWeb2boardUpdater
     from Test.unit.WSCommunication.Hubs.testBoardConfigHub import TestBoardConfigHub
     from Test.unit.WSCommunication.Hubs.testCodeHub import TestCodeHub
     from Test.unit.WSCommunication.Hubs.testSerialMonitorHub import TestSerialMonitorHub
     from Test.unit.testUtils import TestUtils
+    from Test.unit.testDownloader import TestDownloader
 
     suite = unittest.TestSuite()
-    suite.addTests(unittest.makeSuite(TestCodeHub))
-    suite.addTests(unittest.makeSuite(TestBoardConfigHub))
-    suite.addTests(unittest.makeSuite(TestSerialMonitorHub))
     suite.addTests(unittest.makeSuite(TestUpdater))
+    suite.addTests(unittest.makeSuite(TestWeb2boardUpdater))
+    suite.addTests(unittest.makeSuite(TestBoardConfigHub))
+    suite.addTests(unittest.makeSuite(TestCodeHub))
+    suite.addTests(unittest.makeSuite(TestSerialMonitorHub))
     suite.addTests(unittest.makeSuite(TestUtils))
+    suite.addTests(unittest.makeSuite(TestDownloader))
     __runTests(suite, "unitTestReport")
 
 
@@ -53,6 +55,7 @@ def runAllTests():
 
 
 if __name__ == '__main__':
+    log = libs.LoggingUtils.initLogging(__name__)
     if len(sys.argv)>1:
         testing = sys.argv[1]
     else:

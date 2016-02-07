@@ -12,7 +12,7 @@ os.chdir(os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE
 
 a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), 'sconsScript.py')],
              pathex=[os.getcwd()],
-             hiddenimports=['UserList', 'UserString', 'ConfigParser'],
+             hiddenimports=['UserList', 'UserString', 'ConfigParser', 'json'],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)

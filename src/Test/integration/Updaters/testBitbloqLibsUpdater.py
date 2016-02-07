@@ -25,7 +25,6 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         self.assertIsNotNone(self.updater.currentVersionInfo)
         self.assertEqual(self.updater.currentVersionInfo.version, Config.bitbloqLibsVersion)
         self.assertEqual(self.updater.currentVersionInfo.librariesNames, Config.bitbloqLibsLibraries)
-        self.assertIsNotNone(self.updater.onlineVersionUrl)
         self.assertIsNotNone(self.updater.destinationPath)
         self.assertNotEqual(self.updater.name, Updater().name)
 

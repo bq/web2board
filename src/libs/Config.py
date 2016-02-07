@@ -10,10 +10,10 @@ my_lock = Lock()
 
 class Config:
     _log = logging.getLogger(__name__)
-    webSocketIP = "localhost"
+    webSocketIP = "127.0.0.1"
     webSocketPort = 9876
     proxy = None
-    version = "2.0.1"
+    version = "2.0.0"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
     bitbloqLibsVersion = "0.0.5"
     bitbloqLibsLibraries = [

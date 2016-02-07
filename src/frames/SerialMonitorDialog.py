@@ -25,7 +25,7 @@ from libs.CompilerUploader import getCompilerUploader
 from libs.Config import Config
 from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
-from libs.WSCommunication.Clients.WSHubsApi import WSHubsAPIClient, HubsAPI
+from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
 
 log = logging.getLogger(__name__)
 
@@ -63,9 +63,9 @@ class SerialConnection:
 class SerialMonitorDialog(QtGui.QDialog):
     def __init__(self, parent, port=None, *args, **kwargs):
         super(SerialMonitorDialog, self).__init__(*args, **kwargs)
-
-
+        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
         self.api.connect()
+        self.api.defaultOnError = lambda error: "failed executing action due to: {}".format(error)
         self.isClosed = False
         self.ui = Ui_SerialMonitor()
         self.ui.setupUi(self)
@@ -126,6 +126,7 @@ class SerialMonitorDialog(QtGui.QDialog):
         if message == "":
             return
         self.logText(message)
+        self.api.SerialMonitorHub.server.write(self.port, message)
         self.serialConnection.write(message)
         self.ui.sendLineEdit.setText('')
 

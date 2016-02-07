@@ -123,6 +123,14 @@ class Web2boardWindow(QtGui.QMainWindow):
             self.setWindowState(Qt.WindowMinimized)
         event.ignore()
 
+    def getSelectedPort(self):
+        port = self.ui.ports.currentText()
+        if port == "AUTO":
+            return None
+        if port.endswith(" (ok)"):
+            return port[:-5]
+        return port
+
     @InGuiThread()
     def logInConsole(self, record):
         kwargs = self.__getConsoleKwargs(record)
@@ -165,7 +173,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         lastPortSelection = self.ui.ports.currentText()
         self.ui.statusbar.showMessage("")
         self.ui.ports.clear()
-        portsInCombo = ["AUTO sadfsdfsdf"] + self.availablePorts
+        portsInCombo = ["AUTO"] + self.availablePorts
         for i, port in enumerate(portsInCombo):
             if port == self.autoPort:
                 portsInCombo[i] = self.autoPort + " (ok)"

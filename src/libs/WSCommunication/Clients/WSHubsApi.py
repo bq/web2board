@@ -90,6 +90,7 @@ class WSHubsAPIClient(WebSocketClient):
 
         def returnFunction(onSuccess, onError=None, timeOut=None):
             callBacks = self.__returnFunctions.get(ID, WSReturnObject.WSCallbacks())
+            onError = onError if onError is not None else self.defaultOnError
 
             def onSuccessWrapper(*args, **kwargs):
                 onSuccess(*args, **kwargs)
@@ -106,8 +107,8 @@ class WSHubsAPIClient(WebSocketClient):
                 callBacks.onError = None
             self.__returnFunctions[ID] = callBacks
 
-            timeOut = timeOut if timeOut is not None else self.onTimeOut
-            r = Timer(self.serverTimeout, timeOut, (ID,))
+            timeOut = timeOut if timeOut is not None else self.serverTimeout
+            r = Timer(timeOut, self.onTimeOut, (ID,))
             r.start()
 
         retObject = WSReturnObject()
@@ -124,14 +125,26 @@ class WSHubsAPIClient(WebSocketClient):
         if f and f.onError:
             f.onError("timeOut Error")
 
+    def defaultOnError(self, error):
+        pass
+
 class HubsAPI(object):
     def __init__(self, url, serverTimeout=5.0, pickler=Pickler(max_depth=4, max_iter=100, make_refs=False)):
         self.wsClient = WSHubsAPIClient(self, url, serverTimeout)
+        self.wsClient.defaultOnError = lambda error: None
         self.pickler = pickler
         self.UtilsAPIHub = self.__UtilsAPIHub(self.wsClient, self.pickler)
         self.CodeHub = self.__CodeHub(self.wsClient, self.pickler)
         self.SerialMonitorHub = self.__SerialMonitorHub(self.wsClient, self.pickler)
         self.BoardConfigHub = self.__BoardConfigHub(self.wsClient, self.pickler)
+
+    @property
+    def defaultOnError(self):
+        return None
+
+    @defaultOnError.setter
+    def defaultOnError(self, func):
+        self.wsClient.defaultOnError = func
 
     def connect(self):
         self.wsClient.connect()
