@@ -1,2 +1,0 @@
-#!/bin/sh
-/usr/bin/python /usr/lib/python2.7/dist-packages/web2board/web2board.py "$@"
