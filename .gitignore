@@ -20,3 +20,4 @@ src/res/
 *_web2board_*
 installers/
 *.log
+config.json
