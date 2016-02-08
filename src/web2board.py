@@ -22,6 +22,7 @@ from libs.MainApp import getMainApp
 
 log = initLogging(__name__)  # initialized in main
 originalEcho = click.echo
+originalSEcho = click.secho
 
 
 def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=None):
@@ -30,10 +31,10 @@ def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=No
     log.debug(message)
 
 click.echo = clickEchoForExecutable
+click.secho = clickEchoForExecutable
 
 if __name__ == "__main__":
     try:
-
         utils.killProcess("web2board")
 
         def closeSigHandler(signal, frame):
