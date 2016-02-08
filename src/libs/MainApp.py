@@ -76,7 +76,8 @@ class MainApp:
         logging.getLogger().handlers[0].level = logLevel
 
         if options.afterInstall or os.path.exists(PathsManager.PLATFORMIO_PACKAGES_PATH):
-            afterInstallScript.run()
+            afterInstallScript.run().get()
+            os._exit(1)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
