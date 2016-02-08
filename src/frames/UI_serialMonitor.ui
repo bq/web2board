@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>468</width>
+    <width>462</width>
     <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Serial monitor</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
    <item>

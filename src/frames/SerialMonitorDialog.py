@@ -73,8 +73,9 @@ class SerialMonitorDialog(QtGui.QDialog):
         self.messagesBuffer = []
 
         self.ui.clearButton.clicked.connect(self.onClear)
-
         self.ui.sendLineEdit.returnPressed.connect(self.onSend)
+
+
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
 
         self.ui.pauseButton.clicked.connect(self.onPauseButtonClicked)
@@ -86,6 +87,9 @@ class SerialMonitorDialog(QtGui.QDialog):
             .done(lambda x: log.debug("Successfully connected to serial port"),
                   lambda error: log.error("Unable to connect to serial port due to: {}".format(error)))
         self.api.SerialMonitorHub.server.subscribeToHub()
+
+    def showEvent(self, *args, **kwargs):
+        super(SerialMonitorDialog, self).showEvent(*args, **kwargs)
 
     def closeEvent(self, event):
         self.isClosed = True

@@ -13,6 +13,7 @@
 #                                                                       #
 # -----------------------------------------------------------------------#
 import signal
+import click
 
 from Scripts.TestRunner import *
 from libs import utils
@@ -20,9 +21,19 @@ from libs.LoggingUtils import initLogging
 from libs.MainApp import getMainApp
 
 log = initLogging(__name__)  # initialized in main
+originalEcho = click.echo
+
+
+def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=None):
+    if not utils.areWeFrozen():
+        originalEcho(message, file, nl, err, color)
+    log.debug(message)
+
+click.echo = clickEchoForExecutable
 
 if __name__ == "__main__":
     try:
+
         utils.killProcess("web2board")
 
         def closeSigHandler(signal, frame):

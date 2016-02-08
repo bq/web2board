@@ -1,6 +1,9 @@
 import os
 import shutil
 import sys
+
+import subprocess
+
 import libs.utils as utils
 from libs.PathsManager import PathsManager
 
@@ -14,6 +17,6 @@ if __name__ == '__main__':
             shutil.rmtree(PathsManager.PROGRAM_PATH)
         print "Extracting web2board..."
         shutil.copytree(utils.getModulePath() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
-        os.system(web2boardPath + " --afterInstall &")
+        subprocess.call(web2boardPath + " --afterInstall")
     else:
-        os.popen(web2boardPath + " &")
+        subprocess.call(web2boardPath)

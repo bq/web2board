@@ -15,7 +15,7 @@ import os
 import sys
 import time
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 from PySide.QtGui import QMessageBox
 
@@ -64,6 +64,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
+        self.onSearchPorts()
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")

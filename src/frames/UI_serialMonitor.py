@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\UI_serialMonitor.ui'
+# Form implementation generated from reading ui file 'UI_serialMonitor.ui'
 #
-# Created: Thu Feb 04 12:49:02 2016
+# Created: Mon Feb 08 09:26:52 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_SerialMonitor(object):
     def setupUi(self, SerialMonitor):
         SerialMonitor.setObjectName("SerialMonitor")
-        SerialMonitor.resize(468, 471)
+        SerialMonitor.resize(462, 471)
         self.verticalLayout_2 = QtGui.QVBoxLayout(SerialMonitor)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -65,7 +65,7 @@ class Ui_SerialMonitor(object):
         QtCore.QMetaObject.connectSlotsByName(SerialMonitor)
 
     def retranslateUi(self, SerialMonitor):
-        SerialMonitor.setWindowTitle(QtGui.QApplication.translate("SerialMonitor", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        SerialMonitor.setWindowTitle(QtGui.QApplication.translate("SerialMonitor", "Serial monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.sendButton.setText(QtGui.QApplication.translate("SerialMonitor", "Send", None, QtGui.QApplication.UnicodeUTF8))
         self.consoleTextEdit.setHtml(QtGui.QApplication.translate("SerialMonitor", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
