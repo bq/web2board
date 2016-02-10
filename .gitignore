@@ -21,3 +21,4 @@ src/res/
 installers/
 *.log
 config.json
+res/common/platformIoPackages

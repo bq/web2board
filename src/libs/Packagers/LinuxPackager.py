@@ -16,6 +16,7 @@ class LinuxPackager(Packager):
         Packager.__init__(self)
         self.architecture = architecture
         self.installerPath = self.installerFolder + os.sep + "debian_{}".format(architecture)
+        self.installerOfflinePath = self.installerFolder + os.sep + "debian_{}Offline".format(architecture)
 
         self.installerCreationPath = join(self.web2boardPath, "deb_web2board_{}_{}".format(architecture, self.version))
         self.installerCreationName = os.path.basename(self.installerCreationPath)
@@ -26,8 +27,6 @@ class LinuxPackager(Packager):
         self.resPlatformPath = join(self.resPath, "linux")
         self.web2boardExecutableName = "web2board"
         self.web2boardSpecPath = join(self.web2boardPath, "web2board-linux.spec")
-        self.sconsExecutableName = "sconsScript"
-        self.sconsSpecPath = join(self.web2boardPath, "scons-linux.spec")
 
         self.packageDebianMetadataPath = join(self.installerCreationPath, "DEBIAN")
         self.debianMetadataPath = join(self.pkgPlatformPath, "debian")

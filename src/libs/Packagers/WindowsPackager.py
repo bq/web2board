@@ -10,6 +10,7 @@ class WindowsPackager(Packager):
     def __init__(self):
         Packager.__init__(self)
         self.installerPath = self.installerFolder + os.sep + "win32"
+        self.installerOfflinePath = self.installerFolder + os.sep + "win32Offline"
         self.installerCreationPath = self.web2boardPath + os.sep + "win_web2board_{}".format(self.version)
         self.installerCreationName = os.path.basename(self.installerCreationPath)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")

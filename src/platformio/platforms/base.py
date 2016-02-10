@@ -433,20 +433,21 @@ class BasePlatform(object):
         self._found_error = False
         args = []
         try:
-            args = [PathsManager.SCONS_EXECUTABLE_PATH,  # [JORGE_GARCIA] modified for scons compatibility
+            args = [os.path.relpath(PathsManager.EXECUTABLE_FILE),  # [JORGE_GARCIA] modified for scons compatibility
                     "-Q",
                     "-j %d" % self.get_job_nums(),
                     "--warn=no-no-parallel-support",
                     "-f", join(util.get_source_dir(), "builder", "main.py")
                     ] + variables + targets + [PathsManager.PLATFORMIO_WORKSPACE_PATH]
-            if PathsManager.SCONS_EXECUTABLE_PATH.endswith(".py"):
+            if PathsManager.EXECUTABLE_FILE.endswith(".py"):
                 args = ["python"] + args
             # test that SCons is installed correctly
             # assert util.test_scons()
+            log.info("Executing: {}".format("\n".join(args)))
             result = util.exec_command(args,
                                        stdout=util.AsyncPipe(self.on_run_out),
-                                       stderr=util.AsyncPipe(self.on_run_err)
-                                       )
+                                       stderr=util.AsyncPipe(self.on_run_err))
+
         except (OSError, AssertionError) as e:
             log.exception("error running scons with \n{}".format(args))
             raise exception.SConsNotInstalledError()

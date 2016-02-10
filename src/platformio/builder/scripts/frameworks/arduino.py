@@ -26,7 +26,7 @@ from os import listdir, walk
 from os.path import isdir, isfile, join
 
 from SCons.Script import DefaultEnvironment
-
+import sys
 env = DefaultEnvironment()
 
 BOARD_OPTS = env.get("BOARD_OPTIONS", {})
@@ -67,8 +67,7 @@ env.Replace(PLATFORMFW_DIR=PLATFORMFW_DIR)
 # Lookup for specific core's libraries
 #
 
-if isdir(join(env.subst("$PLATFORMFW_DIR"), "libraries", "__cores__",
-              BOARD_CORELIBDIRNAME)):
+if isdir(join(env.subst("$PLATFORMFW_DIR"), "libraries", "__cores__", str(BOARD_CORELIBDIRNAME))): # [JORGE GARCIA] changed for non ascii chars
     lib_dirs = env.get("LIBSOURCE_DIRS")
     lib_dirs.insert(
         lib_dirs.index(join("$PLATFORMFW_DIR", "libraries")),

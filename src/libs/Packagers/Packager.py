@@ -37,10 +37,10 @@ class Packager:
         self.version = Config.version
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
-        self.sconsSpecPath = os.path.join(self.web2boardPath, "scons.spec")
 
         # abstract attributes
         self.installerPath = None
+        self.installerOfflinePath = None
         self.installerCreationPath = None
         self.installerCreationExecutablesPath = None
         self.installerCreationDistPath = None
@@ -49,7 +49,6 @@ class Packager:
         self.resPlatformPath = None
 
         self.web2boardExecutableName = None
-        self.sconsExecutableName = None
 
     # todo move this to attribute
     def _getInstallerCreationResPath(self):
@@ -60,22 +59,21 @@ class Packager:
         return os.path.join(self._getInstallerCreationResPath(), pm.PLATFORMIO_PACKAGES_NAME)
 
     def prepareResFolderForExecutable(self):
-        if os.path.exists(self.srcResPath):
-            shutil.rmtree(self.srcResPath)
-        os.makedirs(self.srcResPath)
+        if not os.path.exists(self.srcResPath):
+            os.makedirs(self.srcResPath)
 
-        utils.copytree(self.resCommonPath, self.srcResPath)
-        utils.copytree(self.resPlatformPath, self.srcResPath)
+        utils.copytree(self.resCommonPath, self.srcResPath, forceCopy=True)
+        utils.copytree(self.resPlatformPath, self.srcResPath, forceCopy=True)
 
     def _deleteInstallerCreationFolder(self):
         if os.path.exists(self.installerCreationPath):
             shutil.rmtree(self.installerCreationPath)
 
     def _clearMainFolders(self):
-        if os.path.exists(os.path.join(self.srcPath, self.sconsExecutableName)):
-            os.remove(os.path.join(self.srcPath, self.sconsExecutableName))
         if os.path.exists(self.installerPath):
             shutil.rmtree(self.installerPath)
+        if os.path.exists(self.installerOfflinePath):
+            shutil.rmtree(self.installerOfflinePath)
         self._clearBuildFiles()
         self._deleteInstallerCreationFolder()
 
@@ -98,8 +96,7 @@ class Packager:
         currentPath = os.getcwd()
         os.chdir(self.srcPath)
         try:
-            self._constructSconsExecutable()
-            self._getSconsPackages()
+            self._getPlatformioPackages()
             self._constructWeb2boardExecutable()
             shutil.move(self.installerCreationExecutablesPath, self.installerCreationDistPath + os.sep + "web2board")
             self._constructLinkExecutable()
@@ -117,16 +114,6 @@ class Packager:
         os.system("pyinstaller \"{}\"".format(self.web2boardSpecPath))
         utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationExecutablesPath)
 
-    def _constructSconsExecutable(self):
-        log.debug("Creating Scons Executable")
-        os.system("pyinstaller \"{}\"".format(self.sconsSpecPath))
-
-        installerSconsPath = os.path.join(self._getInstallerCreationResPath(), "Scons")
-        utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"), installerSconsPath)
-
-        shutil.copytree(os.path.join(self.srcPath, "platformio"), os.path.join(installerSconsPath, "plarformio"))
-        shutil.copytree(self.srcResPath, os.path.join(installerSconsPath, "res"))
-
     def _compressExecutables(self):
         packagesFiles = findFiles(self.installerCreationExecutablesPath, ["*", "**/*"])
         packagesFiles = [x[len(self.installerCreationExecutablesPath) + 1:] for x in packagesFiles]
@@ -137,7 +124,7 @@ class Packager:
                 for zipFilePath in packagesFilesInProgressBar:
                     z.write(zipFilePath)
 
-    def _getSconsPackages(self):
+    def _getPlatformioPackages(self):
         log.debug("Gettings Scons Packages")
         originalCurrentDirectory = os.getcwd()
         originalClickConfirm = click.confirm
@@ -158,23 +145,32 @@ class Packager:
                 platform._install_default_packages()
             os.chdir(originalCurrentDirectory)
 
-            log.info("all packages where successfully installed")
-            platformIOPackagesPath = os.path.abspath(util.get_home_dir())
+            log.info("all platformio packages are successfully installed")
 
+            platformIOPackagesPath = os.path.abspath(util.get_home_dir())
             def isDoc(filePath):
                 isDoc = os.sep + "doc" + os.sep not in filePath
                 isDoc = isDoc and os.sep + "examples" + os.sep not in filePath
                 isDoc = isDoc and os.sep + "tool-scons" + os.sep not in filePath
-                return isDoc and os.sep + "README" not in filePath.upper()
+                isDoc = isDoc and os.sep + "README" not in filePath.upper()
+                return not isDoc
 
-            installerPlatformioPackagesPath = self._getPlatformIOPackagesPath()
-            if os.path.exists(installerPlatformioPackagesPath):
-                shutil.rmtree(installerPlatformioPackagesPath)
-
-            os.makedirs(installerPlatformioPackagesPath)
-            utils.copytree(platformIOPackagesPath, installerPlatformioPackagesPath, isDoc)
-
-
+            # installerPlatformioPackagesPath = self._getPlatformIOPackagesPath()
+            # if os.path.exists(installerPlatformioPackagesPath):
+            #     shutil.rmtree(installerPlatformioPackagesPath)
+            #
+            # os.makedirs(installerPlatformioPackagesPath)
+            log.info("Cleaning platformio packages files")
+            allFiles = sorted(utils.findFiles(platformIOPackagesPath, ["*", "**" + os.sep + "*"]), reverse=True)
+            for i, f in enumerate(allFiles):
+                if isDoc(f):
+                    if os.path.isfile(f):
+                        os.remove(f)
+                    else:
+                        try:
+                            os.rmdir(f)
+                        except:
+                            shutil.rmtree(f)
         finally:
             os.chdir(originalCurrentDirectory)
             click.confirm = originalClickConfirm
@@ -194,6 +190,22 @@ class Packager:
 
     def createPackage(self):
         raise NotImplementedError
+
+    def createPackageForOffline(self):
+        log.debug("Removing main folders")
+        self._clearMainFolders()
+        log.debug("Creating main folders")
+        self._makeMainDirs()
+        currentPath = os.getcwd()
+        os.chdir(self.srcPath)
+        try:
+            self._getPlatformioPackages()
+            self._constructWeb2boardExecutable()
+            shutil.move(self.installerCreationExecutablesPath, self.installerOfflinePath)
+        finally:
+            os.chdir(currentPath)
+            self._clearBuildFiles()
+
 
     @staticmethod
     def constructCurrentPlatformPackager(architecture=ARCH_64):

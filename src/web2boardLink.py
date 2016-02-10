@@ -2,23 +2,17 @@ import logging
 import os
 import shutil
 import sys
-import subprocess
 
 import time
-from PySide import QtGui
-from PySide.QtCore import Qt
-from PySide.QtGui import QMessageBox
+
 
 import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
-from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
-
-msgBox = None
 
 
 def startLogger():
-    fileHandler = logging.FileHandler(PathsManager.getHomePath()  + os.sep + "web2boardLink.log", 'a')
+    fileHandler = logging.FileHandler(PathsManager.getHomePath() + os.sep + "web2boardLink.log", 'a')
     fileHandler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fileHandler.setFormatter(formatter)
@@ -26,45 +20,122 @@ def startLogger():
     log.addHandler(fileHandler)
     log.setLevel(logging.DEBUG)
 
+if utils.areWeFrozen():
+    os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
+    PathsManager.setAllConstants()
+msgBox = None
 startLogger()
 log = logging.getLogger(__name__)
+web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension())
+WATCHDOG_TIME = 60
 
 @asynchronous()
-def factoryReset(web2boardPath):
+def factoryReset():
+    global msgBox
     try:
-        time.sleep(5)
-        log.info("deleting web2board of : {}".format(PathsManager.PROGRAM_PATH))
+        startWatchdog()
+        logMessage("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
         if os.path.exists(PathsManager.PROGRAM_PATH):
             shutil.rmtree(PathsManager.PROGRAM_PATH)
-        log.info("Extracting web2board...")
+        logMessage("Extracting web2board...")
         shutil.copytree(utils.getModulePath() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
-        os.system(web2boardPath + " --afterInstall")
-    finally:
-        endMessageBox()
+        msgBox.endSuccessful()
+    except:
         log.exception("Failed performing Factory reset")
+        msgBox.endError()
 
-@InGuiThread()
-def endMessageBox():
+
+@asynchronous()
+def startWatchdog():
     global msgBox
-    msgBox.setText("Web2board successfully configured")
-    msgBox.setStandardButtons(QMessageBox.Ok)
+    timePassed = 0
+    while not msgBox.taskEnded and timePassed < WATCHDOG_TIME:
+        time.sleep(0.3)
+        timePassed += 0.3
+    if timePassed >= WATCHDOG_TIME:
+        msgBox.endError()
+
+
+def isFactoryReset():
+    return len(sys.argv) > 1 and (sys.argv[1].lower() == "factoryreset" or sys.argv[1].lower() == "--factoryreset")
+
+
+def logMessage(message):
+    global msgBox
+    log.info(message)
+    msgBox.showMessage(message)
+
+
+def startDialog():
+    global msgBox
+    from PySide import QtGui
+    from libs.Decorators.InGuiThread import InGuiThread
+    from PySide.QtGui import QDialog
+    from frames.UI_Link import Ui_Link
+    from PySide.QtGui import QMovie
+    app = QtGui.QApplication(sys.argv)
+
+    class LinkDialog(QDialog):
+        def __init__(self, *args, **kwargs):
+            super(LinkDialog, self).__init__(*args, **kwargs)
+            self.ui = Ui_Link()
+            self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
+            self.ui.setupUi(self)
+            self.ui.tryAgain.setVisible(False)
+            self.ui.tryAgain.clicked.connect(self.retry)
+            self.taskEnded = False
+            self.successfullyEnded = False
+            self.movie = QMovie(os.path.join(PathsManager.RES_ICONS_PATH, "loading.gif"))
+            self.ui.loading.setMovie(self.movie)
+            self.movie.start()
+            self.show()
+
+        def closeEvent(self, evt):
+            if self.taskEnded:
+                evt.accept()
+                return
+            quit_msg = "It is not possible to quit while configuring files\nThis task can take up to {} seconds"
+            QtGui.QMessageBox.warning(self, 'Warning!', quit_msg.format(WATCHDOG_TIME), QtGui.QMessageBox.Ok)
+            evt.ignore()
+
+        @InGuiThread()
+        def showMessage(self, message):
+            self.ui.status.setText(message)
+
+        @InGuiThread()
+        def endSuccessful(self):
+            self.taskEnded = True
+            self.ui.close.setEnabled(True)
+            self.successfullyEnded = True
+            self.showMessage("Web2board successfully configured")
+
+        @InGuiThread()
+        def endError(self):
+            self.taskEnded = True
+            self.showMessage("Failed to configure file.\nplease try again later or check log.")
+            self.ui.tryAgain.setVisible(True)
+            self.ui.close.setEnabled(True)
+            self.movie.stop()
+
+        def retry(self):
+            self.taskEnded = False
+            self.ui.close.setEnabled(False)
+            self.ui.tryAgain.setVisible(False)
+            factoryReset()
+
+    msgBox = LinkDialog()
+    return app
+
 
 if __name__ == '__main__':
-    web2boardPath = '"' + os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension()) + '"'
-    print "web2boardPath: {}".format(web2boardPath)
-    utils.killProcess("web2board"  + utils.getOsExecutableExtension())
 
-    if (len(sys.argv) > 1 and sys.argv[1].lower() == "factoryreset") or not os.path.exists(PathsManager.PROGRAM_PATH):
+    print "web2boardPath: {}".format(web2boardPath)
+    utils.killProcess("web2board" + utils.getOsExecutableExtension())
+    if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
         global msgBox
-        log.debug("preforming factoryReset")
-        app = QtGui.QApplication(sys.argv)
-        task = factoryReset(web2boardPath)
-        msgBox = QMessageBox(None)
-        msgBox.setStandardButtons(0)
-        msgBox.setAttribute(Qt.WA_DeleteOnClose)
-        msgBox.setWindowTitle("Starting web2board")
-        msgBox.setText("Web2board is configuring some files.\nThis can take a while but it will be done just once")
-        msgBox.open()
+        app = startDialog()
+        task = factoryReset()
         app.exec_()
 
-    os.popen(web2boardPath)
+    if msgBox is None or msgBox.successfullyEnded:
+        os.popen('"{}"'.format(web2boardPath))

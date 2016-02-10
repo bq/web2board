@@ -3,6 +3,7 @@ import importlib
 import json
 import logging
 import logging.config
+import logging.handlers
 import os
 import sys
 import time
@@ -11,10 +12,30 @@ from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 
 __author__ = 'jorge.garcia'
+FILE_ENCODING = sys.getfilesystemencoding()
+
+
+def getDecodedMessage(record, handler):
+    # Need to make an actual copy of the record
+    # to prevent altering the message for other loggers
+    myRecord = copy.copy(record)
+    try:
+        handler.format(myRecord)
+    except:
+        try:
+            myRecord.msg = myRecord.msg.decode(FILE_ENCODING)
+            handler.format(myRecord)
+        except:
+            try:
+                myRecord.msg = myRecord.msg.decode("utf-8", errors="replace")
+                handler.format(myRecord)
+            except:
+                myRecord.msg = "Unable to format record"
+    return myRecord
 
 
 class ColoredConsoleHandler(logging.StreamHandler):
-    FILE_ENCODING = sys.getfilesystemencoding()
+
     def __init__(self, stream=None):
         super(ColoredConsoleHandler, self).__init__(stream)
 
@@ -23,23 +44,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
 
     def emit(self, record):
         module = importlib.import_module("libs.MainApp")
-
-        # Need to make an actual copy of the record
-        # to prevent altering the message for other loggers
-        myRecord = copy.copy(record)
-        try:
-            self.format(myRecord)
-        except:
-            try:
-                myRecord.msg = myRecord.msg.decode(self.FILE_ENCODING)
-                self.format(myRecord)
-            except:
-                try:
-                    myRecord.msg = myRecord.msg.decode("utf-8", errors="replace")
-                    self.format(myRecord)
-                except:
-                    myRecord.msg = "Unable to format record"
-
+        myRecord = getDecodedMessage(record, self)
         super(ColoredConsoleHandler, self).emit(myRecord)
 
         gui = module.getMainApp().w2bGui
@@ -54,6 +59,19 @@ class ColoredConsoleHandler(logging.StreamHandler):
     def asyncEnding(self):
         time.sleep(2)
         os._exit(1)
+
+
+class RotatingHandler(logging.handlers.RotatingFileHandler):
+    def __init__(self, *args, **kwargs):
+        super(RotatingHandler, self).__init__(*args, **kwargs)
+
+    def handle(self, record):
+        return super(RotatingHandler, self).handle(record)
+
+    def emit(self, record):
+        myRecord = getDecodedMessage(record, self)
+        super(RotatingHandler, self).emit(myRecord)
+
 
 
 def initLogging(name):

@@ -3,6 +3,8 @@ import json
 
 import logging
 
+import sys
+
 from libs.Decorators.Synchronized import synchronized
 from libs.PathsManager import PathsManager
 from threading import Lock
@@ -36,8 +38,8 @@ class Config:
     ]
     bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     checkOnlineUpdates = True
-    logLevel = logging.INFO
-    pluginsPath = PathsManager.MAIN_PATH + os.sep + "plugins"
+    logLevel = logging.DEBUG
+    pluginsPath = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
     @classmethod
     def readConfigFile(cls):

@@ -14,12 +14,12 @@ from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.HubsInspector import HubsInspector
 
-from Scripts import afterInstallScript
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
 from libs.CompilerUploader import getCompilerUploader
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
+from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
@@ -57,8 +57,6 @@ class MainApp:
         parser.add_option("--port", default=Config.webSocketPort, type='int', action="store", dest="port", help="port (9876)")
         parser.add_option("--test", default='none', type='string', action="store", dest="testing",
                           help="options: [none, unit, integration, all]")
-        parser.add_option("--afterInstall", default=False, action="store_true", dest="afterInstall",
-                          help="setup packages and folder structure")
         parser.add_option("--board", default="uno", type='string', action="store", dest="board",
                           help="board connected for integration tests")
         parser.add_option("--logLevel", default=Config.logLevel, type='string', action="store", dest="logLevel",
@@ -74,10 +72,6 @@ class MainApp:
 
         logLevel = options.logLevel if isinstance(options.logLevel, int) else logLevels[options.logLevel.lower()]
         logging.getLogger().handlers[0].level = logLevel
-
-        if options.afterInstall or os.path.exists(PathsManager.PLATFORMIO_PACKAGES_PATH):
-            afterInstallScript.run().get()
-            os._exit(1)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
@@ -156,6 +150,54 @@ class MainApp:
 
     def isSerialMonitorRunning(self):
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
+
+    @InGuiThread()
+    def executeSconsScript(self):
+        def revert_io():
+            # This call is added to revert stderr and stdout to the original
+            # ones just in case some build rule or something else in the system
+            # has redirected them elsewhere.
+            sys.stderr = sys.__stderr__
+            sys.stdout = sys.__stdout__
+        import res.Scons.sconsFiles.scons
+        try:
+            class auxFile:
+                def __init__(self, *args):
+                    self.buffer = ""
+
+                def write(self, message):
+                    try:
+                        self.buffer += message
+                    except:
+                        try:
+                            self.buffer += message.encode("utf-8")
+                        except:
+                            self.buffer += message.decode(sys.getfilesystemencoding())
+
+                def writelines(self, messages):
+                    self.buffer += "\n".join(messages)
+
+                def flush(self, *args):
+                    pass
+
+            sys.stderr = auxFile()
+            sys.stdout = auxFile()
+            import res.Scons.sconsFiles.SCons.Script
+            res.Scons.sconsFiles.SCons.Script.main()
+
+        except SystemExit as e:
+            outBuffer = sys.stdout.file.buffer
+            errBuffer = sys.stderr.file.buffer
+            returnObject = {"returncode": e.code, "out": sys.stdout.file.buffer, "err": sys.stderr.file.buffer}
+            revert_io()
+            sys.stdout.write(outBuffer)
+            sys.stderr.write(errBuffer)
+            return returnObject
+
+        except:
+            log.exception("failed to execute Scons script")
+        finally:
+            revert_io()
 
 
 def getMainApp():

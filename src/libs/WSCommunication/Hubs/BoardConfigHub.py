@@ -40,12 +40,6 @@ class BoardConfigHub(Hub):
             if e.code == ERROR_BOARD_NOT_SUPPORTED["code"]:
                 raise BoardConfigHubException('NOT SUPPORTED BOARD')
 
-        # todo: do we need to set the port here??
-        try:
-            port = self.compilerUploader.getPort()
-            _sender.isSettingPort(port)
-        except CompilerException:
-            raise BoardConfigHubException('NO PORT FOUND')
         return True  # if return None, client is not informed that the request is done
 
     def setLibVersion(self, version):

@@ -1,3 +1,4 @@
+import os
 from subprocess import call
 
 from libs import utils
@@ -12,6 +13,7 @@ class MacPackager(Packager):
         Packager.__init__(self)
 
         self.installerPath = self.installerFolder + os.sep + "darwin"
+        self.installerOfflinePath = self.installerFolder + os.sep + "darwinOffline"
         self.installerCreationPath = self.web2boardPath + os.sep + "darwin_web2board_{}".format(self.version)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")
         self.installerCreationName = os.path.basename(self.installerCreationPath)
@@ -20,10 +22,8 @@ class MacPackager(Packager):
         self.resPlatformPath = os.path.join(self.resPath, "darwin")
 
         self.web2boardExecutableName = "web2board.app"
-        self.sconsExecutableName = "sconsScript"
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-mac.spec")
-        self.sconsSpecPath = os.path.join(self.web2boardPath, "scons-mac.spec")
 
         self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
         self.installerBackgroundPath = os.path.join(self.resPlatformPath, "installer_background.jpg")
@@ -42,7 +42,7 @@ class MacPackager(Packager):
                            os.path.join(self._getInstallerCreationResPath(), "Scons"))
 
             log.debug("Gettings Scons Packages")
-            self._getSconsPackages()
+            self._getPlatformioPackages()
 
             log.debug("Creating Web2board Executable")
             call(["pyinstaller", '-w', self.web2boardSpecPath])

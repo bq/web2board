@@ -64,7 +64,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
-        self.onSearchPorts()
+        ports = sorted(self.compileUpdater.getAvailablePorts())
+        self.ui.ports.addItems(ports)
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")

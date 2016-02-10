@@ -26,6 +26,8 @@ from os.path import (abspath, basename, dirname, expanduser, isdir, isfile,
 from platform import system, uname
 from threading import Thread
 
+from libs import utils
+from libs.PathsManager import PathsManager
 from platformio import __apiurl__, __version__, exception
 
 # pylint: disable=wrong-import-order
@@ -157,6 +159,8 @@ def _get_projconf_option_dir(name, default=None):
 
 
 def get_home_dir():
+    return PathsManager.PLATFORMIO_PACKAGES_PATH  # [JORGE_GARCIA] modified optimization
+
     home_dir = _get_projconf_option_dir(
         "home_dir",
         join(expanduser("~"), ".platformio")

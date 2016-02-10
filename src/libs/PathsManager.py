@@ -13,6 +13,7 @@ class PathsManager:
         pass
 
     EXECUTABLE_PATH = None
+    EXECUTABLE_FILE = None
     MAIN_PATH = None
     PLATFORMIO_PACKAGES_NAME = "platformIoPackages"
     PLATFORMIO_PACKAGES_PATH = None
@@ -22,6 +23,7 @@ class PathsManager:
 
     RES_PATH = None
     RES_ICO_PATH = None
+    RES_ICONS_PATH = None
     RES_BOARDS_PATH = None
     RES_PLATFORMIO_PATH = None
     RES_LOGGING_CONFIG_PATH = None
@@ -74,15 +76,15 @@ class PathsManager:
 
     @classmethod
     def getSonsExecutablePath(cls):
-        if utils.areWeFrozen():
-            if utils.isWindows():
-                scriptName = "sconsScript.exe"
-            else:
-                scriptName = "sconsScript"
-            return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", scriptName))
+        return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", "sconsScript.py"))
+
+    @classmethod
+    def getPlatformIOPackagesPath(cls):
+        if cls.MAIN_PATH.endswith("Scons"):
+            path = os.path.join(cls.MAIN_PATH, os.path.pardir, cls.PLATFORMIO_PACKAGES_NAME)
         else:
-            scriptName = "sconsScript.py"
-        return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", scriptName))
+            path = os.path.join(cls.RES_PATH, cls.PLATFORMIO_PACKAGES_NAME)
+        return os.path.abspath(path)
 
     @classmethod
     def logRelevantEnvironmentalPaths(cls):
@@ -101,6 +103,30 @@ class PathsManager:
     def getOriginalPathForUpdate(cls):
         return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board"))
 
+    @classmethod
+    def setAllConstants(cls):
+        cls.EXECUTABLE_PATH = os.getcwd()
+        cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.getOsExecutableExtension()
+        cls.MAIN_PATH = cls.getMainPath()
+        cls.CONFIG_PATH = os.path.join(cls.MAIN_PATH, 'config.json')
+        cls.COPY_PATH = cls.getCopyPathForUpdate()
+        cls.ORIGINAL_PATH = cls.getOriginalPathForUpdate()
+
+        cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
+        cls.RES_ICO_PATH = os.path.join(cls.RES_PATH, 'Web2board.ico')
+        cls.RES_ICONS_PATH = os.path.join(cls.RES_PATH, 'icons')
+        cls.TEST_RES_PATH = os.path.join(cls.MAIN_PATH, 'Test', 'resources')
+        cls.RES_BOARDS_PATH = os.path.join(cls.RES_PATH, 'boards.txt')
+        cls.RES_PLATFORMIO_PATH = os.path.join(cls.RES_PATH, 'platformio')
+        cls.RES_LOGGING_CONFIG_PATH = os.path.join(cls.RES_PATH, 'logging.json')
+        cls.RES_SCONS_ZIP_PATH = os.path.join(cls.MAIN_PATH, "res", "sconsRes.zip")
+
+        cls.PROGRAM_PATH = cls.getExternalDataFolder()
+        cls.PLATFORMIO_WORKSPACE_PATH = os.path.join(cls.RES_PATH, 'platformioWorkSpace')
+        cls.TEST_SETTINGS_PATH = os.path.join(cls.RES_PATH, 'TestSettings', 'resources')
+        cls.SCONS_EXECUTABLE_PATH = cls.getSonsExecutablePath()
+
+        cls.PLATFORMIO_PACKAGES_PATH = cls.getPlatformIOPackagesPath()
 
 # set working directory to src
 if utils.areWeFrozen():
@@ -108,24 +134,5 @@ if utils.areWeFrozen():
 else:
     os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
 
-pm = PathsManager
-pm.EXECUTABLE_PATH = os.getcwd()
-pm.MAIN_PATH = pm.getMainPath()
-pm.CONFIG_PATH = os.path.join(pm.MAIN_PATH, 'config.json')
-pm.COPY_PATH = pm.getCopyPathForUpdate()
-pm.ORIGINAL_PATH = pm.getOriginalPathForUpdate()
 
-pm.RES_PATH = os.path.join(pm.MAIN_PATH, 'res')
-pm.RES_ICO_PATH = os.path.join(pm.RES_PATH, 'Web2board.ico')
-pm.TEST_RES_PATH = os.path.join(pm.MAIN_PATH, 'Test', 'resources')
-pm.RES_BOARDS_PATH = os.path.join(pm.RES_PATH, 'boards.txt')
-pm.RES_PLATFORMIO_PATH = os.path.join(pm.RES_PATH, 'platformio')
-pm.RES_LOGGING_CONFIG_PATH = os.path.join(pm.RES_PATH, 'logging.json')
-pm.RES_SCONS_ZIP_PATH = os.path.join(pm.MAIN_PATH, "res", "sconsRes.zip")
-
-pm.PROGRAM_PATH = pm.getExternalDataFolder()
-pm.PLATFORMIO_WORKSPACE_PATH = os.path.join(pm.RES_PATH, 'platformioWorkSpace')
-pm.TEST_SETTINGS_PATH = os.path.join(pm.RES_PATH, 'TestSettings', 'resources')
-pm.SCONS_EXECUTABLE_PATH = pm.getSonsExecutablePath()
-
-pm.PLATFORMIO_PACKAGES_PATH = os.path.join(pm.RES_PATH, pm.PLATFORMIO_PACKAGES_NAME)
+PathsManager.setAllConstants()

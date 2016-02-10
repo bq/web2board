@@ -16,6 +16,8 @@ import subprocess
 
 from datetime import timedelta, datetime
 
+import sys
+
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
 from platformio.platformioUtils import run as platformioRun
@@ -85,6 +87,10 @@ class CompilerUploader:
             raise Exception("Platform not supported")
 
         os.chmod(avrExePath, int("755", 8)) # force to have executable rights in avrdude
+
+        avrExePath = os.path.relpath(avrExePath, os.getcwd())
+        avrConfigPath = os.path.relpath(avrConfigPath, os.getcwd())
+
         cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
         p = subprocess.Popen(cmd, shell=utils.isWindows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -105,7 +111,7 @@ class CompilerUploader:
             log.debug("{2}: {0}, {1}".format(output, err, port))
             return 'Device signature =' in output or 'Device signature =' in err
         except:
-            log.debug("Error searching port: {}".format(port))
+            log.debug("Error searching port: {}".format(port), exc_info=1)
             return False
 
     def _run(self, code, upload=False, uploadPort=None):
