@@ -12,7 +12,7 @@ print os.getcwd()
 
 a = Analysis(['src' + os.sep + 'web2board.py'],
              pathex=[os.getcwd()],
-             hiddenimports=['libs.LoggingUtils', 'libs.WSCommunication.Hubs'],
+             hiddenimports=['libs.LoggingUtils', 'libs.WSCommunication.Hubs', 'UserList', 'UserString', 'ConfigParser'],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)
