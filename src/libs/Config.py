@@ -17,12 +17,13 @@ class Config:
     proxy = None
     version = "2.0.0"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
-    bitbloqLibsVersion = "0.0.5"
+    bitbloqLibsVersion = "0.1.0"
     bitbloqLibsLibraries = [
         "BitbloqBatteryReader",
         "BitbloqButtonPad",
         "BitbloqEnableInterrupt",
         "BitbloqEncoder",
+        "BitbloqEvolution",
         "BitbloqHTS221",
         "BitbloqJoystick",
         "BitbloqLedMatrix",
