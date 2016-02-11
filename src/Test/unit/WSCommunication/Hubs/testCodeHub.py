@@ -22,13 +22,13 @@ class TestCodeHub(unittest.TestCase):
         client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
         self.sender = flexmock(isCompiling=lambda: None, isUploading=lambda x: None)
 
+        self.codeHub.compilerUploader = CompilerUploader()
         self.original_compile = self.codeHub.compilerUploader.compile
         self.original_getPort = self.codeHub.compilerUploader.getPort
 
         self.codeHub.compilerUploader = flexmock(self.codeHub.compilerUploader,
                                                  compile=lambda *args: [True, None],
                                                  getPort=None)
-
         self.board = self.codeHub.compilerUploader.board
 
     def tearDown(self):
@@ -80,7 +80,7 @@ class TestCodeHub(unittest.TestCase):
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
         self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return((True, {})).once()
 
-        result = self.codeHub.uploadHex("hexText", self.codeHub.compilerUploader.board, self.sender)
+        result = self.codeHub.uploadHex("hexText", self.board, self.sender)
 
         self.assertTrue(result)
 

@@ -1,6 +1,7 @@
 import json
 import logging
-
+import os
+import time
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 
 log = logging.getLogger(__name__)
@@ -10,14 +11,15 @@ log.addHandler(logging.NullHandler())
 class WSConnectionHandler(ConnectionHandler):
     def opened(self, *args):
         from libs.MainApp import getMainApp
-        self._connectedClient = self.commEnvironment.constructConnectedClient(self.writeMessage)
-        clientId = "Bitbloq"
-        self.ID = self._connectedClient.onOpen(clientId)
-        log.debug("open new connection with ID: %s " % str(self.ID))
+        super(WSConnectionHandler, self).opened(*args)
         getMainApp().w2bGui.changeConnectedStatus()
 
     def closed(self, code, reason=None):
         super(WSConnectionHandler, self).closed(code, reason)
+        if self._connectedClient.ID == "Bitbloq":
+            log.info("Bitbloq disconnected, closing web2board")
+            time.sleep(1)
+            os._exit(1)
 
     def received_message(self, message):
         if message.data == "version":  # bitbloq thinks we are in version 1

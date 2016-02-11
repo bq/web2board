@@ -87,21 +87,13 @@ class TestBoardConfigHub(unittest.TestCase):
             self.boardConfigHub.setBoard("12343425234", self.sender)
             self.assertEqual(str(cm.exception), 'NOT SUPPORTED BOARD')
 
-    def test_setBoard_raisesExceptionIfNoPortFound(self):
+    def test_setBoard_noticeTheClientWhenSettingBoard(self):
         self.sender.should_receive("isSettingBoard").once()
+
+        self.boardConfigHub.setBoard("uno", self.sender)
+
+    def test_setBoard_SettingBoardDoesNotSetPort(self):
         self.sender.should_receive("isSettingPort").never()
-
-        def newGetPort():
-            raise CompilerException(ERROR_NO_PORT_FOUND, self.boardConfigHub.compilerUploader.board)
-
-        self.boardConfigHub.compilerUploader.getPort = newGetPort
-        with self.assertRaises(BoardConfigHubException) as cm:
-            self.boardConfigHub.setBoard("uno", self.sender)
-            self.assertEqual(str(cm.exception), 'NO PORT FOUND')
-
-    def test_setBoard_noticeTheClientWhenSettingBoardAndSettingPort(self):
-        self.sender.should_receive("isSettingBoard").once()
-        self.sender.should_receive("isSettingPort").once()
 
         self.boardConfigHub.setBoard("uno", self.sender)
 

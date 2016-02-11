@@ -8,7 +8,7 @@ from PySide.QtGui import QApplication
 from flexmock import flexmock
 
 from Test.testingUtils import restoreAllTestResources
-from libs.CompilerUploader import CompilerUploader, CompilerException
+from libs.CompilerUploader import CompilerUploader, CompilerException, getCompilerUploader
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
@@ -22,9 +22,15 @@ except:
 
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None
+    portToUse = None
 
     @classmethod
     def setUpClass(cls):
+        if cls is None:
+            try:
+                cls.portToUse = getCompilerUploader().getPort()
+            except:
+                cls.portToUse = -1
         cls.platformToUse = cls.__getPlatformToUse()
         log.info("""\n\n
         #######################################
@@ -129,43 +135,52 @@ class TestCompilerUploader(unittest.TestCase):
         pprint(compileResult)
         self.assertFalse(compileResult[0])
 
+    def __assertPortFount(self):
+        if self.portToUse == -1:
+            self.assertFalse(True, "port not found, check board: {} is connected".format(self.connectedBoard))
+
     def test_upload_raisesExceptionIfBoardIsNotSet(self):
+        self.__assertPortFount()
         self.assertIsNone(self.compiler.board)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
-        self.assertRaises(CompilerException, self.compiler.upload, workingCpp)
+        self.assertRaises(CompilerException, self.compiler.upload, workingCpp, uploadPort=self.portToUse)
 
     def test_upload_compilesSuccessfullyWithWorkingCpp(self):
+        self.__assertPortFount()
         self.compiler.setBoard(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
-        uploadResult = self.compiler.upload(workingCpp)
+        uploadResult = self.compiler.upload(workingCpp, uploadPort=self.portToUse)
 
         pprint(uploadResult)
         self.assertTrue(uploadResult[0])
 
     def test_upload_resultErrorIsFalseUsingNotWorkingCpp(self):
+        self.__assertPortFount()
         self.compiler.setBoard(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
 
-        uploadResult = self.compiler.upload(notWorkingCpp)
+        uploadResult = self.compiler.upload(notWorkingCpp, uploadPort=self.portToUse)
 
         pprint(uploadResult)
         self.assertFalse(uploadResult[0])
 
     def test_uploadAvrHex_returnsOkResultWithWorkingHexFile(self):
+        self.__assertPortFount()
         self.compiler.setBoard(self.connectedBoard)
-        result = self.compiler.uploadAvrHex(self.hexFilePath)
+        result = self.compiler.uploadAvrHex(self.hexFilePath, uploadPort=self.portToUse)
 
         self.assertTrue(result[0])
 
     def test_uploadAvrHex_returnsBadResultWithNonExistingFile(self):
+        self.__assertPortFount()
         self.compiler.setBoard(self.connectedBoard)
 
-        result = self.compiler.uploadAvrHex("notExistingFile")
+        result = self.compiler.uploadAvrHex("notExistingFile", uploadPort=self.portToUse)
 
         self.assertFalse(result[0])
 

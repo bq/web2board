@@ -38,7 +38,7 @@ class Config:
     ]
     bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     checkOnlineUpdates = True
-    logLevel = logging.DEBUG
+    logLevel = logging.INFO
     pluginsPath = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
     @classmethod

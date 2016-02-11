@@ -29,7 +29,7 @@ originalSEcho = click.secho
 
 
 def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=None, *args, **kwargs):
-    if not utils.areWeFrozen():
+    if not utils.areWeFrozen() and False:
         originalEcho(message, file, nl, err, color)
     log.debug(message)
 
