@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Mon Feb 08 08:31:36 2016
+# Created: Fri Feb 12 14:17:38 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,9 +64,14 @@ class Ui_Web2board(object):
         self.menuBar.setObjectName("menuBar")
         self.menuTest = QtGui.QMenu(self.menuBar)
         self.menuTest.setObjectName("menuTest")
-        self.menuPlugins = QtGui.QMenu(self.menuTest)
-        self.menuPlugins.setObjectName("menuPlugins")
+        self.menuPlugins_2 = QtGui.QMenu(self.menuBar)
+        self.menuPlugins_2.setObjectName("menuPlugins_2")
         Web2board.setMenuBar(self.menuBar)
+        self.toolBar = QtGui.QToolBar(Web2board)
+        self.toolBar.setMovable(False)
+        self.toolBar.setFloatable(False)
+        self.toolBar.setObjectName("toolBar")
+        Web2board.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.actionConnected = QtGui.QAction(Web2board)
         self.actionConnected.setCheckable(True)
         self.actionConnected.setObjectName("actionConnected")
@@ -76,12 +81,16 @@ class Ui_Web2board(object):
         self.actionSerialMonitor.setObjectName("actionSerialMonitor")
         self.actionSettings = QtGui.QAction(Web2board)
         self.actionSettings.setObjectName("actionSettings")
-        self.menuPlugins.addAction(self.actionSerialMonitor)
+        self.actionAbout = QtGui.QAction(Web2board)
+        self.actionAbout.setObjectName("actionAbout")
         self.menuTest.addAction(self.actionSettings)
-        self.menuTest.addAction(self.actionConnected)
         self.menuTest.addSeparator()
-        self.menuTest.addAction(self.menuPlugins.menuAction())
+        self.menuTest.addAction(self.actionAbout)
+        self.menuPlugins_2.addAction(self.actionSerialMonitor)
         self.menuBar.addAction(self.menuTest.menuAction())
+        self.menuBar.addAction(self.menuPlugins_2.menuAction())
+        self.toolBar.addAction(self.actionSettings)
+        self.toolBar.addAction(self.actionSerialMonitor)
 
         self.retranslateUi(Web2board)
         QtCore.QMetaObject.connectSlotsByName(Web2board)
@@ -91,15 +100,17 @@ class Ui_Web2board(object):
         self.forceClose.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
-        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))
+        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Refresh ports", None, QtGui.QApplication.UnicodeUTF8))
         self.updateGroupbox.setTitle(QtGui.QApplication.translate("Web2board", "Downloading", None, QtGui.QApplication.UnicodeUTF8))
         self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuTest.setTitle(QtGui.QApplication.translate("Web2board", "Actions", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuPlugins.setTitle(QtGui.QApplication.translate("Web2board", "Plugins", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuTest.setTitle(QtGui.QApplication.translate("Web2board", "File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuPlugins_2.setTitle(QtGui.QApplication.translate("Web2board", "Plugins", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolBar.setWindowTitle(QtGui.QApplication.translate("Web2board", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
         self.actionConnected.setText(QtGui.QApplication.translate("Web2board", "Connected", None, QtGui.QApplication.UnicodeUTF8))
         self.actionConnected.setToolTip(QtGui.QApplication.translate("Web2board", "Show if bitbloq is connected", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPlugins.setText(QtGui.QApplication.translate("Web2board", "Plugins", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSerialMonitor.setText(QtGui.QApplication.translate("Web2board", "SerialMonitor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSerialMonitor.setToolTip(QtGui.QApplication.translate("Web2board", "Serial monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSettings.setText(QtGui.QApplication.translate("Web2board", "Settings", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout.setText(QtGui.QApplication.translate("Web2board", "About", None, QtGui.QApplication.UnicodeUTF8))
 

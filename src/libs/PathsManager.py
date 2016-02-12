@@ -128,6 +128,10 @@ class PathsManager:
 
         cls.PLATFORMIO_PACKAGES_PATH = cls.getPlatformIOPackagesPath()
 
+    @classmethod
+    def getIconPath(cls, iconName):
+        return os.path.join(PathsManager.RES_ICONS_PATH, iconName)
+
 # set working directory to src
 if utils.areWeFrozen():
     os.chdir(utils.getModulePath())

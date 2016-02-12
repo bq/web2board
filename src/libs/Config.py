@@ -50,7 +50,6 @@ class Config:
         return configValues
 
     @classmethod
-    @synchronized(my_lock)
     def readConfigFile(cls):
         if os.path.exists(PathsManager.CONFIG_PATH):
             try:

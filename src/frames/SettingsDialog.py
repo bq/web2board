@@ -55,7 +55,7 @@ class SettingsDialog(QtGui.QDialog):
 
     def closeEvent(self, event):
         if self.__closeFromOk:
-            QtGui.QMessageBox.information(self, "Info", "It is necessary to restart web2board to apply changes")
+            QtGui.QMessageBox.information(self, "Info", "You might need to restart web2board to apply changes")
             event.accept()
         else:
             reply = QtGui.QMessageBox.question(self, "Are you sure you want to quit? ",
@@ -82,6 +82,7 @@ class SettingsDialog(QtGui.QDialog):
             Config.logLevel = logging.ERROR
         elif self.ui.logLevelCritial.isChecked():
             Config.logLevel = logging.CRITICAL
+        logging.getLogger().handlers[0].level = Config.logLevel
 
         Config.checkOnlineUpdates = self.ui.checkUpdates.isChecked()
         Config.storeConfigInFile()

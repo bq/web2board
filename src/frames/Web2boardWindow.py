@@ -36,9 +36,14 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(Web2boardWindow, self).__init__(*args, **kwargs)
-        self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.ui = Ui_Web2board()
         self.ui.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
+        self.ui.forceClose.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
+        self.ui.actionSerialMonitor.setIcon(QtGui.QIcon(PathsManager.getIconPath("monitor.png")))
+        self.ui.searchPorts.setIcon(QtGui.QIcon(PathsManager.getIconPath("refresh.png")))
+        self.ui.actionSettings.setIcon(QtGui.QIcon(PathsManager.getIconPath("settings.png")))
+        self.ui.actionAbout.setIcon(QtGui.QIcon(PathsManager.getIconPath("about.png")))
         self.availablePorts = []
         self.autoPort = None
 
@@ -212,7 +217,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def changeConnectedStatus(self):
-        self.ui.actionConnected.setChecked(True)
+        pass
 
     @InGuiThread()
     def startDownload(self, version):

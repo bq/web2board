@@ -74,7 +74,6 @@ class MainApp:
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
-            getCompilerUploader().setBoard(options.board)
 
         if options.update2version is not None:
             log.debug("updating version")

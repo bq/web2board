@@ -29,7 +29,7 @@ originalSEcho = click.secho
 
 
 def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=None, *args, **kwargs):
-    if not utils.areWeFrozen() and False:
+    if not utils.areWeFrozen():
         originalEcho(message, file, nl, err, color)
     log.debug(message)
 
@@ -55,18 +55,14 @@ if __name__ == "__main__":
     try:
         utils.killProcess("web2board")
 
-
         def closeSigHandler(signal, frame):
             log.warning("closing server")
             getMainApp().w2bServer.server_close()
             log.warning("server closed")
             os._exit(1)
 
-
         app = getMainApp()
-
         signal.signal(signal.SIGINT, closeSigHandler)
-
         qtApp = app.startMain()
         sys.exit(qtApp.exec_())
     except SystemExit:
