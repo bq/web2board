@@ -16,7 +16,6 @@ from wshubsapi.HubsInspector import HubsInspector
 
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
-from libs.CompilerUploader import getCompilerUploader
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread

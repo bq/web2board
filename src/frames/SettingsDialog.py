@@ -69,7 +69,7 @@ class SettingsDialog(QtGui.QDialog):
 
     def onOk(self):
         Config.webSocketIP = self.ui.wsIP.text()
-        Config.wsPort = self.ui.wsPort.value()
+        Config.webSocketPort = self.ui.wsPort.value()
         Config.proxy = self.ui.proxy.text()
 
         if self.ui.logLevelDebug.isChecked():

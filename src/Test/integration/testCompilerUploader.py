@@ -8,7 +8,7 @@ from PySide.QtGui import QApplication
 from flexmock import flexmock
 
 from Test.testingUtils import restoreAllTestResources
-from libs.CompilerUploader import CompilerUploader, CompilerException, getCompilerUploader
+from libs.CompilerUploader import CompilerUploader, CompilerException
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
 from libs.utils import isWindows, isLinux, isMac
@@ -28,7 +28,7 @@ class TestCompilerUploader(unittest.TestCase):
     def setUpClass(cls):
         if cls is None:
             try:
-                cls.portToUse = getCompilerUploader().getPort()
+                cls.portToUse = CompilerUploader.construct(cls.__getPlatformToUse()).getPort()
             except:
                 cls.portToUse = -1
         cls.platformToUse = cls.__getPlatformToUse()
@@ -58,8 +58,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.notWorkingCppPath = os.path.join(self.srcCopyPath, "notWorking.cpp")
         self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.cpp")
         self.connectedBoard = self.platformToUse
-        self.compiler = CompilerUploader()
-        self.compiler.board = None
+        self.compiler = CompilerUploader.construct(self.__getPlatformToUse())
 
         self.original_searchPorts = self.compiler._searchBoardPort
         restoreAllTestResources()
@@ -68,7 +67,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.compiler._searchBoardPort = self.original_searchPorts
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
-        self.assertIsNone(self.compiler.board)
+        self.compiler.board = None
         self.assertRaises(CompilerException, self.compiler.getPort)
 
     def test_getPort_raiseExceptionIfNotReturningPort(self):
@@ -102,7 +101,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.__assertRightPortName(port)
 
     def test_compile_raisesExceptionIfBoardIsNotSet(self):
-        self.assertIsNone(self.compiler.board)
+        self.compiler.board = None
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
@@ -141,7 +140,7 @@ class TestCompilerUploader(unittest.TestCase):
 
     def test_upload_raisesExceptionIfBoardIsNotSet(self):
         self.__assertPortFount()
-        self.assertIsNone(self.compiler.board)
+        self.compiler.board = None
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 

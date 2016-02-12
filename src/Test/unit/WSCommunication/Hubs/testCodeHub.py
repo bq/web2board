@@ -6,12 +6,15 @@ from wshubsapi.Hub import UnsuccessfulReplay
 from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
+
+from Test.testingUtils import createCompilerUploaderMock, createSenderMock
 from libs.CompilerUploader import CompilerUploader
+from libs.MainApp import getMainApp
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
+from libs.PathsManager import PathsManager as pm
+from flexmock import flexmock, flexmock_teardown
 # do not remove
 import libs.WSCommunication.Hubs
-from libs.PathsManager import PathsManager as pm
-from flexmock import flexmock
 
 
 class TestCodeHub(unittest.TestCase):
@@ -19,25 +22,35 @@ class TestCodeHub(unittest.TestCase):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         self.codeHub = HubsInspector.getHubInstance(CodeHub)
-        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
-        self.sender = flexmock(isCompiling=lambda: None, isUploading=lambda x: None)
+        """:type : CodeHub"""
 
-        self.codeHub.compilerUploader = CompilerUploader()
-        self.original_compile = self.codeHub.compilerUploader.compile
-        self.original_getPort = self.codeHub.compilerUploader.getPort
+        self.sender = createSenderMock()
+        getMainApp().w2bGui = flexmock(getSelectedPort=lambda *args: None,
+                                       isSerialMonitorRunning=lambda: False)
 
-        self.codeHub.compilerUploader = flexmock(self.codeHub.compilerUploader,
-                                                 compile=lambda *args: [True, None],
-                                                 getPort=None)
-        self.board = self.codeHub.compilerUploader.board
+        self.originalConstruct = CompilerUploader.construct
+        self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
+        self.board = CompilerUploader.DEFAULT_BOARD
 
     def tearDown(self):
-        self.codeHub.compilerUploader.compile = self.original_compile
-        self.codeHub.compilerUploader.getPort = self.original_compile
+        flexmock_teardown()
         removeHubsSubclasses()
 
-    def test_construct_getCompilerUploader(self):
-        self.assertIsInstance(self.codeHub.compilerUploader, CompilerUploader)
+    def test_construct_getsCompilerUploader(self):
+        self.assertIsInstance(self.originalConstruct(), CompilerUploader)
+
+    def test_construct_getsCompilerUploaderWithRightBoard(self):
+        compiler1 = self.originalConstruct("uno")
+        compiler2 = self.originalConstruct("diemilanove")
+
+        self.assertEqual(compiler1.board, "uno")
+        self.assertEqual(compiler2.board, "diemilanove")
+
+    def test_construct_getsSameObjectIfPassedSameBoard(self):
+        compiler1 = self.originalConstruct("uno")
+        compiler2 = self.originalConstruct("uno")
+
+        self.assertIs(compiler1, compiler2)
 
     def test_compile_senderIsAdvisedCompilingIsOngoing(self):
         self.sender.should_receive("isCompiling").once()
@@ -46,7 +59,7 @@ class TestCodeHub(unittest.TestCase):
 
     def test_compile_callsCompilerCompile(self):
         code = "myCode"
-        (self.codeHub.compilerUploader
+        (self.compileUploaderMock
          .should_receive("compile")
          .once()
          .with_args(code)
@@ -56,29 +69,29 @@ class TestCodeHub(unittest.TestCase):
 
     def test_upload_senderIsAdvisedCodeIsUploadingWithPort(self):
         port = "PORT"
-        self.codeHub.compilerUploader.should_receive("getPort").and_return(port).once()
-        self.codeHub.compilerUploader.should_receive("upload").and_return((True, {})).once()
+        self.compileUploaderMock.should_receive("getPort").and_return(port).once()
+        self.compileUploaderMock.should_receive("upload").and_return((True, {})).once()
 
-        self.codeHub.upload("myCode",self.board, self.sender)
+        self.codeHub.upload("myCode", self.board, self.sender)
 
     def test_upload_successfulUploadReturnsTrue(self):
-        self.codeHub.compilerUploader.should_receive("upload").and_return((True, {})).once()
+        self.compileUploaderMock.should_receive("upload").and_return((True, {})).once()
 
-        result = self.codeHub.upload("myCode",self.board, self.sender)
+        result = self.codeHub.upload("myCode", self.board, self.sender)
 
         self.assertEqual(result, True)
 
     def test_upload_unsuccessfulUploadReturnsErrorString(self):
         uploadReturn = (False, {"err": "errorMessage"},)
-        self.codeHub.compilerUploader.should_receive("upload").and_return(uploadReturn).once()
+        self.compileUploaderMock.should_receive("upload").and_return(uploadReturn).once()
 
-        result = self.codeHub.upload("myCode",self.board, self.sender)
+        result = self.codeHub.upload("myCode", self.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
         self.assertEqual(result.replay, uploadReturn[1]["err"])
 
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
-        self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return((True, {})).once()
+        self.compileUploaderMock.should_receive("uploadAvrHex").and_return((True, {})).once()
 
         result = self.codeHub.uploadHex("hexText", self.board, self.sender)
 
@@ -86,9 +99,9 @@ class TestCodeHub(unittest.TestCase):
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
         uploadReturn = (False, {"err": "errorMessage"},)
-        self.codeHub.compilerUploader.should_receive("uploadAvrHex").and_return(uploadReturn).once()
+        self.compileUploaderMock.should_receive("uploadAvrHex").and_return(uploadReturn).once()
 
-        result = self.codeHub.uploadHex("hexText", self.codeHub.compilerUploader.board, self.sender)
+        result = self.codeHub.uploadHex("hexText", self.compileUploaderMock.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
         self.assertEqual(result.replay, uploadReturn[1]["err"])

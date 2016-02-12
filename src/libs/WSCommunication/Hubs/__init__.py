@@ -1,3 +1,3 @@
-import BoardConfigHub
+import VersionsHandlerHub
 import CodeHub
 import SerialMonitorHub

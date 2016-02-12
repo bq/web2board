@@ -43,6 +43,14 @@ class Config:
     pluginsPath = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
     @classmethod
+    def _getConfigValues(cls):
+        configValues = {k: v for k, v in cls.__dict__.items() if not k.startswith("_")}
+        configValues.pop("readConfigFile")
+        configValues.pop("storeConfigInFile")
+        return configValues
+
+    @classmethod
+    @synchronized(my_lock)
     def readConfigFile(cls):
         if os.path.exists(PathsManager.CONFIG_PATH):
             try:
@@ -59,7 +67,5 @@ class Config:
     @synchronized(my_lock)
     def storeConfigInFile(cls):
         with open(PathsManager.CONFIG_PATH, "w") as f:
-            configValues = {k: v for k, v in cls.__dict__.items() if not k.startswith("_")}
-            configValues.pop("readConfigFile")
-            configValues.pop("storeConfigInFile")
+            configValues = cls._getConfigValues()
             json.dump(configValues, f, indent=4)

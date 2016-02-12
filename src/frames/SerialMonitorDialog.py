@@ -21,7 +21,7 @@ import serial
 from PySide.QtGui import QTextCursor
 
 from frames.UI_serialMonitor import Ui_SerialMonitor
-from libs.CompilerUploader import getCompilerUploader
+from libs.CompilerUploader import CompilerUploader
 from libs.Config import Config
 from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
@@ -80,7 +80,7 @@ class SerialMonitorDialog(QtGui.QDialog):
 
         self.ui.pauseButton.clicked.connect(self.onPauseButtonClicked)
 
-        self.port = port if port is not None else getCompilerUploader().getPort()
+        self.port = port if port is not None else CompilerUploader().getPort()
 
         self.api.SerialMonitorHub.client.received = self.refreshConsole
         self.api.SerialMonitorHub.server.startConnection(self.port) \

@@ -26,7 +26,7 @@ from platformio.util import get_boards
 from libs import utils
 
 log = logging.getLogger(__name__)
-__globalCompilerUploader = None
+
 
 ERROR_BOARD_NOT_SET = {"code": 0, "message": "Necessary to define board before to run/compile"}
 ERROR_BOARD_NOT_SUPPORTED = {"code": 1, "message": "Board: {0} not Supported"}
@@ -46,9 +46,13 @@ class CompilerException(Exception):
 # Class CompilerUploader, created to support different compilers & uploaders
 #
 class CompilerUploader:
-    def __init__(self):
+    __globalCompilerUploaderHolder = {}
+    DEFAULT_BOARD = "uno"
+
+    def __init__(self, board=DEFAULT_BOARD):
         self.lastPortUsed = None
-        self.board = 'uno'  # we use the board name as the environment (check platformio.ini)
+        self.board = board  # we use the board name as the environment (check platformio.ini)
+        self._checkBoardConfiguration()
 
     def _getIniConfig(self, environment):
         """
@@ -191,12 +195,12 @@ class CompilerUploader:
         resultOk = okText in output or okText in err
         return resultOk, {"out": output, "err": err}
 
-
-def getCompilerUploader():
-    """
-    :rtype: CompilerUploader
-    """
-    global __globalCompilerUploader
-    if __globalCompilerUploader is None:
-        __globalCompilerUploader = CompilerUploader()
-    return __globalCompilerUploader
+    @classmethod
+    def construct(cls, board=DEFAULT_BOARD):
+        """
+        :param board: board mcu string
+        :rtype: CompilerUploader
+        """
+        if board not in cls.__globalCompilerUploaderHolder:
+            cls.__globalCompilerUploaderHolder[board] = CompilerUploader(board)
+        return cls.__globalCompilerUploaderHolder[board]

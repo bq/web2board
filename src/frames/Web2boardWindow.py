@@ -23,7 +23,7 @@ import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.SettingsDialog import SettingsDialog
 from frames.UI_web2board import Ui_Web2board
-from libs.CompilerUploader import getCompilerUploader
+from libs.CompilerUploader import CompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
@@ -42,7 +42,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.availablePorts = []
         self.autoPort = None
 
-        self.compileUpdater = getCompilerUploader()
+        self.compileUpdater = CompilerUploader.construct()
         self.serialMonitor = None
         self.updaterDialog = None
         self.settingsDialog = SettingsDialog(self)

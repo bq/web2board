@@ -4,7 +4,7 @@ import serial
 import time
 from wshubsapi.Hub import Hub
 
-from libs.CompilerUploader import getCompilerUploader
+from libs.CompilerUploader import CompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 
@@ -60,14 +60,18 @@ class SerialMonitorHub(Hub):
 
     def __init__(self):
         super(SerialMonitorHub, self).__init__()
-        self.compilerUploader = getCompilerUploader()
+        self.compilerUploader = None
         self.serialConnections = dict()
         """:type : dict from int to SerialConnection"""
 
-    def startApp(self, port=None):
+    def startApp(self, port, board):
+        self.compilerUploader = CompilerUploader.construct(board)
         from libs.MainApp import getMainApp
         mainApp = getMainApp()
-        mainApp.w2bGui.startSerialMonitorApp(port)
+        if not mainApp.w2bGui.isSerialMonitorRunning():
+            if port is None:
+                port = CompilerUploader.construct(board).getPort()
+            mainApp.w2bGui.startSerialMonitorApp(port)
         return True
 
     def startConnection(self, port, baudrate=9600):

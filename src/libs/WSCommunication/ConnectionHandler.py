@@ -4,6 +4,7 @@ import os
 import time
 from wshubsapi.ConnectionHandlers.WS4Py import ConnectionHandler
 
+from libs import utils
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
@@ -19,7 +20,8 @@ class WSConnectionHandler(ConnectionHandler):
         if self._connectedClient.ID == "Bitbloq":
             log.info("Bitbloq disconnected, closing web2board")
             time.sleep(1)
-            os._exit(1)
+            if utils.areWeFrozen():
+                os._exit(1)
 
     def received_message(self, message):
         if message.data == "version":  # bitbloq thinks we are in version 1

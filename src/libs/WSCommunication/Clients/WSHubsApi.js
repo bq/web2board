@@ -109,7 +109,7 @@ function HubsAPI(url, serverTimeout) {
         onOpen: function () {},
         onReconnecting: function () {},
         onMessageError: function (error){},
-        onClientFunctionNotFound: function (hub, function {}
+        onClientFunctionNotFound: function (hub, func) {}
     };
 
     this.defaultErrorHandler = null;
@@ -256,46 +256,41 @@ function HubsAPI(url, serverTimeout) {
         }
     };
     this.CodeHub.client = {};
-    this.BoardConfigHub = {};
-    this.BoardConfigHub.server = {
-        __HUB_NAME : 'BoardConfigHub',
+    this.VersionsHandlerHub = {};
+    this.VersionsHandlerHub.server = {
+        __HUB_NAME : 'VersionsHandlerHub',
         
         setLibVersion : function (version){
             
-            return constructMessage('BoardConfigHub', 'setLibVersion', arguments);
+            return constructMessage('VersionsHandlerHub', 'setLibVersion', arguments);
         },
 
         unsubscribeToHub : function (){
             
-            return constructMessage('BoardConfigHub', 'unsubscribeToHub', arguments);
+            return constructMessage('VersionsHandlerHub', 'unsubscribeToHub', arguments);
         },
 
         getSubscribedClientsToHub : function (){
             
-            return constructMessage('BoardConfigHub', 'getSubscribedClientsToHub', arguments);
+            return constructMessage('VersionsHandlerHub', 'getSubscribedClientsToHub', arguments);
         },
 
         subscribeToHub : function (){
             
-            return constructMessage('BoardConfigHub', 'subscribeToHub', arguments);
-        },
-
-        setBoard : function (board){
-            
-            return constructMessage('BoardConfigHub', 'setBoard', arguments);
+            return constructMessage('VersionsHandlerHub', 'subscribeToHub', arguments);
         },
 
         getVersion : function (){
             
-            return constructMessage('BoardConfigHub', 'getVersion', arguments);
+            return constructMessage('VersionsHandlerHub', 'getVersion', arguments);
         },
 
         setWeb2boardVersion : function (version){
             
-            return constructMessage('BoardConfigHub', 'setWeb2boardVersion', arguments);
+            return constructMessage('VersionsHandlerHub', 'setWeb2boardVersion', arguments);
         }
     };
-    this.BoardConfigHub.client = {};
+    this.VersionsHandlerHub.client = {};
     this.SerialMonitorHub = {};
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
@@ -320,8 +315,8 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('SerialMonitorHub', 'getSubscribedClientsToHub', arguments);
         },
 
-        startApp : function (port){
-            arguments[0] = port === undefined ? null : port;
+        startApp : function (port, board){
+            
             return constructMessage('SerialMonitorHub', 'startApp', arguments);
         },
 

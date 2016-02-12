@@ -7,13 +7,14 @@ from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 from wshubsapi.utils import WSMessagesReceivedQueue
 
+from Test.testingUtils import createCompilerUploaderMock, createSenderMock
 from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 
 # do not remove
 import libs.WSCommunication.Hubs
 
-from flexmock import flexmock
+from flexmock import flexmock, flexmock_teardown
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs.MainApp import getMainApp
@@ -25,22 +26,15 @@ class TestSerialMonitorHub(unittest.TestCase):
         global subprocess
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.serialMonitorHub = HubsInspector.getHubInstance(SerialMonitorHub)
-        client = ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
-        self.sender = flexmock(isCompiling=lambda: None, isUploading=lambda x: None)
+        """:type : SerialMonitorHub"""
+        self.serialMonitorHub.compilerUploader = CompilerUploader.construct()
+        self.sender = createSenderMock()
 
-        self.original_compile = self.serialMonitorHub.compilerUploader.compile
-        self.original_getPort = self.serialMonitorHub.compilerUploader.getPort
-
-
-        self.serialMonitorHub.compilerUploader = flexmock(self.serialMonitorHub.compilerUploader,
-                                                          compile=None,
-                                                          getPort=None)
+        self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
 
     def tearDown(self):
-        self.serialMonitorHub.compilerUploader.compile = self.original_compile
-        self.serialMonitorHub.compilerUploader.getPort = self.original_compile
+        flexmock_teardown()
         removeHubsSubclasses()
-
 
     def __PopenChecker(self, args, **kwargs):
         if not areWeFrozen():
@@ -58,6 +52,6 @@ class TestSerialMonitorHub(unittest.TestCase):
         original_startSerialMonitorApp = mainApp.w2bGui.startSerialMonitorApp
         try:
             flexmock(mainApp.w2bGui).should_receive("startSerialMonitorApp").once()
-            self.serialMonitorHub.startApp()
+            self.serialMonitorHub.startApp("COM1", CompilerUploader.DEFAULT_BOARD)
         finally:
             mainApp.w2bGui.startSerialMonitorApp = original_startSerialMonitorApp

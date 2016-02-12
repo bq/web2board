@@ -8,7 +8,7 @@ import time
 import sys
 from flexmock import flexmock
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restoreAllTestResources, restorePaths
 from libs import utils
 from libs.PathsManager import PathsManager
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
@@ -23,7 +23,6 @@ class TestWeb2boardUpdater(unittest.TestCase):
         self.updater = Web2BoardUpdater()
         self.original_osPopen = os.popen
         self.original_osRename = os.rename
-        self.original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
         self.original_sleep = time.sleep
         self.original_logCritical = Web2BoardUpdater.log.critical
         self.original_shutil_copy = shutil.copytree
@@ -42,7 +41,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
         shutil.copytree = self.original_shutil_copy
         sys.exit = self.original_exit
         Web2BoardUpdater.log.critical = self.original_logCritical
-        PathsManager.__dict__ = {x: y for x, y in self.original_pathManagerDict.items()}
+        restorePaths()
 
     def __setUpForCopyingFolders(self):
         PathsManager.MAIN_PATH = self.mainPath
