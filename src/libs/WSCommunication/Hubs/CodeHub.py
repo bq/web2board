@@ -23,7 +23,7 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        log.info("Compiling from {}".format(_sender[0].ID))
+        log.info("Compiling from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code))
         _sender.isCompiling()
         compileReport = CompilerUploader.construct().compile(code)
@@ -34,7 +34,7 @@ class CodeHub(Hub):
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
-        log.info("Uploading for board {} from {}".format(board, _sender[0].ID))
+        log.info("Uploading for board {} from {}".format(board, _sender.ID))
         log.debug("Uploading code: {}".format(code))
         uploadPort = self.__prepareUpload(board, _sender)
         if isinstance(uploadPort, UnsuccessfulReplay):
@@ -49,7 +49,7 @@ class CodeHub(Hub):
         :type hexText: str
         :type _sender: ConnectedClientsGroup
         """
-        log.info("upload Hex text for board {} from {}".format(board, _sender[0].ID))
+        log.info("upload Hex text for board {} from {}".format(board, _sender.ID))
         uploadPort = self.__prepareUpload(board, _sender)
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort

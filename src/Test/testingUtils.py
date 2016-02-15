@@ -1,6 +1,7 @@
 import os
 import shutil
 from flexmock import flexmock
+from wshubsapi.ClientInHub import ClientInHub
 from wshubsapi.ConnectedClient import ConnectedClient
 
 from libs.CompilerUploader import CompilerUploader
@@ -8,8 +9,8 @@ from libs.PathsManager import PathsManager
 from libs import utils
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
-
 __original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
+
 
 def restoreAllTestResources():
     if os.path.exists(PathsManager.TEST_SETTINGS_PATH):
@@ -34,11 +35,9 @@ def createSenderMock():
         def __init__(self):
             self.isCompiling = lambda: None
             self.isUploading = lambda x: None
+            self.ID = None
 
-        def __getitem__(self, item):
-            return ConnectedClient(_DEFAULT_PICKER, None, lambda x=0: x)
-
-    return flexmock(Sender())
+    return flexmock(Sender(), ID="testID")
 
 
 def restorePaths():
