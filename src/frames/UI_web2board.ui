@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>942</width>
-    <height>475</height>
+    <width>946</width>
+    <height>453</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,18 +17,6 @@
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="forceClose">
-        <property name="text">
-         <string>Force close</string>
-        </property>
-        <property name="icon">
-         <iconset theme="warning">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
@@ -111,7 +99,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>942</width>
+     <width>946</width>
      <height>21</height>
     </rect>
    </property>
@@ -131,25 +119,6 @@
    </widget>
    <addaction name="menuTest"/>
    <addaction name="menuPlugins_2"/>
-  </widget>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionSettings"/>
-   <addaction name="actionSerialMonitor"/>
   </widget>
   <action name="actionConnected">
    <property name="checkable">
@@ -183,6 +152,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionFoceClose">
+   <property name="text">
+    <string>FoceClose</string>
    </property>
   </action>
  </widget>

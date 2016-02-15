@@ -18,7 +18,6 @@ from flexmock import flexmock, flexmock_teardown
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 from libs.MainApp import getMainApp
-from libs.utils import areWeFrozen
 
 
 class TestSerialMonitorHub(unittest.TestCase):
@@ -35,13 +34,6 @@ class TestSerialMonitorHub(unittest.TestCase):
     def tearDown(self):
         flexmock_teardown()
         removeHubsSubclasses()
-
-    def __PopenChecker(self, args, **kwargs):
-        if not areWeFrozen():
-            self.assertEqual(args.pop(0), "python")
-        self.assertTrue(os.path.exists(args[0]))
-        self.assertIn("SerialMonitor", args[0])
-        return "Popen"
 
     def test_construct_getCompilerUploader(self):
         self.assertIsInstance(self.serialMonitorHub.compilerUploader, CompilerUploader)

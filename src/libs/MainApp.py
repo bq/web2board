@@ -22,6 +22,7 @@ from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
 log = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class MainApp:
         self.w2bServer = None
         self.isAppRunning = False
 
-    @asynchronous()
+    @InGuiThread()
     def __handleTestingOptions(self, testing):
         sys.argv[1:] = []
         if testing != "none":
@@ -47,10 +48,10 @@ class MainApp:
                 runAllTests()
 
             log.warning("\nexiting program in 10s")
-            time.sleep(3)
+            time.sleep(10)
             os._exit(1)
 
-    def handleSystemArguments(self):
+    def parseSystemArguments(self):
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
         parser.add_option("--host", default=Config.webSocketIP, type='string', action="store", dest="host", help="hostname (localhost)")
         parser.add_option("--port", default=Config.webSocketPort, type='int', action="store", dest="port", help="port (9876)")
@@ -62,18 +63,27 @@ class MainApp:
                           help="show more or less info, options[debug, info, warning, error, critical")
         parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
                           help="auto update to version")
+        parser.add_option("--proxy", default=Config.proxy, type='string', action="store", dest="proxy",
+                          help="define proxy for internet connections")
 
-        options, args = parser.parse_args()
-        log.info("init web2board with options: {}, and args: {}".format(options, args))
+        return parser.parse_args()
 
+    def handleSystemArguments(self, options, args):
         logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
                      "error": logging.ERROR, "critical": logging.CRITICAL}
+
+        log.info("init web2board with options: {}, and args: {}".format(options, args))
 
         logLevel = options.logLevel if isinstance(options.logLevel, int) else logLevels[options.logLevel.lower()]
         logging.getLogger().handlers[0].level = logLevel
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
+
+        if options.proxy is not None:
+            proxy = urllib2.ProxyHandler({'http': options.proxy})
+            opener = urllib2.build_opener(proxy)
+            urllib2.install_opener(opener)
 
         if options.update2version is not None:
             log.debug("updating version")
@@ -100,7 +110,7 @@ class MainApp:
     def updateLibrariesIfNecessary(self):
         try:
             getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
-        except (HTTPError, URLError):
+        except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
             proxyName = raw_input("introduce proxy name: ")
             proxy = urllib2.ProxyHandler({'http': proxyName})
@@ -123,6 +133,17 @@ class MainApp:
         return app
 
     @asynchronous()
+    def checkConnectionIsAvailable(self):
+        time.sleep(1)
+        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
+        try:
+            self.api.connect()
+        except Exception as e:
+            pass
+        else:
+            log.info("connection available")
+
+    @asynchronous()
     def startServer(self, options):
         while not self.isAppRunning:
             time.sleep(0.1)
@@ -131,15 +152,17 @@ class MainApp:
 
         try:
             log.info("listening...")
+            self.checkConnectionIsAvailable()
             self.w2bServer.serve_forever()
         finally:
             os._exit(1)
 
     def startMain(self):
         Config.readConfigFile()
+        options, args = self.parseSystemArguments()
         app = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()
-        options = self.handleSystemArguments()
+        self.handleSystemArguments(options, args)
         PathsManager.logRelevantEnvironmentalPaths()
         if options.update2version is None:
             self.startServer(options)

@@ -7,7 +7,6 @@ from libs.Downloader import Downloader
 
 
 class TestDownloader(unittest.TestCase):
-
     def setUp(self):
         global urllib
         self.downloader = Downloader(refreshTime=0.01)

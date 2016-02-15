@@ -8,6 +8,7 @@ from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
+from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 from libs.MainApp import getMainApp
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
@@ -25,7 +26,8 @@ class TestCodeHub(unittest.TestCase):
         """:type : CodeHub"""
 
         self.sender = createSenderMock()
-        getMainApp().w2bGui = flexmock(getSelectedPort=lambda *args: None,
+        getMainApp().w2bGui = flexmock(Web2boardWindow(),
+                                       getSelectedPort=lambda *args: None,
                                        isSerialMonitorRunning=lambda: False)
 
         self.originalConstruct = CompilerUploader.construct

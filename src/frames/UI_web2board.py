@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Fri Feb 12 14:17:38 2016
+# Created: Mon Feb 15 15:22:57 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,19 +12,13 @@ from PySide import QtCore, QtGui
 class Ui_Web2board(object):
     def setupUi(self, Web2board):
         Web2board.setObjectName("Web2board")
-        Web2board.resize(942, 475)
+        Web2board.resize(946, 453)
         self.centralwidget = QtGui.QWidget(Web2board)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.forceClose = QtGui.QPushButton(self.centralwidget)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.forceClose.setIcon(icon)
-        self.forceClose.setObjectName("forceClose")
-        self.horizontalLayout.addWidget(self.forceClose)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.label = QtGui.QLabel(self.centralwidget)
@@ -60,18 +54,13 @@ class Ui_Web2board(object):
         self.statusbar.setObjectName("statusbar")
         Web2board.setStatusBar(self.statusbar)
         self.menuBar = QtGui.QMenuBar(Web2board)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 942, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 946, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuTest = QtGui.QMenu(self.menuBar)
         self.menuTest.setObjectName("menuTest")
         self.menuPlugins_2 = QtGui.QMenu(self.menuBar)
         self.menuPlugins_2.setObjectName("menuPlugins_2")
         Web2board.setMenuBar(self.menuBar)
-        self.toolBar = QtGui.QToolBar(Web2board)
-        self.toolBar.setMovable(False)
-        self.toolBar.setFloatable(False)
-        self.toolBar.setObjectName("toolBar")
-        Web2board.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.actionConnected = QtGui.QAction(Web2board)
         self.actionConnected.setCheckable(True)
         self.actionConnected.setObjectName("actionConnected")
@@ -83,21 +72,20 @@ class Ui_Web2board(object):
         self.actionSettings.setObjectName("actionSettings")
         self.actionAbout = QtGui.QAction(Web2board)
         self.actionAbout.setObjectName("actionAbout")
+        self.actionFoceClose = QtGui.QAction(Web2board)
+        self.actionFoceClose.setObjectName("actionFoceClose")
         self.menuTest.addAction(self.actionSettings)
         self.menuTest.addSeparator()
         self.menuTest.addAction(self.actionAbout)
         self.menuPlugins_2.addAction(self.actionSerialMonitor)
         self.menuBar.addAction(self.menuTest.menuAction())
         self.menuBar.addAction(self.menuPlugins_2.menuAction())
-        self.toolBar.addAction(self.actionSettings)
-        self.toolBar.addAction(self.actionSerialMonitor)
 
         self.retranslateUi(Web2board)
         QtCore.QMetaObject.connectSlotsByName(Web2board)
 
     def retranslateUi(self, Web2board):
         Web2board.setWindowTitle(QtGui.QApplication.translate("Web2board", "Web2board", None, QtGui.QApplication.UnicodeUTF8))
-        self.forceClose.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Refresh ports", None, QtGui.QApplication.UnicodeUTF8))
@@ -105,7 +93,6 @@ class Ui_Web2board(object):
         self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTest.setTitle(QtGui.QApplication.translate("Web2board", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuPlugins_2.setTitle(QtGui.QApplication.translate("Web2board", "Plugins", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolBar.setWindowTitle(QtGui.QApplication.translate("Web2board", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
         self.actionConnected.setText(QtGui.QApplication.translate("Web2board", "Connected", None, QtGui.QApplication.UnicodeUTF8))
         self.actionConnected.setToolTip(QtGui.QApplication.translate("Web2board", "Show if bitbloq is connected", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPlugins.setText(QtGui.QApplication.translate("Web2board", "Plugins", None, QtGui.QApplication.UnicodeUTF8))
@@ -113,4 +100,5 @@ class Ui_Web2board(object):
         self.actionSerialMonitor.setToolTip(QtGui.QApplication.translate("Web2board", "Serial monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSettings.setText(QtGui.QApplication.translate("Web2board", "Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAbout.setText(QtGui.QApplication.translate("Web2board", "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFoceClose.setText(QtGui.QApplication.translate("Web2board", "FoceClose", None, QtGui.QApplication.UnicodeUTF8))
 
