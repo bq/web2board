@@ -77,6 +77,13 @@ class TestCompilerUploader(unittest.TestCase):
 
         self.assertRaises(CompilerException, self.compiler.getPort)
 
+    def test_getPort_raiseExceptionIfNotAvailablePort(self):
+        self.compiler = flexmock(self.compiler, getAvailablePorts=lambda: [])
+
+        self.compiler.setBoard('uno')
+
+        self.assertRaises(CompilerException, self.compiler.getPort)
+
     def test_getPort_returnPortIfSearchPortsReturnsOnePort(self):
         self.compiler = flexmock(self.compiler, _searchBoardPort=lambda: 1)
         self.compiler.setBoard('uno')

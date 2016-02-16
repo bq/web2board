@@ -4,14 +4,16 @@ import threading
 from threading import Timer
 import jsonpickle
 from jsonpickle.pickler import Pickler
-from ws4py.client.threadedclient import WebSocketClient
 from wshubsapi import utils
 
 utils.setSerializerDateTimeHandler()
+_defaultPickler = Pickler(max_depth=4, max_iter=100, make_refs=False)
+
 
 class WSSimpleObject(object):
     def __setattr__(self, key, value):
         return super(WSSimpleObject, self).__setattr__(key, value)
+
 
 class WSReturnObject:
     class WSCallbacks:
@@ -21,6 +23,7 @@ class WSReturnObject:
 
     def done(self, onSuccess, onError=None):
         pass
+
 
 class GenericServer(object):
     __messageID = 0
@@ -44,93 +47,100 @@ class GenericServer(object):
         return jsonpickle.encode(self.pickler.flatten(obj2ser))
 
 
-class WSHubsAPIClient(WebSocketClient):
-    def __init__(self, api, url, serverTimeout):
-        super(WSHubsAPIClient, self).__init__(url)
-        self.__returnFunctions = dict()
-        self.isOpened = False
-        self.serverTimeout = serverTimeout
-        self.api = api
-        self.log = logging.getLogger(__name__)
-        self.log.addHandler(logging.NullHandler())
+def constructAPIClientClass(clientClass):
+    if clientClass is None:
+        from ws4py.client.threadedclient import WebSocketClient
+        clientClass = WebSocketClient
+    class WSHubsAPIClient(clientClass):
+        def __init__(self, api, url, serverTimeout):
+            clientClass.__init__(self, url)
+            self.__returnFunctions = dict()
+            self.isOpened = False
+            self.serverTimeout = serverTimeout
+            self.api = api
+            self.log = logging.getLogger(__name__)
+            self.log.addHandler(logging.NullHandler())
 
-    def opened(self):
-        self.isOpened = True
-        self.log.debug("Connection opened")
+        def opened(self):
+            self.isOpened = True
+            self.log.debug("Connection opened")
 
-    def closed(self, code, reason=None):
-        self.log.debug("Connection closed with code:\n%s\nAnd reason:\n%s" % (code, reason))
+        def closed(self, code, reason=None):
+            self.log.debug("Connection closed with code:\n%s\nAnd reason:\n%s" % (code, reason))
 
-    def received_message(self, m):
-        try:
-            msgObj = json.loads(m.data.decode('utf-8'))
-        except Exception as e:
-            self.onError(e)
-            return
-        if "replay" in msgObj:
-            f = self.__returnFunctions.get(msgObj["ID"], None)
-            if f and msgObj["success"]:
-                f.onSuccess(msgObj["replay"])
-            elif f and f.onError:
-                f.onError(msgObj["replay"])
-        else:
+        def received_message(self, m):
             try:
-                clientFunction = self.api.__getattribute__(msgObj["hub"]).client.__dict__[msgObj["function"]]
-                clientFunction(*msgObj["args"])
-            except:
-                pass
+                msgObj = json.loads(m.data.decode('utf-8'))
+            except Exception as e:
+                self.onError(e)
+                return
+            if "replay" in msgObj:
+                f = self.__returnFunctions.get(msgObj["ID"], None)
+                if f and msgObj["success"]:
+                    f.onSuccess(msgObj["replay"])
+                elif f and f.onError:
+                    f.onError(msgObj["replay"])
+            else:
+                try:
+                    clientFunction = self.api.__getattribute__(msgObj["hub"]).client.__dict__[msgObj["function"]]
+                    clientFunction(*msgObj["args"])
+                except:
+                    pass
 
+            self.log.debug("Received message: %s" % m.data.decode('utf-8'))
 
-        self.log.debug("Received message: %s" % m.data.decode('utf-8'))
+        def getReturnFunction(self, ID):
+            """
+            :rtype : WSReturnObject
+            """
 
-    def getReturnFunction(self, ID):
-        """
-        :rtype : WSReturnObject
-        """
+            def returnFunction(onSuccess, onError=None, timeOut=None):
+                callBacks = self.__returnFunctions.get(ID, WSReturnObject.WSCallbacks())
+                onError = onError if onError is not None else self.defaultOnError
 
-        def returnFunction(onSuccess, onError=None, timeOut=None):
-            callBacks = self.__returnFunctions.get(ID, WSReturnObject.WSCallbacks())
-            onError = onError if onError is not None else self.defaultOnError
-
-            def onSuccessWrapper(*args, **kwargs):
-                onSuccess(*args, **kwargs)
-                self.__returnFunctions.pop(ID, None)
-
-            callBacks.onSuccess = onSuccessWrapper
-            if onError is not None:
-                def onErrorWrapper(*args, **kwargs):
-                    onError(*args, **kwargs)
+                def onSuccessWrapper(*args, **kwargs):
+                    onSuccess(*args, **kwargs)
                     self.__returnFunctions.pop(ID, None)
 
-                callBacks.onError = onErrorWrapper
-            else:
-                callBacks.onError = None
-            self.__returnFunctions[ID] = callBacks
+                callBacks.onSuccess = onSuccessWrapper
+                if onError is not None:
+                    def onErrorWrapper(*args, **kwargs):
+                        onError(*args, **kwargs)
+                        self.__returnFunctions.pop(ID, None)
 
-            timeOut = timeOut if timeOut is not None else self.serverTimeout
-            r = Timer(timeOut, self.onTimeOut, (ID,))
-            r.start()
+                    callBacks.onError = onErrorWrapper
+                else:
+                    callBacks.onError = None
+                self.__returnFunctions[ID] = callBacks
 
-        retObject = WSReturnObject()
-        retObject.done = returnFunction
+                timeOut = timeOut if timeOut is not None else self.serverTimeout
+                r = Timer(timeOut, self.onTimeOut, (ID,))
+                r.start()
 
-        # todo create timeout
-        return retObject
+            retObject = WSReturnObject()
+            retObject.done = returnFunction
 
-    def onError(self, exception):
-        self.log.exception("Error in protocol")
+            # todo create timeout
+            return retObject
 
-    def onTimeOut(self, messageId):
-        f = self.__returnFunctions.pop(messageId, None)
-        if f and f.onError:
-            f.onError("timeOut Error")
+        def onError(self, exception):
+            self.log.exception("Error in protocol")
 
-    def defaultOnError(self, error):
-        pass
+        def onTimeOut(self, messageId):
+            f = self.__returnFunctions.pop(messageId, None)
+            if f and f.onError:
+                f.onError("timeOut Error")
+
+        def defaultOnError(self, error):
+            pass
+
+    return WSHubsAPIClient
+
 
 class HubsAPI(object):
-    def __init__(self, url, serverTimeout=5.0, pickler=Pickler(max_depth=4, max_iter=100, make_refs=False)):
-        self.wsClient = WSHubsAPIClient(self, url, serverTimeout)
+    def __init__(self, url, serverTimeout=5.0, clientClass=None, pickler=_defaultPickler):
+        apiClientClass = constructAPIClientClass(clientClass)
+        self.wsClient = apiClientClass(self, url, serverTimeout)
         self.wsClient.defaultOnError = lambda error: None
         self.pickler = pickler
         self.UtilsAPIHub = self.__UtilsAPIHub(self.wsClient, self.pickler)

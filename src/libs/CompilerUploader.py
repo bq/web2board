@@ -144,7 +144,7 @@ class CompilerUploader:
         baudRate = options["boardData"]["upload"]["speed"]
         availablePorts = self.getAvailablePorts()
         if len(availablePorts) <= 0:
-            return []
+            return None
         log.info("Found available ports: {}".format(availablePorts))
         portResultHashMap = {}
         for port in availablePorts:
@@ -159,6 +159,7 @@ class CompilerUploader:
                     log.info("Found board port: {}".format(port))
                     self.lastPortUsed = port
                     return port
+        return None
 
     def getAvailablePorts(self):
         portsToUpload = utils.listSerialPorts(lambda x: x[2] != "n/a")
