@@ -230,14 +230,14 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-            def unsubscribeToHub(self, ):
+            def unsubscribeFromHub(self, ):
                 """
                 :rtype : WSReturnObject
                 """
                 args = list()
                 
                 id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeToHub", "args": args, "ID": id}
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
@@ -298,14 +298,14 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-            def unsubscribeToHub(self, ):
+            def unsubscribeFromHub(self, ):
                 """
                 :rtype : WSReturnObject
                 """
                 args = list()
                 
                 id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeToHub", "args": args, "ID": id}
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
@@ -417,14 +417,14 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-            def unsubscribeToHub(self, ):
+            def unsubscribeFromHub(self, ):
                 """
                 :rtype : WSReturnObject
                 """
                 args = list()
                 
                 id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeToHub", "args": args, "ID": id}
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
@@ -548,14 +548,14 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-            def unsubscribeToHub(self, ):
+            def unsubscribeFromHub(self, ):
                 """
                 :rtype : WSReturnObject
                 """
                 args = list()
                 
                 id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeToHub", "args": args, "ID": id}
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction

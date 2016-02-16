@@ -175,11 +175,6 @@ function HubsAPI(url, serverTimeout) {
     this.UtilsAPIHub.server = {
         __HUB_NAME : 'UtilsAPIHub',
         
-        unsubscribeToHub : function (){
-            
-            return constructMessage('UtilsAPIHub', 'unsubscribeToHub', arguments);
-        },
-
         getSubscribedClientsToHub : function (){
             
             return constructMessage('UtilsAPIHub', 'getSubscribedClientsToHub', arguments);
@@ -193,6 +188,11 @@ function HubsAPI(url, serverTimeout) {
         isClientConnected : function (clientId){
             
             return constructMessage('UtilsAPIHub', 'isClientConnected', arguments);
+        },
+
+        unsubscribeFromHub : function (){
+            
+            return constructMessage('UtilsAPIHub', 'unsubscribeFromHub', arguments);
         },
 
         subscribeToHub : function (){
@@ -215,11 +215,6 @@ function HubsAPI(url, serverTimeout) {
     this.CodeHub.server = {
         __HUB_NAME : 'CodeHub',
         
-        unsubscribeToHub : function (){
-            
-            return constructMessage('CodeHub', 'unsubscribeToHub', arguments);
-        },
-
         uploadHex : function (hexText, board){
             
             return constructMessage('CodeHub', 'uploadHex', arguments);
@@ -228,6 +223,11 @@ function HubsAPI(url, serverTimeout) {
         getSubscribedClientsToHub : function (){
             
             return constructMessage('CodeHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        unsubscribeFromHub : function (){
+            
+            return constructMessage('CodeHub', 'unsubscribeFromHub', arguments);
         },
 
         upload : function (code, board){
@@ -265,14 +265,14 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('VersionsHandlerHub', 'setLibVersion', arguments);
         },
 
-        unsubscribeToHub : function (){
-            
-            return constructMessage('VersionsHandlerHub', 'unsubscribeToHub', arguments);
-        },
-
         getSubscribedClientsToHub : function (){
             
             return constructMessage('VersionsHandlerHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        unsubscribeFromHub : function (){
+            
+            return constructMessage('VersionsHandlerHub', 'unsubscribeFromHub', arguments);
         },
 
         subscribeToHub : function (){
@@ -295,11 +295,6 @@ function HubsAPI(url, serverTimeout) {
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
         
-        unsubscribeToHub : function (){
-            
-            return constructMessage('SerialMonitorHub', 'unsubscribeToHub', arguments);
-        },
-
         findBoardPort : function (){
             
             return constructMessage('SerialMonitorHub', 'findBoardPort', arguments);
@@ -313,6 +308,11 @@ function HubsAPI(url, serverTimeout) {
         getSubscribedClientsToHub : function (){
             
             return constructMessage('SerialMonitorHub', 'getSubscribedClientsToHub', arguments);
+        },
+
+        unsubscribeFromHub : function (){
+            
+            return constructMessage('SerialMonitorHub', 'unsubscribeFromHub', arguments);
         },
 
         startApp : function (port, board){
