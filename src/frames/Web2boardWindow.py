@@ -44,6 +44,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.actionSettings.setIcon(QtGui.QIcon(PathsManager.getIconPath("settings.png")))
         self.ui.actionAbout.setIcon(QtGui.QIcon(PathsManager.getIconPath("about.png")))
         self.ui.actionForceClose.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
+        self.ui.forceCloseButton.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
         self.availablePorts = []
         self.autoPort = None
 
@@ -66,6 +67,7 @@ class Web2boardWindow(QtGui.QMainWindow):
             os._exit(1)
 
         self.ui.actionForceClose.triggered.connect(quit)
+        self.ui.forceCloseButton.clicked.connect(quit)
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Tue Feb 16 11:30:28 2016
+# Created: Tue Feb 16 14:46:55 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,6 +19,11 @@ class Ui_Web2board(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.forceCloseButton = QtGui.QPushButton(self.centralwidget)
+        self.forceCloseButton.setObjectName("forceCloseButton")
+        self.horizontalLayout.addWidget(self.forceCloseButton)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
@@ -30,8 +35,6 @@ class Ui_Web2board(object):
         self.searchPorts = QtGui.QPushButton(self.centralwidget)
         self.searchPorts.setObjectName("searchPorts")
         self.horizontalLayout.addWidget(self.searchPorts)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.console = QtGui.QTextEdit(self.centralwidget)
         self.console.setReadOnly(True)
@@ -83,6 +86,7 @@ class Ui_Web2board(object):
 
     def retranslateUi(self, Web2board):
         Web2board.setWindowTitle(QtGui.QApplication.translate("Web2board", "Web2board", None, QtGui.QApplication.UnicodeUTF8))
+        self.forceCloseButton.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Refresh ports", None, QtGui.QApplication.UnicodeUTF8))
