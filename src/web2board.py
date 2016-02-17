@@ -58,9 +58,13 @@ if __name__ == "__main__":
         utils.killProcess("web2board")
 
         def closeSigHandler(signal, frame):
-            log.warning("closing server")
-            getMainApp().w2bServer.server_close()
-            log.warning("server closed")
+            try:
+                log.warning("closing server")
+                getMainApp().w2bServer.server_close()
+                log.warning("server closed")
+            except:
+                log.warning("unable to close server")
+
             os._exit(1)
 
         app = getMainApp()

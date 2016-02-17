@@ -5,7 +5,7 @@ from pprint import pprint
 
 import click
 from PySide.QtGui import QApplication
-from flexmock import flexmock
+from flexmock import flexmock, flexmock_teardown
 
 from Test.testingUtils import restoreAllTestResources
 from libs.CompilerUploader import CompilerUploader, CompilerException
@@ -26,7 +26,7 @@ class TestCompilerUploader(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if cls is None:
+        if cls.portToUse is None:
             try:
                 cls.portToUse = CompilerUploader.construct(cls.__getPlatformToUse()).getPort()
             except:
@@ -60,11 +60,10 @@ class TestCompilerUploader(unittest.TestCase):
         self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader.construct(self.__getPlatformToUse())
 
-        self.original_searchPorts = self.compiler._searchBoardPort
         restoreAllTestResources()
 
     def tearDown(self):
-        self.compiler._searchBoardPort = self.original_searchPorts
+        flexmock_teardown()
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.compiler.board = None
