@@ -127,10 +127,9 @@ class MainApp:
         app = QtGui.QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
         self.__mainWidget = QWidget()
-        self.w2bGui = Web2boardWindow(self.__mainWidget if not utils.isMac() else None, app)
+        self.w2bGui = Web2boardWindow(self.__mainWidget, app)
         if not isTrayIconAvailable():
             self.w2bGui.setWindowState(Qt.WindowMinimized)
-            self.w2bGui.show()
         self.isAppRunning = True
         return app
 

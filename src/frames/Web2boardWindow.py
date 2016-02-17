@@ -24,6 +24,7 @@ import libs.MainApp
 from frames.SerialMonitorDialog import SerialMonitorDialog
 from frames.SettingsDialog import SettingsDialog
 from frames.UI_web2board import Ui_Web2board
+from libs import utils
 from libs.CompilerUploader import CompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
@@ -78,6 +79,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
         ports = sorted(self.compileUpdater.getAvailablePorts())
         self.ui.ports.addItems(ports)
+        self.show()
+        self.hide()
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
@@ -102,6 +105,12 @@ class Web2boardWindow(QtGui.QMainWindow):
         except:
             pass
         return style
+
+    def hide(self):
+        if utils.isMac():
+            self.setWindowState(self.windowState() | Qt.WindowMinimized)
+            return
+        return super(Web2boardWindow, self).hide()
 
     def onSearchPorts(self):
         self.ui.searchPorts.setEnabled(False)
@@ -230,7 +239,7 @@ class Web2boardWindow(QtGui.QMainWindow):
     def showApp(self):
         if not self.isVisible():
             self.show()
-        if self.windowState() == Qt.WindowMinimized:
+        if self.windowState() & Qt.WindowMinimized:
             self.setWindowState(Qt.WindowNoState)
         self.parent.raise_()
         self.app.setActiveWindow(self.parent)
