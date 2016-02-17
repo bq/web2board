@@ -42,7 +42,7 @@ class CodeHub(Hub):
 
         compileReport = CompilerUploader.construct(board).upload(code, uploadPort=uploadPort)
 
-        return self.__handleCompileReport(compileReport)
+        return self.__handleCompileReport(compileReport, uploadPort)
 
     def uploadHex(self, hexText, board, _sender):
         """
@@ -59,7 +59,7 @@ class CodeHub(Hub):
 
         relPath = os.path.relpath(tmpHexFile.name, os.getcwd())
         compileReport = CompilerUploader.construct(board).uploadAvrHex(relPath, uploadPort=uploadPort)
-        return self.__handleCompileReport(compileReport)
+        return self.__handleCompileReport(compileReport, uploadPort)
 
     def uploadHexFile(self, hexFilePath, board, _sender):
         """
@@ -69,7 +69,7 @@ class CodeHub(Hub):
         log.info("upload HexFile for board {} from {}".format(board, _sender[0].ID))
         with open(hexFilePath) as hexFile:
             hexText = hexFile.read()
-        self.uploadHex(hexText, board, _sender)
+        return self.uploadHex(hexText, board, _sender)
 
     @staticmethod
     def tryToTerminateSerialCommProcess():
@@ -82,10 +82,10 @@ class CodeHub(Hub):
             except:
                 log.exception("unable to terminate process")
 
-    def __handleCompileReport(self, compileReport):
+    def __handleCompileReport(self, compileReport, port=True):
         # second check to prevent problem with bluetooth
         if compileReport[0] or "Writing | #" in compileReport[1]["err"]:
-            return True
+            return port
         else:
             return self._constructUnsuccessfulReplay(compileReport[1]["err"])
 

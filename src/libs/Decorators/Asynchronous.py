@@ -4,7 +4,7 @@ from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
 
 log = logging.getLogger(__name__)
-__executor = ThreadPoolExecutor(max_workers=10)
+__executor = ThreadPoolExecutor(max_workers=25)
 
 
 class AsynchronousNotDone(Exception):
