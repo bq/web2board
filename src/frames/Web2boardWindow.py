@@ -10,6 +10,7 @@
 # Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import cgi
 import logging
 import os
 import sys
@@ -34,8 +35,9 @@ log = logging.getLogger(__name__)
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
 
-    def __init__(self, *args, **kwargs):
-        super(Web2boardWindow, self).__init__(*args, **kwargs)
+    def __init__(self, parent=None, *args, **kwargs):
+        super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
+        self.parent = parent
         self.ui = Ui_Web2board()
         self.ui.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
@@ -45,6 +47,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.actionAbout.setIcon(QtGui.QIcon(PathsManager.getIconPath("about.png")))
         self.ui.actionForceClose.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
         self.ui.forceCloseButton.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
+        self.ui.clean.setIcon(QtGui.QIcon(PathsManager.getIconPath("clean.png")))
         self.availablePorts = []
         self.autoPort = None
 
@@ -68,6 +71,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
         self.ui.actionForceClose.triggered.connect(quit)
         self.ui.forceCloseButton.clicked.connect(quit)
+        self.ui.clean.clicked.connect(self.cleanConsole)
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
@@ -100,13 +104,13 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     def onSearchPorts(self):
         self.ui.searchPorts.setEnabled(False)
-        self.ui.statusbar.showMessage("Searching ports...")
+        self.ui.searchPorts.setEnabled(False)
         self.__getPorts()
 
     def createTrayIcon(self):
         def onTrayIconActivated(reason):
             if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
-                self.show()
+                self.showApp()
 
         showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
         quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
@@ -125,12 +129,19 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.show()
 
     def closeEvent(self, event):
+        self.hide()
         if libs.MainApp.isTrayIconAvailable():
-            self.hide()
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
-        else:
-            self.setWindowState(Qt.WindowMinimized)
         event.ignore()
+
+    def changeEvent(self, event):
+        if event.type() == QtCore.QEvent.WindowStateChange:
+            if self.windowState() & QtCore.Qt.WindowMinimized:
+                event.ignore()
+                self.hide()
+                return
+
+        super(Web2boardWindow, self).changeEvent(event)
 
     def getSelectedPort(self):
         port = self.ui.ports.currentText()
@@ -141,8 +152,13 @@ class Web2boardWindow(QtGui.QMainWindow):
         return port
 
     @InGuiThread()
+    def cleanConsole(self):
+        self.ui.console.clear()
+
+    @InGuiThread()
     def logInConsole(self, record):
         kwargs = self.__getConsoleKwargs(record)
+        kwargs["msg"] = cgi.escape(kwargs["msg"])
         message = self.CONSOLE_MESSAGE_DIV.format(**kwargs)
 
         if message.endswith("\n"):
@@ -180,7 +196,6 @@ class Web2boardWindow(QtGui.QMainWindow):
     @InGuiThread()
     def onRefreshFinished(self):
         lastPortSelection = self.ui.ports.currentText()
-        self.ui.statusbar.showMessage("")
         self.ui.ports.clear()
         portsInCombo = ["AUTO"] + self.availablePorts
         for i, port in enumerate(portsInCombo):
@@ -212,10 +227,17 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def showApp(self):
-        if not self.isVisible():
-            self.show()
+        self.update()
+        self.show()
+        if self.windowState() == Qt.WindowMinimized:
             self.setWindowState(Qt.WindowNoState)
-            self.raise_()
+        self.raise_()
+        self.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+        self.update()
+
+    @InGuiThread()
+    def closeApp(self):
+        self.close()
 
     @InGuiThread()
     def changeConnectedStatus(self):

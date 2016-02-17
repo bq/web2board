@@ -143,6 +143,7 @@ class HubsAPI(object):
         self.wsClient = apiClientClass(self, url, serverTimeout)
         self.wsClient.defaultOnError = lambda error: None
         self.pickler = pickler
+        self.WindowHub = self.__WindowHub(self.wsClient, self.pickler)
         self.UtilsAPIHub = self.__UtilsAPIHub(self.wsClient, self.pickler)
         self.CodeHub = self.__CodeHub(self.wsClient, self.pickler)
         self.VersionsHandlerHub = self.__VersionsHandlerHub(self.wsClient, self.pickler)
@@ -160,6 +161,98 @@ class HubsAPI(object):
         self.wsClient.connect()
 
 
+    class __WindowHub(object):
+        def __init__(self, wsClient, pickler):
+            hubName = self.__class__.__name__[2:]
+            self.server = self.__Server(wsClient, hubName, pickler)
+            self.client = WSSimpleObject()
+
+        class __Server(GenericServer):
+            
+            def cleanConsole(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "cleanConsole", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def closeApp(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "closeApp", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def forceClose(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "forceClose", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getSubscribedClientsToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def showApp(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "showApp", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def subscribeToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def unsubscribeFromHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
     class __UtilsAPIHub(object):
         def __init__(self, wsClient, pickler):
             hubName = self.__class__.__name__[2:]

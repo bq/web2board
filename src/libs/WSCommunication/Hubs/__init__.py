@@ -1,3 +1,4 @@
 import VersionsHandlerHub
 import CodeHub
 import SerialMonitorHub
+import WindowHub

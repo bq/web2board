@@ -10,6 +10,7 @@ from wsgiref.simple_server import make_server
 
 from PySide import QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QWidget
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.HubsInspector import HubsInspector
@@ -125,7 +126,8 @@ class MainApp:
 
         app = QtGui.QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
-        self.w2bGui = Web2boardWindow(None)
+        self.__mainWidget = QWidget()
+        self.w2bGui = Web2boardWindow(self.__mainWidget)
         if not isTrayIconAvailable():
             self.w2bGui.setWindowState(Qt.WindowMinimized)
             self.w2bGui.show()

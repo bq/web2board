@@ -57,7 +57,8 @@ class CodeHub(Hub):
         with open(PathsManager.RES_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
             tmpHexFile.write(hexText)
 
-        compileReport = CompilerUploader.construct(board).uploadAvrHex(tmpHexFile.name, uploadPort=uploadPort)
+        relPath = os.path.relpath(tmpHexFile.name, os.getcwd())
+        compileReport = CompilerUploader.construct(board).uploadAvrHex(relPath, uploadPort=uploadPort)
         return self.__handleCompileReport(compileReport)
 
     def uploadHexFile(self, hexFilePath, board, _sender):

@@ -27,15 +27,17 @@ log = initLogging(__name__)  # initialized in main
 originalEcho = click.echo
 originalSEcho = click.secho
 
+def getEchoFunction(original):
+    def clickEchoForExecutable(message, *args, **kwargs):
+        try:
+            original(message, *args, **kwargs)
+        except:
+            log.debug(message)
+    return clickEchoForExecutable
 
-def clickEchoForExecutable(message=None, file=None, nl=True, err=False, color=None, *args, **kwargs):
-    if not utils.areWeFrozen():
-        originalEcho(message, file, nl, err, color)
-    log.debug(message)
 
-
-click.echo = clickEchoForExecutable
-click.secho = clickEchoForExecutable
+click.echo = getEchoFunction(originalEcho)
+click.secho = getEchoFunction(originalSEcho)
 
 
 def runSconsScript():

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Tue Feb 16 14:46:55 2016
+# Created: Wed Feb 17 08:34:01 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_Web2board(object):
     def setupUi(self, Web2board):
         Web2board.setObjectName("Web2board")
-        Web2board.resize(946, 453)
+        Web2board.resize(1038, 450)
         self.centralwidget = QtGui.QWidget(Web2board)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralwidget)
@@ -22,6 +22,10 @@ class Ui_Web2board(object):
         self.forceCloseButton = QtGui.QPushButton(self.centralwidget)
         self.forceCloseButton.setObjectName("forceCloseButton")
         self.horizontalLayout.addWidget(self.forceCloseButton)
+        self.clean = QtGui.QPushButton(self.centralwidget)
+        self.clean.setText("")
+        self.clean.setObjectName("clean")
+        self.horizontalLayout.addWidget(self.clean)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.label = QtGui.QLabel(self.centralwidget)
@@ -53,11 +57,8 @@ class Ui_Web2board(object):
         self.verticalLayout_3.addWidget(self.info)
         self.verticalLayout_2.addWidget(self.updateGroupbox)
         Web2board.setCentralWidget(self.centralwidget)
-        self.statusbar = QtGui.QStatusBar(Web2board)
-        self.statusbar.setObjectName("statusbar")
-        Web2board.setStatusBar(self.statusbar)
         self.menuBar = QtGui.QMenuBar(Web2board)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 946, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1038, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuTest = QtGui.QMenu(self.menuBar)
         self.menuTest.setObjectName("menuTest")
@@ -86,10 +87,12 @@ class Ui_Web2board(object):
 
     def retranslateUi(self, Web2board):
         Web2board.setWindowTitle(QtGui.QApplication.translate("Web2board", "Web2board", None, QtGui.QApplication.UnicodeUTF8))
+        self.forceCloseButton.setToolTip(QtGui.QApplication.translate("Web2board", "Totally close web2board", None, QtGui.QApplication.UnicodeUTF8))
         self.forceCloseButton.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
+        self.clean.setToolTip(QtGui.QApplication.translate("Web2board", "Clean the console", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
-        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Refresh ports", None, QtGui.QApplication.UnicodeUTF8))
+        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))
         self.updateGroupbox.setTitle(QtGui.QApplication.translate("Web2board", "Downloading", None, QtGui.QApplication.UnicodeUTF8))
         self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTest.setTitle(QtGui.QApplication.translate("Web2board", "File", None, QtGui.QApplication.UnicodeUTF8))

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>946</width>
-    <height>453</height>
+    <width>1038</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,21 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="forceCloseButton">
+        <property name="toolTip">
+         <string>Totally close web2board</string>
+        </property>
         <property name="text">
          <string>Force close</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clean">
+        <property name="toolTip">
+         <string>Clean the console</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -62,7 +75,7 @@
       <item>
        <widget class="QPushButton" name="searchPorts">
         <property name="text">
-         <string>Refresh ports</string>
+         <string>Search ports</string>
         </property>
        </widget>
       </item>
@@ -100,13 +113,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>946</width>
+     <width>1038</width>
      <height>21</height>
     </rect>
    </property>

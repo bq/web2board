@@ -32,6 +32,17 @@ def fork():
     _fork()
 
 
+
+
+import sys
+from PySide.QtGui import *
+
 if __name__ == '__main__':
-    fork()
-    main()
+    app = QApplication(sys.argv)
+
+    widget = QWidget()
+
+    mainWindow = QMainWindow(widget)
+    mainWindow.show()
+
+    sys.exit(app.exec_())

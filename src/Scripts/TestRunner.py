@@ -19,20 +19,22 @@ def __runTests(suite, reportTitle="report"):
 def runUnitTests():
     from Test.unit.Updaters.testUpdater import TestUpdater
     from Test.unit.Updaters.testWeb2boardUpdater import TestWeb2boardUpdater
-    from Test.unit.WSCommunication.Hubs.testVersionsHandlerHub import TestVersionsHandlerHub
     from Test.unit.WSCommunication.Hubs.testCodeHub import TestCodeHub
     from Test.unit.WSCommunication.Hubs.testSerialMonitorHub import TestSerialMonitorHub
-    from Test.unit.testUtils import TestUtils
+    from Test.unit.WSCommunication.Hubs.testVersionsHandlerHub import TestVersionsHandlerHub
+    from Test.unit.testConfig import TestConfig
     from Test.unit.testDownloader import TestDownloader
+    from Test.unit.testUtils import TestUtils
 
     suite = unittest.TestSuite()
     suite.addTests(unittest.makeSuite(TestUpdater))
     suite.addTests(unittest.makeSuite(TestWeb2boardUpdater))
-    suite.addTests(unittest.makeSuite(TestVersionsHandlerHub))
     suite.addTests(unittest.makeSuite(TestCodeHub))
     suite.addTests(unittest.makeSuite(TestSerialMonitorHub))
-    suite.addTests(unittest.makeSuite(TestUtils))
+    suite.addTests(unittest.makeSuite(TestVersionsHandlerHub))
+    suite.addTests(unittest.makeSuite(TestConfig))
     suite.addTests(unittest.makeSuite(TestDownloader))
+    suite.addTests(unittest.makeSuite(TestUtils))
     __runTests(suite, "unitTestReport")
 
 

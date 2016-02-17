@@ -123,7 +123,7 @@ class CompilerUploader:
         target = ("upload",) if upload else ()
         uploadPort = self.getPort() if upload and uploadPort is None else uploadPort
 
-        code = '#include "Arduino.h"\n' + code  # todo do this only in Arduino frameworks
+        code = '#include "Arduino.h";' + code  # todo do this only in Arduino frameworks
 
         with open(os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src", "main.cpp"), 'w') as mainCppFile:
             mainCppFile.write(code)

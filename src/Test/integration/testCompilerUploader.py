@@ -178,7 +178,8 @@ class TestCompilerUploader(unittest.TestCase):
     def test_uploadAvrHex_returnsOkResultWithWorkingHexFile(self):
         self.__assertPortFount()
         self.compiler.setBoard(self.connectedBoard)
-        result = self.compiler.uploadAvrHex(self.hexFilePath, uploadPort=self.portToUse)
+        path = os.path.relpath(self.hexFilePath, os.getcwd())
+        result = self.compiler.uploadAvrHex(path, uploadPort=self.portToUse)
 
         self.assertTrue(result[0])
 
