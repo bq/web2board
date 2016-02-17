@@ -35,8 +35,9 @@ log = logging.getLogger(__name__)
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
 
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent=None, app=None, *args, **kwargs):
         super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
+        self.app = app
         self.parent = parent
         self.ui = Ui_Web2board()
         self.ui.setupUi(self)
@@ -227,13 +228,13 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def showApp(self):
-        self.update()
-        self.show()
+        if not self.isVisible():
+            self.show()
         if self.windowState() == Qt.WindowMinimized:
             self.setWindowState(Qt.WindowNoState)
-        self.raise_()
-        self.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
-        self.update()
+        self.parent.raise_()
+        self.app.setActiveWindow(self.parent)
+        self.activateWindow()
 
     @InGuiThread()
     def closeApp(self):
