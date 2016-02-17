@@ -81,7 +81,7 @@ class TestCodeHub(unittest.TestCase):
 
         result = self.codeHub.upload("myCode", self.board, self.sender)
 
-        self.assertEqual(result, True)
+        self.assertEqual(result, "PORT")
 
     def test_upload_unsuccessfulUploadReturnsErrorString(self):
         uploadReturn = (False, {"err": "errorMessage"},)
@@ -97,7 +97,7 @@ class TestCodeHub(unittest.TestCase):
 
         result = self.codeHub.uploadHex("hexText", self.board, self.sender)
 
-        self.assertTrue(result)
+        self.assertEqual(result, "PORT")
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
         uploadReturn = (False, {"err": "errorMessage"},)

@@ -29,21 +29,5 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False,
+          console=True,
           icon=PathsManager.RES_ICO_PATH)
-
-app = BUNDLE(exe,
-             name='web2board.app',
-             icon= 'res' + os.sep + 'web2board.icns',
-             bundle_identifier=None,
-             info_plist={
-                 'CFBundleURLTypes': [
-                     {
-                         'CFBundleURLName': 'bitbloq.bq.com',
-                         'CFBundleURLSchemes': 'web2board'
-                     }
-                 ],
-                 'PyOptions': {
-                     'argv_emulation': True
-                 }
-             }, )

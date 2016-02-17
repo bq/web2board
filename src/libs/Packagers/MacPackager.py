@@ -32,25 +32,6 @@ class MacPackager(Packager):
         self.appResourcesPath = os.path.join(self.installerCreationDistPath, self.web2boardExecutableName, "Contents",
                                              "MacOS", "res")
 
-    def _constructAndMoveExecutable(self):
-        currentPath = os.getcwd()
-        os.chdir(self.srcPath)
-        try:
-            log.debug("Creating Scons Executable")
-            call(["pyinstaller", self.sconsSpecPath])
-            utils.copytree(os.path.join(self.pyInstallerDistFolder, "sconsScript"),
-                           os.path.join(self._getInstallerCreationResPath(), "Scons"))
-
-            log.debug("Gettings Scons Packages")
-            self._getPlatformioPackages()
-
-            log.debug("Creating Web2board Executable")
-            call(["pyinstaller", '-w', self.web2boardSpecPath])
-            shutil.move(os.path.join(self.pyInstallerDistFolder, "web2board.app"), self.installerCreationDistPath)
-
-        finally:
-            os.chdir(currentPath)
-
     def _addMetadataForInstaller(self):
         Packager._addMetadataForInstaller(self)
         copytree(self.pkgPlatformPath, self.installerCreationPath)

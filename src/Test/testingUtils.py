@@ -23,7 +23,7 @@ def restoreAllTestResources():
 def createCompilerUploaderMock():
     compileUploaderMock = flexmock(CompilerUploader(),
                                    compile=lambda *args: [True, None],
-                                   getPort=None)
+                                   getPort="PORT")
     CompileUploaderConstructorMock = flexmock(CompilerUploader,
                                               construct=lambda *args: compileUploaderMock)
 
