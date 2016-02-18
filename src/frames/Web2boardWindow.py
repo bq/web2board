@@ -40,6 +40,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
         self.parent = parent if parent is not None else self
         self.ui = Ui_Web2board()
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinimizeButtonHint)
         self.ui.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.ui.actionSerialMonitor.setIcon(QtGui.QIcon(PathsManager.getIconPath("monitor.png")))
