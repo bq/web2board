@@ -79,8 +79,9 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
         ports = sorted(self.compileUpdater.getAvailablePorts())
         self.ui.ports.addItems(ports)
-        self.show()
-        self.hide()
+        if utils.isMac():
+            self.show()
+            self.hide()
 
     def __getConsoleKwargs(self, record):
         record.msg = record.msg.encode("utf-8")
@@ -143,15 +144,6 @@ class Web2boardWindow(QtGui.QMainWindow):
         if libs.MainApp.isTrayIconAvailable():
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
         event.ignore()
-
-    def changeEvent(self, event):
-        if event.type() == QtCore.QEvent.WindowStateChange:
-            if self.windowState() & QtCore.Qt.WindowMinimized:
-                event.ignore()
-                self.hide()
-                return
-
-        super(Web2boardWindow, self).changeEvent(event)
 
     def getSelectedPort(self):
         port = self.ui.ports.currentText()
