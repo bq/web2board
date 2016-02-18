@@ -36,6 +36,7 @@ class MainApp:
         """:type : frames.Web2boardWindow.Web2boardWindow"""
         self.w2bServer = None
         self.isAppRunning = False
+        self.qtApp = None
 
     @InGuiThread()
     def __handleTestingOptions(self, testing):
@@ -126,8 +127,8 @@ class MainApp:
 
         app = QtGui.QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
-        self.__mainWidget = QWidget()
-        self.w2bGui = Web2boardWindow(self.__mainWidget, app)
+        self.__mainWidget = QWidget() if not utils.isMac() else None
+        self.w2bGui = Web2boardWindow(self.__mainWidget)
         if not isTrayIconAvailable():
             self.w2bGui.setWindowState(Qt.WindowMinimized)
         self.isAppRunning = True
@@ -161,14 +162,14 @@ class MainApp:
     def startMain(self):
         Config.readConfigFile()
         options, args = self.parseSystemArguments()
-        app = self.startConsoleViewer()
+        self.qtApp = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()
         self.handleSystemArguments(options, args)
         PathsManager.logRelevantEnvironmentalPaths()
         if options.update2version is None:
             self.startServer(options)
 
-        return app
+        return self.qtApp
 
     def isSerialMonitorRunning(self):
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
@@ -220,6 +221,19 @@ class MainApp:
             log.exception("failed to execute Scons script")
         finally:
             revert_io()
+
+    @InGuiThread()
+    def bringWidgetToFront(self, widget):
+        if widget.isVisible():
+            widget.hide()
+        widget.show()
+        if widget.windowState() & Qt.WindowMinimized:
+            widget.setWindowState(Qt.WindowNoState)
+        widget.raise_()
+        self.qtApp.setActiveWindow(widget)
+        widget.activateWindow()
+        widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+        widget.update()
 
 
 def getMainApp():

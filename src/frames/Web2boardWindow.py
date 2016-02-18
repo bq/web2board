@@ -36,11 +36,12 @@ log = logging.getLogger(__name__)
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
 
-    def __init__(self, parent=None, app=None, *args, **kwargs):
+    def __init__(self, parent=None, *args, **kwargs):
         super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
-        self.app = app
-        self.parent = parent
+        self.parent = parent if parent is not None else self
         self.ui = Ui_Web2board()
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinimizeButtonHint)
         self.ui.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
         self.ui.actionSerialMonitor.setIcon(QtGui.QIcon(PathsManager.getIconPath("monitor.png")))
@@ -214,10 +215,9 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def startSerialMonitorApp(self, port=None):
-        self.serialMonitor = SerialMonitorDialog(None, port)
-        self.serialMonitor.show()
-        self.serialMonitor.raise_()
-        self.serialMonitor.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+        if self.serialMonitor is None or self.serialMonitor.isClosed:
+            self.serialMonitor = SerialMonitorDialog(None, port if port is not None else self.getSelectedPort())
+        libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)
 
     @InGuiThread()
     def closeSerialMonitorApp(self):
@@ -229,13 +229,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     @InGuiThread()
     def showApp(self):
-        if not self.isVisible():
-            self.show()
-        if self.windowState() & Qt.WindowMinimized:
-            self.setWindowState(Qt.WindowNoState)
-        self.parent.raise_()
-        self.app.setActiveWindow(self.parent)
-        self.activateWindow()
+        libs.MainApp.getMainApp().bringWidgetToFront(self)
 
     @InGuiThread()
     def closeApp(self):

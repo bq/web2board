@@ -74,12 +74,9 @@ class SerialMonitorDialog(QtGui.QDialog):
 
         self.ui.clearButton.clicked.connect(self.onClear)
         self.ui.sendLineEdit.returnPressed.connect(self.onSend)
-
-
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
 
         self.ui.pauseButton.clicked.connect(self.onPauseButtonClicked)
-
         self.port = port if port is not None else CompilerUploader().getPort()
 
         self.api.SerialMonitorHub.client.received = self.refreshConsole
