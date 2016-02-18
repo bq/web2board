@@ -38,7 +38,7 @@ class Web2boardWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
-        self.parent = parent
+        self.parent = parent if parent is not None else self
         self.ui = Ui_Web2board()
         self.ui.setupUi(self)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
