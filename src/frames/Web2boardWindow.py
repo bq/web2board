@@ -223,7 +223,7 @@ class Web2boardWindow(QtGui.QMainWindow):
     @InGuiThread()
     def startSerialMonitorApp(self, port=None):
         if self.serialMonitor is None or self.serialMonitor.isClosed:
-            self.serialMonitor = SerialMonitorDialog(self.getSelectedPort(), port)
+            self.serialMonitor = SerialMonitorDialog(None, port if port is not None else self.getSelectedPort())
         libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)
 
     @InGuiThread()
