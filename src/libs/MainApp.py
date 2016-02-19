@@ -10,7 +10,6 @@ from wsgiref.simple_server import make_server
 
 from PySide import QtGui
 from PySide.QtCore import Qt
-from PySide.QtGui import QWidget
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.HubsInspector import HubsInspector
@@ -153,7 +152,7 @@ class MainApp:
 
         try:
             log.info("listening...")
-            self.checkConnectionIsAvailable()
+            # self.checkConnectionIsAvailable()
             self.w2bServer.serve_forever()
         finally:
             forceQuit()
@@ -223,11 +222,13 @@ class MainApp:
 
     @InGuiThread()
     def bringWidgetToFront(self, widget):
-        if widget.isVisible():
+        if widget.isVisible() and not utils.isMac():
             widget.hide()
-        widget.show()
-        if widget.windowState() & Qt.WindowMinimized:
-            widget.setWindowState(Qt.WindowNoState)
+        if not utils.isMac():
+            widget.show()
+            if widget.windowState() & Qt.WindowMinimized:
+                widget.setWindowState(Qt.WindowNoState)
+
         widget.raise_()
         self.qtApp.setActiveWindow(widget)
         widget.activateWindow()
@@ -244,3 +245,13 @@ def getMainApp():
 
 def isTrayIconAvailable():
     return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
+
+
+@InGuiThread()
+def forceQuit():
+    try:
+        mainApp = getMainApp()
+        mainApp.w2bGui.closeTrayIcon()
+        mainApp.qtApp.quit()
+    finally:
+        pass

@@ -15,7 +15,6 @@
 import pprint
 import signal
 import click
-import os
 
 from Scripts.TestRunner import *
 from libs import utils

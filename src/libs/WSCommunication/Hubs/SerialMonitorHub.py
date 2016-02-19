@@ -68,10 +68,10 @@ class SerialMonitorHub(Hub):
         self.compilerUploader = CompilerUploader.construct(board)
         from libs.MainApp import getMainApp
         mainApp = getMainApp()
-        if not mainApp.w2bGui.isSerialMonitorRunning():
-            if port is None:
-                port = CompilerUploader.construct(board).getPort()
-            mainApp.w2bGui.startSerialMonitorApp(port)
+        if mainApp.w2bGui.isSerialMonitorRunning():
+            port = mainApp.w2bGui.serialMonitor.port
+
+        mainApp.w2bGui.startSerialMonitorApp(port)
         return True
 
     def startConnection(self, port, baudrate=9600):

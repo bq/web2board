@@ -128,7 +128,7 @@ class Web2boardWindow(QtGui.QMainWindow):
                 self.showApp()
 
         showAppAction = QtGui.QAction("ShowApp", self, triggered=self.showApp)
-        quitAction = QtGui.QAction("&Quit", self, triggered=QtGui.qApp.quit)
+        quitAction = QtGui.QAction("&Quit", self, triggered=libs.MainApp.forceQuit)
 
         self.trayIconMenu = QtGui.QMenu(self)
         self.trayIconMenu.addAction(showAppAction)
@@ -224,7 +224,8 @@ class Web2boardWindow(QtGui.QMainWindow):
     def startSerialMonitorApp(self, port=None):
         if self.serialMonitor is None or self.serialMonitor.isClosed:
             self.serialMonitor = SerialMonitorDialog(None, port if port is not None else self.getSelectedPort())
-        self.serialMonitor.show()
+        if not self.serialMonitor.isVisible():
+            self.serialMonitor.show()
         libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)
 
     @InGuiThread()
@@ -233,7 +234,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.serialMonitor = None
 
     def isSerialMonitorRunning(self):
-        return self.serialMonitor is not None
+        return self.serialMonitor is not None and not self.serialMonitor.isClosed
 
     @InGuiThread()
     def showApp(self):

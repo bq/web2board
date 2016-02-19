@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_serialMonitor.ui'
 #
-# Created: Mon Feb 08 09:26:52 2016
+# Created: Fri Feb 19 14:05:57 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,36 +12,38 @@ from PySide import QtCore, QtGui
 class Ui_SerialMonitor(object):
     def setupUi(self, SerialMonitor):
         SerialMonitor.setObjectName("SerialMonitor")
-        SerialMonitor.resize(462, 471)
-        self.verticalLayout_2 = QtGui.QVBoxLayout(SerialMonitor)
+        SerialMonitor.resize(519, 529)
+        self.centralwidget = QtGui.QWidget(SerialMonitor)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.sendLineEdit = QtGui.QLineEdit(SerialMonitor)
+        self.sendLineEdit = QtGui.QLineEdit(self.centralwidget)
         self.sendLineEdit.setObjectName("sendLineEdit")
         self.horizontalLayout.addWidget(self.sendLineEdit)
-        self.sendButton = QtGui.QPushButton(SerialMonitor)
+        self.sendButton = QtGui.QPushButton(self.centralwidget)
         self.sendButton.setObjectName("sendButton")
         self.horizontalLayout.addWidget(self.sendButton)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.consoleTextEdit = QtGui.QTextEdit(SerialMonitor)
+        self.consoleTextEdit = QtGui.QTextEdit(self.centralwidget)
         self.consoleTextEdit.setReadOnly(True)
         self.consoleTextEdit.setObjectName("consoleTextEdit")
         self.verticalLayout.addWidget(self.consoleTextEdit)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.pauseButton = QtGui.QPushButton(SerialMonitor)
+        self.pauseButton = QtGui.QPushButton(self.centralwidget)
         self.pauseButton.setCheckable(True)
         self.pauseButton.setObjectName("pauseButton")
         self.horizontalLayout_2.addWidget(self.pauseButton)
-        self.clearButton = QtGui.QPushButton(SerialMonitor)
+        self.clearButton = QtGui.QPushButton(self.centralwidget)
         self.clearButton.setObjectName("clearButton")
         self.horizontalLayout_2.addWidget(self.clearButton)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.comboBox = QtGui.QComboBox(SerialMonitor)
+        self.comboBox = QtGui.QComboBox(self.centralwidget)
         self.comboBox.setMaxVisibleItems(20)
         self.comboBox.setSizeAdjustPolicy(QtGui.QComboBox.AdjustToContents)
         self.comboBox.setObjectName("comboBox")
@@ -59,6 +61,7 @@ class Ui_SerialMonitor(object):
         self.horizontalLayout_2.addWidget(self.comboBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addLayout(self.verticalLayout)
+        SerialMonitor.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(SerialMonitor)
         self.comboBox.setCurrentIndex(4)

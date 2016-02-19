@@ -60,7 +60,7 @@ class SerialConnection:
         self.serial.close()
 
 
-class SerialMonitorDialog(QtGui.QDialog):
+class SerialMonitorDialog(QtGui.QMainWindow):
     def __init__(self, parent, port=None, *args, **kwargs):
         super(SerialMonitorDialog, self).__init__(*args, **kwargs)
         self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
@@ -128,7 +128,6 @@ class SerialMonitorDialog(QtGui.QDialog):
             return
         self.logText(message)
         self.api.SerialMonitorHub.server.write(self.port, message)
-        self.serialConnection.write(message)
         self.ui.sendLineEdit.setText('')
 
     def onClear(self):
