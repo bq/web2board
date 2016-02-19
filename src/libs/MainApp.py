@@ -10,7 +10,6 @@ from wsgiref.simple_server import make_server
 
 from PySide import QtGui
 from PySide.QtCore import Qt
-from PySide.QtGui import QWidget
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.HubsInspector import HubsInspector
@@ -127,8 +126,7 @@ class MainApp:
 
         app = QtGui.QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
-        self.__mainWidget = QWidget() if not utils.isMac() else None
-        self.w2bGui = Web2boardWindow(self.__mainWidget)
+        self.w2bGui = Web2boardWindow()
         if not isTrayIconAvailable():
             self.w2bGui.setWindowState(Qt.WindowMinimized)
         self.isAppRunning = True
@@ -157,7 +155,7 @@ class MainApp:
             self.checkConnectionIsAvailable()
             self.w2bServer.serve_forever()
         finally:
-            os._exit(1)
+            forceQuit()
 
     def startMain(self):
         Config.readConfigFile()
@@ -245,3 +243,13 @@ def getMainApp():
 
 def isTrayIconAvailable():
     return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
+
+
+@InGuiThread()
+def forceQuit():
+    try:
+        mainApp = getMainApp()
+        mainApp.w2bGui.closeTrayIcon()
+        mainApp.qtApp.quit()
+    finally:
+        pass

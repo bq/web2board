@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1038</width>
-    <height>450</height>
+    <width>1002</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,9 +28,19 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="clean">
+       <widget class="QPushButton" name="settingsButton">
         <property name="toolTip">
-         <string>Clean the console</string>
+         <string>Open settings window</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="serialMonitorButton">
+        <property name="toolTip">
+         <string>open serial monitor</string>
         </property>
         <property name="text">
          <string/>
@@ -49,6 +59,16 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clean">
+        <property name="toolTip">
+         <string>Clean the console</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="label">
@@ -74,6 +94,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="searchPorts">
+        <property name="toolTip">
+         <string>Search usb ports and connected board</string>
+        </property>
         <property name="text">
          <string>Search ports</string>
         </property>
@@ -118,7 +141,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1038</width>
+     <width>1002</width>
      <height>21</height>
     </rect>
    </property>

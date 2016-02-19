@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Wed Feb 17 08:34:01 2016
+# Created: Fri Feb 19 12:12:05 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_Web2board(object):
     def setupUi(self, Web2board):
         Web2board.setObjectName("Web2board")
-        Web2board.resize(1038, 450)
+        Web2board.resize(1002, 471)
         self.centralwidget = QtGui.QWidget(Web2board)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralwidget)
@@ -22,12 +22,20 @@ class Ui_Web2board(object):
         self.forceCloseButton = QtGui.QPushButton(self.centralwidget)
         self.forceCloseButton.setObjectName("forceCloseButton")
         self.horizontalLayout.addWidget(self.forceCloseButton)
+        self.settingsButton = QtGui.QPushButton(self.centralwidget)
+        self.settingsButton.setText("")
+        self.settingsButton.setObjectName("settingsButton")
+        self.horizontalLayout.addWidget(self.settingsButton)
+        self.serialMonitorButton = QtGui.QPushButton(self.centralwidget)
+        self.serialMonitorButton.setText("")
+        self.serialMonitorButton.setObjectName("serialMonitorButton")
+        self.horizontalLayout.addWidget(self.serialMonitorButton)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.clean = QtGui.QPushButton(self.centralwidget)
         self.clean.setText("")
         self.clean.setObjectName("clean")
         self.horizontalLayout.addWidget(self.clean)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
@@ -58,7 +66,7 @@ class Ui_Web2board(object):
         self.verticalLayout_2.addWidget(self.updateGroupbox)
         Web2board.setCentralWidget(self.centralwidget)
         self.menuBar = QtGui.QMenuBar(Web2board)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1038, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1002, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuTest = QtGui.QMenu(self.menuBar)
         self.menuTest.setObjectName("menuTest")
@@ -89,9 +97,12 @@ class Ui_Web2board(object):
         Web2board.setWindowTitle(QtGui.QApplication.translate("Web2board", "Web2board", None, QtGui.QApplication.UnicodeUTF8))
         self.forceCloseButton.setToolTip(QtGui.QApplication.translate("Web2board", "Totally close web2board", None, QtGui.QApplication.UnicodeUTF8))
         self.forceCloseButton.setText(QtGui.QApplication.translate("Web2board", "Force close", None, QtGui.QApplication.UnicodeUTF8))
+        self.settingsButton.setToolTip(QtGui.QApplication.translate("Web2board", "Open settings window", None, QtGui.QApplication.UnicodeUTF8))
+        self.serialMonitorButton.setToolTip(QtGui.QApplication.translate("Web2board", "open serial monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.clean.setToolTip(QtGui.QApplication.translate("Web2board", "Clean the console", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
+        self.searchPorts.setToolTip(QtGui.QApplication.translate("Web2board", "Search usb ports and connected board", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))
         self.updateGroupbox.setTitle(QtGui.QApplication.translate("Web2board", "Downloading", None, QtGui.QApplication.UnicodeUTF8))
         self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))

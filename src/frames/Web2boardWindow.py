@@ -36,9 +36,8 @@ log = logging.getLogger(__name__)
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
 
-    def __init__(self, parent=None, *args, **kwargs):
-        super(Web2boardWindow, self).__init__(parent, *args, **kwargs)
-        self.parent = parent if parent is not None else self
+    def __init__(self, *args, **kwargs):
+        super(Web2boardWindow, self).__init__(*args, **kwargs)
         self.ui = Ui_Web2board()
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinimizeButtonHint)
@@ -51,6 +50,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.actionForceClose.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
         self.ui.forceCloseButton.setIcon(QtGui.QIcon(PathsManager.getIconPath("close.png")))
         self.ui.clean.setIcon(QtGui.QIcon(PathsManager.getIconPath("clean.png")))
+        self.ui.settingsButton.setIcon(QtGui.QIcon(PathsManager.getIconPath("settings.png")))
+        self.ui.serialMonitorButton.setIcon(QtGui.QIcon(PathsManager.getIconPath("monitor.png")))
         self.availablePorts = []
         self.autoPort = None
 
@@ -70,14 +71,16 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.__lastVersionDownloaded = ""
 
         def quit(*args):
-            os._exit(1)
+            libs.MainApp.forceQuit()
 
         self.ui.actionForceClose.triggered.connect(quit)
         self.ui.forceCloseButton.clicked.connect(quit)
         self.ui.clean.clicked.connect(self.cleanConsole)
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
         self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
+        self.ui.settingsButton.clicked.connect(self.settingsDialog.show)
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
+        self.ui.serialMonitorButton.clicked.connect(self.startSerialMonitorApp)
         ports = sorted(self.compileUpdater.getAvailablePorts())
         self.ui.ports.addItems(ports)
         if utils.isMac():
@@ -139,6 +142,10 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.trayIcon.activated.connect(onTrayIconActivated)
         self.trayIcon.messageClicked.connect(self.show)
         self.trayIcon.show()
+
+    def closeTrayIcon(self):
+        if libs.MainApp.isTrayIconAvailable():
+            self.trayIcon.hide()
 
     def closeEvent(self, event):
         self.hide()

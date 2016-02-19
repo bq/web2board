@@ -2,11 +2,10 @@ import logging
 import os
 
 import time
-from wshubsapi.Hub import Hub, UnsuccessfulReplay
+from wshubsapi.Hub import Hub
 
-from libs.CompilerUploader import CompilerException, CompilerUploader
-from libs.MainApp import getMainApp
-from libs.PathsManager import PathsManager
+from libs.MainApp import getMainApp, forceQuit
+
 
 log = logging.getLogger(__name__)
 
@@ -35,4 +34,4 @@ class WindowHub(Hub):
     def forceClose(self, _sender):
         log.info("Client: {} force us to close".format(_sender))
         time.sleep(1)
-        os._exit(1)
+        forceQuit()

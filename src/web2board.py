@@ -54,8 +54,10 @@ if "-Q" in sys.argv:
     runSconsScript()
 
 if __name__ == "__main__":
+    qtApp = None
     try:
         utils.killProcess("web2board")
+        app = getMainApp()
 
         def closeSigHandler(signal, frame):
             try:
@@ -64,10 +66,10 @@ if __name__ == "__main__":
                 log.warning("server closed")
             except:
                 log.warning("unable to close server")
-
+            app.quit()
             os._exit(1)
 
-        app = getMainApp()
+
         signal.signal(signal.SIGINT, closeSigHandler)
         qtApp = app.startMain()
         sys.exit(qtApp.exec_())
@@ -78,4 +80,6 @@ if __name__ == "__main__":
             raise e
         else:
             log.critical("critical exception", exc_info=1)
+    if qtApp is not None:
+        qtApp.quit()
     os._exit(1)
