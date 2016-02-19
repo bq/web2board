@@ -224,11 +224,13 @@ class MainApp:
 
     @InGuiThread()
     def bringWidgetToFront(self, widget):
-        if widget.isVisible():
+        if widget.isVisible() and not utils.isMac():
             widget.hide()
-        widget.show()
-        if widget.windowState() & Qt.WindowMinimized:
-            widget.setWindowState(Qt.WindowNoState)
+        if not utils.isMac():
+            widget.show()
+            if widget.windowState() & Qt.WindowMinimized:
+                widget.setWindowState(Qt.WindowNoState)
+
         widget.raise_()
         self.qtApp.setActiveWindow(widget)
         widget.activateWindow()
