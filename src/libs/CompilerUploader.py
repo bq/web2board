@@ -190,7 +190,7 @@ class CompilerUploader:
         port = uploadPort if uploadPort is not None else self.getPort()
         mcu = options["boardData"]["build"]["mcu"]
         baudRate = str(options["boardData"]["upload"]["speed"])
-        args = "-V " + " -P " + port + " -p " + mcu + " -b " + baudRate + " -c arduino -D -U flash:w:" + hexFilePath + ":i"
+        args = "-V -P " + port + " -p " + mcu + " -b " + baudRate + " -c arduino -D -U flash:w:" + hexFilePath + ":i"
         output, err = self._callAvrdude(args)
         okText = "bytes of flash written"
         resultOk = okText in output or okText in err

@@ -153,15 +153,6 @@ class Web2boardWindow(QtGui.QMainWindow):
             self.showBalloonMessage("Web2board is running in background.\nClick Quit to totally end the application")
         event.ignore()
 
-    def changeEvent(self, event):
-        if event.type() == QtCore.QEvent.WindowStateChange:
-            if self.windowState() & QtCore.Qt.WindowMinimized:
-                event.ignore()
-                self.hide()
-                return
-
-        super(Web2boardWindow, self).changeEvent(event)
-
     def getSelectedPort(self):
         port = self.ui.ports.currentText()
         if port == "AUTO":
@@ -233,6 +224,7 @@ class Web2boardWindow(QtGui.QMainWindow):
     def startSerialMonitorApp(self, port=None):
         if self.serialMonitor is None or self.serialMonitor.isClosed:
             self.serialMonitor = SerialMonitorDialog(None, port if port is not None else self.getSelectedPort())
+        self.serialMonitor.show()
         libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)
 
     @InGuiThread()

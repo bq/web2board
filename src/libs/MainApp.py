@@ -10,6 +10,7 @@ from wsgiref.simple_server import make_server
 
 from PySide import QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QWidget
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from wshubsapi.HubsInspector import HubsInspector
@@ -243,13 +244,3 @@ def getMainApp():
 
 def isTrayIconAvailable():
     return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
-
-
-@InGuiThread()
-def forceQuit():
-    try:
-        mainApp = getMainApp()
-        mainApp.w2bGui.closeTrayIcon()
-        mainApp.qtApp.quit()
-    finally:
-        pass

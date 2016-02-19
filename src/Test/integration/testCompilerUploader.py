@@ -179,7 +179,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.compiler.setBoard(self.connectedBoard)
         path = os.path.relpath(self.hexFilePath, os.getcwd())
         result = self.compiler.uploadAvrHex(path, uploadPort=self.portToUse)
-
+        print(result[1])
         self.assertTrue(result[0])
 
     def test_uploadAvrHex_returnsBadResultWithNonExistingFile(self):

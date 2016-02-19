@@ -20,7 +20,6 @@ import os
 from Scripts.TestRunner import *
 from libs import utils
 from libs.LoggingUtils import initLogging
-from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
 
 log = initLogging(__name__)  # initialized in main
@@ -56,6 +55,7 @@ if "-Q" in sys.argv:
 if __name__ == "__main__":
     qtApp = None
     try:
+        from libs.MainApp import getMainApp
         utils.killProcess("web2board")
         app = getMainApp()
 
