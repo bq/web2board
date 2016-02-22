@@ -13,7 +13,7 @@ my_lock = Lock()
 class Config:
     _log = logging.getLogger(__name__)
     webSocketIP = "127.0.0.1"
-    webSocketPort = 9876
+    webSocketPort = 9877
     proxy = None
     version = "2.0.0"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
