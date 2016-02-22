@@ -231,9 +231,10 @@ class MainApp:
 
         widget.raise_()
         self.qtApp.setActiveWindow(widget)
-        widget.activateWindow()
-        widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
-        widget.update()
+        if not utils.isLinux():
+            widget.activateWindow()
+            widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+            widget.update()
 
 
 def getMainApp():

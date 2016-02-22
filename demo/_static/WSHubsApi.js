@@ -135,42 +135,61 @@ function HubsAPI(url, serverTimeout) {
         else {
             thisApi.wsClient.send(JSON.stringify(body));
         }
-        return {done: getReturnFunction(id, {hubName: hubName, functionName: functionName, args: args})};
-    };
-    var getReturnFunction = function (ID, callInfo) {
-        return function (onSuccess, onError, respondsTimeout) {
-            if (returnFunctions[ID] === undefined) {
-                returnFunctions[ID] = {};
-            }
-            var f = returnFunctions[ID];
-            f.onSuccess = function () {
-                if(onSuccess !== undefined) {
-                    onSuccess.apply(onSuccess, arguments);
-                }
-                delete returnFunctions[ID];
-            };
-            f.onError = function () {
-                if(onError !== undefined) {
-                    onError.apply(onError, arguments);
-                } else if (thisApi.defaultErrorHandler !== null){
-                    var argumentsArray = [callInfo].concat(arguments);
-                    thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler.apply, argumentsArray);
-                }
-                delete returnFunctions[ID];
-            };
-            //check returnFunctions, memory leak
-            respondsTimeout = undefined ? defaultRespondTimeout : respondsTimeout;
-            if(respondsTimeout >=0) {
-                setTimeout(function () {
-                    if (returnFunctions[ID] && returnFunctions[ID].onError) {
-                        returnFunctions[ID].onError('timeOut Error');
-                    }
-                }, defaultRespondTimeout);
-            }
-        };
+        return getReturnFunction(id, {hubName: hubName, functionName: functionName, args: args});
     };
 
-    
+    var getReturnFunction = function (ID, callInfo) {
+
+        function Future (ID, callInfo) {
+            var self = this;
+            this.done = function(onSuccess, onError, respondsTimeout) {
+                if (returnFunctions[ID] === undefined) {
+                    returnFunctions[ID] = {};
+                }
+                var f = returnFunctions[ID];
+                f.onSuccess = function () {
+                    try{
+                        if(onSuccess !== undefined) {
+                            onSuccess.apply(onSuccess, arguments);
+                         }
+                    } finally {
+                        delete returnFunctions[ID];
+                        self._finally();
+                    }
+                };
+                f.onError = function () {
+                    try{
+                        if(onError !== undefined) {
+                            onError.apply(onError, arguments);
+                        } else if (thisApi.defaultErrorHandler !== null){
+                            var argumentsArray = [callInfo].concat(arguments);
+                            thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler.apply, argumentsArray);
+                        }
+                    } finally {
+                        delete returnFunctions[ID];
+                        self._finally();
+                    }
+                };
+                //check returnFunctions, memory leak
+                respondsTimeout = undefined ? defaultRespondTimeout : respondsTimeout;
+                if(respondsTimeout >=0) {
+                    setTimeout(function () {
+                        if (returnFunctions[ID] && returnFunctions[ID].onError) {
+                            returnFunctions[ID].onError('timeOut Error');
+                        }
+                    }, defaultRespondTimeout);
+                }
+                return self;
+            };
+            this.finally = function (finallyCallback) {
+                self._finally = finallyCallback;
+            };
+            this._finally = function () {};
+        };
+        return new Future(ID, callInfo)
+    };
+
+
     this.WindowHub = {};
     this.WindowHub.server = {
         __HUB_NAME : 'WindowHub',
