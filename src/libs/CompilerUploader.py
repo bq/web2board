@@ -47,7 +47,7 @@ class CompilerException(Exception):
 #
 class CompilerUploader:
     __globalCompilerUploaderHolder = {}
-    DEFAULT_BOARD = "uno"
+    DEFAULT_BOARD = "bt328"
 
     def __init__(self, board=DEFAULT_BOARD):
         self.lastPortUsed = None

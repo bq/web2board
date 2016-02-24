@@ -26,7 +26,6 @@ class TestSerialMonitorHub(unittest.TestCase):
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
         self.serialMonitorHub = HubsInspector.getHubInstance(SerialMonitorHub)
         """:type : SerialMonitorHub"""
-        self.serialMonitorHub.compilerUploader = CompilerUploader.construct()
         self.sender = createSenderMock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()

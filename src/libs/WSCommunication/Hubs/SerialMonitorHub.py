@@ -60,17 +60,17 @@ class SerialMonitorHub(Hub):
 
     def __init__(self):
         super(SerialMonitorHub, self).__init__()
-        self.compilerUploader = None
         self.serialConnections = dict()
         """:type : dict from int to SerialConnection"""
 
     def startApp(self, port, board):
-        self.compilerUploader = CompilerUploader.construct(board)
+        compilerUploader = CompilerUploader.construct(board)
         from libs.MainApp import getMainApp
         mainApp = getMainApp()
         if mainApp.w2bGui.isSerialMonitorRunning():
             port = mainApp.w2bGui.serialMonitor.port
-
+        if port is None:
+            port = compilerUploader.getPort()
         mainApp.w2bGui.startSerialMonitorApp(port)
         return True
 
