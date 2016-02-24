@@ -12,9 +12,11 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
+import importlib
 import pprint
 import signal
 import click
+from wshubsapi.HubsInspector import HubsInspector
 
 from Scripts.TestRunner import *
 from libs import utils
@@ -54,6 +56,8 @@ if "-Q" in sys.argv:
 if __name__ == "__main__":
     qtApp = None
     try:
+        importlib.import_module("libs.WSCommunication.Hubs")
+        HubsInspector.inspectImplementedHubs()
         from libs.MainApp import getMainApp
         utils.killProcess("web2board")
         app = getMainApp()

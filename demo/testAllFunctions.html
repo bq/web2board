@@ -13,8 +13,14 @@
     <h1>Test all hubs functions</h1>
 </div>
 <script>
-    var hubsApi = new HubsAPI('ws://127.0.0.1:9876/');
+    var hubsApi = new HubsAPI('ws://127.0.0.1:9877/');
     hubsApi.connect(2);
+
+    hubsApi.LoggingHub.client.onLoggingMessage = function () {
+        console.log(arguments);
+    }
+    hubsApi.LoggingHub.server.subscribeToHub()
+    hubsApi.LoggingHub.server
 
     var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
     var ARGUMENT_NAMES = /([^\s,]+)/g;

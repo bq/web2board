@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_settingsDialog.ui'
 #
-# Created: Mon Feb 08 08:31:36 2016
+# Created: Tue Feb 23 12:25:03 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_SettingsDialog(object):
     def setupUi(self, SettingsDialog):
         SettingsDialog.setObjectName("SettingsDialog")
-        SettingsDialog.resize(530, 279)
+        SettingsDialog.resize(573, 343)
         self.verticalLayout = QtGui.QVBoxLayout(SettingsDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox = QtGui.QGroupBox(SettingsDialog)
@@ -35,18 +35,40 @@ class Ui_SettingsDialog(object):
         self.wsPort.setObjectName("wsPort")
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.wsPort)
         self.label_3 = QtGui.QLabel(self.groupBox)
+        self.label_3.setEnabled(False)
         self.label_3.setObjectName("label_3")
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.proxy = QtGui.QLineEdit(self.groupBox)
+        self.proxy.setEnabled(False)
         self.proxy.setObjectName("proxy")
         self.horizontalLayout_7.addWidget(self.proxy)
         self.checkProxy = QtGui.QPushButton(self.groupBox)
+        self.checkProxy.setEnabled(False)
         self.checkProxy.setObjectName("checkProxy")
         self.horizontalLayout_7.addWidget(self.checkProxy)
         self.formLayout.setLayout(2, QtGui.QFormLayout.FieldRole, self.horizontalLayout_7)
         self.verticalLayout.addWidget(self.groupBox)
+        self.groupBox_4 = QtGui.QGroupBox(SettingsDialog)
+        self.groupBox_4.setObjectName("groupBox_4")
+        self.formLayout_3 = QtGui.QFormLayout(self.groupBox_4)
+        self.formLayout_3.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_3.setObjectName("formLayout_3")
+        self.label_5 = QtGui.QLabel(self.groupBox_4)
+        self.label_5.setObjectName("label_5")
+        self.formLayout_3.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_5)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.librariesDir = QtGui.QLineEdit(self.groupBox_4)
+        self.librariesDir.setObjectName("librariesDir")
+        self.horizontalLayout_3.addWidget(self.librariesDir)
+        self.searchLibrariesDirButton = QtGui.QPushButton(self.groupBox_4)
+        self.searchLibrariesDirButton.setMaximumSize(QtCore.QSize(45, 16777215))
+        self.searchLibrariesDirButton.setObjectName("searchLibrariesDirButton")
+        self.horizontalLayout_3.addWidget(self.searchLibrariesDirButton)
+        self.formLayout_3.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_3)
+        self.verticalLayout.addWidget(self.groupBox_4)
         self.groupBox_2 = QtGui.QGroupBox(SettingsDialog)
         self.groupBox_2.setObjectName("groupBox_2")
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
@@ -97,7 +119,7 @@ class Ui_SettingsDialog(object):
         self.cancel.setObjectName("cancel")
         self.horizontalLayout_2.addWidget(self.cancel)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        self.verticalLayout.setStretch(2, 1)
+        self.verticalLayout.setStretch(3, 1)
 
         self.retranslateUi(SettingsDialog)
         QtCore.QMetaObject.connectSlotsByName(SettingsDialog)
@@ -108,8 +130,14 @@ class Ui_SettingsDialog(object):
         self.label.setText(QtGui.QApplication.translate("SettingsDialog", "Websocket IP:", None, QtGui.QApplication.UnicodeUTF8))
         self.wsIP.setText(QtGui.QApplication.translate("SettingsDialog", "localhost", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("SettingsDialog", "Websocket Port:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setToolTip(QtGui.QApplication.translate("SettingsDialog", "Not apply for offline", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("SettingsDialog", "Proxy", None, QtGui.QApplication.UnicodeUTF8))
+        self.proxy.setToolTip(QtGui.QApplication.translate("SettingsDialog", "Not apply for offline", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkProxy.setToolTip(QtGui.QApplication.translate("SettingsDialog", "Not apply for offline", None, QtGui.QApplication.UnicodeUTF8))
         self.checkProxy.setText(QtGui.QApplication.translate("SettingsDialog", "Check", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_4.setTitle(QtGui.QApplication.translate("SettingsDialog", "Work space", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("SettingsDialog", "libraires directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.searchLibrariesDirButton.setText(QtGui.QApplication.translate("SettingsDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_2.setTitle(QtGui.QApplication.translate("SettingsDialog", "Logging", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("SettingsDialog", "Level:", None, QtGui.QApplication.UnicodeUTF8))
         self.logLevelDebug.setText(QtGui.QApplication.translate("SettingsDialog", "DEBUG", None, QtGui.QApplication.UnicodeUTF8))

@@ -35,9 +35,6 @@ class TestSerialMonitorHub(unittest.TestCase):
         flexmock_teardown()
         removeHubsSubclasses()
 
-    def test_construct_getCompilerUploader(self):
-        self.assertIsInstance(self.serialMonitorHub.compilerUploader, CompilerUploader)
-
     def test_startApp_callsStartsSerialMonitorApp(self):
         mainApp = getMainApp()
         mainApp.w2bGui = Web2boardWindow(None, 0)

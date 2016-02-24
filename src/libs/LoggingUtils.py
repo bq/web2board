@@ -7,6 +7,10 @@ import logging.handlers
 import os
 import sys
 import time
+from datetime import datetime
+from logging import Handler
+
+from wshubsapi.HubsInspector import HubsInspector
 
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
@@ -73,6 +77,23 @@ class RotatingHandler(logging.handlers.RotatingFileHandler):
         myRecord = getDecodedMessage(record, self)
         super(RotatingHandler, self).emit(myRecord)
 
+
+class HubsHandler(Handler):
+    def __init__(self, *args, **kwargs):
+        super(HubsHandler, self).__init__(*args, **kwargs)
+
+    def handle(self, record):
+        return super(HubsHandler, self).handle(record)
+
+    def emit(self, record):
+        if '\n{"function": "onLoggingMessage"' in record.msg:
+            return
+        from libs.WSCommunication.Hubs.LoggingHub import LoggingHub
+        r = getDecodedMessage(record, self)
+        loggingHub = HubsInspector.getHubInstance(LoggingHub)
+        loggingHub.recordsBuffer.append(r)
+        subscribedClients = loggingHub._getClientsHolder().getSubscribedClients()
+        subscribedClients.onLoggingMessage(datetime.now().isoformat(), r.levelno, r.msg, self.format(r))
 
 
 def initLogging(name):

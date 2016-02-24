@@ -70,13 +70,8 @@ class MainApp:
         return parser.parse_args()
 
     def handleSystemArguments(self, options, args):
-        logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
-                     "error": logging.ERROR, "critical": logging.CRITICAL}
-
         log.info("init web2board with options: {}, and args: {}".format(options, args))
-
-        logLevel = options.logLevel if isinstance(options.logLevel, int) else logLevels[options.logLevel.lower()]
-        logging.getLogger().handlers[0].level = logLevel
+        utils.setLogLevel(options.logLevel)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
@@ -95,8 +90,6 @@ class MainApp:
         return options
 
     def initializeServerAndCommunicationProtocol(self, options):
-        importlib.import_module("libs.WSCommunication.Hubs")
-        HubsInspector.inspectImplementedHubs()
         # do not call this line in executable
         if not utils.areWeFrozen():
             HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")

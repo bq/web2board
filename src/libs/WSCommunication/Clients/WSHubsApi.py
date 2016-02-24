@@ -143,11 +143,13 @@ class HubsAPI(object):
         self.wsClient = apiClientClass(self, url, serverTimeout)
         self.wsClient.defaultOnError = lambda error: None
         self.pickler = pickler
-        self.WindowHub = self.__WindowHub(self.wsClient, self.pickler)
-        self.UtilsAPIHub = self.__UtilsAPIHub(self.wsClient, self.pickler)
         self.CodeHub = self.__CodeHub(self.wsClient, self.pickler)
         self.VersionsHandlerHub = self.__VersionsHandlerHub(self.wsClient, self.pickler)
+        self.LoggingHub = self.__LoggingHub(self.wsClient, self.pickler)
+        self.WindowHub = self.__WindowHub(self.wsClient, self.pickler)
+        self.UtilsAPIHub = self.__UtilsAPIHub(self.wsClient, self.pickler)
         self.SerialMonitorHub = self.__SerialMonitorHub(self.wsClient, self.pickler)
+        self.ConfigHub = self.__ConfigHub(self.wsClient, self.pickler)
 
     @property
     def defaultOnError(self):
@@ -161,6 +163,252 @@ class HubsAPI(object):
         self.wsClient.connect()
 
 
+    class __CodeHub(object):
+        def __init__(self, wsClient, pickler):
+            hubName = self.__class__.__name__[2:]
+            self.server = self.__Server(wsClient, hubName, pickler)
+            self.client = WSSimpleObject()
+
+        class __Server(GenericServer):
+            
+            def compile(self, code):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(code)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "compile", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getSubscribedClientsToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def subscribeToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def tryToTerminateSerialCommProcess(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "tryToTerminateSerialCommProcess", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def unsubscribeFromHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def upload(self, code, board, port=None):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(code)
+                args.append(board)
+                args.append(port)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "upload", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def uploadHex(self, hexText, board, port=None):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(hexText)
+                args.append(board)
+                args.append(port)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "uploadHex", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def uploadHexFile(self, hexFilePath, board, port=None):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(hexFilePath)
+                args.append(board)
+                args.append(port)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "uploadHexFile", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+    class __VersionsHandlerHub(object):
+        def __init__(self, wsClient, pickler):
+            hubName = self.__class__.__name__[2:]
+            self.server = self.__Server(wsClient, hubName, pickler)
+            self.client = WSSimpleObject()
+
+        class __Server(GenericServer):
+            
+            def getSubscribedClientsToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getVersion(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getVersion", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setLibVersion(self, version):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(version)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setLibVersion", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setWeb2boardVersion(self, version):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(version)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setWeb2boardVersion", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def subscribeToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def unsubscribeFromHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+    class __LoggingHub(object):
+        def __init__(self, wsClient, pickler):
+            hubName = self.__class__.__name__[2:]
+            self.server = self.__Server(wsClient, hubName, pickler)
+            self.client = WSSimpleObject()
+
+        class __Server(GenericServer):
+            
+            def getAllBufferedRecords(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getAllBufferedRecords", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getSubscribedClientsToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def subscribeToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def unsubscribeFromHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
     class __WindowHub(object):
         def __init__(self, wsClient, pickler):
             hubName = self.__class__.__name__[2:]
@@ -345,193 +593,6 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-    class __CodeHub(object):
-        def __init__(self, wsClient, pickler):
-            hubName = self.__class__.__name__[2:]
-            self.server = self.__Server(wsClient, hubName, pickler)
-            self.client = WSSimpleObject()
-
-        class __Server(GenericServer):
-            
-            def compile(self, code):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(code)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "compile", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def getSubscribedClientsToHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def subscribeToHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def tryToTerminateSerialCommProcess(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "tryToTerminateSerialCommProcess", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def unsubscribeFromHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def upload(self, code, board):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(code)
-                args.append(board)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "upload", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def uploadHex(self, hexText, board):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(hexText)
-                args.append(board)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "uploadHex", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def uploadHexFile(self, hexFilePath, board):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(hexFilePath)
-                args.append(board)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "uploadHexFile", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-    class __VersionsHandlerHub(object):
-        def __init__(self, wsClient, pickler):
-            hubName = self.__class__.__name__[2:]
-            self.server = self.__Server(wsClient, hubName, pickler)
-            self.client = WSSimpleObject()
-
-        class __Server(GenericServer):
-            
-            def getSubscribedClientsToHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def getVersion(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "getVersion", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def setLibVersion(self, version):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(version)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "setLibVersion", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def setWeb2boardVersion(self, version):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(version)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "setWeb2boardVersion", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def subscribeToHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def unsubscribeFromHub(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
     class __SerialMonitorHub(object):
         def __init__(self, wsClient, pickler):
             hubName = self.__class__.__name__[2:]
@@ -565,12 +626,12 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
-            def findBoardPort(self, ):
+            def findBoardPort(self, board):
                 """
                 :rtype : WSReturnObject
                 """
                 args = list()
-                
+                args.append(board)
                 id = self._getNextMessageID()
                 body = {"hub": self.hubName, "function": "findBoardPort", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
@@ -672,6 +733,171 @@ class HubsAPI(object):
                 args.append(data)
                 id = self._getNextMessageID()
                 body = {"hub": self.hubName, "function": "write", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+    class __ConfigHub(object):
+        def __init__(self, wsClient, pickler):
+            hubName = self.__class__.__name__[2:]
+            self.server = self.__Server(wsClient, hubName, pickler)
+            self.client = WSSimpleObject()
+
+        class __Server(GenericServer):
+            
+            def changePlatformioIniFile(self, content):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(content)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "changePlatformioIniFile", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getConfig(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getConfig", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getLibrariesPath(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getLibrariesPath", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getSubscribedClientsToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def restorePlatformioIniFile(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "restorePlatformioIniFile", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setLibrariesPath(self, libDir):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(libDir)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setLibrariesPath", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setLogLevel(self, logLevel):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(logLevel)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setLogLevel", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setProxy(self, proxyUrl):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(proxyUrl)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setProxy", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setValues(self, configDic):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(configDic)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setValues", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def setWebSocketInfo(self, IP, port):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(IP)
+                args.append(port)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "setWebSocketInfo", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def subscribeToHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "subscribeToHub", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def testProxy(self, proxyUrl):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(proxyUrl)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "testProxy", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def unsubscribeFromHub(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "unsubscribeFromHub", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction

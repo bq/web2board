@@ -16,7 +16,10 @@ import sys
 import time
 
 from PySide import QtGui
+from PySide.QtGui import QFileDialog
+
 from frames.UI_settingsDialog import Ui_SettingsDialog
+from libs import utils
 from libs.Config import Config
 
 log = logging.getLogger(__name__)
@@ -32,13 +35,19 @@ class SettingsDialog(QtGui.QDialog):
 
         self.ui.ok.clicked.connect(self.onOk)
         self.ui.cancel.clicked.connect(self.close)
+        self.ui.searchLibrariesDirButton.clicked.connect(self.__openFileDialog)
 
         self.__closeFromOk = False
+
+    def __openFileDialog(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.ui.librariesDir.setText(folder.encode("utf-8"))
 
     def setUpSettings(self):
         self.ui.wsIP.setText(Config.webSocketIP)
         self.ui.wsPort.setValue(Config.webSocketPort)
         self.ui.proxy.setText(Config.proxy)
+        self.ui.librariesDir.setText(Config.getPlatformioLibDir())
 
         if Config.logLevel <= logging.DEBUG:
             self.ui.logLevelDebug.setChecked(True)
@@ -71,6 +80,8 @@ class SettingsDialog(QtGui.QDialog):
         Config.webSocketIP = self.ui.wsIP.text()
         Config.webSocketPort = self.ui.wsPort.value()
         Config.proxy = self.ui.proxy.text()
+        if self.ui.librariesDir.text() != Config.getPlatformioLibDir():
+            Config.setPlatformioLibDir(self.ui.librariesDir.text())
 
         if self.ui.logLevelDebug.isChecked():
             Config.logLevel = logging.DEBUG
@@ -82,13 +93,12 @@ class SettingsDialog(QtGui.QDialog):
             Config.logLevel = logging.ERROR
         elif self.ui.logLevelCritial.isChecked():
             Config.logLevel = logging.CRITICAL
-        logging.getLogger().handlers[0].level = Config.logLevel
+        utils.setLogLevel(Config.logLevel)
 
         Config.checkOnlineUpdates = self.ui.checkUpdates.isChecked()
         Config.storeConfigInFile()
         self.__closeFromOk = True
         self.close()
-
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

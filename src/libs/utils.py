@@ -165,3 +165,11 @@ def getOsExecutableExtension():
         return ".exe"
     if isLinux():
         return ""
+
+
+def setLogLevel(logLevel):
+    logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
+                 "error": logging.ERROR, "critical": logging.CRITICAL}
+
+    logLevel = logLevel if isinstance(logLevel, int) else logLevels[logLevel.lower()]
+    logging.getLogger().handlers[0].level = logLevel

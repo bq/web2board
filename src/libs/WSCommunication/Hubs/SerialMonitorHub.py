@@ -97,10 +97,10 @@ class SerialMonitorHub(Hub):
         self._getClientsHolder().getSubscribedClients().baudrateChanged(port, baudrate)
 
     def getAvailablePorts(self):
-        return self.compilerUploader.getAvailablePorts()
+        return CompilerUploader.construct().getAvailablePorts()
 
-    def findBoardPort(self):
-        return self.compilerUploader.getPort()
+    def findBoardPort(self, board):
+        return CompilerUploader.construct(board).getPort()
 
     def isPortConnected(self, port):
         return port in self.serialConnections and not self.serialConnections[port].isClosed()

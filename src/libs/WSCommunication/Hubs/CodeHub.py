@@ -24,19 +24,19 @@ class CodeHub(Hub):
         :type _sender: ConnectedClientsGroup
         """
         log.info("Compiling from {}".format(_sender.ID))
-        log.debug("Compiling code: {}".format(code))
+        log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.isCompiling()
         compileReport = CompilerUploader.construct().compile(code)
         return self.__handleCompileReport(compileReport)
 
-    def upload(self, code, board, _sender):
+    def upload(self, code, board, _sender, port=None):
         """
         :type code: str
         :type _sender: ConnectedClientsGroup
         """
         log.info("Uploading for board {} from {}".format(board, _sender.ID))
-        log.debug("Uploading code: {}".format(code))
-        uploadPort = self.__prepareUpload(board, _sender)
+        log.debug("Uploading code: {}".format(code.encode("utf-8")))
+        uploadPort = self.__prepareUpload(board, _sender, port)
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort
 
@@ -44,13 +44,13 @@ class CodeHub(Hub):
 
         return self.__handleCompileReport(compileReport, uploadPort)
 
-    def uploadHex(self, hexText, board, _sender):
+    def uploadHex(self, hexText, board, _sender, port=None):
         """
         :type hexText: str
         :type _sender: ConnectedClientsGroup
         """
         log.info("upload Hex text for board {} from {}".format(board, _sender.ID))
-        uploadPort = self.__prepareUpload(board, _sender)
+        uploadPort = self.__prepareUpload(board, _sender, port)
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort
 
@@ -61,7 +61,7 @@ class CodeHub(Hub):
         compileReport = CompilerUploader.construct(board).uploadAvrHex(relPath, uploadPort=uploadPort)
         return self.__handleCompileReport(compileReport, uploadPort)
 
-    def uploadHexFile(self, hexFilePath, board, _sender):
+    def uploadHexFile(self, hexFilePath, board, _sender, port=None):
         """
         :type hexFilePath: str
         :type _sender: ConnectedClientsGroup
@@ -69,7 +69,7 @@ class CodeHub(Hub):
         log.info("upload HexFile for board {} from {}".format(board, _sender[0].ID))
         with open(hexFilePath) as hexFile:
             hexText = hexFile.read()
-        return self.uploadHex(hexText, board, _sender)
+        return self.uploadHex(hexText, board, _sender, port)
 
     @staticmethod
     def tryToTerminateSerialCommProcess():
@@ -89,7 +89,10 @@ class CodeHub(Hub):
         else:
             return self._constructUnsuccessfulReplay(compileReport[1]["err"])
 
-    def __prepareUpload(self, board, _sender):
+    def __prepareUpload(self, board, _sender, uploadPort=None):
+        if uploadPort is not None:
+            _sender.isUploading(uploadPort)
+            return uploadPort
         compileUploader = CompilerUploader.construct(board)
         self.tryToTerminateSerialCommProcess()
         uploadPort = getMainApp().w2bGui.getSelectedPort()

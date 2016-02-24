@@ -13,7 +13,7 @@ from libs.Config import Config
 class TestConfig(unittest.TestCase):
     def setUp(self):
         self.myTestFolder = os.path.join(PathsManager.TEST_SETTINGS_PATH, "Config")
-        self.originalConfigDict = Config._getConfigValues()
+        self.originalConfigDict = Config.getConfigValues()
         restoreAllTestResources()
 
     def tearDown(self):
@@ -43,7 +43,7 @@ class TestConfig(unittest.TestCase):
 
         Config.readConfigFile()
 
-        for k, v in Config._getConfigValues().items():
+        for k, v in Config.getConfigValues().items():
             self.assertEqual(self.originalConfigDict[k], v)
 
     def test_storeConfigInFile_createsNewFileIfNotExists(self):

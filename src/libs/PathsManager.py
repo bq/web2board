@@ -32,6 +32,7 @@ class PathsManager:
 
     PROGRAM_PATH = None
     PLATFORMIO_WORKSPACE_PATH = None
+    PLATFORMIO_INI_PATH = None
     TEST_SETTINGS_PATH = None
 
     SCONS_EXECUTABLE_PATH = None
@@ -123,6 +124,7 @@ class PathsManager:
 
         cls.PROGRAM_PATH = cls.getExternalDataFolder()
         cls.PLATFORMIO_WORKSPACE_PATH = os.path.join(cls.RES_PATH, 'platformioWorkSpace')
+        cls.PLATFORMIO_INI_PATH = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, 'platformio.ini')
         cls.TEST_SETTINGS_PATH = os.path.join(cls.RES_PATH, 'TestSettings', 'resources')
         cls.SCONS_EXECUTABLE_PATH = cls.getSonsExecutablePath()
 
