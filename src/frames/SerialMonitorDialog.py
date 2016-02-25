@@ -97,7 +97,7 @@ class SerialMonitorDialog(QtGui.QMainWindow):
 
     @InGuiThread()
     def logText(self, message):
-        if message is not None and not isinstance(message, basestring):
+        if message is not None and isinstance(message, basestring):
             message = message.replace("\r", "")
             textLines = self.ui.consoleTextEdit.toPlainText().split("\n")
             if len(textLines) >= 800 or len(textLines[-1]) > 300:

@@ -94,6 +94,7 @@ class MainApp:
         if not utils.areWeFrozen():
             HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
             HubsInspector.constructPythonFile(path="libs/WSCommunication/Clients")
+        Config.webSocketPort = options.port
         self.w2bServer = make_server(options.host, options.port, server_class=WSGIServer,
                                      handler_class=WebSocketWSGIRequestHandler,
                                      app=WebSocketWSGIApplication(handler_cls=WSConnectionHandler))
