@@ -391,17 +391,23 @@ def scons_in_pip():
 
 @memoized
 def _lookup_boards():
+    from libs.PathsManager import PathsManager
+    import logging
+    l = logging.getLogger("platformio")
     boards = {}
     bdirs = [join(get_source_dir(), "boards")]
     if isdir(join(get_home_dir(), "boards")):
         bdirs.append(join(get_home_dir(), "boards"))
-
+    bdirs.append(PathsManager.RES_PLATFORMIO_PATH + os.sep + "boards")
+    l.info("paths for boards: {}".format(bdirs))
     for bdir in bdirs:
-        for json_file in sorted(os.listdir(bdir)):
-            if not json_file.endswith(".json"):
-                continue
-            with open(join(bdir, json_file)) as f:
-                boards.update(json.load(f))
+        if os.path.isdir(bdir):
+            for json_file in sorted(os.listdir(bdir)):
+                if not json_file.endswith(".json"):
+                    continue
+                with open(join(bdir, json_file)) as f:
+                    boards.update(json.load(f))
+    l.info("boards detected: {}".format(boards))
     return boards
 
 
