@@ -19,26 +19,8 @@ class Config:
     proxy = None
     version = "2.0.0"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
-    bitbloqLibsVersion = "0.1.0"
-    bitbloqLibsLibraries = [
-        "BitbloqBatteryReader",
-        "BitbloqButtonPad",
-        "BitbloqEnableInterrupt",
-        "BitbloqEncoder",
-        "BitbloqEvolution",
-        "BitbloqHTS221",
-        "BitbloqJoystick",
-        "BitbloqLedMatrix",
-        "BitbloqLineFollower",
-        "BitbloqLiquidCrystal",
-        "BitbloqOscillator",
-        "BitbloqRGB",
-        "BitbloqRTC",
-        "BitbloqSoftwareSerial",
-        "BitbloqUS",
-        "BitbloqZowi",
-        "BitbloqZowiSerialCommand"
-    ]
+    bitbloqLibsVersion = "0.1.1"
+    bitbloqLibsLibraries = []
     bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     checkOnlineUpdates = True
     logLevel = logging.INFO
