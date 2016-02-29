@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'UI_web2board.ui'
 #
-# Created: Fri Feb 19 12:12:05 2016
+# Created: Mon Feb 29 09:33:20 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,16 @@ class Ui_Web2board(object):
         self.clean.setText("")
         self.clean.setObjectName("clean")
         self.horizontalLayout.addWidget(self.clean)
+        self.label_2 = QtGui.QLabel(self.centralwidget)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout.addWidget(self.label_2)
+        self.boards = QtGui.QComboBox(self.centralwidget)
+        self.boards.setMinimumSize(QtCore.QSize(100, 0))
+        self.boards.setObjectName("boards")
+        self.boards.addItem("")
+        self.boards.addItem("")
+        self.boards.addItem("")
+        self.horizontalLayout.addWidget(self.boards)
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
@@ -100,10 +110,14 @@ class Ui_Web2board(object):
         self.settingsButton.setToolTip(QtGui.QApplication.translate("Web2board", "Open settings window", None, QtGui.QApplication.UnicodeUTF8))
         self.serialMonitorButton.setToolTip(QtGui.QApplication.translate("Web2board", "open serial monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.clean.setToolTip(QtGui.QApplication.translate("Web2board", "Clean the console", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("Web2board", "boards:", None, QtGui.QApplication.UnicodeUTF8))
+        self.boards.setItemText(0, QtGui.QApplication.translate("Web2board", "BQ Zum", None, QtGui.QApplication.UnicodeUTF8))
+        self.boards.setItemText(1, QtGui.QApplication.translate("Web2board", "freeduino", None, QtGui.QApplication.UnicodeUTF8))
+        self.boards.setItemText(2, QtGui.QApplication.translate("Web2board", "Arduino uno", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Web2board", "ports:", None, QtGui.QApplication.UnicodeUTF8))
         self.ports.setItemText(0, QtGui.QApplication.translate("Web2board", "AUTO", None, QtGui.QApplication.UnicodeUTF8))
         self.searchPorts.setToolTip(QtGui.QApplication.translate("Web2board", "Search usb ports and connected board", None, QtGui.QApplication.UnicodeUTF8))
-        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search ports", None, QtGui.QApplication.UnicodeUTF8))
+        self.searchPorts.setText(QtGui.QApplication.translate("Web2board", "Search board", None, QtGui.QApplication.UnicodeUTF8))
         self.updateGroupbox.setTitle(QtGui.QApplication.translate("Web2board", "Downloading", None, QtGui.QApplication.UnicodeUTF8))
         self.info.setText(QtGui.QApplication.translate("Web2board", "Info:", None, QtGui.QApplication.UnicodeUTF8))
         self.menuTest.setTitle(QtGui.QApplication.translate("Web2board", "File", None, QtGui.QApplication.UnicodeUTF8))

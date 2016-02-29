@@ -71,6 +71,38 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>boards:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="boards">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>BQ Zum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>freeduino</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Arduino uno</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label">
         <property name="text">
          <string>ports:</string>
@@ -98,7 +130,7 @@
          <string>Search usb ports and connected board</string>
         </property>
         <property name="text">
-         <string>Search ports</string>
+         <string>Search board</string>
         </property>
        </widget>
       </item>

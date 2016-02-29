@@ -35,6 +35,7 @@ log = logging.getLogger(__name__)
 
 class Web2boardWindow(QtGui.QMainWindow):
     CONSOLE_MESSAGE_DIV = "<div style='color:{fg}; font-weight:{bold}'; text-decoration:{underline} >{msg}</div>"
+    boardMcuRelation = {"BQ Zum": "bt328", "Arduino uno": "uno", "freeduino": "uno"}
 
     def __init__(self, *args, **kwargs):
         super(Web2boardWindow, self).__init__(*args, **kwargs)
@@ -120,7 +121,9 @@ class Web2boardWindow(QtGui.QMainWindow):
     def onSearchPorts(self):
         self.ui.searchPorts.setEnabled(False)
         self.ui.searchPorts.setEnabled(False)
-        self.__getPorts()
+
+        board = self.boardMcuRelation[self.ui.boards.currentText()]
+        self.__getPorts(board)
 
     def createTrayIcon(self):
         def onTrayIconActivated(reason):
@@ -196,10 +199,12 @@ class Web2boardWindow(QtGui.QMainWindow):
         return msgBox.exec_() == QMessageBox.Ok
 
     @asynchronous()
-    def __getPorts(self):
+    def __getPorts(self, board):
         try:
-            self.availablePorts = self.compileUpdater.getAvailablePorts()
-            self.autoPort = self.compileUpdater.getPort()
+            compiler = CompilerUploader.construct(board)
+            self.availablePorts = compiler.getAvailablePorts()
+            self.autoPort = compiler.getPort()
+            return self.autoPort
         finally:
             self.onRefreshFinished()
 
@@ -223,7 +228,10 @@ class Web2boardWindow(QtGui.QMainWindow):
     @InGuiThread()
     def startSerialMonitorApp(self, port=None):
         if self.serialMonitor is None or self.serialMonitor.isClosed:
-            self.serialMonitor = SerialMonitorDialog(None, port if port is not None else self.getSelectedPort())
+            port = port if port is not None else self.getSelectedPort()
+            if port is None:
+                port = self.__getPorts(self.boardMcuRelation[self.ui.boards.currentText()]).get()
+            self.serialMonitor = SerialMonitorDialog(None, port)
         if not self.serialMonitor.isVisible():
             self.serialMonitor.show()
         libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)

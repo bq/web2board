@@ -125,9 +125,8 @@ class CompilerUploader:
 
         if isinstance(code, unicode):
             code = code.encode("utf-8")
-        code = '#include "Arduino.h";' + code  # todo do this only in Arduino frameworks
 
-        with open(os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src", "main.cpp"), 'w') as mainCppFile:
+        with open(os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src", "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
         return platformioRun(target=target, environment=(self.board,), project_dir=pm.PLATFORMIO_WORKSPACE_PATH,
@@ -207,3 +206,4 @@ class CompilerUploader:
         if board not in cls.__globalCompilerUploaderHolder:
             cls.__globalCompilerUploaderHolder[board] = CompilerUploader(board)
         return cls.__globalCompilerUploaderHolder[board]
+

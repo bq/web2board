@@ -29,7 +29,11 @@ class Result(object):
         if joinTimeout is not None:
             joinTimeout = max([0, joinTimeout - (datetime.now() - self.startTime).seconds])
             self.result = self.future.result(joinTimeout)
-        return self.future.result(joinTimeout)
+        result = self.future.result(joinTimeout)
+        if isinstance(result, Exception):
+            raise result
+        else:
+            return result
 
 
 def asynchronous(daemon=True):
