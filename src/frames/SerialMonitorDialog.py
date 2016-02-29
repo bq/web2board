@@ -126,7 +126,6 @@ class SerialMonitorDialog(QtGui.QMainWindow):
         message = self.ui.sendLineEdit.text()
         if message == "":
             return
-        self.logText(message)
         self.api.SerialMonitorHub.server.write(self.port, message)
         self.ui.sendLineEdit.setText('')
 
