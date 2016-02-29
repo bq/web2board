@@ -44,6 +44,8 @@ class PathsManager:
     @staticmethod
     def getBasePath():
         if utils.areWeFrozen():
+            if utils.isMac():
+                return os.getcwd()
             return sys._MEIPASS
         else:
             return os.getcwd()
@@ -113,12 +115,16 @@ class PathsManager:
         cls.COPY_PATH = cls.getCopyPathForUpdate()
         cls.ORIGINAL_PATH = cls.getOriginalPathForUpdate()
 
-        cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
+        if utils.isMac() and utils.areWeFrozen():
+            cls.RES_PATH = os.path.join(cls.MAIN_PATH, os.pardir, 'Resources', 'res')
+            cls.RES_PATH = os.path.abspath(cls.RES_PATH)
+        else:
+            cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
         cls.RES_ICO_PATH = os.path.join(cls.RES_PATH, 'Web2board.ico')
         cls.RES_ICONS_PATH = os.path.join(cls.RES_PATH, 'icons')
         cls.TEST_RES_PATH = os.path.join(cls.MAIN_PATH, 'Test', 'resources')
         cls.RES_BOARDS_PATH = os.path.join(cls.RES_PATH, 'boards.txt')
-        cls.RES_PLATFORMIO_PATH = os.path.join(cls.RES_PATH, 'platformio')
+        cls.RES_PLATFORMIO_PATH = os.path.abspath(os.path.join(cls.RES_PATH, os.pardir, 'platformio'))
         cls.RES_LOGGING_CONFIG_PATH = os.path.join(cls.RES_PATH, 'logging.json')
         cls.RES_SCONS_ZIP_PATH = os.path.join(cls.MAIN_PATH, "res", "sconsRes.zip")
 
