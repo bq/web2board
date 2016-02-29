@@ -54,9 +54,9 @@ class TestCompilerUploader(unittest.TestCase):
         self.platformioPath = pm.PLATFORMIO_WORKSPACE_PATH
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         self.srcCopyPath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
-        self.workingCppPath = os.path.join(self.srcCopyPath, "working.cpp")
-        self.notWorkingCppPath = os.path.join(self.srcCopyPath, "notWorking.cpp")
-        self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.cpp")
+        self.workingCppPath = os.path.join(self.srcCopyPath, "working.ino")
+        self.notWorkingCppPath = os.path.join(self.srcCopyPath, "notWorking.ino")
+        self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.ino")
         self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader.construct(self.__getPlatformToUse())
 
