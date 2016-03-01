@@ -6,6 +6,7 @@ import time
 
 from libs.Decorators.Asynchronous import asynchronous
 
+
 class Downloader:
     log = logging.getLogger(__name__)
 

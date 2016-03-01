@@ -78,8 +78,8 @@ class Web2boardWindow(QtGui.QMainWindow):
         self.ui.forceCloseButton.clicked.connect(quit)
         self.ui.clean.clicked.connect(self.cleanConsole)
         self.ui.searchPorts.clicked.connect(self.onSearchPorts)
-        self.ui.actionSettings.triggered.connect(self.settingsDialog.show)
-        self.ui.settingsButton.clicked.connect(self.settingsDialog.show)
+        self.ui.actionSettings.triggered.connect(lambda *args: SettingsDialog(self).show())
+        self.ui.settingsButton.clicked.connect(lambda *args: SettingsDialog(self).show())
         self.ui.actionSerialMonitor.triggered.connect(self.startSerialMonitorApp)
         self.ui.serialMonitorButton.clicked.connect(self.startSerialMonitorApp)
         ports = sorted(self.compileUpdater.getAvailablePorts())
@@ -149,6 +149,7 @@ class Web2boardWindow(QtGui.QMainWindow):
     def closeTrayIcon(self):
         if libs.MainApp.isTrayIconAvailable():
             self.trayIcon.hide()
+            self.trayIcon.setVisible(False)
 
     def closeEvent(self, event):
         self.hide()

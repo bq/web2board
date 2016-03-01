@@ -48,7 +48,7 @@ class TestDownloader(unittest.TestCase):
         self.urlopenMock.once()
         flexmock(self).should_call("__infoCallbackMock") \
             .with_args(object, 1000, float).at_least().times(1)
-        flexmock(urllib).should_call("urlretrieve").with_args(url, dst).once()
+        flexmock(self.downloader).should_call("__realDownload").with_args(url, dst).once()
 
         self.downloader.download(url, dst, infoCallback=self.__infoCallbackMock).get()
 

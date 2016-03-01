@@ -20,7 +20,25 @@ class Config:
     version = "2.0.0"
     downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
     bitbloqLibsVersion = "0.1.1"
-    bitbloqLibsLibraries = []
+    bitbloqLibsLibraries = [
+        "BitbloqBatteryReader",
+        "BitbloqButtonPad",
+        "BitbloqEnableInterrupt",
+        "BitbloqEncoder",
+        "BitbloqEvolution",
+        "BitbloqHTS221",
+        "BitbloqJoystick",
+        "BitbloqLedMatrix",
+        "BitbloqLineFollower",
+        "BitbloqLiquidCrystal",
+        "BitbloqOscillator",
+        "BitbloqRGB",
+        "BitbloqRTC",
+        "BitbloqSoftwareSerial",
+        "BitbloqUS",
+        "BitbloqZowi",
+        "BitbloqZowiSerialCommand"
+    ]
     bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     checkOnlineUpdates = True
     logLevel = logging.INFO
@@ -42,6 +60,8 @@ class Config:
         with open(PathsManager.PLATFORMIO_INI_PATH) as platformioIniFile:
             parser.readfp(platformioIniFile)
         assert os.path.isdir(libDir)
+        if not parser.has_section("platformio"):
+            parser.add_section("platformio")
         parser.set("platformio", "lib_dir", os.path.abspath(libDir))
         with open(PathsManager.PLATFORMIO_INI_PATH, "wb") as platformioIniFile:
             parser.write(platformioIniFile)

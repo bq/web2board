@@ -80,8 +80,8 @@ class SettingsDialog(QtGui.QDialog):
         Config.webSocketIP = self.ui.wsIP.text()
         Config.webSocketPort = self.ui.wsPort.value()
         Config.proxy = self.ui.proxy.text()
-        if self.ui.librariesDir.text() != Config.getPlatformioLibDir():
-            Config.setPlatformioLibDir(self.ui.librariesDir.text())
+        if self.ui.librariesDir.text().encode(sys.getfilesystemencoding()) == Config.getPlatformioLibDir():
+            Config.setPlatformioLibDir(self.ui.librariesDir.text().encode(sys.getfilesystemencoding()))
 
         if self.ui.logLevelDebug.isChecked():
             Config.logLevel = logging.DEBUG
@@ -99,10 +99,3 @@ class SettingsDialog(QtGui.QDialog):
         Config.storeConfigInFile()
         self.__closeFromOk = True
         self.close()
-
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    Config.readConfigFile()
-    mySW = SettingsDialog(None)
-    mySW.show()
-    sys.exit(app.exec_())

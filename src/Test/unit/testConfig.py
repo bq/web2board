@@ -21,9 +21,6 @@ class TestConfig(unittest.TestCase):
         flexmock_teardown()
         Config.__dict__.update({x: y for x, y in self.originalConfigDict.items()})
 
-    def test_construct_assertLogLevelIsINFO(self):
-        self.assertEqual(Config.logLevel, logging.INFO)
-
     def test_readConfigFile_changesConfigParameters(self):
         PathsManager.CONFIG_PATH = os.path.join(self.myTestFolder, "testConfig.json")
         Config.readConfigFile()

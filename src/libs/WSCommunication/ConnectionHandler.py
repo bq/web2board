@@ -21,7 +21,7 @@ class WSConnectionHandler(ConnectionHandler):
         if self._connectedClient.ID == "Bitbloq":
             log.info("Bitbloq disconnected, closing web2board...")
             time.sleep(0.5)
-            if utils.areWeFrozen():
+            if utils.areWeFrozen() or True:
                 libs.MainApp.forceQuit()
 
     def received_message(self, message):
@@ -29,4 +29,6 @@ class WSConnectionHandler(ConnectionHandler):
             # send an empty dict to alert bitbloq we are in version 2
             self._connectedClient.writeMessage(json.dumps(dict()))
         else:
-            super(WSConnectionHandler, self).received_message(message)
+            sortMessage = str(message) if len(message.data) < 500 else message.data[:300] + "..."
+            log.debug("Message received from ID: %s\n%s " % (str(self._connectedClient.ID), sortMessage))
+            self.commEnvironment.onAsyncMessage(self._connectedClient, message.data)
