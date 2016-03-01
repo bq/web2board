@@ -153,6 +153,7 @@ class MainApp:
 
     def startMain(self):
         Config.readConfigFile()
+        PathsManager.cleanPioEnvs()
         options, args = self.parseSystemArguments()
         self.qtApp = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()

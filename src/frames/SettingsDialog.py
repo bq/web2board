@@ -21,6 +21,7 @@ from PySide.QtGui import QFileDialog
 from frames.UI_settingsDialog import Ui_SettingsDialog
 from libs import utils
 from libs.Config import Config
+from libs.PathsManager import PathsManager
 
 log = logging.getLogger(__name__)
 
@@ -80,8 +81,9 @@ class SettingsDialog(QtGui.QDialog):
         Config.webSocketIP = self.ui.wsIP.text()
         Config.webSocketPort = self.ui.wsPort.value()
         Config.proxy = self.ui.proxy.text()
-        if self.ui.librariesDir.text().encode(sys.getfilesystemencoding()) == Config.getPlatformioLibDir():
+        if self.ui.librariesDir.text().encode(sys.getfilesystemencoding()) != Config.getPlatformioLibDir():
             Config.setPlatformioLibDir(self.ui.librariesDir.text().encode(sys.getfilesystemencoding()))
+            PathsManager.cleanPioEnvs()
 
         if self.ui.logLevelDebug.isChecked():
             Config.logLevel = logging.DEBUG

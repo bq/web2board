@@ -3,6 +3,8 @@ import os
 import sys
 from os.path import expanduser
 import platform
+import shutil
+
 from libs import utils
 
 _pathsLog = logging.getLogger(__name__)
@@ -139,6 +141,12 @@ class PathsManager:
     @classmethod
     def getIconPath(cls, iconName):
         return os.path.join(PathsManager.RES_ICONS_PATH, iconName)
+
+    @classmethod
+    def cleanPioEnvs(cls):
+        path = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, ".pioenvs")
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
 # set working directory to src
 if utils.areWeFrozen():
