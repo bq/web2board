@@ -74,6 +74,7 @@ def addHandlerInMimeapps():
         f.write(DESKTOP_TEXT)
 
 if __name__ == '__main__':
+    log = None
     try:
         log = startLogger()
         log.info("Script started")
@@ -83,6 +84,7 @@ if __name__ == '__main__':
         addHandlerInMimeapps()
         log.info("Successfully installed web2board")
     except:
-        log.exception("Failed performing postinst")
+        if log:
+            log.exception("Failed performing postinst")
         raise
 

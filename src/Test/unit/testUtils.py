@@ -76,7 +76,7 @@ class TestUtils(unittest.TestCase):
         print self.myTestFolder
         directories = utils.listDirectoriesInPath(self.myTestFolder)
         directories = map(lambda x: x.lower(), directories)
-        self.assertEqual(directories, ["copytree_old", "otherdir"])
+        self.assertEqual(set(directories), {"copytree_old", "otherdir"})
 
     def test_extractZip(self):
         utils.extractZip(self.zipPath, self.myTestFolder)

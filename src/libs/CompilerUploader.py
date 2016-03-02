@@ -126,7 +126,10 @@ class CompilerUploader:
         if isinstance(code, unicode):
             code = code.encode("utf-8")
 
-        with open(os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src", "main.ino"), 'w') as mainCppFile:
+        mainInoPath = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
+        if not os.path.exists(mainInoPath):
+            os.makedirs(mainInoPath)
+        with open(os.path.join(mainInoPath,  "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
         return platformioRun(target=target, environment=(self.board,), project_dir=pm.PLATFORMIO_WORKSPACE_PATH,
