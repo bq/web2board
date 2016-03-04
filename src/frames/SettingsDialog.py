@@ -12,6 +12,7 @@
 # -----------------------------------------------------------------------#
 
 import logging
+import os
 import sys
 import time
 
@@ -78,6 +79,9 @@ class SettingsDialog(QtGui.QDialog):
                 event.ignore()
 
     def onOk(self):
+        if not os.path.exists(self.ui.librariesDir.text()):
+            QtGui.QMessageBox.warning(self, "Warning", "Libraries directory does not exist")
+            return
         Config.webSocketIP = self.ui.wsIP.text()
         Config.webSocketPort = self.ui.wsPort.value()
         Config.proxy = self.ui.proxy.text()

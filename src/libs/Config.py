@@ -12,6 +12,10 @@ from threading import Lock
 my_lock = Lock()
 
 
+class ConfigException(Exception):
+    pass
+
+
 class Config:
     _log = logging.getLogger(__name__)
     webSocketIP = "127.0.0.1"
@@ -56,10 +60,11 @@ class Config:
 
     @classmethod
     def setPlatformioLibDir(cls, libDir):
+        if not os.path.exists(libDir):
+            raise ConfigException("Libraries directory does not exist")
         parser = ConfigParser()
         with open(PathsManager.PLATFORMIO_INI_PATH) as platformioIniFile:
             parser.readfp(platformioIniFile)
-        assert os.path.isdir(libDir)
         if not parser.has_section("platformio"):
             parser.add_section("platformio")
         parser.set("platformio", "lib_dir", os.path.abspath(libDir))
