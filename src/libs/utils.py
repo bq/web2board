@@ -6,6 +6,7 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from glob import glob
 from urllib2 import urlopen
 import glob2
 import psutil
@@ -125,7 +126,9 @@ def listSerialPorts(portsFilter=None):
     ports = list(serial.tools.list_ports.comports())
     if portsFilter is not None:
         ports = filter(portsFilter, ports)
-    return ports
+    if isMac():
+        ports = set(ports + glob('/dev/tty.*'))
+    return list(ports)
 
 
 def isLinux():
