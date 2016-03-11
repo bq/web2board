@@ -23,3 +23,5 @@ installers/
 **/config.json
 src/*.spec
 res/common/platformIoPackages
+/dist/
+/build/
