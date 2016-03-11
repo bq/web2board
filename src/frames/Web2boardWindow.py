@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 import time
-
+from bs4 import BeautifulSoup
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 from PySide.QtGui import QMessageBox
@@ -180,6 +180,12 @@ class Web2boardWindow(QtGui.QMainWindow):
         message = message.replace("\n", "<br>")
         message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
         self.ui.console.append(message.decode("utf-8"))
+        p = BeautifulSoup(self.ui.console.toHtml(), "lxml")
+        allMessages = p.findAll("p")
+        if len(allMessages)>120:
+            self.cleanConsole()
+            log.info()
+
         if record.levelno >= logging.ERROR:
             self.showBalloonMessage("Critical error occurred\nPlease check the history log",
                                     icon=QtGui.QSystemTrayIcon.Warning)
@@ -236,6 +242,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         if not self.serialMonitor.isVisible():
             self.serialMonitor.show()
         libs.MainApp.getMainApp().bringWidgetToFront(self.serialMonitor)
+        return port
 
     @InGuiThread()
     def closeSerialMonitorApp(self):

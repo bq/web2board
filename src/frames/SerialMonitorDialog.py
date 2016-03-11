@@ -29,37 +29,6 @@ from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
 
 log = logging.getLogger(__name__)
 
-
-class SerialConnection:
-    def __init__(self, port):
-        self.serial = serial.Serial()
-        self.serial.port = port
-        self.serial.baudrate = 9600
-        self.serial.open()
-
-    def getData(self):
-        if self.serial.isOpen():
-            out = ''
-            try:
-                while self.serial.inWaiting() > 0:
-                    out += self.serial.read(1)
-                if out != '':
-                    return out
-            except Exception as e:
-                log.critical("error getting data {}".format(e), exc_info=1)
-
-    def write(self, data):
-        self.serial.write(data.encode())
-
-    def changeBaudRate(self, value):
-        self.serial.close()
-        self.serial.baudrate = value
-        self.serial.open()
-
-    def close(self):
-        self.serial.close()
-
-
 class SerialMonitorDialog(QtGui.QMainWindow):
     def __init__(self, parent, port=None, *args, **kwargs):
         super(SerialMonitorDialog, self).__init__(*args, **kwargs)
@@ -75,7 +44,7 @@ class SerialMonitorDialog(QtGui.QMainWindow):
         self.ui.clearButton.clicked.connect(self.onClear)
         self.ui.sendLineEdit.returnPressed.connect(self.onSend)
         self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
-
+        self.ui.baudrateBox.currentIndexChanged.connect(self.onBaudrateChanged)
         self.ui.pauseButton.clicked.connect(self.onPauseButtonClicked)
         self.port = port if port is not None else CompilerUploader().getPort()
 
@@ -134,8 +103,8 @@ class SerialMonitorDialog(QtGui.QMainWindow):
         self.ui.sendLineEdit.setText("")
 
     def onBaudrateChanged(self, event):
-        self.api.SerialMonitorHub.server.changeBaudrate(self.port, self.dropdown.GetValue()) \
-            .done(lambda x: log.debug("Successfully changed baudrate to serial port"),
+        self.api.SerialMonitorHub.server.changeBaudrate(self.port, int(self.ui.baudrateBox.currentText())) \
+            .done(lambda x: log.debug("Successfully changed baudrate to {}".format(self.ui.baudrateBox.currentText())),
                   lambda error: log.error("Unable to change baudrate due to: {}".format(error)))
 
 
