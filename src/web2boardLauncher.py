@@ -27,7 +27,6 @@ def open_file(filename):
 startLogger()
 log = logging.getLogger(__name__)
 web2boardPath = "web2board" + utils.getOsExecutableExtension()
-PathsManager.logRelevantEnvironmentalPaths()
 
 if __name__ == '__main__':
     utils.killProcess("web2board" + utils.getOsExecutableExtension())

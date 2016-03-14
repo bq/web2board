@@ -1,4 +1,3 @@
-
 import unittest
 
 from wshubsapi.HubsInspector import HubsInspector
@@ -21,8 +20,8 @@ class TestSerialMonitorHub(unittest.TestCase):
     def setUp(self):
         global subprocess
         HubsInspector.inspectImplementedHubs(forceReconstruction=True)
-        self.serialMonitorHub = HubsInspector.getHubInstance(SerialMonitorHub)
-        """:type : SerialMonitorHub"""
+        self.serialMonitorHub = flexmock(HubsInspector.getHubInstance(SerialMonitorHub))
+        """:type : flexmock"""
         self.sender = createSenderMock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
@@ -41,3 +40,30 @@ class TestSerialMonitorHub(unittest.TestCase):
             self.serialMonitorHub.startApp("COM1", CompilerUploader.DEFAULT_BOARD)
         finally:
             mainApp.w2bGui.startSerialMonitorApp = original_startSerialMonitorApp
+
+    def test_changeBaudrate_doesNotClosePortIfNotCreated(self):
+        port = "COM4"
+        baudrate = 115200
+        self.serialMonitorHub.should_receive("closeConnection").never()
+        self.serialMonitorHub.should_receive("startConnection").with_args(port, baudrate).once()
+
+        self.assertTrue(self.serialMonitorHub.changeBaudrate(port, baudrate))
+
+    def test_changeBaudrate_closePortIfAlreadyCreated(self):
+        port = "COM4"
+        baudrate = 9600
+        self.serialMonitorHub.serialConnections[port] = flexmock(isClosed=lambda: False)
+        self.serialMonitorHub.should_receive("startConnection").with_args(port, baudrate).once()
+        self.serialMonitorHub.should_receive("closeConnection").with_args(port).once()
+
+        self.assertTrue(self.serialMonitorHub.changeBaudrate(port, baudrate))
+
+    def test_changeBaudrate_callsBaudrateChangedForSubscribed(self):
+        port = "COM4"
+        baudrate = 115200
+        self.serialMonitorHub.should_receive("startConnection").with_args(port, baudrate).once()
+        subscribedClients = flexmock(baudrateChanged=lambda p, b: None)
+        clientsHolder = flexmock(self.serialMonitorHub._getClientsHolder(), getSubscribedClients=lambda :subscribedClients)
+        clientsHolder.getSubscribedClients().should_receive("baudrateChanged").once()
+
+        self.assertTrue(self.serialMonitorHub.changeBaudrate(port, baudrate))
