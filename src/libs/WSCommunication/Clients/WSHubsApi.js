@@ -83,17 +83,7 @@ function HubsAPI(url, serverTimeout) {
                 } else {
                     f = thisApi[msgObj.hub].client[msgObj.function];
                     if (f!== undefined) {
-                        var replayMessage = {ID: msgObj.ID}
-                        try {
-                            replayMessage.replay =  f.apply(f, msgObj.args);
-                            replayMessage.success = true;
-                        } catch(e){
-                            replayMessage.success = false;
-                            replayMessage.replay = e.toString();
-                        } finally {
-                            replayMessage.replay = replayMessage.replay === undefined ? null: replayMessage.replay;
-                            thisApi.wsClient.send(JSON.stringify(replayMessage))
-                        }
+                        f.apply(f, msgObj.args);
                     } else {
                         this.onClientFunctionNotFound(msgObj.hub, msgObj.function);
                     }

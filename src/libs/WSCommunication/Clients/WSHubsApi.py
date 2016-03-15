@@ -20,7 +20,6 @@ class WSReturnObject:
         def __init__(self, onSuccess=None, onError=None):
             self.onSuccess = onSuccess
             self.onError = onError
-            self.onFinally = lambda: None
 
     def done(self, onSuccess, onError=None):
         pass
@@ -54,9 +53,6 @@ def constructAPIClientClass(clientClass):
         clientClass = WebSocketClient
     class WSHubsAPIClient(clientClass):
         def __init__(self, api, url, serverTimeout):
-            """
-            :type api: HubsAPI
-            """
             clientClass.__init__(self, url)
             self.__returnFunctions = dict()
             self.isOpened = False
@@ -80,27 +76,14 @@ def constructAPIClientClass(clientClass):
                 return
             if "replay" in msgObj:
                 f = self.__returnFunctions.get(msgObj["ID"], None)
-                try:
-                    if f and msgObj["success"]:
-                        f.onSuccess(msgObj["replay"])
-                    elif f and f.onError:
-                        f.onError(msgObj["replay"])
-                finally:
-                    if f:
-                        f.onFinally()
+                if f and msgObj["success"]:
+                    f.onSuccess(msgObj["replay"])
+                elif f and f.onError:
+                    f.onError(msgObj["replay"])
             else:
                 try:
                     clientFunction = self.api.__getattribute__(msgObj["hub"]).client.__dict__[msgObj["function"]]
-                    replayMessage = dict(ID=msgObj["ID"])
-                    try:
-                        replay = clientFunction(*msgObj["args"])
-                        replayMessage["replay"] = replay
-                        replayMessage["success"] = True
-                    except Exception as e:
-                        replayMessage["replay"] = str(e)
-                        replayMessage["success"] = False
-                    finally:
-                        self.api.wsClient.send(self.api.serializeObject(replayMessage))
+                    clientFunction(*msgObj["args"])
                 except:
                     pass
 
@@ -133,7 +116,6 @@ def constructAPIClientClass(clientClass):
                 timeOut = timeOut if timeOut is not None else self.serverTimeout
                 r = Timer(timeOut, self.onTimeOut, (ID,))
                 r.start()
-                return callBacks
 
             retObject = WSReturnObject()
             retObject.done = returnFunction
@@ -179,9 +161,6 @@ class HubsAPI(object):
 
     def connect(self):
         self.wsClient.connect()
-
-    def serializeObject(self, obj2ser):
-        return jsonpickle.encode(self.pickler.flatten(obj2ser))
 
 
     class __CodeHub(object):
