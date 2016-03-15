@@ -12,7 +12,7 @@ from libs.LoggingUtils import initLogging
 
 architectureInt = 64
 offline = "offline" in sys.argv
-if "34" in sys.argv:
+if "32" in sys.argv:
     architectureInt = int(sys.argv[1])
 
 Config.readConfigFile()
@@ -23,6 +23,8 @@ packager.prepareResFolderForExecutable()
 log = initLogging(__name__)
 log.info("packaging for architecture: {}".format(architecture))
 if offline:
+    log.info("packaging for OFFLINE")
     packager.createPackageForOffline()
 else:
+    log.info("packaging")
     packager.createPackage()
