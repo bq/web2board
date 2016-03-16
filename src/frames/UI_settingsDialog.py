@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'UI_settingsDialog.ui'
+# Form implementation generated from reading ui file 'C:\SoftwareProjects\web2board\src\frames\UI_settingsDialog.ui'
 #
-# Created: Tue Feb 23 12:25:03 2016
+# Created: Sun Mar 13 20:34:08 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!

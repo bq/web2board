@@ -1,15 +1,14 @@
 import logging
-import os
 import shutil
-import sys
-
+from threading import Thread
+from Tkinter import *
+from ttk import *
 import time
-
-
+import os
+from tkMessageBox import showinfo, showwarning
 import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
-
 
 def startLogger():
     fileHandler = logging.FileHandler(PathsManager.getHomePath() + os.sep + "web2boardLink.log", 'a')
@@ -23,9 +22,12 @@ def startLogger():
 if utils.areWeFrozen():
     os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
     PathsManager.setAllConstants()
+
+
 msgBox = None
 startLogger()
 log = logging.getLogger(__name__)
+log.info("starting")
 web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension())
 WATCHDOG_TIME = 60
 
@@ -33,6 +35,7 @@ WATCHDOG_TIME = 60
 def factoryReset():
     global msgBox
     try:
+        time.sleep(1)
         startWatchdog()
         logMessage("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
         if os.path.exists(PathsManager.PROGRAM_PATH):
@@ -40,9 +43,9 @@ def factoryReset():
         logMessage("Extracting web2board...")
         shutil.copytree(utils.getModulePath() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
         msgBox.endSuccessful()
-    except:
+    except Exception as e:
         log.exception("Failed performing Factory reset")
-        msgBox.endError()
+        msgBox.endError(str(e))
 
 
 @asynchronous()
@@ -63,79 +66,122 @@ def isFactoryReset():
 def logMessage(message):
     global msgBox
     log.info(message)
-    msgBox.showMessage(message)
+    msgBox.setMessage(message)
 
 
 def startDialog():
     global msgBox
-    from PySide import QtGui
-    from libs.Decorators.InGuiThread import InGuiThread
-    from PySide.QtGui import QDialog
-    from frames.UI_Link import Ui_Link
-    from PySide.QtGui import QMovie
-    app = QtGui.QApplication(sys.argv)
+    class Application(Frame):
+        MESSAGE_TEMPLATE = "Web2board is configuring some files.\nThis can takes a couple of minutes but it will be done just once.\n\n{}"
+        def __init__(self, parent):
+            Frame.__init__(self,parent)
+            parent.minsize(width=500, height=0)
+            self.frame = Frame(self)
+            self.num = 0
+            self.parent = parent
+            self.gif = Label(self.frame)
+            self.okButton = Button(self, text="OK")
+            self.closeButton = Button(self, text="Close", command=self.close)
+            self.message = Label(self.frame, text=self.MESSAGE_TEMPLATE.format(""))
+            self.parent.title("Web2board launcher")
+            self.style = Style()
+            self.style.theme_use("default")
+            root.protocol("WM_DELETE_WINDOW", self.close)
+            self.messages = []
 
-    class LinkDialog(QDialog):
-        def __init__(self, *args, **kwargs):
-            super(LinkDialog, self).__init__(*args, **kwargs)
-            self.ui = Ui_Link()
-            self.setWindowIcon(QtGui.QIcon(PathsManager.RES_ICO_PATH))
-            self.ui.setupUi(self)
-            self.ui.tryAgain.setVisible(False)
-            self.ui.tryAgain.clicked.connect(self.retry)
-            self.taskEnded = False
+            self.taskEnded=False
             self.successfullyEnded = False
-            self.movie = QMovie(os.path.join(PathsManager.RES_ICONS_PATH, "loading.gif"))
-            self.ui.loading.setMovie(self.movie)
-            self.movie.start()
-            self.show()
 
-        def closeEvent(self, evt):
+            self.create_widgets()
+            self.updateMessage()
+
+        def create_widgets(self):
+            self.frame.pack(fill=BOTH, expand=True)
+            self.pack(fill=BOTH, expand=True)
+            self.message.pack(side=LEFT, padx=10)
+            self.gif.pack(side=RIGHT, padx=5)
+            self.closeButton.pack(side=RIGHT, padx=5, pady=5)
+            self.okButton.pack(side=RIGHT)
+
+            Thread(target=self.animate).start()
+
+        def setMessage(self, message):
+            self.messages.append(message)
+
+        def updateMessage(self):
+            for m in self.messages:
+                self.message.configure(text=m)
+            self.messages = []
+
+            self.after(100, self.updateMessage)
+
+        def animate(self):
+            icon = PathsManager.RES_ICONS_PATH + os.sep
+            try:
+                if not self.taskEnded:
+                    icon += "loading.gif"
+                    img = PhotoImage(file=icon, format="gif - {}".format(self.num))
+                elif self.successfullyEnded:
+                    icon += "success.gif"
+                    img = PhotoImage(file=icon)
+                else:
+                    icon += "error.gif"
+                    img = PhotoImage(file=icon)
+
+                self.gif.config(image=img)
+                self.gif.image=img
+                self.num += 1
+            except TclError as e:
+                self.num = 0
+            except Exception as e:
+                print e
+            finally:
+                self.after(70, self.animate)
+
+
+        def close(self):
             if self.taskEnded:
-                evt.accept()
+                self.parent.destroy()
                 return
             quit_msg = "It is not possible to quit while configuring files\nThis task can take up to {} seconds"
-            QtGui.QMessageBox.warning(self, 'Warning!', quit_msg.format(WATCHDOG_TIME), QtGui.QMessageBox.Ok)
-            evt.ignore()
+            showwarning('Warning!', quit_msg.format(WATCHDOG_TIME))
 
-        @InGuiThread()
-        def showMessage(self, message):
-            self.ui.status.setText(message)
-
-        @InGuiThread()
         def endSuccessful(self):
             self.taskEnded = True
-            self.ui.close.setEnabled(True)
+            # self.ui.close.setEnabled(True)
             self.successfullyEnded = True
-            self.showMessage("Web2board successfully configured")
+            self.closeButton.configure(state=DISABLED)
+            self.okButton.configure(text="Start Web2Board", command=self.close, state=NORMAL)
+            self.setMessage("Web2board successfully configured")
 
-        @InGuiThread()
-        def endError(self):
+        def endError(self, error):
             self.taskEnded = True
-            self.showMessage("Failed to configure file.\nplease try again later or check log.")
-            self.ui.tryAgain.setVisible(True)
-            self.ui.close.setEnabled(True)
-            self.movie.stop()
+            self.setMessage("Failed to configure web2board due to:\n{}.\n\nplease try again later or check log.".format(error))
+            self.closeButton.configure(state=NORMAL)
+            self.okButton.configure(text="Try again", command=self.retry, state=NORMAL)
 
         def retry(self):
             self.taskEnded = False
-            self.ui.close.setEnabled(False)
-            self.ui.tryAgain.setVisible(False)
+            self.closeButton.configure(state=DISABLED)
+            self.okButton.configure(state=DISABLED)
             factoryReset()
 
-    msgBox = LinkDialog()
-    return app
+
+    root = Tk()
+    root.iconbitmap(PathsManager.RES_ICO_PATH)
+    msgBox = Application(root)
+    return root
+
 
 
 if __name__ == '__main__':
-
-    print "web2boardPath: {}".format(web2boardPath)
+    log.info("web2boardPath: {}".format(web2boardPath))
     utils.killProcess("web2board" + utils.getOsExecutableExtension())
     if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
         global msgBox
         app = startDialog()
         task = factoryReset()
-        app.exec_()
+        app.mainloop()
 
     if msgBox is None or msgBox.successfullyEnded:
         os.popen('"{}"'.format(web2boardPath))

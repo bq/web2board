@@ -71,8 +71,8 @@ class SerialMonitorHub(Hub):
             port = mainApp.w2bGui.serialMonitor.port
         if port is None:
             port = compilerUploader.getPort()
-        mainApp.w2bGui.startSerialMonitorApp(port)
-        return True
+        port = mainApp.w2bGui.startSerialMonitorApp(port).get()
+        return port
 
     def startConnection(self, port, baudrate=9600):
         if self.isPortConnected(port):
@@ -92,9 +92,13 @@ class SerialMonitorHub(Hub):
         self._getClientsHolder().getSubscribedClients().writted(data, port, _sender.ID)
 
     def changeBaudrate(self, port, baudrate):
-        if not self.isPortConnected(port):
-            self.startConnection(port)
+        if self.isPortConnected(port):
+            self.closeConnection(port)
+
+        self.startConnection(port, baudrate)
+
         self._getClientsHolder().getSubscribedClients().baudrateChanged(port, baudrate)
+        return True
 
     def getAvailablePorts(self):
         return CompilerUploader.construct().getAvailablePorts()

@@ -11,6 +11,7 @@ from urllib2 import urlopen
 import glob2
 import psutil
 import serial.tools.list_ports
+from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
@@ -153,10 +154,12 @@ def killProcess(name):
         # check whether the process name matches
         try:
             if name in proc.name() and proc.pid != os.getpid():
-                print "killing a running web2board application"
+                log.debug("killing a running web2board application. old app pid: {0}, this pid {1}".format(proc.pid, os.getpid()))
                 proc.kill()
         except psutil.ZombieProcess:
             pass
+        except:
+            log.exception("Failing killing old web2board process")
 
 
 def getOsExecutableExtension():

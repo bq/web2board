@@ -86,7 +86,7 @@ class CompilerUploader:
             avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
         elif utils.isLinux():
             avrExePath = os.path.join(pm.RES_PATH, 'avrdude64' if utils.is64bits() else "avrdude")
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
+            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf' if utils.is64bits() else "avrdude32.conf")
         else:
             raise Exception("Platform not supported")
 
