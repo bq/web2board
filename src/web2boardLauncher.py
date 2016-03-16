@@ -31,4 +31,3 @@ web2boardPath = "web2board" + utils.getOsExecutableExtension()
 if __name__ == '__main__':
     utils.killProcess("web2board" + utils.getOsExecutableExtension())
     open_file("web2board")
-    os.popen('"./{}"'.format(web2boardPath))
