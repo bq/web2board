@@ -127,7 +127,7 @@ def listSerialPorts(portsFilter=None):
     if portsFilter is not None:
         ports = filter(portsFilter, ports)
     if isMac():
-        ports = ports + [[x] for x in glob('/dev/cu*') if x not in map(lambda x: x[0], ports)]
+        ports = ports + [[x] for x in glob('/dev/tty.*') if x not in map(lambda x: x[0], ports)]
     return list(ports)
 
 
