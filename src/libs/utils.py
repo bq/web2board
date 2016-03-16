@@ -162,8 +162,8 @@ def killProcess(name):
             log.exception("Failing killing old web2board process")
 
 
-def getOsExecutableExtension():
-    if not areWeFrozen():
+def getOsExecutableExtension(frozen=False):
+    if not areWeFrozen() and not frozen:
         return ".py"
     if isMac():
         return ""
