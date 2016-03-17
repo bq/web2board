@@ -1,6 +1,5 @@
 import os
 import json
-
 import logging
 
 import sys
@@ -18,7 +17,7 @@ class ConfigException(Exception):
 
 class Config:
     _log = logging.getLogger(__name__)
-    webSocketIP = "127.0.0.1"
+    webSocketIP = ""
     webSocketPort = 9876
     proxy = None
     version = "2.0.0"
@@ -79,6 +78,7 @@ class Config:
         configValues.pop("setPlatformioLibDir")
         configValues.pop("getPlatformioLibDir")
         configValues.pop("getConfigValues")
+        configValues.pop("getClientWSIP")
         return configValues
 
     @classmethod
@@ -100,3 +100,7 @@ class Config:
         with open(PathsManager.CONFIG_PATH, "w") as f:
             configValues = cls.getConfigValues()
             json.dump(configValues, f, indent=4)
+
+    @classmethod
+    def getClientWSIP(cls):
+        return "127.0.0.1" if Config.webSocketIP == "" else Config.webSocketIP

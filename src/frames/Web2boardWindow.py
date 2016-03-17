@@ -179,7 +179,7 @@ class Web2boardWindow(QtGui.QMainWindow):
         message = message.replace("\n", "<br>")
         message = message.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
         self.ui.console.append(message.decode("utf-8"))
-        if len(self.ui.console.toHtml()) > 50000:
+        if len(self.ui.console.toHtml()) > 20000:
             self.cleanConsole()
             log.info("console cleaned due to buffer overflow")
 

@@ -11,7 +11,6 @@ from urllib2 import urlopen
 import glob2
 import psutil
 import serial.tools.list_ports
-from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
@@ -160,6 +159,7 @@ def killProcess(name):
             pass
         except:
             log.exception("Failing killing old web2board process")
+
 
 
 def getOsExecutableExtension(frozen=False):

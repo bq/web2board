@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 class SerialMonitorDialog(QtGui.QMainWindow):
     def __init__(self, parent, port=None, *args, **kwargs):
         super(SerialMonitorDialog, self).__init__(*args, **kwargs)
-        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
+        self.api = HubsAPI("ws://{0}:{1}".format(Config.getClientWSIP(), Config.webSocketPort), 10)
         self.api.connect()
         self.api.defaultOnError = lambda error: "failed executing action due to: {}".format(error)
         self.isClosed = False

@@ -46,6 +46,7 @@ class SerialConnection:
     def close(self):
         self.isAboutToBeClosed = True
         self.serial.close()
+        time.sleep(3) #we have to give time to really close the port
 
     def isClosed(self):
         return not self.serial.isOpen()

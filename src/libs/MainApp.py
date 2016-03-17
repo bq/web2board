@@ -1,4 +1,5 @@
 import importlib
+import json
 import logging
 import os
 import sys
@@ -158,9 +159,12 @@ class MainApp:
         self.qtApp = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()
         self.handleSystemArguments(options, args)
+        log.debug("Enviromental data:")
+        log.debug(json.dumps(os.environ.data, indent=4))
         PathsManager.logRelevantEnvironmentalPaths()
         if options.update2version is None:
             self.startServer(options)
+            self.testConnection()
 
         return self.qtApp
 
@@ -230,6 +234,17 @@ class MainApp:
             widget.activateWindow()
             widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
             widget.update()
+
+    @asynchronous()
+    def testConnection(self):
+        import socket
+        time.sleep(2)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((Config.getClientWSIP(), Config.webSocketPort))
+        if result == 0:
+            log.debug("Port is open")
+        else:
+            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.webSocketPort))
 
 
 def getMainApp():
