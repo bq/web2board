@@ -1,11 +1,10 @@
 import logging
-import os
-
 import sys
-
 import subprocess
 
 import libs.utils as utils
+
+#do not remove this import!!!
 from libs.PathsManager import PathsManager
 
 
