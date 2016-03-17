@@ -12,7 +12,9 @@
 #          Sergio Morcuende <sergio.morcuende@bq.com>                   #
 #                                                                       #
 # -----------------------------------------------------------------------#
+
 import importlib
+import json
 import pprint
 import signal
 import click
@@ -56,6 +58,8 @@ if "-Q" in sys.argv:
 if __name__ == "__main__":
     qtApp = None
     try:
+        log.debug("Enviromental data:")
+        log.debug(json.dumps(os.environ.data, indent=4))
         importlib.import_module("libs.WSCommunication.Hubs")
         HubsInspector.inspectImplementedHubs()
         from libs.MainApp import getMainApp
