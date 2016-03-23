@@ -160,8 +160,14 @@ class MainApp:
         self.updateLibrariesIfNecessary()
         self.handleSystemArguments(options, args)
         log.debug("Enviromental data:")
-        log.debug(json.dumps(os.environ.data, indent=4))
-        PathsManager.logRelevantEnvironmentalPaths()
+        try:
+            log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
+        except:
+            log.exception("unable to log environmental data")
+        try:
+            PathsManager.logRelevantEnvironmentalPaths()
+        except:
+            log.exception("Unable to log Paths")
         if options.update2version is None:
             self.startServer(options)
             self.testConnection()
