@@ -48,7 +48,7 @@ class PathsManager:
         if utils.areWeFrozen():
             if utils.isMac():
                 return os.getcwd()
-            return sys._MEIPASS
+            return os.getcwd()
         else:
             return os.getcwd()
 

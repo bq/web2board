@@ -92,8 +92,8 @@ class CompilerUploader:
 
         os.chmod(avrExePath, int("755", 8)) # force to have executable rights in avrdude
 
-        avrExePath = os.path.relpath(avrExePath, os.getcwd())
-        avrConfigPath = os.path.relpath(avrConfigPath, os.getcwd())
+        avrExePath = os.path.normpath(os.path.relpath(avrExePath, os.getcwd()))
+        avrConfigPath = os.path.normpath(os.path.relpath(avrConfigPath, os.getcwd()))
 
         cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
