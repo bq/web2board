@@ -48,7 +48,7 @@ class PathsManager:
         if utils.areWeFrozen():
             if utils.isMac():
                 return os.getcwd()
-            return sys._MEIPASS
+            return os.getcwd()
         else:
             return os.getcwd()
 
@@ -77,7 +77,7 @@ class PathsManager:
 
     @classmethod
     def getDstPathForUpdate(cls, version):
-        return os.path.join(cls.getHomePath(), "web2board_{}".format(version))
+        return os.path.join(cls.getHomePath(), u"web2board_{}".format(version))
 
     @classmethod
     def getSonsExecutablePath(cls):
@@ -113,7 +113,7 @@ class PathsManager:
         cls.EXECUTABLE_PATH = os.getcwd()
         cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.getOsExecutableExtension()
         cls.MAIN_PATH = cls.getMainPath()
-        cls.CONFIG_PATH = os.path.join(cls.MAIN_PATH, 'config.json')
+        cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, 'web2board-config.json'))
         cls.COPY_PATH = cls.getCopyPathForUpdate()
         cls.ORIGINAL_PATH = cls.getOriginalPathForUpdate()
 

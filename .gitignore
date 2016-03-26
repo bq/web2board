@@ -20,7 +20,7 @@ src/res/
 installers/
 **/*.log
 **/info.log.*
-**/config.json
+**/web2board-config.json
 src/*.spec
 res/common/platformIoPackages
 /dist/

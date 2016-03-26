@@ -30,7 +30,7 @@ class Web2BoardUpdater(Updater):
         if copyNewName is None:
             copyNewName = "web2board_copy" + utils.getOsExecutableExtension()
         self.__executableCopyOriginalName = os.path.join(copyPath, copyOriginName)
-        self.__executableCopyNewName = os.path.join(copyPath, copyNewName)
+        self.__executableCopyNewName = os.path.relpath(os.path.join(copyPath, copyNewName), os.getcwd())
 
         self.downloader = Downloader(refreshTime=1)
 

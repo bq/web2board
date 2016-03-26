@@ -1,5 +1,6 @@
 import logging
 import shutil
+import subprocess
 from threading import Thread
 from Tkinter import *
 from ttk import *
@@ -30,6 +31,10 @@ log = logging.getLogger(__name__)
 log.info("starting")
 web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension())
 WATCHDOG_TIME = 60
+
+PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH,  'res')
+PathsManager.RES_ICO_PATH = os.path.join(PathsManager.RES_PATH, 'Web2board.ico')
+PathsManager.RES_ICONS_PATH = os.path.join(PathsManager.RES_PATH, 'icons')
 
 @asynchronous()
 def factoryReset():
@@ -172,16 +177,18 @@ def startDialog():
     msgBox = Application(root)
     return root
 
-
-
 if __name__ == '__main__':
-    log.info("web2boardPath: {}".format(web2boardPath))
-    utils.killProcess("web2board" + utils.getOsExecutableExtension())
-    if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
-        global msgBox
-        app = startDialog()
-        task = factoryReset()
-        app.mainloop()
+    global msgBox
+    try:
+        log.info("web2boardPath: {}".format(web2boardPath))
+        utils.killProcess("web2board")
+        if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
+            app = startDialog()
+            task = factoryReset()
+            app.mainloop()
 
-    if msgBox is None or msgBox.successfullyEnded:
-        os.popen('"{}"'.format(web2boardPath))
+        if msgBox is None or msgBox.successfullyEnded:
+            utils.openFile(web2boardPath)
+    except:
+        log.exception("Unable to launch web2board")
+        raise

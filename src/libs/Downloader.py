@@ -4,6 +4,8 @@ import urllib
 
 import time
 
+import sys
+
 from libs.Decorators.Asynchronous import asynchronous
 
 
@@ -30,10 +32,11 @@ class Downloader:
                 totalSize = int(meta.getheaders("Content-Length")[0])
                 break
             except:
-                self.log.warning("Unable to get download file info. retraing in 0.5s")
-                time.sleep(0.5)
+                self.log.warning("Unable to get download file info. retrying in 0.5s")
+                time.sleep(1)
         else:
-            raise Exception("Unable to download file")
+            self.log.error("Unable to download file")
+            totalSize = sys.maxint
 
         while not downloadTask.isDone():
             if os.path.exists(dst):

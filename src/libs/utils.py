@@ -51,6 +51,7 @@ def copytree(src, dst, filter=None, ignore=None, forceCopy=False):
             if forceCopy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
+
 def rmtree(folder):
     for the_file in os.listdir(folder):
         file_path = os.path.join(folder, the_file)
@@ -161,7 +162,6 @@ def killProcess(name):
             log.exception("Failing killing old web2board process")
 
 
-
 def getOsExecutableExtension(frozen=False):
     if not areWeFrozen() and not frozen:
         return ".py"
@@ -179,3 +179,10 @@ def setLogLevel(logLevel):
 
     logLevel = logLevel if isinstance(logLevel, int) else logLevels[logLevel.lower()]
     logging.getLogger().handlers[0].level = logLevel
+
+
+def openFile(filename):
+    if sys.platform == "win32":
+        os.popen('"{0}" {1}'.format(filename.encode(sys.getfilesystemencoding()), " ".join(sys.argv[1:])))
+    else:
+        os.popen("'./{} '".format(filename.encode(sys.getfilesystemencoding()), " ".join(sys.argv[1:])))

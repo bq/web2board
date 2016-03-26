@@ -24,9 +24,22 @@ class VersionsHandlerHub(Hub):
         return True  # if return None, client is not informed that the request is done
 
     def setWeb2boardVersion(self, version):
-        gui = getMainApp().w2bGui
         w2bUpdater = getWeb2boardUpdater()
-        gui.startDownload(version)
-        w2bUpdater.downloadVersion(version, gui.refreshProgressBar, gui.downloadEnded).get()
+        try:
+            gui = getMainApp().w2bGui
+            gui.startDownload(version)
+            w2bUpdater.downloadVersion(version, gui.refreshProgressBar, gui.downloadEnded).get()
+        except:
+            self._getClientsHolder().getSubscribedClients().downloadEnded(False)
+            raise
         w2bUpdater.makeAnAuxiliaryCopy()
         w2bUpdater.runAuxiliaryCopy(version)
+
+    def __downloadProgress(self, current, total, percentage):
+        getMainApp().w2bGui.refreshProgressBar(current, total, percentage)
+        self._getClientsHolder().getSubscribedClients().downloadProgress(current, total, percentage)
+
+
+    def __downloadEnded(self, task):
+        getMainApp().w2bGui.downloadEnded()
+        self._getClientsHolder().getSubscribedClients().downloadEnded(True)

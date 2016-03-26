@@ -63,7 +63,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
     def asyncEnding(self):
         time.sleep(2)
         module = importlib.import_module("libs.MainApp")
-        module.quit()
+        module.forceQuit()
 
 
 class RotatingHandler(logging.handlers.RotatingFileHandler):

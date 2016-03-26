@@ -279,7 +279,11 @@ class Web2boardWindow(QtGui.QMainWindow):
         else:
             remaining = "infinite"
         text = "downloading {0:.1f} Kb/s, {1} of {2}, remaining: {3:.0f} s"
-        self.ui.info.setText(text.format(vel, current, total, remaining))
+        try:
+            self.ui.info.setText(text.format(vel, current, total, remaining))
+        except ValueError:
+            log.error(remaining)
+            pass
         self.ui.progressBar.setValue(int(percentage) + 1)
 
     @InGuiThread()
