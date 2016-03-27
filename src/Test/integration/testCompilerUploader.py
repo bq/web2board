@@ -51,7 +51,7 @@ class TestCompilerUploader(unittest.TestCase):
         return board
 
     def setUp(self):
-        self.platformioPath = pm.PLATFORMIO_WORKSPACE_PATH
+        self.platformioPath = pm.PLATFORMIO_WORKSPACE_SKELETON
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         self.srcCopyPath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
         self.workingCppPath = os.path.join(self.srcCopyPath, "working.ino")

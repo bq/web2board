@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 import sys
@@ -17,7 +18,7 @@ class PathsManager:
     EXECUTABLE_PATH = None
     EXECUTABLE_FILE = None
     MAIN_PATH = None
-    PLATFORMIO_PACKAGES_NAME = "platformIoPackages"
+    PLATFORMIO_PACKAGES_NAME = "pp"
     PLATFORMIO_PACKAGES_PATH = None
     CONFIG_PATH = None
     COPY_PATH = None
@@ -33,6 +34,7 @@ class PathsManager:
     TEST_RES_PATH = None
 
     PROGRAM_PATH = None
+    PLATFORMIO_WORKSPACE_SKELETON = None
     PLATFORMIO_WORKSPACE_PATH = None
     PLATFORMIO_INI_PATH = None
     TEST_SETTINGS_PATH = None
@@ -85,10 +87,7 @@ class PathsManager:
 
     @classmethod
     def getPlatformIOPackagesPath(cls):
-        if cls.MAIN_PATH.endswith("Scons"):
-            path = os.path.join(cls.MAIN_PATH, os.path.pardir, cls.PLATFORMIO_PACKAGES_NAME)
-        else:
-            path = os.path.join(cls.RES_PATH, cls.PLATFORMIO_PACKAGES_NAME)
+        path = os.path.join(cls.RES_PATH, cls.PLATFORMIO_PACKAGES_NAME)
         return os.path.abspath(path)
 
     @classmethod
@@ -131,8 +130,9 @@ class PathsManager:
         cls.RES_SCONS_ZIP_PATH = os.path.join(cls.MAIN_PATH, "res", "sconsRes.zip")
 
         cls.PROGRAM_PATH = cls.getExternalDataFolder()
-        cls.PLATFORMIO_WORKSPACE_PATH = os.path.join(cls.RES_PATH, 'platformioWorkSpace')
-        cls.PLATFORMIO_INI_PATH = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, 'platformio.ini')
+        cls.PLATFORMIO_WORKSPACE_SKELETON = os.path.join(cls.RES_PATH, 'platformioWorkSpaceSkeleton')
+        cls.PLATFORMIO_WORKSPACE_PATH = os.path.join(cls.RES_PATH, 'platformioWS_{}')
+        cls.PLATFORMIO_INI_PATH = os.path.join(cls.PLATFORMIO_WORKSPACE_SKELETON, 'platformio.ini')
         cls.TEST_SETTINGS_PATH = os.path.join(cls.RES_PATH, 'TestSettings', 'resources')
         cls.SCONS_EXECUTABLE_PATH = cls.getSonsExecutablePath()
 
@@ -144,8 +144,7 @@ class PathsManager:
 
     @classmethod
     def cleanPioEnvs(cls):
-        path = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, ".pioenvs")
-        if os.path.exists(path):
+        for path in glob.glob(cls.PLATFORMIO_WORKSPACE_PATH.replace("{}", "*")):
             shutil.rmtree(path)
 
 # set working directory to src

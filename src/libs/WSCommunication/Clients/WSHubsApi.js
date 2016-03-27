@@ -1,6 +1,6 @@
 /* jshint ignore:start */
 /* ignore jslint start */
-function HubsAPI(url, serverTimeout) {
+function HubsAPI(url, serverTimeout, wsClientClass) {
     'use strict';
 
     var messageID = 0,
@@ -20,7 +20,15 @@ function HubsAPI(url, serverTimeout) {
         reconnectTimeout = reconnectTimeout || -1;
         var openPromise = {
             onSuccess : function() {},
-            onError : function(error) {}
+            onError : function(error) {},
+            _connectError: false,
+            done: function (onSuccess, onError) {
+                openPromise.onSuccess = onSuccess;
+                openPromise.onError = onError;
+                if (openPromise._connectError !== false){
+                    openPromise.onError(openPromise._connectError);
+                }
+            }
         };
         function reconnect(error) {
             if (reconnectTimeout !== -1) {
@@ -32,10 +40,11 @@ function HubsAPI(url, serverTimeout) {
         }
 
         try {
-            this.wsClient = new WebSocket(url);
+            this.wsClient = wsClientClass === undefined ? new WebSocket(url) : new wsClientClass(url);
         } catch (error) {
             reconnect(error);
-            return;
+            openPromise._connectError = error;
+            return openPromise;
         }
 
         this.wsClient.onopen = function () {
@@ -107,11 +116,7 @@ function HubsAPI(url, serverTimeout) {
             thisApi.callbacks.onMessageError(error);
         };
 
-        return { done: function (onSuccess, onError) {
-                openPromise.onSuccess = onSuccess;
-                openPromise.onError = onError;
-            }
-        };
+        return openPromise;
     };
 
     this.callbacks = {
@@ -173,7 +178,7 @@ function HubsAPI(url, serverTimeout) {
                             onError.apply(onError, arguments);
                         } else if (thisApi.defaultErrorHandler !== null){
                             var argumentsArray = [callInfo].concat(arguments);
-                            thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler.apply, argumentsArray);
+                            thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler, argumentsArray);
                         }
                     } finally {
                         delete returnFunctions[ID];
@@ -204,6 +209,11 @@ function HubsAPI(url, serverTimeout) {
     this.CodeHub.server = {
         __HUB_NAME : 'CodeHub',
         
+        uploadHexFile : function (hexFilePath, board, port){
+            arguments[0] = hexFilePath === undefined ? null : hexFilePath;
+            return constructMessage('CodeHub', 'uploadHexFile', arguments);
+        },
+
         uploadHex : function (hexText, board, port){
             arguments[0] = hexText === undefined ? null : hexText;
             return constructMessage('CodeHub', 'uploadHex', arguments);
@@ -234,9 +244,9 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'subscribeToHub', arguments);
         },
 
-        uploadHexFile : function (hexFilePath, board, port){
-            arguments[0] = hexFilePath === undefined ? null : hexFilePath;
-            return constructMessage('CodeHub', 'uploadHexFile', arguments);
+        getHexData : function (code){
+            
+            return constructMessage('CodeHub', 'getHexData', arguments);
         },
 
         tryToTerminateSerialCommProcess : function (){
@@ -389,6 +399,16 @@ function HubsAPI(url, serverTimeout) {
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
         
+        getAllConnectedPorts : function (){
+            
+            return constructMessage('SerialMonitorHub', 'getAllConnectedPorts', arguments);
+        },
+
+        closeAllConnections : function (){
+            
+            return constructMessage('SerialMonitorHub', 'closeAllConnections', arguments);
+        },
+
         findBoardPort : function (board){
             
             return constructMessage('SerialMonitorHub', 'findBoardPort', arguments);

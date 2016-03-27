@@ -12,13 +12,17 @@
 # -----------------------------------------------------------------------#
 import logging
 import os
+import random
 import subprocess
-
 from datetime import timedelta, datetime
 
 import sys
+from threading import Lock
+
+import time
 
 from libs.Decorators.Asynchronous import asynchronous
+from libs.Decorators.Synchronized import synchronized
 from libs.PathsManager import PathsManager as pm
 from platformio.platformioUtils import run as platformioRun
 from platformio import exception, util
@@ -47,18 +51,41 @@ class CompilerException(Exception):
 #
 class CompilerUploader:
     __globalCompilerUploaderHolder = {}
+    workSpaceTokens = []
     DEFAULT_BOARD = "bt328"
+    threadLock = Lock()
 
     def __init__(self, board=DEFAULT_BOARD):
         self.lastPortUsed = None
         self.board = board  # we use the board name as the environment (check platformio.ini)
         self._checkBoardConfiguration()
 
+    def __constructWorkSpace(self, code, token):
+        if isinstance(code, unicode):
+            code = code.encode("utf-8")
+        workSpacePath = pm.PLATFORMIO_WORKSPACE_PATH.format(token)
+        if not os.path.exists(workSpacePath):
+            utils.copytree(pm.PLATFORMIO_WORKSPACE_SKELETON, workSpacePath)
+        mainInoPath = os.path.join(workSpacePath, "src")
+        if not os.path.exists(mainInoPath):
+            os.makedirs(mainInoPath)
+        with open(os.path.join(mainInoPath, "main.ino"), 'w') as mainCppFile:
+            mainCppFile.write(code)
+        return workSpacePath
+
+    def __getHexString(self, workSpacePath, board):
+        hexPath = os.path.join(workSpacePath, ".pioenvs", board, "firmware.hex")
+        if os.path.exists(hexPath):
+            with open(hexPath) as hexFile:
+                return hexFile.read()
+        else:
+            return None
+
     def _getIniConfig(self, environment):
         """
         :type environment: str
             """
-        with util.cd(pm.PLATFORMIO_WORKSPACE_PATH):
+        with util.cd(pm.PLATFORMIO_WORKSPACE_SKELETON):
             config = util.get_project_config()
 
             if not config.sections():
@@ -118,22 +145,23 @@ class CompilerUploader:
             log.debug("Error searching port: {}".format(port), exc_info=1)
             return False
 
-    def _run(self, code, upload=False, uploadPort=None):
-        self._checkBoardConfiguration()
-        target = ("upload",) if upload else ()
-        uploadPort = self.getPort() if upload and uploadPort is None else uploadPort
+    def _run(self, code, upload=False, uploadPort=None, getHexString=False):
+        token = self._getAvailableToken()
+        try:
+            self._checkBoardConfiguration()
+            target = ("upload",) if upload else ()
+            uploadPort = self.getPort() if upload and uploadPort is None else uploadPort
 
-        if isinstance(code, unicode):
-            code = code.encode("utf-8")
+            workSpacePath = self.__constructWorkSpace(code, token)
 
-        mainInoPath = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
-        if not os.path.exists(mainInoPath):
-            os.makedirs(mainInoPath)
-        with open(os.path.join(mainInoPath,  "main.ino"), 'w') as mainCppFile:
-            mainCppFile.write(code)
-
-        return platformioRun(target=target, environment=(self.board,), project_dir=pm.PLATFORMIO_WORKSPACE_PATH,
-                             upload_port=uploadPort)[0]
+            runResult = platformioRun(target=target, environment=(self.board,),
+                                 project_dir=workSpacePath, upload_port=uploadPort)[0]
+            if getHexString:
+                hexResult = self.__getHexString(workSpacePath, self.board) if runResult[0] else None
+                return runResult, hexResult
+            return runResult
+        finally:
+            self._removeToken(token)
 
     def _checkBoardConfiguration(self):
         if self.board is None:
@@ -165,6 +193,18 @@ class CompilerUploader:
                     return port
         return None
 
+    def _getAvailableToken(self):
+        with self.threadLock:
+            for i in range(5):
+                if i not in self.workSpaceTokens:
+                    self.workSpaceTokens.append(i)
+                    return i
+        time.sleep(0.2)
+        return self._getAvailableToken()
+
+    def _removeToken(self, token):
+        self.workSpaceTokens.remove(token)
+
     def getAvailablePorts(self):
         portsToUpload = utils.listSerialPorts(lambda x: x[2] != "n/a")
         availablePorts = map(lambda x: x[0], portsToUpload)
@@ -184,6 +224,9 @@ class CompilerUploader:
 
     def compile(self, code):
         return self._run(code, upload=False)
+
+    def getHexData(self, code):
+        return self._run(code, upload=False, getHexString=True)
 
     def upload(self, code, uploadPort=None):
         return self._run(code, upload=True, uploadPort=uploadPort)

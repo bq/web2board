@@ -39,6 +39,12 @@ def getEchoFunction(original):
 click.echo = getEchoFunction(originalEcho)
 click.secho = getEchoFunction(originalSEcho)
 
+def clickConfirm(message):
+    print message
+    return True
+
+click.confirm = clickConfirm
+
 
 def runSconsScript():
     pprint.pprint(sys.path)

@@ -204,6 +204,18 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
+            def getHexData(self, code):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(code)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getHexData", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
             def getSubscribedClientsToHub(self, ):
                 """
                 :rtype : WSReturnObject
@@ -635,6 +647,18 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
+            def closeAllConnections(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "closeAllConnections", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
             def closeConnection(self, port):
                 """
                 :rtype : WSReturnObject
@@ -655,6 +679,18 @@ class HubsAPI(object):
                 args.append(board)
                 id = self._getNextMessageID()
                 body = {"hub": self.hubName, "function": "findBoardPort", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
+            def getAllConnectedPorts(self, ):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "getAllConnectedPorts", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction

@@ -29,6 +29,17 @@ class CodeHub(Hub):
         compileReport = CompilerUploader.construct().compile(code)
         return self.__handleCompileReport(compileReport)
 
+    def getHexData(self, code, _sender):
+        """
+        :type code: str
+        :type _sender: ConnectedClientsGroup
+        """
+        log.info("getting hexData from {}".format(_sender.ID))
+        log.debug("Compiling code: {}".format(code.encode("utf-8")))
+        _sender.isCompiling()
+        compileReport, hexData = CompilerUploader.construct().getHexData(code)
+        return self.__handleCompileReport(compileReport), hexData
+
     def upload(self, code, board, _sender, port=None):
         """
         :type code: str

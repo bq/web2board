@@ -135,7 +135,7 @@ class Packager:
 
         click.confirm = clickConfirm
         try:
-            os.chdir(pm.PLATFORMIO_WORKSPACE_PATH)
+            os.chdir(pm.PLATFORMIO_WORKSPACE_SKELETON)
             config = util.get_project_config()
             for section in config.sections():
                 envOptionsDict = {x[0]: x[1] for x in config.items(section)}

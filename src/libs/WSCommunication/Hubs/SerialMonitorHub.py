@@ -32,7 +32,7 @@ class SerialConnection:
                     self.onReceivedCallback(self.serial.port, out)
             except Exception as e:
                 if not self.isAboutToBeClosed:
-                    log.error("error getting data: {}".format(e), exc_info=1)
+                    log.exception("error getting data: {}".format(e))
             time.sleep(0.1)
 
     def write(self, data):
@@ -109,6 +109,14 @@ class SerialMonitorHub(Hub):
 
     def isPortConnected(self, port):
         return port in self.serialConnections and not self.serialConnections[port].isClosed()
+
+    def getAllConnectedPorts(self):
+        return [port for port, connection in self.serialConnections.items() if not connection.isClosed()]
+
+    def closeAllConnections(self):
+        for port in self.getAllConnectedPorts():
+            self.closeConnection(port)
+        return True
 
     def __onReceivedCallback(self, port, data):
         self._getClientsHolder().getSubscribedClients().received(port, data)

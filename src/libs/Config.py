@@ -50,12 +50,12 @@ class Config:
     @classmethod
     def getPlatformioLibDir(cls):
         parser = ConfigParser()
-        with open(PathsManager.PLATFORMIO_WORKSPACE_PATH + os.sep + "platformio.ini") as platformioIniFile:
+        with open(PathsManager.PLATFORMIO_WORKSPACE_SKELETON + os.sep + "platformio.ini") as platformioIniFile:
             parser.readfp(platformioIniFile)
         if parser.has_option("platformio", "lib_dir"):
             return os.path.abspath(parser.get("platformio", "lib_dir"))
         else:
-            return PathsManager.PLATFORMIO_WORKSPACE_PATH + os.sep + "lib"
+            return PathsManager.PLATFORMIO_WORKSPACE_SKELETON + os.sep + "lib"
 
     @classmethod
     def setPlatformioLibDir(cls, libDir):

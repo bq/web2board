@@ -18,7 +18,7 @@ class BitbloqLibsUpdater(Updater):
     def __init__(self):
         Updater.__init__(self)
         self.currentVersionInfo = VersionInfo(Config.bitbloqLibsVersion, librariesNames=Config.bitbloqLibsLibraries)
-        self.destinationPath = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_PATH, "lib")
+        self.destinationPath = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_SKELETON, "lib")
         self.name = "BitbloqLibsUpdater"
 
     def _updateCurrentVersionInfoTo(self, versionToUpload):
