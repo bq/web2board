@@ -103,9 +103,18 @@ class SerialMonitorDialog(QtGui.QMainWindow):
         self.ui.sendLineEdit.setText("")
 
     def onBaudrateChanged(self, event):
+        self.ui.baudrateBox.setEnabled(False)
+
         self.api.SerialMonitorHub.server.changeBaudrate(self.port, int(self.ui.baudrateBox.currentText())) \
             .done(lambda x: log.debug("Successfully changed baudrate to {}".format(self.ui.baudrateBox.currentText())),
-                  lambda error: log.error("Unable to change baudrate due to: {}".format(error)))
+                  self.onError)\
+            .onFinally = lambda: self.ui.baudrateBox.setEnabled(True)
+
+    @InGuiThread()
+    def onError(self, error):
+        log.error("Unable to change baudrate due to: {}".format(error))
+        QtGui.QMessageBox.warning(self, "Warning", "Unable to change baudrate due to: {}".format(error))
+
 
 
 if __name__ == '__main__':

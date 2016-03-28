@@ -36,6 +36,7 @@ class SerialConnection:
             time.sleep(0.1)
 
     def write(self, data):
+        data = data.replace("+", "\+")
         self.serial.write(data.encode())
 
     def changeBaudRate(self, value):
@@ -93,11 +94,10 @@ class SerialMonitorHub(Hub):
         self._getClientsHolder().getSubscribedClients().writted(data, port, _sender.ID)
 
     def changeBaudrate(self, port, baudrate):
-        if self.isPortConnected(port):
-            self.closeConnection(port)
-
-        self.startConnection(port, baudrate)
-
+        if not self.isPortConnected(port):
+            self.startConnection(port, baudrate)
+        else:
+            self.serialConnections[port].changeBaudRate(baudrate)
         self._getClientsHolder().getSubscribedClients().baudrateChanged(port, baudrate)
         return True
 

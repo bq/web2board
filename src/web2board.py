@@ -64,7 +64,7 @@ if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
         HubsInspector.inspectImplementedHubs()
-        from libs.MainApp import getMainApp
+        from libs.MainApp import getMainApp, forceQuit
         app = getMainApp()
 
         def closeSigHandler(signal, frame):
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 log.warning("server closed")
             except:
                 log.warning("unable to close server")
-            app.quit()
+            forceQuit()
             os._exit(1)
 
 
