@@ -52,9 +52,8 @@ class TestSerialMonitorHub(unittest.TestCase):
     def test_changeBaudrate_closePortIfAlreadyCreated(self):
         port = "COM4"
         baudrate = 9600
-        self.serialMonitorHub.serialConnections[port] = flexmock(isClosed=lambda: False)
-        self.serialMonitorHub.should_receive("startConnection").with_args(port, baudrate).once()
-        self.serialMonitorHub.should_receive("closeConnection").with_args(port).once()
+        self.serialMonitorHub.serialConnections[port] = flexmock(isClosed=lambda: False, changeBaudRate=lambda *args: None)
+        self.serialMonitorHub.serialConnections[port].should_receive("changeBaudRate").with_args(baudrate).once()
 
         self.assertTrue(self.serialMonitorHub.changeBaudrate(port, baudrate))
 
