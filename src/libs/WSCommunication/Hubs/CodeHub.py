@@ -2,10 +2,12 @@ import logging
 import os
 
 from wshubsapi.Hub import Hub, UnsuccessfulReplay
+from wshubsapi.HubsInspector import HubsInspector
 
 from libs.CompilerUploader import CompilerException, CompilerUploader
 from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
+from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 
 log = logging.getLogger(__name__)
 
@@ -112,6 +114,7 @@ class CodeHub(Hub):
                 uploadPort = compileUploader.getPort()
             except CompilerException as e:
                 return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
+        serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
+        serialHub.closeConnection(uploadPort)
         _sender.isUploading(uploadPort)
-
         return uploadPort

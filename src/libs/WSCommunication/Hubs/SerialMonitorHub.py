@@ -47,7 +47,7 @@ class SerialConnection:
     def close(self):
         self.isAboutToBeClosed = True
         self.serial.close()
-        time.sleep(3) #we have to give time to really close the port
+        time.sleep(2) #we have to give time to really close the port
 
     def isClosed(self):
         return not self.serial.isOpen()
@@ -84,7 +84,8 @@ class SerialMonitorHub(Hub):
         return True
 
     def closeConnection(self, port):
-        self.serialConnections[port].close()
+        if port in self.serialConnections:
+            self.serialConnections[port].close()
 
     def write(self, port, data, _sender):
         if not self.isPortConnected(port):
