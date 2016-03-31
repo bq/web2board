@@ -13,7 +13,7 @@
     <h1>Test all hubs functions</h1>
 </div>
 <script>
-    var hubsApi = new HubsAPI('ws://127.0.0.1:9877/');
+    var hubsApi = new HubsAPI('ws://127.0.0.1:9876/');
     hubsApi.connect(2);
 
     hubsApi.LoggingHub.client.onLoggingMessage = function () {

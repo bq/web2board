@@ -1,15 +1,16 @@
 import logging
-import shutil
-import subprocess
-from threading import Thread
-from Tkinter import *
-from ttk import *
-import time
 import os
-from tkMessageBox import showinfo, showwarning
+import shutil
+import time
+from Tkinter import *
+from threading import Thread
+from tkMessageBox import showwarning
+from ttk import *
+
 import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
+
 
 def startLogger():
     fileHandler = logging.FileHandler(PathsManager.getHomePath() + os.sep + "web2boardLink.log", 'a')
@@ -24,7 +25,6 @@ if utils.areWeFrozen():
     os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
     PathsManager.setAllConstants()
 
-
 msgBox = None
 startLogger()
 log = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ log.info("starting")
 web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension())
 WATCHDOG_TIME = 60
 
-PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH,  'res')
+PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH, 'res')
 PathsManager.RES_ICO_PATH = os.path.join(PathsManager.RES_PATH, 'Web2board.ico')
 PathsManager.RES_ICONS_PATH = os.path.join(PathsManager.RES_PATH, 'icons')
 
@@ -127,10 +127,10 @@ def startDialog():
                     icon += "loading.gif"
                     img = PhotoImage(file=icon, format="gif - {}".format(self.num))
                 elif self.successfullyEnded:
-                    icon += "success.gif"
+                    icon += "success.png"
                     img = PhotoImage(file=icon)
                 else:
-                    icon += "error.gif"
+                    icon += "error.png"
                     img = PhotoImage(file=icon)
 
                 self.gif.config(image=img)
@@ -173,7 +173,10 @@ def startDialog():
 
 
     root = Tk()
-    root.iconbitmap(PathsManager.RES_ICO_PATH)
+    try:
+        root.iconbitmap(PathsManager.RES_ICO_PATH)
+    except:
+        pass
     msgBox = Application(root)
     return root
 

@@ -27,7 +27,7 @@ class WSConnectionHandler(ConnectionHandler):
     def received_message(self, message):
         if message.data == "version":  # bitbloq thinks we are in version 1
             # send an empty dict to alert bitbloq we are in version 2
-            self._connectedClient.writeMessage(json.dumps(dict()))
+            self._connectedClient.api_writeMessage(json.dumps(dict()))
         else:
             sortMessage = str(message) if len(message.data) < 500 else message.data[:300] + "..."
             log.debug("Message received from ID: %s\n%s " % (str(self._connectedClient.ID), sortMessage))

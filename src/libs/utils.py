@@ -182,7 +182,13 @@ def setLogLevel(logLevel):
 
 
 def openFile(filename):
+    filePath = filename.encode(sys.getfilesystemencoding())
+
     if sys.platform == "win32":
-        os.popen('"{0}" {1}'.format(filename.encode(sys.getfilesystemencoding()), " ".join(sys.argv[1:])))
+        os.popen('"{0}" {1}'.format(filePath, " ".join(sys.argv[1:])))
     else:
-        os.popen("'./{} '".format(filename.encode(sys.getfilesystemencoding()), " ".join(sys.argv[1:])))
+        if filePath [0] == "/":
+            template = "'{0}' {1}"
+        else:
+            template = "'./{0}' {1}"
+        os.popen(template.format(filePath, " ".join(sys.argv[1:])))
