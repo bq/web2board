@@ -107,6 +107,8 @@ class CodeHub(Hub):
             _sender.isUploading(uploadPort)
             return uploadPort
         compileUploader = CompilerUploader.construct(board)
+        serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
+        serialHub.closeAllConnections()
         self.tryToTerminateSerialCommProcess()
         uploadPort = getMainApp().w2bGui.getSelectedPort()
         if uploadPort is None:
@@ -114,7 +116,5 @@ class CodeHub(Hub):
                 uploadPort = compileUploader.getPort()
             except CompilerException as e:
                 return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
-        serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
-        serialHub.closeConnection(uploadPort)
         _sender.isUploading(uploadPort)
         return uploadPort
