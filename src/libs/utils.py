@@ -150,10 +150,15 @@ def is64bits():
 
 def killProcess(name):
     name += getOsExecutableExtension()
+    if isWindows():
+        try:
+            os.system("taskkill /im {}".format(name))
+        except:
+            log.exception("Failing killing old web2board process")
     for proc in psutil.process_iter():
         # check whether the process name matches
         try:
-            if name in proc.name() and proc.pid != os.getpid():
+            if name == proc.name() and proc.pid != os.getpid():
                 log.debug("killing a running web2board application. old app pid: {0}, this pid {1}".format(proc.pid, os.getpid()))
                 proc.kill()
         except psutil.ZombieProcess:
