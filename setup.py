@@ -23,5 +23,5 @@ setup(
     author='bq',
     author_email='support-bitbloq@bq.com',
     description='Native program that connects a web and a board.',
-    requires=['wshubsapi', 'click', 'glob2', 'psutil']
+    requires=['wshubsapi', 'click', 'glob2']
 )

@@ -9,7 +9,6 @@ import zipfile
 from glob import glob
 from urllib2 import urlopen
 import glob2
-import psutil
 import serial.tools.list_ports
 
 log = logging.getLogger(__name__)
@@ -155,14 +154,10 @@ def killProcess(name):
             os.system("taskkill /im {}".format(name))
         except:
             log.exception("Failing killing old web2board process")
-    for proc in psutil.process_iter():
+    else:
         # check whether the process name matches
         try:
-            if name == proc.name() and proc.pid != os.getpid():
-                log.debug("killing a running web2board application. old app pid: {0}, this pid {1}".format(proc.pid, os.getpid()))
-                proc.kill()
-        except psutil.ZombieProcess:
-            pass
+            os.system("killall -9 {}".format(name))
         except:
             log.exception("Failing killing old web2board process")
 
@@ -192,7 +187,7 @@ def openFile(filename):
     if sys.platform == "win32":
         os.popen('"{0}" {1}'.format(filePath, " ".join(sys.argv[1:])))
     else:
-        if filePath [0] == "/":
+        if filePath[0] == "/":
             template = "'{0}' {1}"
         else:
             template = "'./{0}' {1}"

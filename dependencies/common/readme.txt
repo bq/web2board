@@ -4,7 +4,6 @@ sudo pip install flexmock
 sudo pip install glob2
 sudo pip install pyserial
 sudo pip install pyinstaller==3.1
-sudo pip install psutil
 sudo pip install lockfile
 sudo pip install requests
 sudo pip install bottle
