@@ -28,5 +28,5 @@ log = logging.getLogger(__name__)
 web2boardPath = "web2board" + utils.getOsExecutableExtension()
 
 if __name__ == '__main__':
-    utils.killProcess("web2board" + utils.getOsExecutableExtension())
+    utils.killProcess("web2board")
     open_file("web2board")
