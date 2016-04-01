@@ -131,7 +131,7 @@ class PathsManager:
 
         cls.PROGRAM_PATH = cls.getExternalDataFolder()
         cls.PLATFORMIO_WORKSPACE_SKELETON = os.path.join(cls.RES_PATH, 'platformioWorkSpaceSkeleton')
-        cls.PLATFORMIO_WORKSPACE_PATH = os.path.join(cls.RES_PATH, 'platformioWS_{}')
+        cls.PLATFORMIO_WORKSPACE_PATH = cls.PLATFORMIO_WORKSPACE_SKELETON
         cls.PLATFORMIO_INI_PATH = os.path.join(cls.PLATFORMIO_WORKSPACE_SKELETON, 'platformio.ini')
         cls.TEST_SETTINGS_PATH = os.path.join(cls.RES_PATH, 'TestSettings', 'resources')
         cls.SCONS_EXECUTABLE_PATH = cls.getSonsExecutablePath()
@@ -144,7 +144,8 @@ class PathsManager:
 
     @classmethod
     def cleanPioEnvs(cls):
-        for path in glob.glob(cls.PLATFORMIO_WORKSPACE_PATH.replace("{}", "*")):
+        path = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, ".pioenvs")
+        if os.path.exists(path):
             shutil.rmtree(path)
 
 # set working directory to src
