@@ -7,12 +7,11 @@ import time
 import urllib2
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
-from wsgiref.simple_server import make_server
 
 from PySide import QtGui
 from PySide.QtCore import Qt
-from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler
-from ws4py.server.wsgiutils import WebSocketWSGIApplication
+
+from tornado import web, ioloop
 from wshubsapi.HubsInspector import HubsInspector
 
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
@@ -95,11 +94,11 @@ class MainApp:
         if not utils.areWeFrozen():
             HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
             HubsInspector.constructPythonFile(path="libs/WSCommunication/Clients")
+        self.w2bServer = web.Application([
+            (r'/(.*)', WSConnectionHandler),
+        ])
         Config.webSocketPort = options.port
-        self.w2bServer = make_server(options.host, options.port, server_class=WSGIServer,
-                                     handler_class=WebSocketWSGIRequestHandler,
-                                     app=WebSocketWSGIApplication(handler_cls=WSConnectionHandler))
-        self.w2bServer.initialize_websockets_manager()
+        self.w2bServer.listen(options.port)
         return self.w2bServer
 
     @asynchronous()
@@ -148,7 +147,7 @@ class MainApp:
         try:
             log.info("listening...")
             # self.checkConnectionIsAvailable()
-            self.w2bServer.serve_forever()
+            ioloop.IOLoop.instance().start()
         finally:
             forceQuit()
 
