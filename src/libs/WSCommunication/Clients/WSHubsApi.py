@@ -450,30 +450,6 @@ class HubsAPI(object):
 
         class __Server(GenericServer):
             
-            def cleanConsole(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "cleanConsole", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def closeApp(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "closeApp", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
             def forceClose(self, ):
                 """
                 :rtype : WSReturnObject
@@ -494,18 +470,6 @@ class HubsAPI(object):
                 
                 id = self._getNextMessageID()
                 body = {"hub": self.hubName, "function": "getSubscribedClientsToHub", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def showApp(self, ):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "showApp", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
@@ -727,19 +691,6 @@ class HubsAPI(object):
                 args.append(port)
                 id = self._getNextMessageID()
                 body = {"hub": self.hubName, "function": "isPortConnected", "args": args, "ID": id}
-                retFunction = self.wsClient.getReturnFunction(id)
-                self.wsClient.send(self._serializeObject(body))
-                return retFunction
-        
-            def startApp(self, port, board):
-                """
-                :rtype : WSReturnObject
-                """
-                args = list()
-                args.append(port)
-                args.append(board)
-                id = self._getNextMessageID()
-                body = {"hub": self.hubName, "function": "startApp", "args": args, "ID": id}
                 retFunction = self.wsClient.getReturnFunction(id)
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction

@@ -2,15 +2,15 @@
 
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------#
-#                                                                       #
-# This file is part of the web2board project                            #
-#                                                                       #
-# Copyright (C) 2015 Mundo Reader S.L.                                  #
-#                                                                       #
-# Date: April - May 2015                                                #
-# Authors: Irene Sanz Nieto <irene.sanz@bq.com>,                        #
-#          Sergio Morcuende <sergio.morcuende@bq.com>                   #
-#                                                                       #
+#                                                                        #
+# This file is part of the web2board project                             #
+#                                                                        #
+# Copyright (C) 2015 Mundo Reader S.L.                                   #
+#                                                                        #
+# Date: April - May 2015                                                 #
+# Authors: Irene Sanz Nieto <irene.sanz@bq.com>,                         #
+#          Sergio Morcuende <sergio.morcuende@bq.com>                    #
+#                                                                        #
 # -----------------------------------------------------------------------#
 
 import importlib
@@ -68,22 +68,19 @@ if __name__ == "__main__":
         def closeSigHandler(signal, frame):
             try:
                 log.warning("closing server")
-                getMainApp().w2bServer.server_close()
+                app.w2bServer.server_close()
                 log.warning("server closed")
             except:
                 log.warning("unable to close server")
             forceQuit()
             os._exit(1)
 
-
         signal.signal(signal.SIGINT, closeSigHandler)
-        qtApp = app.startMain()
-        sys.exit(qtApp.exec_())
+        app.startMain()
     except SystemExit:
         pass
     except Exception as e:
         if log is None:
-            print(20)
             raise e
         else:
             log.critical("critical exception", exc_info=1)

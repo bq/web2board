@@ -319,9 +319,14 @@ function HubsAPI(url, serverTimeout, wsClientClass) {
     this.WindowHub.server = {
         __HUB_NAME : 'WindowHub',
         
-        cleanConsole : function (){
+        unsubscribeFromHub : function (){
             
-            return constructMessage('WindowHub', 'cleanConsole', arguments);
+            return constructMessage('WindowHub', 'unsubscribeFromHub', arguments);
+        },
+
+        forceClose : function (){
+            
+            return constructMessage('WindowHub', 'forceClose', arguments);
         },
 
         getSubscribedClientsToHub : function (){
@@ -329,29 +334,9 @@ function HubsAPI(url, serverTimeout, wsClientClass) {
             return constructMessage('WindowHub', 'getSubscribedClientsToHub', arguments);
         },
 
-        unsubscribeFromHub : function (){
-            
-            return constructMessage('WindowHub', 'unsubscribeFromHub', arguments);
-        },
-
-        showApp : function (){
-            
-            return constructMessage('WindowHub', 'showApp', arguments);
-        },
-
-        closeApp : function (){
-            
-            return constructMessage('WindowHub', 'closeApp', arguments);
-        },
-
         subscribeToHub : function (){
             
             return constructMessage('WindowHub', 'subscribeToHub', arguments);
-        },
-
-        forceClose : function (){
-            
-            return constructMessage('WindowHub', 'forceClose', arguments);
         }
     };
     this.WindowHub.client = {};
@@ -427,11 +412,6 @@ function HubsAPI(url, serverTimeout, wsClientClass) {
         unsubscribeFromHub : function (){
             
             return constructMessage('SerialMonitorHub', 'unsubscribeFromHub', arguments);
-        },
-
-        startApp : function (port, board){
-            
-            return constructMessage('SerialMonitorHub', 'startApp', arguments);
         },
 
         write : function (port, data){

@@ -65,17 +65,6 @@ class SerialMonitorHub(Hub):
         self.serialConnections = dict()
         """:type : dict from int to SerialConnection"""
 
-    def startApp(self, port, board):
-        compilerUploader = CompilerUploader.construct(board)
-        from libs.MainApp import getMainApp
-        mainApp = getMainApp()
-        if mainApp.w2bGui.isSerialMonitorRunning():
-            port = mainApp.w2bGui.serialMonitor.port
-        if port is None:
-            port = compilerUploader.getPort()
-        port = mainApp.w2bGui.startSerialMonitorApp(port).get()
-        return port
-
     def startConnection(self, port, baudrate=9600):
         if self.isPortConnected(port):
             raise SerialMonitorHubException("Port {} already in use".format(port))

@@ -13,7 +13,6 @@ class VersionsHandlerHubException(Exception):
 
 class VersionsHandlerHub(Hub):
     def getVersion(self):
-        # todo: check in bitbloq if this is what we want
         return Config.version
 
     def setLibVersion(self, version):
@@ -28,7 +27,7 @@ class VersionsHandlerHub(Hub):
         try:
             gui = getMainApp().w2bGui
             gui.startDownload(version)
-            w2bUpdater.downloadVersion(version, gui.refreshProgressBar, gui.downloadEnded).get()
+            w2bUpdater.downloadVersion(version, self.__downloadProgress, self.__downloadEnded).get()
         except:
             self._getClientsHolder().getSubscribedClients().downloadEnded(False)
             raise
@@ -36,10 +35,7 @@ class VersionsHandlerHub(Hub):
         w2bUpdater.runAuxiliaryCopy(version)
 
     def __downloadProgress(self, current, total, percentage):
-        getMainApp().w2bGui.refreshProgressBar(current, total, percentage)
         self._getClientsHolder().getSubscribedClients().downloadProgress(current, total, percentage)
 
-
     def __downloadEnded(self, task):
-        getMainApp().w2bGui.downloadEnded()
         self._getClientsHolder().getSubscribedClients().downloadEnded(True)

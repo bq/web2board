@@ -1,4 +1,3 @@
-import importlib
 import json
 import logging
 import os
@@ -9,8 +8,6 @@ from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 
 from PySide import QtGui
-from PySide.QtCore import Qt
-
 from tornado import web, ioloop
 from wshubsapi.HubsInspector import HubsInspector
 
@@ -115,17 +112,6 @@ class MainApp:
         except OSError:
             log.exception("unable to copy libraries files, there could be a permissions problem.")
 
-    def startConsoleViewer(self):
-        from frames.Web2boardWindow import Web2boardWindow
-
-        app = QtGui.QApplication(sys.argv)
-        app.setQuitOnLastWindowClosed(False)
-        self.w2bGui = Web2boardWindow()
-        if not isTrayIconAvailable():
-            self.w2bGui.setWindowState(Qt.WindowMinimized)
-        self.isAppRunning = True
-        return app
-
     @asynchronous()
     def checkConnectionIsAvailable(self):
         time.sleep(1)
@@ -137,11 +123,7 @@ class MainApp:
         else:
             log.info("connection available")
 
-    @asynchronous()
     def startServer(self, options):
-        while not self.isAppRunning:
-            time.sleep(0.1)
-
         self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
 
         try:
@@ -155,7 +137,6 @@ class MainApp:
         Config.readConfigFile()
         PathsManager.cleanPioEnvs()
         options, args = self.parseSystemArguments()
-        self.qtApp = self.startConsoleViewer()
         self.updateLibrariesIfNecessary()
         self.handleSystemArguments(options, args)
         log.debug("Enviromental data:")
@@ -171,74 +152,8 @@ class MainApp:
             self.startServer(options)
             self.testConnection()
 
-        return self.qtApp
-
     def isSerialMonitorRunning(self):
         return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
-
-    @InGuiThread()
-    def executeSconsScript(self):
-        def revert_io():
-            # This call is added to revert stderr and stdout to the original
-            # ones just in case some build rule or something else in the system
-            # has redirected them elsewhere.
-            sys.stderr = sys.__stderr__
-            sys.stdout = sys.__stdout__
-        import res.Scons.sconsFiles.scons
-        try:
-            class auxFile:
-                def __init__(self, *args):
-                    self.buffer = ""
-
-                def write(self, message):
-                    try:
-                        self.buffer += message
-                    except:
-                        try:
-                            self.buffer += message.encode("utf-8")
-                        except:
-                            self.buffer += message.decode(sys.getfilesystemencoding())
-
-                def writelines(self, messages):
-                    self.buffer += "\n".join(messages)
-
-                def flush(self, *args):
-                    pass
-
-            sys.stderr = auxFile()
-            sys.stdout = auxFile()
-            import res.Scons.sconsFiles.SCons.Script
-            res.Scons.sconsFiles.SCons.Script.main()
-
-        except SystemExit as e:
-            outBuffer = sys.stdout.file.buffer
-            errBuffer = sys.stderr.file.buffer
-            returnObject = {"returncode": e.code, "out": sys.stdout.file.buffer, "err": sys.stderr.file.buffer}
-            revert_io()
-            sys.stdout.write(outBuffer)
-            sys.stderr.write(errBuffer)
-            return returnObject
-
-        except:
-            log.exception("failed to execute Scons script")
-        finally:
-            revert_io()
-
-    @InGuiThread()
-    def bringWidgetToFront(self, widget):
-        if widget.isVisible() and not utils.isMac():
-            widget.hide()
-        if not utils.isMac():
-            widget.show()
-            if widget.windowState() & Qt.WindowMinimized:
-                widget.setWindowState(Qt.WindowNoState)
-
-        widget.raise_()
-        self.qtApp.setActiveWindow(widget)
-        if not utils.isLinux():
-            widget.activateWindow()
-            widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
-            widget.update()
 
     @asynchronous()
     def testConnection(self):
