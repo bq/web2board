@@ -1,6 +1,6 @@
 /* jshint ignore:start */
 /* ignore jslint start */
-function HubsAPI(url, serverTimeout) {
+function HubsAPI(url, serverTimeout, wsClientClass) {
     'use strict';
 
     var messageID = 0,
@@ -20,7 +20,15 @@ function HubsAPI(url, serverTimeout) {
         reconnectTimeout = reconnectTimeout || -1;
         var openPromise = {
             onSuccess : function() {},
-            onError : function(error) {}
+            onError : function(error) {},
+            _connectError: false,
+            done: function (onSuccess, onError) {
+                openPromise.onSuccess = onSuccess;
+                openPromise.onError = onError;
+                if (openPromise._connectError !== false){
+                    openPromise.onError(openPromise._connectError);
+                }
+            }
         };
         function reconnect(error) {
             if (reconnectTimeout !== -1) {
@@ -32,10 +40,11 @@ function HubsAPI(url, serverTimeout) {
         }
 
         try {
-            this.wsClient = new WebSocket(url);
+            this.wsClient = wsClientClass === undefined ? new WebSocket(url) : new wsClientClass(url);
         } catch (error) {
             reconnect(error);
-            return;
+            openPromise._connectError = error;
+            return openPromise;
         }
 
         this.wsClient.onopen = function () {
@@ -83,7 +92,17 @@ function HubsAPI(url, serverTimeout) {
                 } else {
                     f = thisApi[msgObj.hub].client[msgObj.function];
                     if (f!== undefined) {
-                        f.apply(f, msgObj.args);
+                        var replayMessage = {ID: msgObj.ID}
+                        try {
+                            replayMessage.replay =  f.apply(f, msgObj.args);
+                            replayMessage.success = true;
+                        } catch(e){
+                            replayMessage.success = false;
+                            replayMessage.replay = e.toString();
+                        } finally {
+                            replayMessage.replay = replayMessage.replay === undefined ? null: replayMessage.replay;
+                            thisApi.wsClient.send(JSON.stringify(replayMessage))
+                        }
                     } else {
                         this.onClientFunctionNotFound(msgObj.hub, msgObj.function);
                     }
@@ -97,11 +116,7 @@ function HubsAPI(url, serverTimeout) {
             thisApi.callbacks.onMessageError(error);
         };
 
-        return { done: function (onSuccess, onError) {
-                openPromise.onSuccess = onSuccess;
-                openPromise.onError = onError;
-            }
-        };
+        return openPromise;
     };
 
     this.callbacks = {
@@ -163,7 +178,7 @@ function HubsAPI(url, serverTimeout) {
                             onError.apply(onError, arguments);
                         } else if (thisApi.defaultErrorHandler !== null){
                             var argumentsArray = [callInfo].concat(arguments);
-                            thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler.apply, argumentsArray);
+                            thisApi.defaultErrorHandler.apply(thisApi.defaultErrorHandler, argumentsArray);
                         }
                     } finally {
                         delete returnFunctions[ID];
@@ -194,6 +209,11 @@ function HubsAPI(url, serverTimeout) {
     this.CodeHub.server = {
         __HUB_NAME : 'CodeHub',
         
+        uploadHexFile : function (hexFilePath, board, port){
+            arguments[0] = hexFilePath === undefined ? null : hexFilePath;
+            return constructMessage('CodeHub', 'uploadHexFile', arguments);
+        },
+
         uploadHex : function (hexText, board, port){
             arguments[0] = hexText === undefined ? null : hexText;
             return constructMessage('CodeHub', 'uploadHex', arguments);
@@ -224,9 +244,9 @@ function HubsAPI(url, serverTimeout) {
             return constructMessage('CodeHub', 'subscribeToHub', arguments);
         },
 
-        uploadHexFile : function (hexFilePath, board, port){
-            arguments[0] = hexFilePath === undefined ? null : hexFilePath;
-            return constructMessage('CodeHub', 'uploadHexFile', arguments);
+        getHexData : function (code){
+            
+            return constructMessage('CodeHub', 'getHexData', arguments);
         },
 
         tryToTerminateSerialCommProcess : function (){
@@ -273,99 +293,89 @@ function HubsAPI(url, serverTimeout) {
     this.LoggingHub = {};
     this.LoggingHub.server = {
         __HUB_NAME : 'LoggingHub',
-
+        
         unsubscribeFromHub : function (){
-
+            
             return constructMessage('LoggingHub', 'unsubscribeFromHub', arguments);
         },
 
         getSubscribedClientsToHub : function (){
-
+            
             return constructMessage('LoggingHub', 'getSubscribedClientsToHub', arguments);
         },
 
         subscribeToHub : function (){
-
+            
             return constructMessage('LoggingHub', 'subscribeToHub', arguments);
+        },
+
+        getAllBufferedRecords : function (){
+            
+            return constructMessage('LoggingHub', 'getAllBufferedRecords', arguments);
         }
     };
     this.LoggingHub.client = {};
     this.WindowHub = {};
     this.WindowHub.server = {
         __HUB_NAME : 'WindowHub',
-
-        cleanConsole : function (){
-
-            return constructMessage('WindowHub', 'cleanConsole', arguments);
-        },
-
-        getSubscribedClientsToHub : function (){
-
-            return constructMessage('WindowHub', 'getSubscribedClientsToHub', arguments);
-        },
-
+        
         unsubscribeFromHub : function (){
-
+            
             return constructMessage('WindowHub', 'unsubscribeFromHub', arguments);
         },
 
-        showApp : function (){
-
-            return constructMessage('WindowHub', 'showApp', arguments);
+        forceClose : function (){
+            
+            return constructMessage('WindowHub', 'forceClose', arguments);
         },
 
-        closeApp : function (){
-
-            return constructMessage('WindowHub', 'closeApp', arguments);
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('WindowHub', 'getSubscribedClientsToHub', arguments);
         },
 
         subscribeToHub : function (){
-
+            
             return constructMessage('WindowHub', 'subscribeToHub', arguments);
-        },
-
-        forceClose : function (){
-
-            return constructMessage('WindowHub', 'forceClose', arguments);
         }
     };
     this.WindowHub.client = {};
     this.UtilsAPIHub = {};
     this.UtilsAPIHub.server = {
         __HUB_NAME : 'UtilsAPIHub',
-
+        
         getSubscribedClientsToHub : function (){
-
+            
             return constructMessage('UtilsAPIHub', 'getSubscribedClientsToHub', arguments);
         },
 
         getId : function (){
-
+            
             return constructMessage('UtilsAPIHub', 'getId', arguments);
         },
 
         isClientConnected : function (clientId){
-
+            
             return constructMessage('UtilsAPIHub', 'isClientConnected', arguments);
         },
 
         unsubscribeFromHub : function (){
-
+            
             return constructMessage('UtilsAPIHub', 'unsubscribeFromHub', arguments);
         },
 
         subscribeToHub : function (){
-
+            
             return constructMessage('UtilsAPIHub', 'subscribeToHub', arguments);
         },
 
         setId : function (clientId){
-
+            
             return constructMessage('UtilsAPIHub', 'setId', arguments);
         },
 
         getHubsStructure : function (){
-
+            
             return constructMessage('UtilsAPIHub', 'getHubsStructure', arguments);
         }
     };
@@ -373,49 +383,54 @@ function HubsAPI(url, serverTimeout) {
     this.SerialMonitorHub = {};
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
+        
+        getAllConnectedPorts : function (){
+            
+            return constructMessage('SerialMonitorHub', 'getAllConnectedPorts', arguments);
+        },
+
+        closeAllConnections : function (){
+            
+            return constructMessage('SerialMonitorHub', 'closeAllConnections', arguments);
+        },
 
         findBoardPort : function (board){
-
+            
             return constructMessage('SerialMonitorHub', 'findBoardPort', arguments);
         },
 
         changeBaudrate : function (port, baudrate){
-
+            
             return constructMessage('SerialMonitorHub', 'changeBaudrate', arguments);
         },
 
         getSubscribedClientsToHub : function (){
-
+            
             return constructMessage('SerialMonitorHub', 'getSubscribedClientsToHub', arguments);
         },
 
         unsubscribeFromHub : function (){
-
+            
             return constructMessage('SerialMonitorHub', 'unsubscribeFromHub', arguments);
         },
 
-        startApp : function (port, board){
-
-            return constructMessage('SerialMonitorHub', 'startApp', arguments);
-        },
-
         write : function (port, data){
-
+            
             return constructMessage('SerialMonitorHub', 'write', arguments);
         },
 
         closeConnection : function (port){
-
+            
             return constructMessage('SerialMonitorHub', 'closeConnection', arguments);
         },
 
         subscribeToHub : function (){
-
+            
             return constructMessage('SerialMonitorHub', 'subscribeToHub', arguments);
         },
 
         getAvailablePorts : function (){
-
+            
             return constructMessage('SerialMonitorHub', 'getAvailablePorts', arguments);
         },
 
@@ -425,7 +440,7 @@ function HubsAPI(url, serverTimeout) {
         },
 
         isPortConnected : function (port){
-
+            
             return constructMessage('SerialMonitorHub', 'isPortConnected', arguments);
         }
     };
@@ -433,64 +448,64 @@ function HubsAPI(url, serverTimeout) {
     this.ConfigHub = {};
     this.ConfigHub.server = {
         __HUB_NAME : 'ConfigHub',
-
+        
         restorePlatformioIniFile : function (){
-
+            
             return constructMessage('ConfigHub', 'restorePlatformioIniFile', arguments);
         },
 
         testProxy : function (proxyUrl){
-
+            
             return constructMessage('ConfigHub', 'testProxy', arguments);
         },
 
         setWebSocketInfo : function (IP, port){
-
+            
             return constructMessage('ConfigHub', 'setWebSocketInfo', arguments);
         },
 
         getLibrariesPath : function (){
-
+            
             return constructMessage('ConfigHub', 'getLibrariesPath', arguments);
         },
 
         setLogLevel : function (logLevel){
-
+            
             return constructMessage('ConfigHub', 'setLogLevel', arguments);
         },
 
         getSubscribedClientsToHub : function (){
-
+            
             return constructMessage('ConfigHub', 'getSubscribedClientsToHub', arguments);
         },
 
         unsubscribeFromHub : function (){
-
+            
             return constructMessage('ConfigHub', 'unsubscribeFromHub', arguments);
         },
 
         changePlatformioIniFile : function (content){
-
+            
             return constructMessage('ConfigHub', 'changePlatformioIniFile', arguments);
         },
 
         setLibrariesPath : function (libDir){
-
+            
             return constructMessage('ConfigHub', 'setLibrariesPath', arguments);
         },
 
         subscribeToHub : function (){
-
+            
             return constructMessage('ConfigHub', 'subscribeToHub', arguments);
         },
 
         getConfig : function (){
-
+            
             return constructMessage('ConfigHub', 'getConfig', arguments);
         },
 
         setProxy : function (proxyUrl){
-
+            
             return constructMessage('ConfigHub', 'setProxy', arguments);
         },
 

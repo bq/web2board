@@ -12,9 +12,7 @@ log.addHandler(logging.NullHandler())
 
 class WSConnectionHandler(ConnectionHandler):
     def open(self, *args):
-        from libs.MainApp import getMainApp
         super(WSConnectionHandler, self).open(*args)
-        getMainApp().w2bGui.changeConnectedStatus()
 
     def on_close(self):
         super(WSConnectionHandler, self).on_close()

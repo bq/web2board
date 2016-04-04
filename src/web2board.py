@@ -58,7 +58,6 @@ if "-Q" in sys.argv:
     runSconsScript()
 
 if __name__ == "__main__":
-    qtApp = None
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
         HubsInspector.inspectImplementedHubs()
@@ -84,6 +83,5 @@ if __name__ == "__main__":
             raise e
         else:
             log.critical("critical exception", exc_info=1)
-    if qtApp is not None:
-        qtApp.quit()
+
     os._exit(1)

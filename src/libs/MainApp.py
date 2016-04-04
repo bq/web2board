@@ -181,8 +181,6 @@ def isTrayIconAvailable():
 @InGuiThread()
 def forceQuit():
     try:
-        mainApp = getMainApp()
-        mainApp.w2bGui.closeTrayIcon()
-        mainApp.qtApp.quit()
+        os._exit(1)
     finally:
         pass
