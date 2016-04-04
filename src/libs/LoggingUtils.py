@@ -81,7 +81,6 @@ class RotatingHandler(logging.handlers.RotatingFileHandler):
 class HubsHandler(Handler):
     def __init__(self, *args, **kwargs):
         super(HubsHandler, self).__init__(*args, **kwargs)
-        from libs.WSCommunication.Hubs.LoggingHub import LoggingHub
         HubsInspector.inspectImplementedHubs()
 
     def handle(self, record):
