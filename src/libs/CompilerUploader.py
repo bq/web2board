@@ -15,14 +15,12 @@ import os
 import subprocess
 from datetime import timedelta, datetime
 
-import sys
-
+from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
-from platformio.platformioUtils import run as platformioRun
 from platformio import exception, util
+from platformio.platformioUtils import run as platformioRun
 from platformio.util import get_boards
-from libs import utils
 
 log = logging.getLogger(__name__)
 
@@ -128,7 +126,7 @@ class CompilerUploader:
         mainInoPath = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
         if not os.path.exists(mainInoPath):
             os.makedirs(mainInoPath)
-        with open(os.path.join(mainInoPath,  "main.ino"), 'w') as mainCppFile:
+        with open(os.path.join(mainInoPath, "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
         runResult = platformioRun(target=target, environment=(self.board,),

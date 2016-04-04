@@ -56,6 +56,7 @@ def runSconsScript():
 
 if "-Q" in sys.argv:
     runSconsScript()
+    os._exit(1)
 
 if __name__ == "__main__":
     try:
