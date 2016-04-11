@@ -1,7 +1,10 @@
+# coding=utf-8
 import logging
 import os
 import serial
 import time
+
+from serial.serialutil import SerialException
 from wshubsapi.Hub import Hub
 
 from libs.CompilerUploader import CompilerUploader
@@ -30,14 +33,19 @@ class SerialConnection:
                     out += self.serial.read(1)
                 if out != '':
                     self.onReceivedCallback(self.serial.port, out)
+            except IOError as e:
+                if e.errno == 5 or e.message == "call to ClearCommError failed":
+                    log.exception("Error in serial port, check connection")
+                    self.close()
+                else:
+                    raise
             except Exception as e:
                 if not self.isAboutToBeClosed:
                     log.exception("error getting data: {}".format(e))
             time.sleep(0.1)
 
     def write(self, data):
-        data = data.replace("+", "\+")
-        self.serial.write(data.encode())
+        self.serial.write(data.encode('utf-8', 'replace'))
 
     def changeBaudRate(self, value):
         self.serial.close()
@@ -47,7 +55,7 @@ class SerialConnection:
     def close(self):
         self.isAboutToBeClosed = True
         self.serial.close()
-        time.sleep(2) #we have to give time to really close the port
+        time.sleep(2) #  we have to give time to really close the port
 
     def isClosed(self):
         return not self.serial.isOpen()
