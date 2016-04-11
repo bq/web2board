@@ -19,7 +19,7 @@ class WSConnectionHandler(ConnectionHandler):
         if self._connectedClient.ID == "Bitbloq":
             log.info("Bitbloq disconnected, closing web2board...")
             time.sleep(0.5)
-            if utils.areWeFrozen() or True:
+            if utils.areWeFrozen():
                 libs.MainApp.forceQuit()
 
     def on_message(self, message):

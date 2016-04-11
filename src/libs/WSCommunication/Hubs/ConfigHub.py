@@ -1,5 +1,7 @@
 import logging
+import os
 import urllib2
+from copy import deepcopy
 
 from wshubsapi.Hub import Hub
 from libs.Config import Config
@@ -18,10 +20,15 @@ class ConfigHub(Hub):
         super(ConfigHub, self).__init__()
 
     def getConfig(self):
-        return Config.getConfigValues()
+        config = deepcopy(Config.getConfigValues())
+        config.update(dict(librariesPath=self.getLibrariesPath()))
+        return config
 
     def setValues(self, configDic):
         configValues = Config.getConfigValues()
+        if "librariesPath" in configDic:
+            librariesPath = configDic.pop("librariesPath")
+            self.setLibrariesPath(librariesPath)
         for k in configValues.keys():
             if k in configDic:
                 Config.__dict__[k] = configDic[k]
@@ -44,6 +51,9 @@ class ConfigHub(Hub):
 
     def getLibrariesPath(self):
         return Config.getPlatformioLibDir()
+
+    def isPossibleLibrariesPath(self, path):
+        return os.path.exists(path)
 
     def changePlatformioIniFile(self, content):
         with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:

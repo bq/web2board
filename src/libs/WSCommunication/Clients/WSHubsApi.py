@@ -801,6 +801,18 @@ class HubsAPI(object):
                 self.wsClient.send(self._serializeObject(body))
                 return retFunction
         
+            def isPossibleLibrariesPath(self, path):
+                """
+                :rtype : WSReturnObject
+                """
+                args = list()
+                args.append(path)
+                id = self._getNextMessageID()
+                body = {"hub": self.hubName, "function": "isPossibleLibrariesPath", "args": args, "ID": id}
+                retFunction = self.wsClient.getReturnFunction(id)
+                self.wsClient.send(self._serializeObject(body))
+                return retFunction
+        
             def restorePlatformioIniFile(self, ):
                 """
                 :rtype : WSReturnObject

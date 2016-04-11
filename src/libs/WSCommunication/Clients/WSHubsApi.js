@@ -489,9 +489,9 @@ function HubsAPI(url, serverTimeout, wsClientClass) {
             return constructMessage('ConfigHub', 'changePlatformioIniFile', arguments);
         },
 
-        setLibrariesPath : function (libDir){
+        isPossibleLibrariesPath : function (path){
             
-            return constructMessage('ConfigHub', 'setLibrariesPath', arguments);
+            return constructMessage('ConfigHub', 'isPossibleLibrariesPath', arguments);
         },
 
         subscribeToHub : function (){
@@ -507,6 +507,11 @@ function HubsAPI(url, serverTimeout, wsClientClass) {
         setProxy : function (proxyUrl){
             
             return constructMessage('ConfigHub', 'setProxy', arguments);
+        },
+
+        setLibrariesPath : function (libDir){
+            
+            return constructMessage('ConfigHub', 'setLibrariesPath', arguments);
         },
 
         setValues : function (configDic){
