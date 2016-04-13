@@ -29,6 +29,10 @@ class WSConnectionHandler(ConnectionHandler):
             # send an empty dict to alert bitbloq we are in version 2
             self._connectedClient.api_writeMessage(json.dumps(dict()))
         else:
-            sortMessage = str(message) if len(message) < 500 else message[:300] + "..."
-            log.debug("Message received from ID: %s\n%s " % (str(self._connectedClient.ID), sortMessage))
-            self.commEnvironment.onAsyncMessage(self._connectedClient, message)
+            try:
+                sortMessage = message if len(message) < 500 else message[:300] + "..."
+                log.debug("Message received from ID: %s\n%s " % (str(self._connectedClient.ID), sortMessage))
+            except UnicodeError:
+                pass
+            self.commEnvironment.onAsyncMessage(self._connectedClient, message.encode('utf-8', 'ignore'))
+
