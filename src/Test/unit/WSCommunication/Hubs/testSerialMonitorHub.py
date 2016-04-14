@@ -30,17 +30,6 @@ class TestSerialMonitorHub(unittest.TestCase):
         flexmock_teardown()
         removeHubsSubclasses()
 
-    def test_startApp_callsStartsSerialMonitorApp(self):
-        futureMock = flexmock(get=lambda: "COM4")
-        mainApp = getMainApp()
-        mainApp.w2bGui = Web2boardWindow(None, 0)
-        original_startSerialMonitorApp = mainApp.w2bGui.startSerialMonitorApp
-        try:
-            flexmock(mainApp.w2bGui).should_receive("startSerialMonitorApp").and_return(futureMock).once()
-            self.serialMonitorHub.startApp("COM1", CompilerUploader.DEFAULT_BOARD)
-        finally:
-            mainApp.w2bGui.startSerialMonitorApp = original_startSerialMonitorApp
-
     def test_changeBaudrate_doesNotClosePortIfNotCreated(self):
         port = "COM4"
         baudrate = 115200

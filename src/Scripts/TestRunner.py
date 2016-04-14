@@ -69,4 +69,4 @@ if __name__ == '__main__':
     elif testing == "all":
         runAllTests()
     # log.warning("exiting program...")
-    #os._exit(1)
+    os._exit(1)

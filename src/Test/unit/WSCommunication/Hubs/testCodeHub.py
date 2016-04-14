@@ -1,14 +1,11 @@
 import os
 import unittest
 
-from wshubsapi.ConnectedClient import ConnectedClient
 from wshubsapi.Hub import UnsuccessfulReplay
 from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
-from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
-from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 from libs.MainApp import getMainApp
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
