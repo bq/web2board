@@ -6,7 +6,6 @@ import shutil
 from flexmock import flexmock
 
 from Test.testingUtils import restoreAllTestResources
-from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils

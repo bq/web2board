@@ -23,9 +23,6 @@ class TestCodeHub(unittest.TestCase):
         """:type : CodeHub"""
 
         self.sender = createSenderMock()
-        getMainApp().w2bGui = flexmock(Web2boardWindow(),
-                                       getSelectedPort=lambda *args: None,
-                                       isSerialMonitorRunning=lambda: False)
 
         self.originalConstruct = CompilerUploader.construct
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()

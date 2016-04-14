@@ -25,8 +25,6 @@ class VersionsHandlerHub(Hub):
     def setWeb2boardVersion(self, version):
         w2bUpdater = getWeb2boardUpdater()
         try:
-            gui = getMainApp().w2bGui
-            gui.startDownload(version)
             w2bUpdater.downloadVersion(version, self.__downloadProgress, self.__downloadEnded).get()
         except:
             self._getClientsHolder().getSubscribedClients().downloadEnded(False)

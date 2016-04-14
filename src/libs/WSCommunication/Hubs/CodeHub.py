@@ -110,7 +110,6 @@ class CodeHub(Hub):
         serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
         serialHub.closeAllConnections()
         self.tryToTerminateSerialCommProcess()
-        uploadPort = getMainApp().w2bGui.getSelectedPort()
         if uploadPort is None:
             try:
                 uploadPort = compileUploader.getPort()

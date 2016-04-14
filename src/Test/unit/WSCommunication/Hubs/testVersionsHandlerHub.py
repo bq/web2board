@@ -6,7 +6,6 @@ from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 
 from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
-from frames.Web2boardWindow import Web2boardWindow
 from libs.Decorators.InGuiThread import Result
 from libs.MainApp import getMainApp
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
@@ -81,6 +80,5 @@ class TestVersionsHandlerHub(unittest.TestCase):
         flexmock(self.updater).should_receive("downloadVersion").and_return(resultObject).once()
         flexmock(self.updater).should_receive("makeAnAuxiliaryCopy").once()
         flexmock(self.updater).should_receive("runAuxiliaryCopy").once()
-        getMainApp().w2bGui = flexmock(Web2boardWindow())
 
         self.versionsHandlerHub.setWeb2boardVersion("0.0.1")

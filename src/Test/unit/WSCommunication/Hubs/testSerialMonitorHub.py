@@ -4,7 +4,6 @@ from wshubsapi.HubsInspector import HubsInspector
 from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
-from frames.Web2boardWindow import Web2boardWindow
 from libs.CompilerUploader import CompilerUploader
 
 # do not remove

@@ -2,10 +2,9 @@ import json
 import os
 import unittest
 import logging
-from flexmock import flexmock, flexmock_teardown
+from flexmock import flexmock_teardown
 
 from Test.testingUtils import restoreAllTestResources, restorePaths
-from libs import utils
 from libs.PathsManager import PathsManager
 from libs.Config import Config
 
