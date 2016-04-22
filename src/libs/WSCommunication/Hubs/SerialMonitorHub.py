@@ -3,9 +3,7 @@ import logging
 import os
 import serial
 import time
-
-from serial.serialutil import SerialException
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 
 from libs.CompilerUploader import CompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
@@ -96,7 +94,7 @@ class SerialMonitorHub(Hub):
             self.startConnection(port, baudrate)
         else:
             self.serialConnections[port].changeBaudRate(baudrate)
-        self._getClientsHolder().getSubscribedClients().baudrateChanged(port, baudrate)
+        self.clients.get_subscribed_clients().baudrateChanged(port, baudrate)
         return True
 
     def getAvailablePorts(self):

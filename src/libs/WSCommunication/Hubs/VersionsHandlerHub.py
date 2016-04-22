@@ -1,7 +1,6 @@
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 
 from libs.Config import Config
-from libs.MainApp import getMainApp
 from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
 from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater

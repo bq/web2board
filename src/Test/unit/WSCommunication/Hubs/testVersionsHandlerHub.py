@@ -2,8 +2,8 @@ import unittest
 
 import sys
 from PySide.QtGui import QApplication
-from wshubsapi.HubsInspector import HubsInspector
-from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
+from wshubsapi.hubs_inspector import HubsInspector
+from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
 from libs.Decorators.InGuiThread import Result
@@ -25,33 +25,21 @@ except:
 class TestVersionsHandlerHub(unittest.TestCase):
 
     def setUp(self):
-        HubsInspector.inspectImplementedHubs(forceReconstruction=True)
+        HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
         self.libUpdater = getBitbloqLibsUpdater()
         self.updater = getWeb2boardUpdater()
-        self.versionsHandlerHub = HubsInspector.getHubInstance(VersionsHandlerHub)
+        self.versionsHandlerHub = HubsInspector.get_hub_instance(VersionsHandlerHub)
         """ :type : VersionsHandlerHub"""
         self.sender = createSenderMock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
-        self.original_lib_update = self.libUpdater.update
-
-        self.original_updater_downloadVersion = self.updater.downloadVersion
-        self.original_updater_makeAnAuxiliaryCopy = self.updater.makeAnAuxiliaryCopy
-        self.original_updater_runAuxiliaryCopy = self.updater.runAuxiliaryCopy
-
         self.testLibVersion = "1.1.1"
 
         restoreAllTestResources()
 
     def tearDown(self):
         flexmock_teardown()
-        self.libUpdater.update = self.original_lib_update
-
-        self.updater.downloadVersion = self.original_updater_downloadVersion
-        self.updater.makeAnAuxiliaryCopy = self.original_updater_makeAnAuxiliaryCopy
-        self.updater.runAuxiliaryCopy = self.original_updater_runAuxiliaryCopy
-
-        removeHubsSubclasses()
+        remove_hubs_subclasses()
 
     def test_getVersion_returnsAVersionStringFormat(self):
         version = self.versionsHandlerHub.getVersion()
@@ -64,7 +52,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
 
         self.versionsHandlerHub.setLibVersion(self.testLibVersion)
 
-    def test_setLibVersion_doesDownloadLibsIfDoesNotHasRightVersion(self):
+    def test_setLibVersion_doesDownloadLibsIfHasNotTheRightVersion(self):
         self.libUpdater = flexmock(self.libUpdater).should_receive("update").once()
 
         self.versionsHandlerHub.setLibVersion(self.testLibVersion)

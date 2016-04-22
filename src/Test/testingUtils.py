@@ -1,13 +1,10 @@
 import os
-import shutil
-from flexmock import flexmock
-from wshubsapi.ClientInHub import ClientInHub
-from wshubsapi.ConnectedClient import ConnectedClient
 
+from flexmock import flexmock
+
+from libs import utils
 from libs.CompilerUploader import CompilerUploader
 from libs.PathsManager import PathsManager
-from libs import utils
-from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
 __original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
 

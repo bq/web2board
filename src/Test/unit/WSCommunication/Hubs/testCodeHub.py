@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from wshubsapi.Hub import UnsuccessfulReplay
-from wshubsapi.HubsInspector import HubsInspector
-from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
+from wshubsapi.hub import UnsuccessfulReplay
+from wshubsapi.hubs_inspector import HubsInspector
+from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
 from libs.CompilerUploader import CompilerUploader
@@ -17,9 +17,9 @@ import libs.WSCommunication.Hubs
 
 class TestCodeHub(unittest.TestCase):
     def setUp(self):
-        HubsInspector.inspectImplementedHubs(forceReconstruction=True)
+        HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
-        self.codeHub = HubsInspector.getHubInstance(CodeHub)
+        self.codeHub = HubsInspector.get_hub_instance(CodeHub)
         """:type : CodeHub"""
 
         self.sender = createSenderMock()
@@ -30,7 +30,7 @@ class TestCodeHub(unittest.TestCase):
 
     def tearDown(self):
         flexmock_teardown()
-        removeHubsSubclasses()
+        remove_hubs_subclasses()
 
     def test_construct_getsCompilerUploader(self):
         self.assertIsInstance(self.originalConstruct(), CompilerUploader)

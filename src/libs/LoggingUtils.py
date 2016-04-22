@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 from logging import Handler
 
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hubs_inspector import HubsInspector
 
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager

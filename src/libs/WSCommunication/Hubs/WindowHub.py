@@ -1,7 +1,7 @@
 import logging
 import time
 
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 from libs.MainApp import forceQuit
 
 log = logging.getLogger(__name__)

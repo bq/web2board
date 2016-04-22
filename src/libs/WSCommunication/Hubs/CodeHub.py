@@ -1,11 +1,10 @@
 import logging
 import os
 
-from wshubsapi.Hub import Hub, UnsuccessfulReplay
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hub import Hub, UnsuccessfulReplay
+from wshubsapi.hubs_inspector import HubsInspector
 
 from libs.CompilerUploader import CompilerException, CompilerUploader
-from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 
@@ -100,20 +99,20 @@ class CodeHub(Hub):
         if compileReport[0] or "Writing | #" in compileReport[1]["err"]:
             return port
         else:
-            return self._constructUnsuccessfulReplay(compileReport[1]["err"])
+            return self._construct_unsuccessful_replay(compileReport[1]["err"])
 
     def __prepareUpload(self, board, _sender, uploadPort=None):
         if uploadPort is not None:
             _sender.isUploading(uploadPort)
             return uploadPort
         compileUploader = CompilerUploader.construct(board)
-        serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
+        serialHub = HubsInspector.get_hub_instance(SerialMonitorHub)
         serialHub.closeAllConnections()
         self.tryToTerminateSerialCommProcess()
         if uploadPort is None:
             try:
                 uploadPort = compileUploader.getPort()
             except CompilerException as e:
-                return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
+                return self._construct_unsuccessful_replay(dict(title="BOARD_NOT_READY", stdErr=e.message))
         _sender.isUploading(uploadPort)
         return uploadPort

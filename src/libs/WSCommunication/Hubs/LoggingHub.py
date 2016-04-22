@@ -1,4 +1,4 @@
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 
 
 class LoggingHub(Hub):

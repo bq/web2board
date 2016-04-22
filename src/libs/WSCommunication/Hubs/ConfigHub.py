@@ -3,7 +3,7 @@ import os
 import urllib2
 from copy import deepcopy
 
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 from libs.Config import Config
 from libs import utils
 from libs.PathsManager import PathsManager

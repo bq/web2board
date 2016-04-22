@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from wshubsapi.ConnectionHandlers.Tornado import ConnectionHandler
+from wshubsapi.connection_handlers.tornado_handler import ConnectionHandler
 
 import libs.MainApp
 from libs import utils

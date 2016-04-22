@@ -17,7 +17,7 @@ import importlib
 import pprint
 import signal
 import click
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hubs_inspector import HubsInspector
 
 from Scripts.TestRunner import *
 from libs.LoggingUtils import initLogging
@@ -26,6 +26,7 @@ from libs.PathsManager import PathsManager
 log = initLogging(__name__)  # initialized in main
 originalEcho = click.echo
 originalSEcho = click.secho
+
 
 def getEchoFunction(original):
     def clickEchoForExecutable(message, *args, **kwargs):
@@ -38,6 +39,7 @@ def getEchoFunction(original):
 
 click.echo = getEchoFunction(originalEcho)
 click.secho = getEchoFunction(originalSEcho)
+
 
 def clickConfirm(message):
     print message
@@ -61,7 +63,7 @@ if "-Q" in sys.argv:
 if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
-        HubsInspector.inspectImplementedHubs()
+        HubsInspector.inspect_implemented_hubs()
         from libs.MainApp import getMainApp, forceQuit
         app = getMainApp()
 

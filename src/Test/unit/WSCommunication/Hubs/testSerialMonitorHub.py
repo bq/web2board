@@ -1,10 +1,9 @@
 import unittest
 
-from wshubsapi.HubsInspector import HubsInspector
-from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
+from wshubsapi.hubs_inspector import HubsInspector
+from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
-from libs.CompilerUploader import CompilerUploader
 
 # do not remove
 import libs.WSCommunication.Hubs
@@ -12,14 +11,13 @@ import libs.WSCommunication.Hubs
 from flexmock import flexmock, flexmock_teardown
 
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
-from libs.MainApp import getMainApp
 
 
 class TestSerialMonitorHub(unittest.TestCase):
     def setUp(self):
         global subprocess
-        HubsInspector.inspectImplementedHubs(forceReconstruction=True)
-        self.serialMonitorHub = flexmock(HubsInspector.getHubInstance(SerialMonitorHub))
+        HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
+        self.serialMonitorHub = flexmock(HubsInspector.get_hub_instance(SerialMonitorHub))
         """:type : flexmock"""
         self.sender = createSenderMock()
 
@@ -27,7 +25,7 @@ class TestSerialMonitorHub(unittest.TestCase):
 
     def tearDown(self):
         flexmock_teardown()
-        removeHubsSubclasses()
+        remove_hubs_subclasses()
 
     def test_changeBaudrate_doesNotClosePortIfNotCreated(self):
         port = "COM4"
@@ -50,7 +48,7 @@ class TestSerialMonitorHub(unittest.TestCase):
         baudrate = 115200
         self.serialMonitorHub.should_receive("startConnection").with_args(port, baudrate).once()
         subscribedClients = flexmock(baudrateChanged=lambda p, b: None)
-        clientsHolder = flexmock(self.serialMonitorHub._getClientsHolder(), getSubscribedClients=lambda :subscribedClients)
-        clientsHolder.getSubscribedClients().should_receive("baudrateChanged").once()
+        clientsHolder = flexmock(self.serialMonitorHub.clients, get_subscribed_clients=lambda: subscribedClients)
+        clientsHolder.get_subscribed_clients().should_receive("baudrateChanged").once()
 
         self.assertTrue(self.serialMonitorHub.changeBaudrate(port, baudrate))

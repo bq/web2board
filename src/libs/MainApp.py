@@ -9,7 +9,7 @@ from urllib2 import HTTPError, URLError
 
 from PySide import QtGui
 from tornado import web, ioloop
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hubs_inspector import HubsInspector
 
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
@@ -137,8 +137,8 @@ class MainApp:
         Config.readConfigFile()
         PathsManager.cleanPioEnvs()
         options, args = self.parseSystemArguments()
-        self.updateLibrariesIfNecessary()
         self.handleSystemArguments(options, args)
+        self.updateLibrariesIfNecessary()
         log.debug("Enviromental data:")
         try:
             log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
