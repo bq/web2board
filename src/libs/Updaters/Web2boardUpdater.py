@@ -103,9 +103,3 @@ class Web2BoardUpdater(Updater):
         finally:
             sys.exit(1)
 
-    @classmethod
-    def get(cls):
-        if cls.__globalWeb2BoardUpdater is None:
-            cls.__globalWeb2BoardUpdater = Web2BoardUpdater()
-        return cls.__globalWeb2BoardUpdater
-

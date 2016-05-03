@@ -14,9 +14,6 @@ class AsynchronousNotDone(Exception):
 # todo, return a Future object and not a Result
 class Result(object):
     def __init__(self, future):
-        """
-        @type thread: Thread
-        """
         self.result = None
         self.future = future
         """:type: concurrent.futures._base.Future"""

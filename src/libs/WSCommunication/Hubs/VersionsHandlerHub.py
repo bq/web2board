@@ -12,29 +12,32 @@ class VersionsHandlerHubException(Exception):
 
 
 class VersionsHandlerHub(Hub):
+
+    def __init__(self):
+        super(VersionsHandlerHub, self).__init__()
+        self.w2b_updater = Web2BoardUpdater()
+        self.libUpdater = BitbloqLibsUpdater()
+
     @staticmethod
     def get_version():
         return Version.web2board
 
-    @staticmethod
-    def set_lib_version(version):
-        libUpdater = BitbloqLibsUpdater.get()
+    def set_lib_version(self, version):
         versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
-        if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
-            libUpdater.update(versionInfo)
+        if self.libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
+            self.libUpdater.update(versionInfo)
 
     def set_web2board_version(self, version):
-        w2bUpdater = Web2BoardUpdater.get()
         try:
-            w2bUpdater.downloadVersion(version, self.__download_progress, self.__download_ended).get()
+            self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).get()
         except:
-            self.clients.getSubscribedClients().downloadEnded(False)
+            self.clients.get_subscribed_clients().downloadEnded(False)
             raise
-        w2bUpdater.makeAnAuxiliaryCopy()
-        w2bUpdater.runAuxiliaryCopy(version)
+        self.w2b_updater.makeAnAuxiliaryCopy()
+        self.w2b_updater.runAuxiliaryCopy(version)
 
     def __download_progress(self, current, total, percentage):
-        self.clients.getSubscribedClients().downloadProgress(current, total, percentage)
+        self.clients.get_subscribed_clients().downloadProgress(current, total, percentage)
 
     def __download_ended(self, task):
-        self.clients.getSubscribedClients().downloadEnded(True)
+        self.clients.get_subscribed_clients().downloadEnded(True)

@@ -15,7 +15,6 @@ from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
-from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
@@ -35,8 +34,8 @@ class MainApp:
         self.isAppRunning = False
         self.qtApp = None
 
-    @InGuiThread()
-    def __handleTestingOptions(self, testing):
+    @staticmethod
+    def __handleTestingOptions(testing):
         sys.argv[1:] = []
         if testing != "none":
             if testing == "unit":
@@ -84,7 +83,7 @@ class MainApp:
 
         if options.update2version is not None:
             log.debug("updating version")
-            Web2BoardUpdater.get().update(PathsManager.getDstPathForUpdate(options.update2version))
+            Web2BoardUpdater().update(PathsManager.getDstPathForUpdate(options.update2version))
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -103,7 +102,7 @@ class MainApp:
     @asynchronous()
     def updateLibrariesIfNecessary(self):
         try:
-            BitbloqLibsUpdater.get().restoreCurrentVersionIfNecessary()
+            BitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
         except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
             proxyName = raw_input("introduce proxy name: ")
@@ -183,7 +182,6 @@ def isTrayIconAvailable():
     return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
 
 
-@InGuiThread()
 def forceQuit():
     try:
         os._exit(1)

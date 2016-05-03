@@ -14,7 +14,7 @@ from libs.utils import findFiles
 from platformio import util
 from platformio.platforms.base import PlatformFactory
 
-pDir = os.path.pardir
+pardir = os.path.pardir
 log = logging.getLogger(__name__)
 
 
@@ -24,7 +24,7 @@ class Packager:
     def __init__(self):
         modulePath = utils.getModulePath()
         self.packagerResPath = os.path.join(modulePath, "res")
-        self.web2boardPath = os.path.abspath(os.path.join(modulePath, pDir, pDir, pDir))
+        self.web2boardPath = os.path.abspath(os.path.join(modulePath, pardir, pardir, pardir))
         self.srcPath = os.path.join(self.web2boardPath, "src")
         self.resPath = os.path.join(self.web2boardPath, "res")
         self.resCommonPath = os.path.join(self.resPath, "common")

@@ -2,13 +2,13 @@ import unittest
 
 import sys
 from PySide.QtGui import QApplication
+from concurrent.futures import Future
 from wshubsapi.hubs_inspector import HubsInspector
 from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
-from libs.Decorators.InGuiThread import Result
+from libs.Decorators.Asynchronous import Result
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
-from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.Version import Version
 from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 
@@ -27,10 +27,10 @@ class TestVersionsHandlerHub(unittest.TestCase):
     def setUp(self):
         HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
         Version.read_version_values()
-        self.libUpdater = BitbloqLibsUpdater.get()
-        self.updater = Web2BoardUpdater.get()
         self.versionsHandlerHub = HubsInspector.get_hub_instance(VersionsHandlerHub)
         """ :type : VersionsHandlerHub"""
+        self.libUpdater = self.versionsHandlerHub.libUpdater
+        self.updater = self.versionsHandlerHub.w2b_updater
         self.sender = createSenderMock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
@@ -64,9 +64,9 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)
 
     def test_setWeb2boardVersion_returnsTrue(self):
-        resultObject = Result()
-        resultObject.actionDone()
-        flexmock(self.updater).should_receive("downloadVersion").and_return(resultObject).once()
+        result = Result(Future())
+        result.future.set_result(True)
+        flexmock(self.updater).should_receive("downloadVersion").and_return(result).once()
         flexmock(self.updater).should_receive("makeAnAuxiliaryCopy").once()
         flexmock(self.updater).should_receive("runAuxiliaryCopy").once()
 

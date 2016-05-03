@@ -50,17 +50,3 @@ class BitbloqLibsUpdater(Updater):
         else:
             log.debug("BitbloqLibs is up to date")
 
-    @classmethod
-    def get(cls):
-        if cls.__globalBitbloqLibsUpdater is None:
-            cls.__globalBitbloqLibsUpdater = BitbloqLibsUpdater()
-        return cls.__globalBitbloqLibsUpdater
-
-
-def get_bitbloq_libs_updater():
-    """
-    :rtype: BitbloqLibsUpdater
-    """
-    if cls.__globalBitbloqLibsUpdater is None:
-        cls.__globalBitbloqLibsUpdater = BitbloqLibsUpdater()
-    return cls.__globalBitbloqLibsUpdater

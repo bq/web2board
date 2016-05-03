@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='web2board',
-    version='2.0.0',
+    version='2.0.1',
     packages=['pkg', 'res', 'res.common', 'res.common.Scons', 'res.common.Scons.sconsFiles',
               'res.common.Scons.sconsFiles.SCons', 'res.common.Scons.sconsFiles.SCons.Node',
               'res.common.Scons.sconsFiles.SCons.Tool', 'res.common.Scons.sconsFiles.SCons.Tool.docbook',
