@@ -19,59 +19,53 @@ class ConfigHub(Hub):
     def __init__(self):
         super(ConfigHub, self).__init__()
 
-    def getConfig(self):
+    def get_config(self):
         config = deepcopy(Config.get_config_values())
-        config.update(dict(librariesPath=self.getLibrariesPath()))
+        config.update(dict(librariesPath=self.get_libraries_path()))
         return config
 
-    def setValues(self, configDic):
-        configValues = Config.get_config_values()
-        if "librariesPath" in configDic:
-            librariesPath = configDic.pop("librariesPath")
-            self.setLibrariesPath(librariesPath)
-        for k in configValues.keys():
-            if k in configDic:
-                Config.__dict__[k] = configDic[k]
+    def set_values(self, config_dic):
+        config_values = Config.get_config_values()
+        if "libraries_path" in config_dic:
+            libraries_path = config_dic.pop("libraries_path")
+            self.set_libraries_path(libraries_path)
+        for k in config_values.keys():
+            if k in config_dic:
+                Config.__dict__[k] = config_dic[k]
         Config.store_config_in_file()
         return True
 
-    def setWebSocketInfo(self, IP, port):
+    def set_web_socket_info(self, IP, port):
         Config.web_socket_ip = IP
         Config.web_socket_port = port
         Config.store_config_in_file()
-        return True
 
-    def setLogLevel(self, logLevel):
+    def set_log_level(self, logLevel):
         utils.setLogLevel(logLevel)
-        return True
 
-    def setLibrariesPath(self, libDir):
+    def set_libraries_path(self, libDir):
         Config.set_platformio_lib_dir(libDir)
-        return True
 
-    def getLibrariesPath(self):
+    def get_libraries_path(self):
         return Config.get_platformio_lib_dir()
 
-    def isPossibleLibrariesPath(self, path):
+    def is_possible_libraries_path(self, path):
         return os.path.exists(path)
 
-    def changePlatformioIniFile(self, content):
+    def change_platformio_ini_file(self, content):
         with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
             f.write(content)
-        return True
 
-    def restorePlatformioIniFile(self):
+    def restore_platformio_ini_file(self):
         with open(PathsManager.PLATFORMIO_INI_PATH + ".copy") as fcopy:
             with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
                 f.write(fcopy.read())
-        return True
 
-    def setProxy(self, proxyUrl):
+    def set_proxy(self, proxyUrl):
         Config.proxy = proxyUrl
         Config.store_config_in_file()
 
-    def testProxy(self, proxyUrl):
+    def test_proxy(self, proxyUrl):
         proxy = urllib2.ProxyHandler({'http': proxyUrl})
         opener = urllib2.build_opener(proxy)
-        print opener.open(urllib2.Request("http://bitbloq.bq.com/")).read()
-        return True
+        log.debug(opener.open(urllib2.Request("http://bitbloq.bq.com/")).read())

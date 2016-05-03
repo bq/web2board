@@ -75,7 +75,6 @@ if __name__ == "__main__":
             except:
                 log.warning("unable to close server")
             forceQuit()
-            os._exit(1)
 
         signal.signal(signal.SIGINT, closeSigHandler)
         app.startMain()

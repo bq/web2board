@@ -89,7 +89,7 @@ class TestCodeHub(unittest.TestCase):
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
         self.compileUploaderMock.should_receive("uploadAvrHex").and_return((True, {})).once()
 
-        result = self.codeHub.uploadHex("hexText", self.board, self.sender)
+        result = self.codeHub.upload_hex("hexText", self.board, self.sender)
 
         self.assertEqual(result, "PORT")
 
@@ -97,7 +97,7 @@ class TestCodeHub(unittest.TestCase):
         uploadReturn = (False, {"err": "errorMessage"},)
         self.compileUploaderMock.should_receive("uploadAvrHex").and_return(uploadReturn).once()
 
-        result = self.codeHub.uploadHex("hexText", self.compileUploaderMock.board, self.sender)
+        result = self.codeHub.upload_hex("hexText", self.compileUploaderMock.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
         self.assertEqual(result.replay, uploadReturn[1]["err"])

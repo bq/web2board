@@ -16,7 +16,7 @@ class VersionsHandlerHub(Hub):
     def __init__(self):
         super(VersionsHandlerHub, self).__init__()
         self.w2b_updater = Web2BoardUpdater()
-        self.libUpdater = BitbloqLibsUpdater()
+        self.lib_updater = BitbloqLibsUpdater()
 
     @staticmethod
     def get_version():
@@ -24,8 +24,8 @@ class VersionsHandlerHub(Hub):
 
     def set_lib_version(self, version):
         versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
-        if self.libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
-            self.libUpdater.update(versionInfo)
+        if self.lib_updater.isNecessaryToUpdate(versionToCompare=versionInfo):
+            self.lib_updater.update(versionInfo)
 
     def set_web2board_version(self, version):
         try:

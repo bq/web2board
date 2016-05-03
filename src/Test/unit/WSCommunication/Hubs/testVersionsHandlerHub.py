@@ -29,7 +29,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
         Version.read_version_values()
         self.versionsHandlerHub = HubsInspector.get_hub_instance(VersionsHandlerHub)
         """ :type : VersionsHandlerHub"""
-        self.libUpdater = self.versionsHandlerHub.libUpdater
+        self.libUpdater = self.versionsHandlerHub.lib_updater
         self.updater = self.versionsHandlerHub.w2b_updater
         self.sender = createSenderMock()
 
