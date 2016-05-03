@@ -15,7 +15,7 @@ offline = "offline" in sys.argv
 if "32" in sys.argv:
     architectureInt = int(sys.argv[1])
 
-Config.readConfigFile()
+Config.read_config_file()
 architecture = Packager.ARCH_32 if architectureInt == 32 else Packager.ARCH_64
 packager = Packager.constructCurrentPlatformPackager(architecture=architecture)
 packager.prepareResFolderForExecutable()

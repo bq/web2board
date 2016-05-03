@@ -21,6 +21,7 @@ class PathsManager:
     PLATFORMIO_PACKAGES_NAME = "pp"
     PLATFORMIO_PACKAGES_PATH = None
     CONFIG_PATH = None
+    VERSION_PATH = None
     COPY_PATH = None
     ORIGINAL_PATH = None
 
@@ -121,6 +122,7 @@ class PathsManager:
             cls.RES_PATH = os.path.abspath(cls.RES_PATH)
         else:
             cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
+        cls.VERSION_PATH = os.path.join(cls.RES_PATH, 'web2board.version')
         cls.RES_ICO_PATH = os.path.join(cls.RES_PATH, 'Web2board.ico')
         cls.RES_ICONS_PATH = os.path.join(cls.RES_PATH, 'icons')
         cls.TEST_RES_PATH = os.path.join(cls.MAIN_PATH, 'Test', 'resources')

@@ -5,9 +5,9 @@ from libs import utils
 from libs.Config import Config
 from libs.PathsManager import PathsManager
 from libs.Updaters.Updater import Updater, VersionInfo
+from libs.Version import Version
 
 log = logging.getLogger(__name__)
-__globalBitbloqLibsUpdater = None
 
 
 class BitbloqLibsUpdaterError(Exception):
@@ -15,18 +15,21 @@ class BitbloqLibsUpdaterError(Exception):
 
 
 class BitbloqLibsUpdater(Updater):
+    __globalBitbloqLibsUpdater = None
+
     def __init__(self):
         Updater.__init__(self)
-        self.currentVersionInfo = VersionInfo(Config.bitbloqLibsVersion, librariesNames=Config.bitbloqLibsLibraries)
+        self.currentVersionInfo = VersionInfo(Version.bitbloq_libs,
+                                              librariesNames=Version.bitbloq_libs_libraries)
         self.destinationPath = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_SKELETON, "lib")
         self.name = "BitbloqLibsUpdater"
 
     def _updateCurrentVersionInfoTo(self, versionToUpload):
         Updater._updateCurrentVersionInfoTo(self, versionToUpload)
 
-        Config.bitbloqLibsLibraries = self.currentVersionInfo.librariesNames
-        Config.bitbloqLibsVersion = self.currentVersionInfo.version
-        Config.storeConfigInFile()
+        Version.bitbloq_libs_libraries = self.currentVersionInfo.librariesNames
+        Version.bitbloq_libs = self.currentVersionInfo.version
+        Version.store_values()
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
         directoriesInUnzippedFolder = utils.listDirectoriesInPath(downloadedPath)
@@ -41,18 +44,23 @@ class BitbloqLibsUpdater(Updater):
     def restoreCurrentVersionIfNecessary(self):
         if self.isNecessaryToUpdate():
             log.warning("It is necessary to upload BitbloqLibs")
-            url = Config.bitbloqLibsDownloadUrlTemplate.format(**self.currentVersionInfo.__dict__)
+            url = Config.bitbloq_libs_download_url_template.format(**self.currentVersionInfo.__dict__)
             self.currentVersionInfo.file2DownloadUrl = url
             self.update(self.currentVersionInfo)
         else:
             log.debug("BitbloqLibs is up to date")
 
+    @classmethod
+    def get(cls):
+        if cls.__globalBitbloqLibsUpdater is None:
+            cls.__globalBitbloqLibsUpdater = BitbloqLibsUpdater()
+        return cls.__globalBitbloqLibsUpdater
 
-def getBitbloqLibsUpdater():
+
+def get_bitbloq_libs_updater():
     """
     :rtype: BitbloqLibsUpdater
     """
-    global __globalBitbloqLibsUpdater
-    if __globalBitbloqLibsUpdater is None:
-        __globalBitbloqLibsUpdater = BitbloqLibsUpdater()
-    return __globalBitbloqLibsUpdater
+    if cls.__globalBitbloqLibsUpdater is None:
+        cls.__globalBitbloqLibsUpdater = BitbloqLibsUpdater()
+    return cls.__globalBitbloqLibsUpdater

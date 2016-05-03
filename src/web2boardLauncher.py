@@ -17,6 +17,7 @@ def startLogger():
     log.addHandler(fileHandler)
     log.setLevel(logging.DEBUG)
 
+
 def open_file(filename):
     if sys.platform == "win32":
         subprocess.call([filename] + sys.argv[1:])

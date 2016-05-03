@@ -35,23 +35,26 @@ applicationsPath = os.path.join("/usr/share/applications")
 mineAppsFilePath = os.path.join(applicationsPath, "defaults.list")
 web2boardDesktop = os.path.join(applicationsPath, "web2board-handler.desktop")
 
+
 def startLogger():
-        if os.geteuid() != 0:
-            fileHandler = logging.FileHandler("installer.log", 'a')
-        else:
-            fileHandler = logging.FileHandler("/opt/web2board/installer.log", 'a')
-        fileHandler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fileHandler.setFormatter(formatter)
-        log = logging.getLogger()
-        log.addHandler(fileHandler)
-        log.setLevel(logging.DEBUG)
-        return logging.getLogger(__name__)
+    if os.geteuid() != 0:
+        fileHandler = logging.FileHandler("installer.log", 'a')
+    else:
+        fileHandler = logging.FileHandler("/opt/web2board/installer.log", 'a')
+    fileHandler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fileHandler.setFormatter(formatter)
+    log = logging.getLogger()
+    log.addHandler(fileHandler)
+    log.setLevel(logging.DEBUG)
+    return logging.getLogger(__name__)
+
 
 def addAllUsersToDialOut():
     allUsers = [p[0] for p in pwd.getpwall()]
     for user in allUsers:
         subprocess.call(["sudo", "adduser", user, "dialout"])
+
 
 def addHandlerInMimeapps():
     if not os.path.exists(applicationsPath):
@@ -73,6 +76,7 @@ def addHandlerInMimeapps():
     with open(web2boardDesktop, "w") as f:
         f.write(DESKTOP_TEXT)
 
+
 if __name__ == '__main__':
     log = None
     try:
@@ -83,8 +87,10 @@ if __name__ == '__main__':
         log.info("Adding handler in Mineapps file: {}".format(mineAppsFilePath))
         addHandlerInMimeapps()
         log.info("Successfully installed web2board")
+        log.info("executing factoryReset")
+        os.popen("/opt/web2board/web2boardLink --factoryreset")
+        log.info("executed factoryReset")
     except:
         if log:
             log.exception("Failed performing postinst")
         raise
-

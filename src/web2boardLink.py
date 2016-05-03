@@ -21,6 +21,7 @@ def startLogger():
     log.addHandler(fileHandler)
     log.setLevel(logging.DEBUG)
 
+
 if utils.areWeFrozen():
     os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
     PathsManager.setAllConstants()
@@ -35,6 +36,7 @@ WATCHDOG_TIME = 60
 PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH, 'res')
 PathsManager.RES_ICO_PATH = os.path.join(PathsManager.RES_PATH, 'Web2board.ico')
 PathsManager.RES_ICONS_PATH = os.path.join(PathsManager.RES_PATH, 'icons')
+
 
 @asynchronous()
 def factoryReset():
@@ -76,10 +78,12 @@ def logMessage(message):
 
 def startDialog():
     global msgBox
+
     class Application(Frame):
         MESSAGE_TEMPLATE = "Web2board is configuring some files.\nThis can takes a couple of minutes but it will be done just once.\n\n{}"
+
         def __init__(self, parent):
-            Frame.__init__(self,parent)
+            Frame.__init__(self, parent)
             parent.minsize(width=500, height=0)
             self.frame = Frame(self)
             self.num = 0
@@ -94,7 +98,7 @@ def startDialog():
             root.protocol("WM_DELETE_WINDOW", self.close)
             self.messages = []
 
-            self.taskEnded=False
+            self.taskEnded = False
             self.successfullyEnded = False
 
             self.create_widgets()
@@ -134,7 +138,7 @@ def startDialog():
                     img = PhotoImage(file=icon)
 
                 self.gif.config(image=img)
-                self.gif.image=img
+                self.gif.image = img
                 self.num += 1
             except TclError as e:
                 self.num = 0
@@ -142,7 +146,6 @@ def startDialog():
                 print e
             finally:
                 self.after(70, self.animate)
-
 
         def close(self):
             if self.taskEnded:
@@ -161,7 +164,8 @@ def startDialog():
 
         def endError(self, error):
             self.taskEnded = True
-            self.setMessage("Failed to configure web2board due to:\n{}.\n\nplease try again later or check log.".format(error))
+            self.setMessage(
+                "Failed to configure web2board due to:\n{}.\n\nplease try again later or check log.".format(error))
             self.closeButton.configure(state=NORMAL)
             self.okButton.configure(text="Try again", command=self.retry, state=NORMAL)
 
@@ -171,7 +175,6 @@ def startDialog():
             self.okButton.configure(state=DISABLED)
             factoryReset()
 
-
     root = Tk()
     try:
         root.iconbitmap(PathsManager.RES_ICO_PATH)
@@ -179,6 +182,7 @@ def startDialog():
         pass
     msgBox = Application(root)
     return root
+
 
 if __name__ == '__main__':
     global msgBox

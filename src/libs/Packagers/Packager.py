@@ -8,7 +8,8 @@ import click
 from libs import utils
 from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater, Web2BoardUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Version import Version
 from libs.utils import findFiles
 from platformio import util
 from platformio.platforms.base import PlatformFactory
@@ -34,7 +35,7 @@ class Packager:
         self.pyInstallerBuildFolder = self.srcPath + os.sep + "build"
         self.installerFolder = os.path.join(self.web2boardPath, "installers")
 
-        self.version = Config.version
+        self.version = Version.web2board
 
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board.spec")
 

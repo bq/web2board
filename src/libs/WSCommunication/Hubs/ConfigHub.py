@@ -20,25 +20,25 @@ class ConfigHub(Hub):
         super(ConfigHub, self).__init__()
 
     def getConfig(self):
-        config = deepcopy(Config.getConfigValues())
+        config = deepcopy(Config.get_config_values())
         config.update(dict(librariesPath=self.getLibrariesPath()))
         return config
 
     def setValues(self, configDic):
-        configValues = Config.getConfigValues()
+        configValues = Config.get_config_values()
         if "librariesPath" in configDic:
             librariesPath = configDic.pop("librariesPath")
             self.setLibrariesPath(librariesPath)
         for k in configValues.keys():
             if k in configDic:
                 Config.__dict__[k] = configDic[k]
-        Config.storeConfigInFile()
+        Config.store_config_in_file()
         return True
 
     def setWebSocketInfo(self, IP, port):
-        Config.webSocketIP = IP
-        Config.webSocketPort = port
-        Config.storeConfigInFile()
+        Config.web_socket_ip = IP
+        Config.web_socket_port = port
+        Config.store_config_in_file()
         return True
 
     def setLogLevel(self, logLevel):
@@ -46,11 +46,11 @@ class ConfigHub(Hub):
         return True
 
     def setLibrariesPath(self, libDir):
-        Config.setPlatformioLibDir(libDir)
+        Config.set_platformio_lib_dir(libDir)
         return True
 
     def getLibrariesPath(self):
-        return Config.getPlatformioLibDir()
+        return Config.get_platformio_lib_dir()
 
     def isPossibleLibrariesPath(self, path):
         return os.path.exists(path)
@@ -68,7 +68,7 @@ class ConfigHub(Hub):
 
     def setProxy(self, proxyUrl):
         Config.proxy = proxyUrl
-        Config.storeConfigInFile()
+        Config.store_config_in_file()
 
     def testProxy(self, proxyUrl):
         proxy = urllib2.ProxyHandler({'http': proxyUrl})

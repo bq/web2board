@@ -11,16 +11,16 @@ from libs.Decorators.Asynchronous import asynchronous
 from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
-
-__globalWeb2BoardUpdater = None
+from libs.Version import Version
 
 
 class Web2BoardUpdater(Updater):
+    __globalWeb2BoardUpdater = None
     log = logging.getLogger(__name__)
 
     def __init__(self, copyOriginName=None, copyNewName=None):
         Updater.__init__(self)
-        self.currentVersionInfo = VersionInfo(Config.version)
+        self.currentVersionInfo = VersionInfo(Version.web2board)
         self.destinationPath = pm.ORIGINAL_PATH
         self.name = "Web2BoardUpdater"
 
@@ -45,14 +45,14 @@ class Web2BoardUpdater(Updater):
                     os=platform.system(),
                     version=onlineVersionInfo.version)
 
-        return Config.downloadUrlTemplate.format(**args)
+        return Config.download_url_template.format(**args)
 
     @asynchronous()
     def downloadVersion(self, version, infoCallback=None, endCallback=None):
         confirmationPath = pm.getDstPathForUpdate(version) + ".confirm"
         zipDstPath = pm.getDstPathForUpdate(version) + ".zip"
         if not os.path.exists(confirmationPath):
-            url = getWeb2boardUpdater().getDownloadUrl(VersionInfo(version))
+            url = self.getDownloadUrl(VersionInfo(version))
             self.downloader.download(url, dst=zipDstPath, infoCallback=infoCallback, endCallback=endCallback).get()
             utils.extractZip(zipDstPath, pm.getDstPathForUpdate(version))
             os.remove(zipDstPath)
@@ -103,12 +103,9 @@ class Web2BoardUpdater(Updater):
         finally:
             sys.exit(1)
 
+    @classmethod
+    def get(cls):
+        if cls.__globalWeb2BoardUpdater is None:
+            cls.__globalWeb2BoardUpdater = Web2BoardUpdater()
+        return cls.__globalWeb2BoardUpdater
 
-def getWeb2boardUpdater():
-    """
-    :rtype: Web2BoardUpdater
-    """
-    global __globalWeb2BoardUpdater
-    if __globalWeb2BoardUpdater is None:
-        __globalWeb2BoardUpdater = Web2BoardUpdater()
-    return __globalWeb2BoardUpdater

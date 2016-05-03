@@ -1,9 +1,10 @@
 from wshubsapi.hub import Hub
 
 from libs.Config import Config
-from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Version import Version
 
 
 class VersionsHandlerHubException(Exception):
@@ -11,28 +12,29 @@ class VersionsHandlerHubException(Exception):
 
 
 class VersionsHandlerHub(Hub):
-    def getVersion(self):
-        return Config.version
+    @staticmethod
+    def get_version():
+        return Version.web2board
 
-    def setLibVersion(self, version):
-        libUpdater = getBitbloqLibsUpdater()
-        versionInfo = VersionInfo(version, Config.bitbloqLibsDownloadUrlTemplate.format(version=version))
+    @staticmethod
+    def set_lib_version(version):
+        libUpdater = BitbloqLibsUpdater.get()
+        versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
         if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
             libUpdater.update(versionInfo)
-        return True  # if return None, client is not informed that the request is done
 
-    def setWeb2boardVersion(self, version):
-        w2bUpdater = getWeb2boardUpdater()
+    def set_web2board_version(self, version):
+        w2bUpdater = Web2BoardUpdater.get()
         try:
-            w2bUpdater.downloadVersion(version, self.__downloadProgress, self.__downloadEnded).get()
+            w2bUpdater.downloadVersion(version, self.__download_progress, self.__download_ended).get()
         except:
-            self._getClientsHolder().getSubscribedClients().downloadEnded(False)
+            self.clients.getSubscribedClients().downloadEnded(False)
             raise
         w2bUpdater.makeAnAuxiliaryCopy()
         w2bUpdater.runAuxiliaryCopy(version)
 
-    def __downloadProgress(self, current, total, percentage):
-        self._getClientsHolder().getSubscribedClients().downloadProgress(current, total, percentage)
+    def __download_progress(self, current, total, percentage):
+        self.clients.getSubscribedClients().downloadProgress(current, total, percentage)
 
-    def __downloadEnded(self, task):
-        self._getClientsHolder().getSubscribedClients().downloadEnded(True)
+    def __download_ended(self, task):
+        self.clients.getSubscribedClients().downloadEnded(True)

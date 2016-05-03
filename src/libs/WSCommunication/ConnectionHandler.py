@@ -16,7 +16,7 @@ class WSConnectionHandler(ConnectionHandler):
 
     def on_close(self):
         super(WSConnectionHandler, self).on_close()
-        if self._connectedClient.ID == "Bitbloq":
+        if self._connected_client.ID == "Bitbloq":
             log.info("Bitbloq disconnected, closing web2board...")
             time.sleep(0.5)
             if utils.areWeFrozen():
@@ -25,11 +25,11 @@ class WSConnectionHandler(ConnectionHandler):
     def on_message(self, message):
         if message == "version":  # bitbloq thinks we are in version 1
             # send an empty dict to alert bitbloq we are in version 2
-            self._connectedClient.api_writeMessage(json.dumps(dict()))
+            self._connected_client.api_write_message(json.dumps(dict()))
         else:
             try:
                 sortMessage = message if len(message) < 500 else message[:300] + "..."
-                log.debug("Message received from ID: %s\n%s " % (str(self._connectedClient.ID), sortMessage))
+                log.debug("Message received from ID: %s\n%s " % (str(self._connected_client.ID), sortMessage))
             except UnicodeError:
                 pass
-            self.commEnvironment.onAsyncMessage(self._connectedClient, message.encode('utf-8', 'ignore'))
+            self.comm_environment.on_async_message(self._connected_client, message.encode('utf-8', 'ignore'))

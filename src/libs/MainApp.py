@@ -17,8 +17,9 @@ from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
-from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Version import Version
 from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
@@ -49,10 +50,13 @@ class MainApp:
             time.sleep(10)
             os._exit(1)
 
-    def parseSystemArguments(self):
+    @staticmethod
+    def parseSystemArguments():
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
-        parser.add_option("--host", default=Config.webSocketIP, type='string', action="store", dest="host", help="hostname (localhost)")
-        parser.add_option("--port", default=Config.webSocketPort, type='int', action="store", dest="port", help="port (9876)")
+        parser.add_option("--host", default=Config.web_socket_ip, type='string', action="store", dest="host",
+                          help="hostname (localhost)")
+        parser.add_option("--port", default=Config.web_socket_port, type='int', action="store", dest="port",
+                          help="port (9876)")
         parser.add_option("--test", default='none', type='string', action="store", dest="testing",
                           help="options: [none, unit, integration, all]")
         parser.add_option("--board", default="uno", type='string', action="store", dest="board",
@@ -80,7 +84,7 @@ class MainApp:
 
         if options.update2version is not None:
             log.debug("updating version")
-            getWeb2boardUpdater().update(PathsManager.getDstPathForUpdate(options.update2version))
+            Web2BoardUpdater.get().update(PathsManager.getDstPathForUpdate(options.update2version))
 
         self.__handleTestingOptions(options.testing.lower())
 
@@ -89,19 +93,17 @@ class MainApp:
     def initializeServerAndCommunicationProtocol(self, options):
         # do not call this line in executable
         if not utils.areWeFrozen():
-            HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
-            HubsInspector.constructPythonFile(path="libs/WSCommunication/Clients")
-        self.w2bServer = web.Application([
-            (r'/(.*)', WSConnectionHandler),
-        ])
-        Config.webSocketPort = options.port
+            HubsInspector.construct_js_file(path="libs/WSCommunication/Clients")
+            HubsInspector.construct_python_file(path="libs/WSCommunication/Clients")
+        self.w2bServer = web.Application([(r'/(.*)', WSConnectionHandler)])
+        Config.web_socket_port = options.port
         self.w2bServer.listen(options.port)
         return self.w2bServer
 
     @asynchronous()
     def updateLibrariesIfNecessary(self):
         try:
-            getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
+            BitbloqLibsUpdater.get().restoreCurrentVersionIfNecessary()
         except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
             proxyName = raw_input("introduce proxy name: ")
@@ -115,7 +117,7 @@ class MainApp:
     @asynchronous()
     def checkConnectionIsAvailable(self):
         time.sleep(1)
-        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
+        self.api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
         try:
             self.api.connect()
         except Exception as e:
@@ -134,11 +136,14 @@ class MainApp:
             forceQuit()
 
     def startMain(self):
-        Config.readConfigFile()
+        Version.read_version_values()
+        Config.read_config_file()
         PathsManager.cleanPioEnvs()
         options, args = self.parseSystemArguments()
         self.handleSystemArguments(options, args)
         self.updateLibrariesIfNecessary()
+
+        Version.log_data()
         log.debug("Enviromental data:")
         try:
             log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
@@ -160,11 +165,11 @@ class MainApp:
         import socket
         time.sleep(2)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((Config.getClientWSIP(), Config.webSocketPort))
+        result = sock.connect_ex((Config.get_client_ws_ip(), Config.web_socket_port))
         if result == 0:
             log.debug("Port is open")
         else:
-            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.webSocketPort))
+            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
 
 
 def getMainApp():
