@@ -76,7 +76,7 @@ def needs_factory_reset():
         return True
     Version.read_version_values()
     installer_version = Version.web2board
-    main_to_version_path = os.path.realpath(PathsManager.MAIN_PATH, PathsManager.VERSION_PATH)
+    main_to_version_path = os.path.relpath(PathsManager.VERSION_PATH, PathsManager.MAIN_PATH)
     PathsManager.VERSION_PATH = os.path.join(PathsManager.PROGRAM_PATH, main_to_version_path)
     if not os.path.exists(PathsManager.VERSION_PATH):
         return True
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             factory_reset()
             app.mainloop()
 
-        if msgBox is None or msgBox.successfullyEnded:
+        if msgBox is None or msgBox.successfully_ended:
             utils.open_file(web2boardPath)
     except:
         log.exception("Unable to launch web2board")
