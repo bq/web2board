@@ -68,13 +68,13 @@ class CompilerUploader:
 
     @staticmethod
     def _call_avrdude(args):
-        if utils.isWindows():
+        if utils.is_windows():
             avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude.exe')
             avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf')
-        elif utils.isMac():
+        elif utils.is_mac():
             avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude')
             avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf')
-        elif utils.isLinux():
+        elif utils.is_linux():
             avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude64' if utils.is64bits() else "avrdude")
             avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf' if utils.is64bits() else "avrdude32.conf")
         else:
@@ -87,9 +87,9 @@ class CompilerUploader:
 
         cmd = [avr_exe_path] + ["-C"] + [avr_config_path] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
-        p = subprocess.Popen(cmd, shell=utils.isWindows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        p = subprocess.Popen(cmd, shell=utils.is_windows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
-                             close_fds=(not utils.isWindows()))
+                             close_fds=(not utils.is_windows()))
         output = p.stdout.read()
         err = p.stderr.read()
         log.debug(output)
@@ -161,7 +161,7 @@ class CompilerUploader:
         return None
 
     def get_available_ports(self):
-        ports_to_upload = utils.listSerialPorts(lambda x: x[2] != "n/a")
+        ports_to_upload = utils.list_serial_ports(lambda x: x[2] != "n/a")
         available_ports = map(lambda x: x[0], ports_to_upload)
         return sorted(available_ports, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 

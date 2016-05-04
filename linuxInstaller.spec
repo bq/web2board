@@ -22,8 +22,8 @@ a = Analysis(['src' + os.sep + 'linuxInstaller.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-a.datas += utils.findFilesForPyInstaller(".", "*.zip")
-a.datas += utils.findFilesForPyInstaller("res", "logging.json")
+a.datas += utils.find_files_for_pyinstaller(".", "*.zip")
+a.datas += utils.find_files_for_pyinstaller("res", "logging.json")
 
 print a.datas
 

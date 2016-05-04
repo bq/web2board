@@ -11,7 +11,7 @@ from Test.testingUtils import restoreAllTestResources
 from libs.CompilerUploader import CompilerUploader, CompilerException
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
-from libs.utils import isWindows, isLinux, isMac
+from libs.utils import is_windows, is_linux, is_mac
 
 log = initLogging(__name__)
 try:
@@ -92,11 +92,11 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertEqual(port, 1)
 
     def __assertRightPortName(self, port):
-        if isWindows():
+        if is_windows():
             self.assertTrue(port.startswith("COM"))
-        elif isLinux():
+        elif is_linux():
             self.assertTrue(port.startswith("/dev/tty"))
-        elif isMac():
+        elif is_mac():
             self.assertTrue(port.startswith("/dev/"))
 
     def test_getPort_returnsBoardConnectedBoard(self):

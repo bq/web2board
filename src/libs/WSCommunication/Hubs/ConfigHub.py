@@ -41,7 +41,7 @@ class ConfigHub(Hub):
         Config.store_config_in_file()
 
     def set_log_level(self, logLevel):
-        utils.setLogLevel(logLevel)
+        utils.set_log_level(logLevel)
 
     def set_libraries_path(self, libDir):
         Config.set_platformio_lib_dir(libDir)

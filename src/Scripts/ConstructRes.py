@@ -29,5 +29,5 @@ os.makedirs(srcResPath)
 
 from libs import utils
 
-utils.copytree(resCommonPath, srcResPath, forceCopy=True)
-utils.copytree(resPlatformPath, srcResPath, forceCopy=True)
+utils.copytree(resCommonPath, srcResPath, force_copy=True)
+utils.copytree(resPlatformPath, srcResPath, force_copy=True)

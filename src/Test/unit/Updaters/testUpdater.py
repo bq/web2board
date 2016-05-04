@@ -32,10 +32,10 @@ class TestUpdater(unittest.TestCase):
         self.updater.onlineVersionUrl = "onlineVersionUrl"
         self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
 
-        self.original_getDataFromUrl = utils.getDataFromUrl
-        self.original_downloadFile = utils.downloadFile
-        self.original_extractZip = utils.extractZip
-        self.original_listDirsInPath = utils.listDirectoriesInPath
+        self.original_getDataFromUrl = utils.get_data_from_url
+        self.original_downloadFile = utils.download_file
+        self.original_extractZip = utils.extract_zip
+        self.original_listDirsInPath = utils.list_directories_in_path
         self.original_json_dump = json.dump
 
         restoreAllTestResources()
@@ -43,10 +43,10 @@ class TestUpdater(unittest.TestCase):
         self.zipToClearPath = None
 
     def tearDown(self):
-        utils.getDataFromUrl = self.original_getDataFromUrl
-        utils.downloadFile = self.original_downloadFile
-        utils.extractZip = self.original_extractZip
-        utils.listDirectoriesInPath = self.original_listDirsInPath
+        utils.get_data_from_url = self.original_getDataFromUrl
+        utils.download_file = self.original_downloadFile
+        utils.extract_zip = self.original_extractZip
+        utils.list_directories_in_path = self.original_listDirsInPath
         json.dump = self.original_json_dump
 
         for libraryName in versionTestData["librariesNames"]:
@@ -59,14 +59,14 @@ class TestUpdater(unittest.TestCase):
             shutil.rmtree(self.updater.destinationPath)
 
     def __getMockForGetDataFromUrl(self, returnValue=json.dumps(versionTestData)):
-        return flexmock(utils).should_receive("getDataFromUrl").and_return(returnValue)
+        return flexmock(utils).should_receive("get_data_from_url").and_return(returnValue)
 
     def __getMockForDownloadFile(self):
         shutil.copy2(self.ORIGINAL_DOWNLOAD_ZIP_PATH, self.COPY_DOWNLOAD_ZIP_PATH)
-        return flexmock(utils).should_receive("downloadFile").and_return(self.COPY_DOWNLOAD_ZIP_PATH)
+        return flexmock(utils).should_receive("download_file").and_return(self.COPY_DOWNLOAD_ZIP_PATH)
 
     def __getMockForExtractZip(self):
-        return flexmock(utils).should_receive("extractZip")
+        return flexmock(utils).should_receive("extract_zip")
 
     def test_downloadOnlineVersionInfo_setsOnlineVersionInfoValues(self):
         self.__getMockForGetDataFromUrl().once()
@@ -127,7 +127,7 @@ class TestUpdater(unittest.TestCase):
         self.__getMockForDownloadFile().once()
         self.__getMockForExtractZip().once()
         os.makedirs(self.updater.destinationPath)
-        flexmock(utils).should_receive("listDirectoriesInPath").and_return(["l1", "l2"])
+        flexmock(utils).should_receive("list_directories_in_path").and_return(["l1", "l2"])
         self.updater.currentVersionInfo = VersionInfo(**versionTestData)
         self.updater._moveDownloadedToDestinationPath = lambda x: x
         onlineVersionInfo = VersionInfo(**onlineVersionTestData)

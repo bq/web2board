@@ -24,7 +24,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
         self.original_sleep = time.sleep
         self.original_logCritical = Web2BoardUpdater.log.critical
         self.original_shutil_copy = shutil.copytree
-        self.original_killProcess = utils.killProcess
+        self.original_killProcess = utils.kill_process
         self.original_exit = sys.exit
 
         self.osMock = flexmock(os, popen=lambda x: None)
@@ -35,7 +35,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
         os.popen = self.original_osPopen
         os.rename = self.original_osRename
         time.sleep = self.original_sleep
-        utils.killProcess = self.original_killProcess
+        utils.kill_process = self.original_killProcess
         shutil.copytree = self.original_shutil_copy
         sys.exit = self.original_exit
         Web2BoardUpdater.log.critical = self.original_logCritical
@@ -87,13 +87,13 @@ class TestWeb2boardUpdater(unittest.TestCase):
 
     def test_update_killsWeb2boardProcess(self):
         self.__setUpForUpdate()
-        flexmock(utils).should_receive("killProcess").with_args("web2board").once()
+        flexmock(utils).should_receive("kill_process").with_args("web2board").once()
 
         self.updater.update(self.versionPath)
 
     def test_update_updatesFilesInMain(self):
         self.__setUpForUpdate()
-        flexmock(utils).should_receive("killProcess")
+        flexmock(utils).should_receive("kill_process")
 
         self.updater.update(self.versionPath)
 
@@ -103,7 +103,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
 
     def test_update_callsExitAfterExecutingUpdate(self):
         self.__setUpForUpdate()
-        flexmock(utils).should_receive("killProcess")
+        flexmock(utils).should_receive("kill_process")
         self.exitMock.should_receive("exit").once()
 
         self.updater.update(self.versionPath)

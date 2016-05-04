@@ -10,7 +10,7 @@ from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.Version import Version
-from libs.utils import findFiles
+from libs.utils import find_files
 from platformio import util
 from platformio.platforms.base import PlatformFactory
 
@@ -22,7 +22,7 @@ class Packager:
     ARCH_64, ARCH_32 = "amd64", "i386"
 
     def __init__(self):
-        modulePath = utils.getModulePath()
+        modulePath = utils.get_module_path()
         self.packagerResPath = os.path.join(modulePath, "res")
         self.web2boardPath = os.path.abspath(os.path.join(modulePath, pardir, pardir, pardir))
         self.srcPath = os.path.join(self.web2boardPath, "src")
@@ -63,8 +63,8 @@ class Packager:
         if not os.path.exists(self.srcResPath):
             os.makedirs(self.srcResPath)
 
-        utils.copytree(self.resCommonPath, self.srcResPath, forceCopy=True)
-        utils.copytree(self.resPlatformPath, self.srcResPath, forceCopy=True)
+        utils.copytree(self.resCommonPath, self.srcResPath, force_copy=True)
+        utils.copytree(self.resPlatformPath, self.srcResPath, force_copy=True)
 
     def _deleteInstallerCreationFolder(self):
         if os.path.exists(self.installerCreationPath):
@@ -116,7 +116,7 @@ class Packager:
         utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board"), self.installerCreationExecutablesPath)
 
     def _compressExecutables(self):
-        packagesFiles = findFiles(self.installerCreationExecutablesPath, ["*", "**/*"])
+        packagesFiles = find_files(self.installerCreationExecutablesPath, ["*", "**/*"])
         packagesFiles = [x[len(self.installerCreationExecutablesPath) + 1:] for x in packagesFiles]
         with zipfile.ZipFile(self.installerCreationDistPath + os.sep + "web2board.zip", "w",
                              zipfile.ZIP_DEFLATED) as z:
@@ -162,7 +162,7 @@ class Packager:
             #
             # os.makedirs(installerPlatformioPackagesPath)
             log.info("Cleaning platformio packages files")
-            allFiles = sorted(utils.findFiles(platformIOPackagesPath, ["*", "**" + os.sep + "*"]), reverse=True)
+            allFiles = sorted(utils.find_files(platformIOPackagesPath, ["*", "**" + os.sep + "*"]), reverse=True)
             for i, f in enumerate(allFiles):
                 if isDoc(f):
                     if os.path.isfile(f):
@@ -203,7 +203,7 @@ class Packager:
             self._getPlatformioPackages()
             self._constructWeb2boardExecutable()
             shutil.move(self.installerCreationExecutablesPath, self.installerOfflinePath)
-            web2boardLauncherPath = os.path.join(self.installerOfflinePath, "res", "web2boardLauncher" + utils.getOsExecutableExtension(True))
+            web2boardLauncherPath = os.path.join(self.installerOfflinePath, "res", "web2boardLauncher" + utils.get_executable_extension(True))
             shutil.move(web2boardLauncherPath, self.installerOfflinePath)
         finally:
             os.chdir(currentPath)
@@ -216,12 +216,12 @@ class Packager:
         :param architecture: use this architecture to for linux packager
         :rtype: Packager
         """
-        if utils.isMac():
+        if utils.is_mac():
             from MacPackager import MacPackager
             return MacPackager()
-        elif utils.isLinux():
+        elif utils.is_linux():
             from LinuxPackager import LinuxPackager
             return LinuxPackager(architecture=architecture)
-        elif utils.isWindows():
+        elif utils.is_windows():
             from WindowsPackager import WindowsPackager
             return WindowsPackager()

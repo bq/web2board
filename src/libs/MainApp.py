@@ -72,7 +72,7 @@ class MainApp:
 
     def handleSystemArguments(self, options, args):
         log.info("init web2board with options: {}, and args: {}".format(options, args))
-        utils.setLogLevel(options.logLevel)
+        utils.set_log_level(options.logLevel)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
@@ -92,7 +92,7 @@ class MainApp:
 
     def initializeServerAndCommunicationProtocol(self, options):
         # do not call this line in executable
-        if not utils.areWeFrozen():
+        if not utils.are_we_frozen():
             HubsInspector.construct_js_file(path="libs/WSCommunication/Clients")
             HubsInspector.construct_python_file(path="libs/WSCommunication/Clients")
         self.w2bServer = web.Application([(r'/(.*)', WSConnectionHandler)])

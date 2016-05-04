@@ -32,14 +32,14 @@ class BitbloqLibsUpdater(Updater):
         Version.store_values()
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
-        directoriesInUnzippedFolder = utils.listDirectoriesInPath(downloadedPath)
+        directoriesInUnzippedFolder = utils.list_directories_in_path(downloadedPath)
         if len(directoriesInUnzippedFolder) != 1:
             raise BitbloqLibsUpdaterError("Not only one bitbloqLibs folder in unzipped file")
-        downloadedPath = downloadedPath + os.sep + utils.listDirectoriesInPath(downloadedPath)[0]
+        downloadedPath = downloadedPath + os.sep + utils.list_directories_in_path(downloadedPath)[0]
 
         if not os.path.exists(self.destinationPath):
             os.makedirs(self.destinationPath)
-        utils.copytree(downloadedPath, self.destinationPath, forceCopy=True)
+        utils.copytree(downloadedPath, self.destinationPath, force_copy=True)
 
     def restoreCurrentVersionIfNecessary(self):
         if self.isNecessaryToUpdate():

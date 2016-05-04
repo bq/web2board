@@ -26,9 +26,9 @@ class Web2BoardUpdater(Updater):
 
         copyPath = pm.COPY_PATH
         if copyOriginName is None:
-            copyOriginName = "web2board" + utils.getOsExecutableExtension()
+            copyOriginName = "web2board" + utils.get_executable_extension()
         if copyNewName is None:
-            copyNewName = "web2board_copy" + utils.getOsExecutableExtension()
+            copyNewName = "web2board_copy" + utils.get_executable_extension()
         self.__executableCopyOriginalName = os.path.join(copyPath, copyOriginName)
         self.__executableCopyNewName = os.path.relpath(os.path.join(copyPath, copyNewName), os.getcwd())
 
@@ -54,7 +54,7 @@ class Web2BoardUpdater(Updater):
         if not os.path.exists(confirmationPath):
             url = self.getDownloadUrl(VersionInfo(version))
             self.downloader.download(url, dst=zipDstPath, infoCallback=infoCallback, endCallback=endCallback).result()
-            utils.extractZip(zipDstPath, pm.getDstPathForUpdate(version))
+            utils.extract_zip(zipDstPath, pm.getDstPathForUpdate(version))
             os.remove(zipDstPath)
             with open(confirmationPath, "w"):
                 pass
@@ -90,7 +90,7 @@ class Web2BoardUpdater(Updater):
                 raise Exception("Unable to update, we are in the original version")
             self.log.info("updating in process")
             self.log.debug("killing original web2board")
-            utils.killProcess("web2board")
+            utils.kill_process("web2board")
             if os.path.exists(pm.ORIGINAL_PATH):
                 self.log.info("removing original files")
                 utils.rmtree(pm.ORIGINAL_PATH)

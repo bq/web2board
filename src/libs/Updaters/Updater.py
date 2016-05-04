@@ -44,7 +44,7 @@ class Updater:
         log.debug("[{0}] Checking library names".format(self.name))
         if not os.path.exists(self.destinationPath):
             return True
-        libraries = utils.listDirectoriesInPath(self.destinationPath)
+        libraries = utils.list_directories_in_path(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
         for cLibrary in self.currentVersionInfo.librariesNames:
             if cLibrary.lower() not in libraries:
@@ -70,7 +70,7 @@ class Updater:
         log.debug("[{0}] Updating version to: {1}".format(self.name, versionToUpload.version))
         self.currentVersionInfo.version = versionToUpload.version
         self.currentVersionInfo.file2DownloadUrl = versionToUpload.file2DownloadUrl
-        self.currentVersionInfo.librariesNames = utils.listDirectoriesInPath(self.destinationPath)
+        self.currentVersionInfo.librariesNames = utils.list_directories_in_path(self.destinationPath)
         log.info("Current version updated")
 
     def getVersionNumber(self, versionInfo=None):
@@ -81,7 +81,7 @@ class Updater:
         return int(versionInfo.version.replace('.', ''))
 
     def downloadOnlineVersionInfo(self):
-        jsonVersion = json.loads(utils.getDataFromUrl(self.onlineVersionUrl))
+        jsonVersion = json.loads(utils.get_data_from_url(self.onlineVersionUrl))
         onlineVersionInfo = VersionInfo(**jsonVersion)
         log.debug("[{0}] Downloaded online version: {1}".format(self.name, onlineVersionInfo.version))
         return onlineVersionInfo
@@ -96,13 +96,13 @@ class Updater:
     def update(self, versionToUpload):
         log.info('[{0}] Downloading version {1}, from {2}'
                  .format(self.name, versionToUpload.version, versionToUpload.file2DownloadUrl))
-        downloadedFilePath = utils.downloadFile(versionToUpload.file2DownloadUrl)
+        downloadedFilePath = utils.download_file(versionToUpload.file2DownloadUrl)
         extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
         if not os.path.exists(extractFolder):
             os.mkdir(extractFolder)
         try:
             log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
-            utils.extractZip(downloadedFilePath, extractFolder)
+            utils.extract_zip(downloadedFilePath, extractFolder)
             self._moveDownloadedToDestinationPath(extractFolder)
             self._updateCurrentVersionInfoTo(versionToUpload)
         finally:

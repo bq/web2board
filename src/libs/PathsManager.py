@@ -48,8 +48,8 @@ class PathsManager:
 
     @staticmethod
     def getBasePath():
-        if utils.areWeFrozen():
-            if utils.isMac():
+        if utils.are_we_frozen():
+            if utils.is_mac():
                 return os.getcwd()
             return os.getcwd()
         else:
@@ -57,11 +57,11 @@ class PathsManager:
 
     @classmethod
     def getExternalDataFolder(cls):
-        if utils.isLinux():
+        if utils.is_linux():
             folder = ".web2board"
-        elif utils.isWindows():
+        elif utils.is_windows():
             folder = "web2board"
-        elif utils.isMac():
+        elif utils.is_mac():
             folder = ".web2board"
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
@@ -69,11 +69,11 @@ class PathsManager:
 
     @staticmethod
     def getHomePath():
-        if utils.isLinux():
+        if utils.is_linux():
             return expanduser("~")
-        elif utils.isWindows():
+        elif utils.is_windows():
             return os.getenv('APPDATA')
-        elif utils.isMac():
+        elif utils.is_mac():
             return expanduser("~")
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
@@ -111,13 +111,13 @@ class PathsManager:
     @classmethod
     def setAllConstants(cls):
         cls.EXECUTABLE_PATH = os.getcwd()
-        cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.getOsExecutableExtension()
+        cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.get_executable_extension()
         cls.MAIN_PATH = cls.getMainPath()
         cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, 'web2board-config.json'))
         cls.COPY_PATH = cls.getCopyPathForUpdate()
         cls.ORIGINAL_PATH = cls.getOriginalPathForUpdate()
 
-        if utils.isMac() and utils.areWeFrozen():
+        if utils.is_mac() and utils.are_we_frozen():
             cls.RES_PATH = os.path.join(cls.MAIN_PATH, os.pardir, 'Resources', 'res')
             cls.RES_PATH = os.path.abspath(cls.RES_PATH)
         else:
@@ -151,10 +151,10 @@ class PathsManager:
             shutil.rmtree(path)
 
 # set working directory to src
-if utils.areWeFrozen():
-    os.chdir(utils.getModulePath())
+if utils.are_we_frozen():
+    os.chdir(utils.get_module_path())
 else:
-    os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
+    os.chdir(os.path.join(utils.get_module_path(), os.path.pardir))
 
 
 PathsManager.setAllConstants()

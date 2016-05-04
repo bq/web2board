@@ -22,7 +22,7 @@ def startLogger():
     log.setLevel(logging.DEBUG)
 
 
-if utils.areWeFrozen():
+if utils.are_we_frozen():
     os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
     PathsManager.setAllConstants()
 
@@ -30,7 +30,7 @@ msgBox = None
 startLogger()
 log = logging.getLogger(__name__)
 log.info("starting")
-web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.getOsExecutableExtension())
+web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.get_executable_extension())
 WATCHDOG_TIME = 60
 
 PathsManager.RES_PATH = os.path.join(PathsManager.MAIN_PATH, 'res')
@@ -48,7 +48,7 @@ def factoryReset():
         if os.path.exists(PathsManager.PROGRAM_PATH):
             shutil.rmtree(PathsManager.PROGRAM_PATH)
         logMessage("Extracting web2board...")
-        shutil.copytree(utils.getModulePath() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
+        shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
         msgBox.endSuccessful()
     except Exception as e:
         log.exception("Failed performing Factory reset")
@@ -188,14 +188,14 @@ if __name__ == '__main__':
     global msgBox
     try:
         log.info("web2boardPath: {}".format(web2boardPath))
-        utils.killProcess("web2board")
+        utils.kill_process("web2board")
         if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
             app = startDialog()
             factoryReset()
             app.mainloop()
 
         if msgBox is None or msgBox.successfullyEnded:
-            utils.openFile(web2boardPath)
+            utils.open_file(web2boardPath)
     except:
         log.exception("Unable to launch web2board")
         raise

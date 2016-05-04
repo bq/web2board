@@ -10,7 +10,7 @@ class TestSerialConnection(unittest.TestCase):
 
     @unittest.skip("test not working")
     def test_construct_isAbleToConnectToSerialPort(self):
-        port = utils.listSerialPorts()[0][0]
+        port = utils.list_serial_ports()[0][0]
         try:
             self.serialConnection = SerialConnection(port, 9600, lambda *args: None)
         except SerialException as e:
