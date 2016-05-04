@@ -25,7 +25,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
     def test_construct_setsAllNecessaryAttributes(self):
         self.assertIsNotNone(self.updater.currentVersionInfo)
         self.assertEqual(self.updater.currentVersionInfo.version, Version.bitbloq_libs)
-        self.assertEqual(self.updater.currentVersionInfo.librariesNames, Config.bitbloq_libs_libraries)
+        self.assertEqual(self.updater.currentVersionInfo.librariesNames, Version.bitbloq_libs_libraries)
         self.assertIsNotNone(self.updater.destinationPath)
         self.assertNotEqual(self.updater.name, Updater().name)
 

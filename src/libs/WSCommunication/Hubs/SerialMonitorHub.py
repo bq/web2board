@@ -98,10 +98,10 @@ class SerialMonitorHub(Hub):
         return True
 
     def getAvailablePorts(self):
-        return CompilerUploader.construct().getAvailablePorts()
+        return CompilerUploader.construct().get_available_ports()
 
     def findBoardPort(self, board):
-        return CompilerUploader.construct(board).getPort()
+        return CompilerUploader.construct(board).get_port()
 
     def isPortConnected(self, port):
         return port in self.serialConnections and not self.serialConnections[port].isClosed()

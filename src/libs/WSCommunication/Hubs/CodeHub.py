@@ -36,7 +36,7 @@ class CodeHub(Hub):
         self.serial_hub.closeAllConnections()
         if upload_port is None:
             try:
-                upload_port = compile_uploader.getPort()
+                upload_port = compile_uploader.get_port()
             except CompilerException as e:
                 return self._construct_unsuccessful_replay(dict(title="BOARD_NOT_READY", stdErr=e.message))
         _sender.isUploading(upload_port)
@@ -61,7 +61,7 @@ class CodeHub(Hub):
         log.info("getting hexData from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.isCompiling()
-        compileReport, hexData = CompilerUploader.construct().getHexData(code)
+        compileReport, hexData = CompilerUploader.construct().get_hex_data(code)
         return self.__handle_compile_report(compileReport), hexData
 
     def upload(self, code, board, _sender, port=None):
@@ -75,7 +75,7 @@ class CodeHub(Hub):
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort
 
-        compileReport = CompilerUploader.construct(board).upload(code, uploadPort=uploadPort)
+        compileReport = CompilerUploader.construct(board).upload(code, upload_port=uploadPort)
 
         return self.__handle_compile_report(compileReport, uploadPort)
 
@@ -93,7 +93,7 @@ class CodeHub(Hub):
             tmpHexFile.write(hexText)
 
         rel_path = os.path.relpath(tmpHexFile.name, os.getcwd())
-        compileReport = CompilerUploader.construct(board).uploadAvrHex(rel_path, uploadPort=upload_port)
+        compileReport = CompilerUploader.construct(board).upload_avr_hex(rel_path, upload_port=upload_port)
         return self.__handle_compile_report(compileReport, upload_port)
 
     def upload_hex_file(self, hex_file_path, board, _sender, port=None):

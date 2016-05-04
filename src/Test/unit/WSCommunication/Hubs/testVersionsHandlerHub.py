@@ -7,8 +7,6 @@ from wshubsapi.hubs_inspector import HubsInspector
 from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
-from libs.Decorators.Asynchronous import Result
-from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Version import Version
 from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 
@@ -40,7 +38,6 @@ class TestVersionsHandlerHub(unittest.TestCase):
 
     def tearDown(self):
         flexmock_teardown()
-        remove_hubs_subclasses()
 
     def test_getVersion_returnsAVersionStringFormat(self):
         version = self.versionsHandlerHub.get_version()
@@ -64,8 +61,8 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)
 
     def test_setWeb2boardVersion_returnsTrue(self):
-        result = Result(Future())
-        result.future.set_result(True)
+        result = Future()
+        result.set_result(True)
         flexmock(self.updater).should_receive("downloadVersion").and_return(result).once()
         flexmock(self.updater).should_receive("makeAnAuxiliaryCopy").once()
         flexmock(self.updater).should_receive("runAuxiliaryCopy").once()

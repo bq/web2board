@@ -28,8 +28,9 @@ __mainApp = None
 
 class MainApp:
     def __init__(self):
+        Version.read_version_values()
+        Config.read_config_file()
         self.w2bGui = None
-        """:type : frames.Web2boardWindow.Web2boardWindow"""
         self.w2bServer = None
         self.isAppRunning = False
         self.qtApp = None
@@ -116,9 +117,9 @@ class MainApp:
     @asynchronous()
     def checkConnectionIsAvailable(self):
         time.sleep(1)
-        self.api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
         try:
-            self.api.connect()
+            api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
+            api.connect()
         except Exception as e:
             pass
         else:
@@ -135,8 +136,6 @@ class MainApp:
             forceQuit()
 
     def startMain(self):
-        Version.read_version_values()
-        Config.read_config_file()
         PathsManager.cleanPioEnvs()
         options, args = self.parseSystemArguments()
         self.handleSystemArguments(options, args)
@@ -169,17 +168,6 @@ class MainApp:
             log.debug("Port is open")
         else:
             log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
-
-
-def getMainApp():
-    global __mainApp
-    if __mainApp is None:
-        __mainApp = MainApp()
-    return __mainApp
-
-
-def isTrayIconAvailable():
-    return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
 
 
 def forceQuit():

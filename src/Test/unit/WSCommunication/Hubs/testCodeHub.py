@@ -7,7 +7,6 @@ from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import createCompilerUploaderMock, createSenderMock
 from libs.CompilerUploader import CompilerUploader
-from libs.MainApp import getMainApp
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
 from libs.PathsManager import PathsManager as pm
 from flexmock import flexmock, flexmock_teardown
@@ -65,7 +64,7 @@ class TestCodeHub(unittest.TestCase):
 
     def test_upload_senderIsAdvisedCodeIsUploadingWithPort(self):
         port = "PORT"
-        self.compileUploaderMock.should_receive("getPort").and_return(port).once()
+        self.compileUploaderMock.should_receive("get_port").and_return(port).once()
         self.compileUploaderMock.should_receive("upload").and_return((True, {})).once()
 
         self.codeHub.upload("myCode", self.board, self.sender)
@@ -87,7 +86,7 @@ class TestCodeHub(unittest.TestCase):
         self.assertEqual(result.replay, uploadReturn[1]["err"])
 
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
-        self.compileUploaderMock.should_receive("uploadAvrHex").and_return((True, {})).once()
+        self.compileUploaderMock.should_receive("upload_avr_hex").and_return((True, {})).once()
 
         result = self.codeHub.upload_hex("hexText", self.board, self.sender)
 
@@ -95,7 +94,7 @@ class TestCodeHub(unittest.TestCase):
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
         uploadReturn = (False, {"err": "errorMessage"},)
-        self.compileUploaderMock.should_receive("uploadAvrHex").and_return(uploadReturn).once()
+        self.compileUploaderMock.should_receive("upload_avr_hex").and_return(uploadReturn).once()
 
         result = self.codeHub.upload_hex("hexText", self.compileUploaderMock.board, self.sender)
 

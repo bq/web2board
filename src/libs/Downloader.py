@@ -38,7 +38,7 @@ class Downloader:
             self.log.error("Unable to download file")
             totalSize = sys.maxint
 
-        while not downloadTask.isDone():
+        while not downloadTask.done():
             if os.path.exists(dst):
                 pathSize = os.path.getsize(dst)
                 if infoCallback is not None:
@@ -46,5 +46,5 @@ class Downloader:
                 time.sleep(self.refreshTime)
 
         if endCallback is not None:
-            endCallback(downloadTask.get())
-        return downloadTask.get()
+            downloadTask.add_done_callback(endCallback)
+        return downloadTask.result()

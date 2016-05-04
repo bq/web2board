@@ -29,7 +29,7 @@ class VersionsHandlerHub(Hub):
 
     def set_web2board_version(self, version):
         try:
-            self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).get()
+            self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).result()
         except:
             self.clients.get_subscribed_clients().downloadEnded(False)
             raise

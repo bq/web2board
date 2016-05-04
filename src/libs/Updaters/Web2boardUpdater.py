@@ -53,7 +53,7 @@ class Web2BoardUpdater(Updater):
         zipDstPath = pm.getDstPathForUpdate(version) + ".zip"
         if not os.path.exists(confirmationPath):
             url = self.getDownloadUrl(VersionInfo(version))
-            self.downloader.download(url, dst=zipDstPath, infoCallback=infoCallback, endCallback=endCallback).get()
+            self.downloader.download(url, dst=zipDstPath, infoCallback=infoCallback, endCallback=endCallback).result()
             utils.extractZip(zipDstPath, pm.getDstPathForUpdate(version))
             os.remove(zipDstPath)
             with open(confirmationPath, "w"):

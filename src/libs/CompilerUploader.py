@@ -1,15 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# -----------------------------------------------------------------------#
-#                                                                       #
-# This file is part of the web2board project                            #
-#                                                                       #
-# Copyright (C) 2015 Mundo Reader S.L.                                  #
-#                                                                       #
-# Date: April - May 2015                                                #
-# Author: Irene Sanz Nieto <irene.sanz@bq.com>                          #
-#                                                                       #
-# -----------------------------------------------------------------------#
+
 import logging
 import os
 import subprocess
@@ -43,15 +34,16 @@ class CompilerException(Exception):
 # Class CompilerUploader, created to support different compilers & uploaders
 #
 class CompilerUploader:
-    __globalCompilerUploaderHolder = {}
+    __global_compiler_uploader_holder = {}
     DEFAULT_BOARD = "bt328"
 
     def __init__(self, board=DEFAULT_BOARD):
         self.lastPortUsed = None
         self.board = board  # we use the board name as the environment (check platformio.ini)
-        self._checkBoardConfiguration()
+        self._check_board_configuration()
 
-    def _getIniConfig(self, environment):
+    @staticmethod
+    def _get_ini_config(environment):
         """
         :type environment: str
             """
@@ -74,25 +66,26 @@ class CompilerUploader:
                     iniConfig["boardData"] = get_boards(iniConfig["board"])
                     return iniConfig
 
-    def _callAvrdude(self, args):
+    @staticmethod
+    def _call_avrdude(args):
         if utils.isWindows():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude.exe')
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
+            avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude.exe')
+            avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf')
         elif utils.isMac():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude')
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf')
+            avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude')
+            avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf')
         elif utils.isLinux():
-            avrExePath = os.path.join(pm.RES_PATH, 'avrdude64' if utils.is64bits() else "avrdude")
-            avrConfigPath = os.path.join(pm.RES_PATH, 'avrdude.conf' if utils.is64bits() else "avrdude32.conf")
+            avr_exe_path = os.path.join(pm.RES_PATH, 'avrdude64' if utils.is64bits() else "avrdude")
+            avr_config_path = os.path.join(pm.RES_PATH, 'avrdude.conf' if utils.is64bits() else "avrdude32.conf")
         else:
             raise Exception("Platform not supported")
 
-        os.chmod(avrExePath, int("755", 8)) # force to have executable rights in avrdude
+        os.chmod(avr_exe_path, int("755", 8)) # force to have executable rights in avrdude
 
-        avrExePath = os.path.normpath(os.path.relpath(avrExePath, os.getcwd()))
-        avrConfigPath = os.path.normpath(os.path.relpath(avrConfigPath, os.getcwd()))
+        avr_exe_path = os.path.normpath(os.path.relpath(avr_exe_path, os.getcwd()))
+        avr_config_path = os.path.normpath(os.path.relpath(avr_config_path, os.getcwd()))
 
-        cmd = [avrExePath] + ["-C"] + [avrConfigPath] + args.split(" ")
+        cmd = [avr_exe_path] + ["-C"] + [avr_config_path] + args.split(" ")
         log.debug("Command executed: {}".format(cmd))
         p = subprocess.Popen(cmd, shell=utils.isWindows(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
@@ -104,21 +97,21 @@ class CompilerUploader:
         return output, err
 
     @asynchronous()
-    def _checkPort(self, port, mcu, baudRate):
+    def _checkPort(self, port, mcu, baud_rate):
         try:
             log.debug("Checking port: {}".format(port))
-            args = "-P " + port + " -p " + mcu + " -b " + str(baudRate) + " -c arduino"
-            output, err = self._callAvrdude(args)
+            args = "-P " + port + " -p " + mcu + " -b " + str(baud_rate) + " -c arduino"
+            output, err = self._call_avrdude(args)
             log.debug("{2}: {0}, {1}".format(output, err, port))
             return 'Device signature =' in output or 'Device signature =' in err
         except:
             log.debug("Error searching port: {}".format(port), exc_info=1)
             return False
 
-    def _run(self, code, upload=False, uploadPort=None, getHexString=False):
-        self._checkBoardConfiguration()
+    def _run(self, code, upload=False, upload_port=None, get_hex_string=False):
+        self._check_board_configuration()
         target = ("upload",) if upload else ()
-        uploadPort = self.getPort() if upload and uploadPort is None else uploadPort
+        upload_port = self.get_port() if upload and upload_port is None else upload_port
 
         if isinstance(code, unicode):
             code = code.encode("utf-8")
@@ -130,79 +123,80 @@ class CompilerUploader:
             mainCppFile.write(code)
 
         runResult = platformioRun(target=target, environment=(self.board,),
-                                  project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=uploadPort)[0]
-        if getHexString:
-            hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
-            return runResult, hexResult
+                                  project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0]
+        if get_hex_string:
+            raise NotImplementedError()
+            # hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
+            # return runResult, hexResult
         return runResult
 
-    def _checkBoardConfiguration(self):
+    def _check_board_configuration(self):
         if self.board is None:
             raise CompilerException(ERROR_BOARD_NOT_SET)
-        if self._getIniConfig(self.board) is None:
+        if self._get_ini_config(self.board) is None:
             raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
 
-    def _searchBoardPort(self):
-        self._checkBoardConfiguration()
-        options = self._getIniConfig(self.board)
+    def _search_board_port(self):
+        self._check_board_configuration()
+        options = self._get_ini_config(self.board)
         mcu = options["boardData"]["build"]["mcu"]
-        baudRate = options["boardData"]["upload"]["speed"]
-        availablePorts = self.getAvailablePorts()
-        if len(availablePorts) <= 0:
+        baud_rate = options["boardData"]["upload"]["speed"]
+        available_ports = self.get_available_ports()
+        if len(available_ports) <= 0:
             return None
-        log.info("Found available ports: {}".format(availablePorts))
-        portResultHashMap = {}
-        for port in availablePorts:
-            portResultHashMap[port] = self._checkPort(port, mcu, baudRate)
+        log.info("Found available ports: {}".format(available_ports))
+        port_futures_dict = {}
+        for port in available_ports:
+            port_futures_dict[port] = self._checkPort(port, mcu, baud_rate)
 
         watchdog = datetime.now()
-        while datetime.now() - watchdog < timedelta(seconds=30) and len(portResultHashMap) > 0:
-            for port, resultObject in portResultHashMap.items():
-                if resultObject.isDone():
-                    portResultHashMap.pop(port)
-                if resultObject.isDone() and resultObject.get():
-                    log.info("Found board port: {}".format(port))
-                    self.lastPortUsed = port
-                    return port
+        while datetime.now() - watchdog < timedelta(seconds=30) and len(port_futures_dict) > 0:
+            for port, future in port_futures_dict.items():
+                if future.done():
+                    port_futures_dict.pop(port)
+                    if future.result():
+                        log.info("Found board port: {}".format(port))
+                        self.lastPortUsed = port
+                        return port
         return None
 
-    def getAvailablePorts(self):
-        portsToUpload = utils.listSerialPorts(lambda x: x[2] != "n/a")
-        availablePorts = map(lambda x: x[0], portsToUpload)
-        return sorted(availablePorts, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
+    def get_available_ports(self):
+        ports_to_upload = utils.listSerialPorts(lambda x: x[2] != "n/a")
+        available_ports = map(lambda x: x[0], ports_to_upload)
+        return sorted(available_ports, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 
-    def getPort(self):
-        self._checkBoardConfiguration()
-        portToUpload = self._searchBoardPort()
-        if portToUpload is None:
+    def get_port(self):
+        self._check_board_configuration()
+        port_to_upload = self._search_board_port()
+        if port_to_upload is None:
             raise CompilerException(ERROR_NO_PORT_FOUND, self.board)
 
-        return portToUpload
+        return port_to_upload
 
-    def setBoard(self, board):
+    def set_board(self, board):
         self.board = board
-        self._checkBoardConfiguration()
+        self._check_board_configuration()
 
     def compile(self, code):
         return self._run(code, upload=False)
 
-    def getHexData(self, code):
-        return self._run(code, upload=False, getHexString=True)
+    def get_hex_data(self, code):
+        return self._run(code, upload=False, get_hex_string=True)
 
-    def upload(self, code, uploadPort=None):
-        return self._run(code, upload=True, uploadPort=uploadPort)
+    def upload(self, code, upload_port=None):
+        return self._run(code, upload=True, upload_port=upload_port)
 
-    def uploadAvrHex(self, hexFilePath, uploadPort=None):
-        self._checkBoardConfiguration()
-        options = self._getIniConfig(self.board)
-        port = uploadPort if uploadPort is not None else self.getPort()
+    def upload_avr_hex(self, hex_file_path, upload_port=None):
+        self._check_board_configuration()
+        options = self._get_ini_config(self.board)
+        port = upload_port if upload_port is not None else self.get_port()
         mcu = options["boardData"]["build"]["mcu"]
-        baudRate = str(options["boardData"]["upload"]["speed"])
-        args = "-V -P " + port + " -p " + mcu + " -b " + baudRate + " -c arduino -D -U flash:w:" + hexFilePath + ":i"
-        output, err = self._callAvrdude(args)
-        okText = "bytes of flash written"
-        resultOk = okText in output or okText in err
-        return resultOk, {"out": output, "err": err}
+        baud_rate = str(options["boardData"]["upload"]["speed"])
+        args = "-V -P " + port + " -p " + mcu + " -b " + baud_rate + " -c arduino -D -U flash:w:" + hex_file_path + ":i"
+        output, err = self._call_avrdude(args)
+        ok_text = "bytes of flash written"
+        result_ok = ok_text in output or ok_text in err
+        return result_ok, {"out": output, "err": err}
 
     @classmethod
     def construct(cls, board=DEFAULT_BOARD):
@@ -210,7 +204,7 @@ class CompilerUploader:
         :param board: board mcu string
         :rtype: CompilerUploader
         """
-        if board not in cls.__globalCompilerUploaderHolder:
-            cls.__globalCompilerUploaderHolder[board] = CompilerUploader(board)
-        return cls.__globalCompilerUploaderHolder[board]
+        if board not in cls.__global_compiler_uploader_holder:
+            cls.__global_compiler_uploader_holder[board] = CompilerUploader(board)
+        return cls.__global_compiler_uploader_holder[board]
 

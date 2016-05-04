@@ -191,7 +191,7 @@ if __name__ == '__main__':
         utils.killProcess("web2board")
         if isFactoryReset() or not os.path.exists(PathsManager.PROGRAM_PATH):
             app = startDialog()
-            task = factoryReset()
+            factoryReset()
             app.mainloop()
 
         if msgBox is None or msgBox.successfullyEnded:

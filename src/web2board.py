@@ -64,8 +64,8 @@ if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
         HubsInspector.inspect_implemented_hubs()
-        from libs.MainApp import getMainApp, forceQuit
-        app = getMainApp()
+        from libs.MainApp import forceQuit, MainApp
+        app = MainApp()
 
         def closeSigHandler(signal, frame):
             try:

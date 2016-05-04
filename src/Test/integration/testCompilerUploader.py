@@ -28,7 +28,7 @@ class TestCompilerUploader(unittest.TestCase):
     def setUpClass(cls):
         if cls.portToUse is None:
             try:
-                cls.portToUse = CompilerUploader.construct(cls.__getPlatformToUse()).getPort()
+                cls.portToUse = CompilerUploader.construct(cls.__getPlatformToUse()).get_port()
             except:
                 cls.portToUse = -1
         cls.platformToUse = cls.__getPlatformToUse()
@@ -67,27 +67,27 @@ class TestCompilerUploader(unittest.TestCase):
 
     def test_getPort_raisesExceptionIfBoardNotSet(self):
         self.compiler.board = None
-        self.assertRaises(CompilerException, self.compiler.getPort)
+        self.assertRaises(CompilerException, self.compiler.get_port)
 
     def test_getPort_raiseExceptionIfNotReturningPort(self):
-        self.compiler = flexmock(self.compiler, _searchBoardPort=lambda: None)
+        self.compiler = flexmock(self.compiler, _search_board_port=lambda: None)
 
-        self.compiler.setBoard('uno')
+        self.compiler.set_board('uno')
 
-        self.assertRaises(CompilerException, self.compiler.getPort)
+        self.assertRaises(CompilerException, self.compiler.get_port)
 
     def test_getPort_raiseExceptionIfNotAvailablePort(self):
-        self.compiler = flexmock(self.compiler, getAvailablePorts=lambda: [])
+        self.compiler = flexmock(self.compiler, get_available_ports=lambda: [])
 
-        self.compiler.setBoard('uno')
+        self.compiler.set_board('uno')
 
-        self.assertRaises(CompilerException, self.compiler.getPort)
+        self.assertRaises(CompilerException, self.compiler.get_port)
 
     def test_getPort_returnPortIfSearchPortsReturnsOnePort(self):
-        self.compiler = flexmock(self.compiler, _searchBoardPort=lambda: 1)
-        self.compiler.setBoard('uno')
+        self.compiler = flexmock(self.compiler, _search_board_port=lambda: 1)
+        self.compiler.set_board('uno')
 
-        port = self.compiler.getPort()
+        port = self.compiler.get_port()
 
         self.assertEqual(port, 1)
 
@@ -100,9 +100,9 @@ class TestCompilerUploader(unittest.TestCase):
             self.assertTrue(port.startswith("/dev/"))
 
     def test_getPort_returnsBoardConnectedBoard(self):
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
 
-        port = self.compiler.getPort()
+        port = self.compiler.get_port()
 
         self.__assertRightPortName(port)
 
@@ -114,7 +114,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertRaises(CompilerException, self.compiler.compile, workingCpp)
 
     def test_compile_compilesSuccessfullyWithWorkingCpp(self):
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
@@ -123,7 +123,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertTrue(compileResult[0])
 
     def test_compile_compilesSuccessfullyWithLibraries(self):
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         with open(self.withLibrariesCppPath) as f:
             withLibrariesCpp = f.read()
 
@@ -132,7 +132,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.assertTrue(compileResult[0])
 
     def test_compile_resultErrorIsFalseUsingNotWorkingCpp(self):
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
 
@@ -150,43 +150,43 @@ class TestCompilerUploader(unittest.TestCase):
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
-        self.assertRaises(CompilerException, self.compiler.upload, workingCpp, uploadPort=self.portToUse)
+        self.assertRaises(CompilerException, self.compiler.upload, workingCpp, upload_port=self.portToUse)
 
     def test_upload_compilesSuccessfullyWithWorkingCpp(self):
         self.__assertPortFount()
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         with open(self.workingCppPath) as f:
             workingCpp = f.read()
 
-        uploadResult = self.compiler.upload(workingCpp, uploadPort=self.portToUse)
+        uploadResult = self.compiler.upload(workingCpp, upload_port=self.portToUse)
 
         pprint(uploadResult)
         self.assertTrue(uploadResult[0])
 
     def test_upload_resultErrorIsFalseUsingNotWorkingCpp(self):
         self.__assertPortFount()
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         with open(self.notWorkingCppPath) as f:
             notWorkingCpp = f.read()
 
-        uploadResult = self.compiler.upload(notWorkingCpp, uploadPort=self.portToUse)
+        uploadResult = self.compiler.upload(notWorkingCpp, upload_port=self.portToUse)
 
         pprint(uploadResult)
         self.assertFalse(uploadResult[0])
 
     def test_uploadAvrHex_returnsOkResultWithWorkingHexFile(self):
         self.__assertPortFount()
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
         path = os.path.relpath(self.hexFilePath, os.getcwd())
-        result = self.compiler.uploadAvrHex(path, uploadPort=self.portToUse)
+        result = self.compiler.upload_avr_hex(path, upload_port=self.portToUse)
         print(result[1])
         self.assertTrue(result[0])
 
     def test_uploadAvrHex_returnsBadResultWithNonExistingFile(self):
         self.__assertPortFount()
-        self.compiler.setBoard(self.connectedBoard)
+        self.compiler.set_board(self.connectedBoard)
 
-        result = self.compiler.uploadAvrHex("notExistingFile", uploadPort=self.portToUse)
+        result = self.compiler.upload_avr_hex("notExistingFile", upload_port=self.portToUse)
 
         self.assertFalse(result[0])
 

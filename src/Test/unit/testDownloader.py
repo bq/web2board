@@ -35,7 +35,7 @@ class TestDownloader(unittest.TestCase):
         self.urlopenMock.once()
         flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
 
-        self.downloader.download(url, dst).get()
+        self.downloader.download(url, dst).result()
 
     def test_download_callsInfoCallback(self):
         url = "url"
@@ -50,7 +50,7 @@ class TestDownloader(unittest.TestCase):
             .with_args(object, 1000, float).at_least().times(1)
         flexmock(self.downloader).should_call("__realDownload").with_args(url, dst).once()
 
-        self.downloader.download(url, dst, infoCallback=self.__infoCallbackMock).get()
+        self.downloader.download(url, dst, infoCallback=self.__infoCallbackMock).result()
 
     def test_download_callsFinishCallback(self):
         url = "url"
@@ -60,4 +60,4 @@ class TestDownloader(unittest.TestCase):
         flexmock(self).should_receive("__finishCallbackMock").at_least().times(1)
         flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
 
-        self.downloader.download(url, dst, endCallback=self.__finishCallbackMock).get()
+        self.downloader.download(url, dst, endCallback=self.__finishCallbackMock).result()
