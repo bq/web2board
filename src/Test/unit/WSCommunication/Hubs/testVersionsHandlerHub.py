@@ -4,7 +4,6 @@ import sys
 from PySide.QtGui import QApplication
 from concurrent.futures import Future
 from wshubsapi.hubs_inspector import HubsInspector
-from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
 from libs.Version import Version
