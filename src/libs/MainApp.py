@@ -61,7 +61,7 @@ class MainApp:
                           help="options: [none, unit, integration, all]")
         parser.add_option("--board", default="uno", type='string', action="store", dest="board",
                           help="board connected for integration tests")
-        parser.add_option("--logLevel", default=Config.logLevel, type='string', action="store", dest="logLevel",
+        parser.add_option("--logLevel", default=Config.log_level, type='string', action="store", dest="logLevel",
                           help="show more or less info, options[debug, info, warning, error, critical")
         parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
                           help="auto update to version")

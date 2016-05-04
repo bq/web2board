@@ -21,7 +21,7 @@ class ConfigHub(Hub):
 
     def get_config(self):
         config = deepcopy(Config.get_config_values())
-        config.update(dict(librariesPath=self.get_libraries_path()))
+        config.update(dict(libraries_path=self.get_libraries_path()))
         return config
 
     def set_values(self, config_dic):
@@ -43,8 +43,8 @@ class ConfigHub(Hub):
     def set_log_level(self, logLevel):
         utils.set_log_level(logLevel)
 
-    def set_libraries_path(self, libDir):
-        Config.set_platformio_lib_dir(libDir)
+    def set_libraries_path(self, lib_dir):
+        Config.set_platformio_lib_dir(lib_dir)
 
     def get_libraries_path(self):
         return Config.get_platformio_lib_dir()

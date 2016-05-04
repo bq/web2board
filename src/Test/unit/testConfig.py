@@ -24,7 +24,7 @@ class TestConfig(unittest.TestCase):
         PathsManager.CONFIG_PATH = os.path.join(self.myTestFolder, "testConfig.json")
         Config.read_config_file()
 
-        self.assertEqual(Config.logLevel, logging.DEBUG)
+        self.assertEqual(Config.log_level, logging.DEBUG)
 
     def test_readConfigFile_catchesErrorIfCorruptedFile(self):
         PathsManager.CONFIG_PATH = os.path.join(self.myTestFolder, "testConfigCorrupted.json")

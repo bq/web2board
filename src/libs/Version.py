@@ -35,3 +35,6 @@ class Version:
         cls._log.info("web2board version: {}".format(cls.web2board))
         cls._log.info("bitbloqLibs version: {}".format(cls.bitbloq_libs))
         cls._log.info("bitbloqLibs libraries: {}".format(cls.bitbloq_libs_libraries))
+
+
+

@@ -22,9 +22,9 @@ class Config:
     proxy = None
     download_url_template = "https://github.com/bq/web2board/archive/devel.zip"
     bitbloq_libs_download_url_template = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
-    checkOnlineUpdates = True
-    logLevel = logging.INFO
-    pluginsPath = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
+    check_online_updates = True
+    log_level = logging.INFO
+    plugins_path = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
     @classmethod
     def get_platformio_lib_dir(cls):
