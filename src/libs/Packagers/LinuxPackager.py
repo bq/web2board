@@ -50,7 +50,7 @@ class LinuxPackager(Packager):
 
     def _moveDebToInstallerPath(self):
         resultingDeb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
-        shutil.move(resultingDeb, self.installerPath + os.sep + "web2boar.deb")
+        shutil.move(resultingDeb, self.installerPath + os.sep + "web2board.deb")
 
     def createPackage(self):
         try:

@@ -16,7 +16,7 @@ class WSConnectionHandler(ConnectionHandler):
 
     def on_close(self):
         super(WSConnectionHandler, self).on_close()
-        if self._connected_client.ID == "Bitbloq":
+        if self._connected_client.ID.lower() == "bitbloq":
             log.info("Bitbloq disconnected, closing web2board...")
             time.sleep(0.5)
             if utils.are_we_frozen():

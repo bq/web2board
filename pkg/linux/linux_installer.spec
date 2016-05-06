@@ -1,17 +1,11 @@
 # -*- mode: python -*-
-import os
-import sys
-
-sys.path.append(os.getcwd())
-import libs.utils as utils
-from libs.PathsManager import PathsManager
 
 block_cipher = None
 
-a = Analysis(['src' + os.sep + 'linuxInstaller.py'],
-             pathex=[os.getcwd()],
+a = Analysis(['linux_installer.py'],
+             pathex=['../../src'],
              binaries=None,
-             datas=None,
+             datas=[("web2boar.deb", ".")],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -20,20 +14,16 @@ a = Analysis(['src' + os.sep + 'linuxInstaller.py'],
              win_private_assemblies=False,
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
 
-a.datas += utils.find_files_for_pyinstaller(".", "*.zip")
-a.datas += utils.find_files_for_pyinstaller("res", "logging.json")
-
-print a.datas
 
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='linuxInstaller',
+          name='linux_installer',
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=True)

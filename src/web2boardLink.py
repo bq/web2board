@@ -178,7 +178,7 @@ def start_dialog():
             self.close_button.configure(state=DISABLED)
             self.ok_button.configure(text="Start Web2Board", command=self.close, state=NORMAL)
             self.set_message("Web2board successfully configured")
-            self.after(2000, self.close)
+            self.after(100, self.close)
 
         def end_error(self, error):
             self.task_ended = True
