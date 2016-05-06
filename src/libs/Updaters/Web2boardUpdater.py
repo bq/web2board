@@ -49,12 +49,12 @@ class Web2BoardUpdater(Updater):
 
     @asynchronous()
     def downloadVersion(self, version, infoCallback=None, endCallback=None):
-        confirmationPath = pm.getDstPathForUpdate(version) + ".confirm"
-        zipDstPath = pm.getDstPathForUpdate(version) + ".zip"
+        confirmationPath = pm.get_dst_path_for_update(version) + ".confirm"
+        zipDstPath = pm.get_dst_path_for_update(version) + ".zip"
         if not os.path.exists(confirmationPath):
             url = self.getDownloadUrl(VersionInfo(version))
-            self.downloader.download(url, dst=zipDstPath, infoCallback=infoCallback, endCallback=endCallback).result()
-            utils.extract_zip(zipDstPath, pm.getDstPathForUpdate(version))
+            self.downloader.download(url, dst=zipDstPath, info_callback=infoCallback, end_callback=endCallback).result()
+            utils.extract_zip(zipDstPath, pm.get_dst_path_for_update(version))
             os.remove(zipDstPath)
             with open(confirmationPath, "w"):
                 pass

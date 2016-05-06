@@ -4,7 +4,7 @@ from wshubsapi.hub import Hub
 class LoggingHub(Hub):
     def __init__(self):
         super(LoggingHub, self).__init__()
-        self.recordsBuffer = list()
+        self.records_buffer = list()
 
-    def getAllBufferedRecords(self):
-        return self.recordsBuffer
+    def get_all_buffered_records(self):
+        return self.records_buffer

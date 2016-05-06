@@ -33,7 +33,7 @@ class CodeHub(Hub):
             _sender.isUploading(upload_port)
             return upload_port
         compile_uploader = CompilerUploader.construct(board)
-        self.serial_hub.closeAllConnections()
+        self.serial_hub.close_all_connections()
         if upload_port is None:
             try:
                 upload_port = compile_uploader.get_port()

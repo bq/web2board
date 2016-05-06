@@ -97,7 +97,7 @@ class CompilerUploader:
         return output, err
 
     @asynchronous()
-    def _checkPort(self, port, mcu, baud_rate):
+    def _check_port(self, port, mcu, baud_rate):
         try:
             log.debug("Checking port: {}".format(port))
             args = "-P " + port + " -p " + mcu + " -b " + str(baud_rate) + " -c arduino"
@@ -147,7 +147,7 @@ class CompilerUploader:
         log.info("Found available ports: {}".format(available_ports))
         port_futures_dict = {}
         for port in available_ports:
-            port_futures_dict[port] = self._checkPort(port, mcu, baud_rate)
+            port_futures_dict[port] = self._check_port(port, mcu, baud_rate)
 
         watchdog = datetime.now()
         while datetime.now() - watchdog < timedelta(seconds=30) and len(port_futures_dict) > 0:

@@ -16,35 +16,35 @@ class Downloader:
         self.refreshTime = refreshTime
 
     @asynchronous()
-    def __realDownload(self, url, dst):
+    def __real_download(self, url, dst):
         urllib.urlretrieve(url, dst)
 
     @asynchronous()
-    def download(self, url, dst=None, infoCallback=None, endCallback=None):
+    def download(self, url, dst=None, info_callback=None, end_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
 
-        downloadTask = self.__realDownload(url, dst)
+        download_task = self.__real_download(url, dst)
         for i in range(3):
             try:
                 site = urllib.urlopen(url)
                 meta = site.info()
-                totalSize = int(meta.getheaders("Content-Length")[0])
+                total_size = int(meta.getheaders("Content-Length")[0])
                 break
             except:
                 self.log.warning("Unable to get download file info. retrying in 0.5s")
                 time.sleep(1)
         else:
             self.log.error("Unable to download file")
-            totalSize = sys.maxint
+            total_size = sys.maxint
 
-        while not downloadTask.done():
+        while not download_task.done():
             if os.path.exists(dst):
                 pathSize = os.path.getsize(dst)
-                if infoCallback is not None:
-                    infoCallback(pathSize, totalSize, pathSize * 100.0 / float(totalSize))
+                if info_callback is not None:
+                    info_callback(pathSize, total_size, pathSize * 100.0 / float(total_size))
                 time.sleep(self.refreshTime)
 
-        if endCallback is not None:
-            downloadTask.add_done_callback(endCallback)
-        return downloadTask.result()
+        if end_callback is not None:
+            download_task.add_done_callback(end_callback)
+        return download_task.result()

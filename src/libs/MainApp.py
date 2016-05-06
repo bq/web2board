@@ -30,13 +30,10 @@ class MainApp:
     def __init__(self):
         Version.read_version_values()
         Config.read_config_file()
-        self.w2bGui = None
-        self.w2bServer = None
-        self.isAppRunning = False
-        self.qtApp = None
+        self.w2b_server = None
 
     @staticmethod
-    def __handleTestingOptions(testing):
+    def __handle_testing_options(testing):
         sys.argv[1:] = []
         if testing != "none":
             if testing == "unit":
@@ -51,7 +48,7 @@ class MainApp:
             os._exit(1)
 
     @staticmethod
-    def parseSystemArguments():
+    def parse_system_arguments():
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
         parser.add_option("--host", default=Config.web_socket_ip, type='string', action="store", dest="host",
                           help="hostname (localhost)")
@@ -70,7 +67,7 @@ class MainApp:
 
         return parser.parse_args()
 
-    def handleSystemArguments(self, options, args):
+    def handle_system_arguments(self, options, args):
         log.info("init web2board with options: {}, and args: {}".format(options, args))
         utils.set_log_level(options.logLevel)
 
@@ -84,24 +81,24 @@ class MainApp:
 
         if options.update2version is not None:
             log.debug("updating version")
-            Web2BoardUpdater().update(PathsManager.getDstPathForUpdate(options.update2version))
+            Web2BoardUpdater().update(PathsManager.get_dst_path_for_update(options.update2version))
 
-        self.__handleTestingOptions(options.testing.lower())
+        self.__handle_testing_options(options.testing.lower())
 
         return options
 
-    def initializeServerAndCommunicationProtocol(self, options):
+    def initialize_server_and_communication_protocol(self, options):
         # do not call this line in executable
         if not utils.are_we_frozen():
             HubsInspector.construct_js_file(path="libs/WSCommunication/Clients")
             HubsInspector.construct_python_file(path="libs/WSCommunication/Clients")
-        self.w2bServer = web.Application([(r'/(.*)', WSConnectionHandler)])
+        self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
         Config.web_socket_port = options.port
-        self.w2bServer.listen(options.port)
-        return self.w2bServer
+        self.w2b_server.listen(options.port)
+        return self.w2b_server
 
     @asynchronous()
-    def updateLibrariesIfNecessary(self):
+    def update_libraries_if_necessary(self):
         try:
             BitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
         except (HTTPError, URLError) as e:
@@ -110,12 +107,12 @@ class MainApp:
             proxy = urllib2.ProxyHandler({'http': proxyName})
             opener = urllib2.build_opener(proxy)
             urllib2.install_opener(opener)
-            self.updateLibrariesIfNecessary()
+            self.update_libraries_if_necessary()
         except OSError:
             log.exception("unable to copy libraries files, there could be a permissions problem.")
 
     @asynchronous()
-    def checkConnectionIsAvailable(self):
+    def check_connection_is_available(self):
         time.sleep(1)
         try:
             api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
@@ -125,21 +122,21 @@ class MainApp:
         else:
             log.info("connection available")
 
-    def startServer(self, options):
-        self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
+    def start_server(self, options):
+        self.w2b_server = self.initialize_server_and_communication_protocol(options)
 
         try:
             log.info("listening...")
             # self.checkConnectionIsAvailable()
             ioloop.IOLoop.instance().start()
         finally:
-            forceQuit()
+            force_quit()
 
-    def startMain(self):
-        PathsManager.cleanPioEnvs()
-        options, args = self.parseSystemArguments()
-        self.handleSystemArguments(options, args)
-        self.updateLibrariesIfNecessary()
+    def start_main(self):
+        PathsManager.clean_pio_envs()
+        options, args = self.parse_system_arguments()
+        self.handle_system_arguments(options, args)
+        self.update_libraries_if_necessary()
 
         Version.log_data()
         log.debug("Enviromental data:")
@@ -148,18 +145,15 @@ class MainApp:
         except:
             log.exception("unable to log environmental data")
         try:
-            PathsManager.logRelevantEnvironmentalPaths()
+            PathsManager.log_relevant_environmental_paths()
         except:
             log.exception("Unable to log Paths")
         if options.update2version is None:
-            self.startServer(options)
-            self.testConnection()
-
-    def isSerialMonitorRunning(self):
-        return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
+            self.start_server(options)
+            self.test_connection()
 
     @asynchronous()
-    def testConnection(self):
+    def test_connection(self):
         import socket
         time.sleep(2)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -170,7 +164,7 @@ class MainApp:
             log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
 
 
-def forceQuit():
+def force_quit():
     try:
         os._exit(1)
     finally:

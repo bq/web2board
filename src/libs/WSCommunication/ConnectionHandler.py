@@ -20,7 +20,7 @@ class WSConnectionHandler(ConnectionHandler):
             log.info("Bitbloq disconnected, closing web2board...")
             time.sleep(0.5)
             if utils.are_we_frozen():
-                libs.MainApp.forceQuit()
+                libs.MainApp.force_quit()
 
     def on_message(self, message):
         if message == "version":  # bitbloq thinks we are in version 1

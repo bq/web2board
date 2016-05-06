@@ -64,20 +64,20 @@ if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
         HubsInspector.inspect_implemented_hubs()
-        from libs.MainApp import forceQuit, MainApp
+        from libs.MainApp import force_quit, MainApp
         app = MainApp()
 
         def closeSigHandler(signal, frame):
             try:
                 log.warning("closing server")
-                app.w2bServer.server_close()
+                app.w2b_server.server_close()
                 log.warning("server closed")
             except:
                 log.warning("unable to close server")
-            forceQuit()
+            force_quit()
 
         signal.signal(signal.SIGINT, closeSigHandler)
-        app.startMain()
+        app.start_main()
     except SystemExit:
         pass
     except Exception as e:

@@ -14,7 +14,7 @@ from libs.Version import Version
 
 
 def startLogger():
-    fileHandler = logging.FileHandler(PathsManager.getHomePath() + os.sep + "web2boardLink.log", 'a')
+    fileHandler = logging.FileHandler(PathsManager.get_home_path() + os.sep + "web2boardLink.log", 'a')
     fileHandler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fileHandler.setFormatter(formatter)
@@ -25,7 +25,7 @@ def startLogger():
 
 if utils.are_we_frozen():
     os.chdir(os.path.join(PathsManager.MAIN_PATH, "web2board"))
-    PathsManager.setAllConstants()
+    PathsManager.set_all_constants()
 
 msgBox = None
 startLogger()
