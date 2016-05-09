@@ -63,7 +63,6 @@ if "-Q" in sys.argv:
 if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")
-        HubsInspector.inspect_implemented_hubs()
         from libs.MainApp import force_quit, MainApp
         app = MainApp()
 
@@ -75,6 +74,7 @@ if __name__ == "__main__":
             except:
                 log.warning("unable to close server")
             force_quit()
+        HubsInspector.inspect_implemented_hubs()
 
         signal.signal(signal.SIGINT, closeSigHandler)
         app.start_main()

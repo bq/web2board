@@ -11,16 +11,24 @@
 <body>
 <div class="container">
     <h1>Test all hubs functions</h1>
+    <h4 id="connectionStatus">Disconnected</h4>
 </div>
 <script>
-    var hubsApi = new HubsAPI('ws://127.0.0.1:9876/');
+    var hubsApi = new HubsAPI('ws://127.0.0.1:9876/'),
+        connectionStatusEle = document.getElementById("connectionStatus");
     hubsApi.connect(2);
+    hubsApi.callbacks.onOpen = function () {
+        connectionStatusEle.innerText = "Connected";
+    };
+    hubsApi.callbacks.onClose = function (error) {
+        connectionStatusEle.innerText = "Disconnected";
+        console.error(error);
+    };
 
     hubsApi.LoggingHub.client.onLoggingMessage = function () {
         console.log(arguments);
-    }
-    hubsApi.LoggingHub.server.subscribeToHub()
-    hubsApi.LoggingHub.server
+    };
+    hubsApi.LoggingHub.server.subscribeToHub();
 
     var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
     var ARGUMENT_NAMES = /([^\s,]+)/g;
@@ -92,20 +100,22 @@
                 newRow.insertCell(-1).innerHTML = functionName;
                 newRow.insertCell(-1).innerHTML = hubsInfo[hubName][functionName].args.join("<br>");
                 var argsCell = newRow.insertCell(-1);
-                var sendButtonCell = newRow.insertCell(-1)
-                var sendButton = document.createElement("button")
-                sendButton.innerHTML = "Send"
+                var sendButtonCell = newRow.insertCell(-1);
+                var sendButton = document.createElement("button");
+                sendButton.innerHTML = "Send";
                 sendButtonCell.appendChild(sendButton);
 
-                var argsInputs = []
+                var argsInputs = [];
                 for (var i = 0; i < args.length; i++) {
-                    var input = document.createElement("input");
+                    var input = document.createElement("input"),
+                        br = document.createElement("br");
                     argsCell.appendChild(input);
+                    argsCell.appendChild(br);
                     argsInputs.push(input);
                 }
                 sendButton.argsInputs = argsInputs;
-                sendButton.functionName = functionName
-                sendButton.hubName = hubName
+                sendButton.functionName = functionName;
+                sendButton.hubName = hubName;
                 sendButton.onclick = function () {
                     var args = this.argsInputs.map(function (input) {
                         return input.value;

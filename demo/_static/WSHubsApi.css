@@ -11,5 +11,19 @@ table {
 
 table, th, td {
   border: 1px solid black;
-  width: 100%;
+}
+td button {
+  height:100%;
+  width:100%;
+  min-height: 25px;
+}
+
+tr:nth-child(even) {
+  background: #fff7db
+}
+tr:nth-child(even) input {
+  background: #e5ddc2
+}
+tr:nth-child(odd) {
+  background: #FFF
 }
