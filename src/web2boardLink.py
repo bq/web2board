@@ -213,6 +213,8 @@ if __name__ == '__main__':
             app.mainloop()
 
         if msgBox is None or msgBox.successfully_ended:
+            if is_factory_reset():
+                sys.argv.pop(1)
             utils.open_file(web2boardPath)
     except:
         log.exception("Unable to launch web2board")

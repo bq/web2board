@@ -44,13 +44,13 @@ class LinuxPackager(Packager):
         with open(self.packageDebianMetadataPath + os.sep + "control", "w") as controlFile:
             controlFile.write(controlText.format(version=self.version, architecture=self.architecture))
 
-        os.chmod(self.debianMetadataPath + os.sep + "postinst", int("775", 8))
-        os.chmod(self.debianMetadataPath + os.sep + "postinst", int("775", 8))
         os.chmod(self.debianMetadataPath + os.sep + "control", int("655", 8))
 
     def _moveDebToInstallerPath(self):
-        resultingDeb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
-        shutil.move(resultingDeb, self.installerPath + os.sep + "web2board.deb")
+        resulting_deb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
+        shutil.move(resulting_deb, self.installerPath + os.sep + "web2board.deb")
+        for installer_file in ["linux_installer.py", "linux_installer.spec"]:
+            shutil.move(self.pkgPath + os.sep + installer_file, self.installerPath + os.sep + installer_file)
 
     def createPackage(self):
         try:
@@ -59,15 +59,11 @@ class LinuxPackager(Packager):
             self._addMetadataForInstaller()
             os.chdir(self.installerCreationPath)
             log.info("Creating Installer")
-            # shutil.make_archive(self.installerCreationPath, "zip", self.installerCreationPath )
             os.system("chmod -R 777 " + self.installerCreationDistPath)
-            os.system("gksudo \"chown -R root:root " + self.installerCreationPath + '"')
             call(["dpkg-deb", "--build", self.installerCreationPath])
             self._moveDebToInstallerPath()
             log.info("installer created successfully")
         finally:
-            userName = getpass.getuser()
-            os.system("gksudo \"chown -R {0} {1} \"".format(userName, self.installerCreationPath))
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)
             self._clearBuildFiles()
