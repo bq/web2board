@@ -49,22 +49,43 @@ class LinuxPackager(Packager):
     def _moveDebToInstallerPath(self):
         resulting_deb = self.web2boardPath + os.sep + self.installerCreationName + ".deb"
         shutil.move(resulting_deb, self.installerPath + os.sep + "web2board.deb")
-        for installer_file in ["linux_installer.py", "linux_installer.spec"]:
-            shutil.move(self.pkgPath + os.sep + installer_file, self.installerPath + os.sep + installer_file)
+
+
+    def _create_linux_installer(self):
+        installer_files = ["linux_installer.py", "linux_installer.spec"]
+        for installer_file in installer_files:
+            shutil.copy(self.pkgPlatformPath + os.sep + installer_file, self.installerPath + os.sep + installer_file)
+        currentPath = os.getcwd()
+        os.chdir(self.installerPath)
+        try:
+            log.info("Creating linux_installer Executable")
+            os.system("pyinstaller \"{}\"".format("linux_installer.spec"))
+            shutil.copy(join("dist", "linux_installer"), "linux_installer")
+            for installer_file in installer_files:
+                os.remove(installer_file)
+            if os.path.exists("build"):
+                shutil.rmtree("build")
+            if os.path.exists("dist"):
+                shutil.rmtree("dist")
+            os.system("chmod 0777 linux_installer")
+        finally:
+            os.chdir(currentPath)
 
     def createPackage(self):
         try:
             self._createMainStructureAndExecutables()
-            log.debug("Adding metadata for installer")
+            log.info("Adding metadata for installer")
             self._addMetadataForInstaller()
             os.chdir(self.installerCreationPath)
-            log.info("Creating Installer")
+            log.info("Creating deb")
             os.system("chmod -R 777 " + self.installerCreationDistPath)
             call(["dpkg-deb", "--build", self.installerCreationPath])
             self._moveDebToInstallerPath()
+            log.info("Creating Linux installer")
+            self._create_linux_installer()
             log.info("installer created successfully")
         finally:
-            log.debug("Cleaning files")
+            log.info("Cleaning files")
             os.chdir(self.web2boardPath)
             self._clearBuildFiles()
             # self._deleteInstallerCreationFolder()
