@@ -87,7 +87,7 @@ class SerialMonitorHub(Hub):
             self.start_connection(port)
 
         self.serial_connections[port].write(data)
-        self._getClientsHolder().getSubscribedClients().writted(data, port, _sender.ID)
+        self.clients.get_subscribed_clients().written(data, port, _sender.ID)
 
     def change_baudrate(self, port, baudrate):
         if not self.is_port_connected(port):
@@ -113,4 +113,4 @@ class SerialMonitorHub(Hub):
             self.close_connection(port)
 
     def __on_received_callback(self, port, data):
-        self.clients.getSubscribedClients().received(port, data)
+        self.clients.get_subscribed_clients().received(port, data)

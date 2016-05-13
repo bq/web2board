@@ -28,13 +28,16 @@ class VersionsHandlerHub(Hub):
             self.lib_updater.update(versionInfo)
 
     def set_web2board_version(self, version):
-        try:
-            self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).result()
-        except:
-            self.clients.get_subscribed_clients().downloadEnded(False)
-            raise
-        self.w2b_updater.makeAnAuxiliaryCopy()
-        self.w2b_updater.runAuxiliaryCopy(version)
+        if Config.check_online_updates and version != Version.web2board:
+            try:
+                self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).result()
+            except:
+                self.clients.get_subscribed_clients().downloadEnded(False)
+                raise
+            self.w2b_updater.makeAnAuxiliaryCopy()
+            self.w2b_updater.runAuxiliaryCopy(version)
+            return True
+        return False
 
     def __download_progress(self, current, total, percentage):
         self.clients.get_subscribed_clients().downloadProgress(current, total, percentage)

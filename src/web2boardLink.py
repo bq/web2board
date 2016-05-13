@@ -70,6 +70,8 @@ def start_watchdog():
 def is_factory_reset():
     return len(sys.argv) > 1 and (sys.argv[1].lower() == "factoryreset" or sys.argv[1].lower() == "--factoryreset")
 
+def should_start_app():
+    return len(sys.argv) <= 2 or (sys.argv[2].lower() != "nostartapp" and sys.argv[2].lower() != "--nostartapp")
 
 def needs_factory_reset():
     if not os.path.exists(PathsManager.PROGRAM_PATH):
@@ -212,7 +214,7 @@ if __name__ == '__main__':
             factory_reset()
             app.mainloop()
 
-        if msgBox is None or msgBox.successfully_ended:
+        if should_start_app() and (msgBox is None or msgBox.successfully_ended):
             if is_factory_reset():
                 sys.argv.pop(1)
             utils.open_file(web2boardPath)

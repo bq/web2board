@@ -41,7 +41,7 @@ bash = 'bash -c \"echo INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE; sudo {0} onT
 
 
 def startLogger():
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
     consoleHandler = logging.StreamHandler(sys.stdout)
     consoleHandler.setLevel(logging.DEBUG)
     consoleHandler.setFormatter(formatter)
@@ -57,8 +57,9 @@ def startLogger():
 
 def addAllUsersToDialOut():
     allUsers = [p[0] for p in pwd.getpwall()]
-    for user in allUsers:
-        subprocess.call(["sudo", "adduser", user, "dialout"], stdout=subprocess.PIPE)
+    with click.progressbar(allUsers) as bar:
+        for user in bar:
+            subprocess.call(["sudo", "adduser", user, "dialout"], stdout=subprocess.PIPE)
 
 
 def addHandlerInMimeapps():
@@ -77,10 +78,12 @@ def addHandlerInMimeapps():
 
     with open(mimeapps_file_path, 'a') as f:
         f.write(BITBLOQS_HANDLER2)
-
+    log.info("creating web2board desktop")
     with open(web2board_desktop, "w") as f:
         f.write(DESKTOP_TEXT)
+    log.info("changing access rights of web2board desktop")
     os.system("chmod 777 '{}'".format(web2board_desktop))
+
 
 applications_path = os.path.join(PathsManager.get_home_path(), ".local/share/applications")
 mimeapps_file_path = os.path.join(applications_path, "mimeapps.list")
@@ -111,12 +114,13 @@ elif sys.argv[1] == "onTerminal":
         raise
     log.info("web2board successfully installed")
 
-
 elif sys.argv[1] == "factoryReset":
     log = startLogger()
     log.info("Adding handler in Mimeapps file: {}".format(mimeapps_file_path))
     addHandlerInMimeapps()
-    subprocess.Popen("/opt/web2board/web2boardLink --factoryreset".split(),
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
+    log.info("running factory reset")
+    subprocess.call("/opt/web2board/web2boardLink --factoryReset --noStartApp".split(),
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    log.info("successfully performed factory reset")
     if click.confirm("It is necessary to restart the computer, do you want to restart it now?"):
         os.system("reboot")

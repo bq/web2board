@@ -24,9 +24,9 @@ class Version:
 
     @classmethod
     def store_values(cls):
-        with open(PathsManager.CONFIG_PATH, "w") as f:
+        with open(PathsManager.VERSION_PATH, "w") as f:
             values = dict(version=cls.web2board,
-                          bitblowLibs=dict(version=cls.bitbloq_libs,
+                          bitbloqLibs=dict(version=cls.bitbloq_libs,
                                            librariesNames=cls.bitbloq_libs_libraries))
             json.dump(values, f, indent=4)
 
