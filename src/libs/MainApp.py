@@ -19,7 +19,7 @@ from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.Version import Version
-from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
+from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
 log = logging.getLogger(__name__)

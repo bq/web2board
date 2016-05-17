@@ -32,7 +32,7 @@ class VersionsHandlerHub(Hub):
             try:
                 self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).result()
             except:
-                self.clients.get_subscribed_clients().downloadEnded(False)
+                self.clients.get_subscribed_clients().download_ended(False)
                 raise
             self.w2b_updater.makeAnAuxiliaryCopy()
             self.w2b_updater.runAuxiliaryCopy(version)
@@ -40,7 +40,7 @@ class VersionsHandlerHub(Hub):
         return False
 
     def __download_progress(self, current, total, percentage):
-        self.clients.get_subscribed_clients().downloadProgress(current, total, percentage)
+        self.clients.get_subscribed_clients().download_progress(current, total, percentage)
 
     def __download_ended(self, task):
         self.clients.get_subscribed_clients().downloadEnded(True)
