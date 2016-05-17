@@ -80,6 +80,7 @@ class MainApp:
             urllib2.install_opener(opener)
 
         if options.update2version is not None:
+            utils.set_log_level(logging.DEBUG)
             log.debug("updating version")
             Web2BoardUpdater().update(PathsManager.get_dst_path_for_update(options.update2version))
 

@@ -102,20 +102,17 @@ class PathsManager:
 
     @classmethod
     def get_copy_path_for_update(cls):
-        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board_copy"))
+        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, ".web2board_copy"))
 
-    @classmethod
-    def get_original_path_for_update(cls):
-        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board"))
 
     @classmethod
     def set_all_constants(cls):
         cls.EXECUTABLE_PATH = os.getcwd()
         cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.get_executable_extension()
         cls.MAIN_PATH = cls.get_main_path()
-        cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, 'web2board-config.json'))
+        cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, '.web2board-config.json'))
         cls.COPY_PATH = cls.get_copy_path_for_update()
-        cls.ORIGINAL_PATH = cls.get_original_path_for_update()
+        cls.ORIGINAL_PATH = cls.get_external_data_folder()
 
         if utils.is_mac() and utils.are_we_frozen():
             cls.RES_PATH = os.path.join(cls.MAIN_PATH, os.pardir, 'Resources', 'res')

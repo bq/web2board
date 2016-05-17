@@ -183,7 +183,6 @@ def set_log_level(log_level):
 
 def open_file(filename):
     filePath = filename.encode(sys.getfilesystemencoding())
-
     if sys.platform == "win32":
         os.popen('"{0}" {1}'.format(filePath, " ".join(sys.argv[1:])))
     else:

@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import shutil
+import subprocess
 import sys
 import time
 
@@ -91,13 +92,25 @@ class Web2BoardUpdater(Updater):
             self.log.info("updating in process")
             self.log.debug("killing original web2board")
             utils.kill_process("web2board")
+
             if os.path.exists(pm.ORIGINAL_PATH):
                 self.log.info("removing original files")
                 utils.rmtree(pm.ORIGINAL_PATH)
+                self.log.info("removed original files")
             else:
                 os.makedirs(pm.ORIGINAL_PATH)
             utils.copytree(versionPath, pm.ORIGINAL_PATH)
             os.remove(versionPath + ".confirm")
+            self.log.debug("removing old version...")
+            shutil.rmtree(versionPath)
+            self.log.debug("removed old version")
+
+            self.log.info("running new version")
+            originalExePath = os.path.join(pm.ORIGINAL_PATH, "web2board" + utils.get_executable_extension())
+            self.log.info(originalExePath)
+            subprocess.call(['chmod', '0777', originalExePath])
+            command = '"{0}" &'.format(originalExePath)
+            os.popen(command)
         except:
             self.log.critical("Error updating", exc_info=1)
         finally:
