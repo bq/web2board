@@ -94,6 +94,7 @@ class TestCodeHub(unittest.TestCase):
         self.assertEqual(result, "PORT")
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
+
         uploadReturn = (False, {"err": "errorMessage"},)
         self.compileUploaderMock.should_receive("upload_avr_hex").and_return(uploadReturn).once()
 

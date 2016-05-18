@@ -8,6 +8,7 @@ import click
 from libs import utils
 from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
+from libs.Updaters.Updater import Updater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.Version import Version
 from libs.utils import find_files
@@ -177,7 +178,7 @@ class Packager:
             click.confirm = originalClickConfirm
 
     def _createMainStructureAndExecutables(self):
-        if self.version == Web2BoardUpdater.NONE_VERSION:
+        if self.version == Updater.NONE_VERSION:
             self.prepareResFolderForExecutable()
             self.__init__()
             return self._createMainStructureAndExecutables()

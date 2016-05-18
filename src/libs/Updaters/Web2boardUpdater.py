@@ -1,19 +1,20 @@
-from glob import glob
 import logging
 import os
 import platform
 import shutil
+from glob import glob
 
 from libs import utils
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager as pm
-from libs.Updaters.Updater import Updater, VersionInfo
-from libs.Version import Version
+from libs.Updaters.Updater import VersionInfo
 
+class UpdaterError(Exception):
+    pass
 
-class Web2BoardUpdater():
+class Web2BoardUpdater:
     __globalWeb2BoardUpdater = None
     log = logging.getLogger(__name__)
 
@@ -63,11 +64,12 @@ class Web2BoardUpdater():
             with open(confirmationPath, "w"):
                 pass
 
+    @asynchronous()
     def update(self, version):
         version_path = pm.get_dst_path_for_update(version)
         confirm_path = version_path + ".confirm"
         if not os.path.isdir(version_path) or not os.path.isfile(confirm_path):
-            raise Exception("Unable to update, not all necessary files downloaded")
+            raise UpdaterError("Unable to update, not all necessary files downloaded")
 
         self.log.info("updating in process")
         utils.copytree(version_path, pm.PROGRAM_PATH)

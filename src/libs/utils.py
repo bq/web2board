@@ -151,7 +151,7 @@ def kill_process(name):
     name += get_executable_extension()
     if is_windows():
         try:
-            os.system("taskkill /im {}".format(name))
+            os.system("taskkill /im {} -F".format(name))
         except:
             log.exception("Failing killing old web2board process")
     else:

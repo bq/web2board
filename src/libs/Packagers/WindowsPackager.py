@@ -1,5 +1,4 @@
 from subprocess import call
-
 from libs.Packagers.Packager import Packager
 from libs.utils import *
 
@@ -49,7 +48,7 @@ class WindowsPackager(Packager):
             log.info("installer created successfully")
         except Exception as e:
             log.exception("Error compiling")
-            print str(e)
+            print(str(e))
         finally:
             log.debug("Cleaning files")
             os.chdir(self.web2boardPath)

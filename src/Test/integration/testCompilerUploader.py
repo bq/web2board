@@ -1,10 +1,8 @@
 import os
-import sys
 import unittest
 from pprint import pprint
 
 import click
-from PySide.QtGui import QApplication
 from flexmock import flexmock, flexmock_teardown
 
 from Test.testingUtils import restore_test_resources
@@ -14,11 +12,6 @@ from libs.PathsManager import PathsManager as pm
 from libs.utils import is_windows, is_linux, is_mac
 
 log = initLogging(__name__)
-try:
-    QApplication(sys.argv)
-except:
-    pass
-
 
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None

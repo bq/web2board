@@ -44,9 +44,9 @@ SetCompressor /SOLID lzma
 !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
 ;Run Cura after installing
-!define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Start Web2board"
-!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+;!define MUI_FINISHPAGE_RUN
+;!define MUI_FINISHPAGE_RUN_TEXT "Start Web2board"
+;!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
 
 ; Pages
 ;!insertmacro MUI_PAGE_WELCOME
@@ -67,6 +67,12 @@ ReserveFile '${NSISDIR}\Plugins\InstallOptions.dll'
 #ReserveFile "header.bmp"
 
 ;--------------------------------
+
+Section "Close web2board (will kill all python processes)"
+  ; Add the libraries and the register.
+  ExecWait 'taskkill /im web2board.exe -F'
+  ExecWait 'taskkill /im python.exe -F'
+SectionEnd
 
 ; The stuff to install
 Section "Web2board"

@@ -11,7 +11,7 @@ import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 from libs.Version import Version
-from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater, UpdaterError
 import subprocess
 
 
@@ -41,39 +41,8 @@ PathsManager.RES_ICO_PATH = os.path.join(PathsManager.RES_PATH, 'Web2board.ico')
 PathsManager.RES_ICONS_PATH = os.path.join(PathsManager.RES_PATH, 'icons')
 
 
-@asynchronous()
-def factory_reset():
-    global msgBox
-    try:
-        time.sleep(1)
-        start_watchdog()
-        log_message("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
-        if os.path.exists(PathsManager.PROGRAM_PATH):
-                shutil.rmtree(PathsManager.PROGRAM_PATH)
-        log_message("Extracting web2board...")
-        shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
-        msgBox.end_successful()
-    except Exception as e:
-        log.exception("Failed performing Factory reset")
-        msgBox.end_error(str(e))
-
-
-@asynchronous()
-def start_watchdog():
-    global msgBox
-    timePassed = 0
-    while not msgBox.taskEnded and timePassed < WATCHDOG_TIME:
-        time.sleep(0.3)
-        timePassed += 0.3
-    if timePassed >= WATCHDOG_TIME:
-        msgBox.end_error()
-
-
 def is_factory_reset():
     return len(sys.argv) > 1 and (sys.argv[1].lower() == "factoryreset" or sys.argv[1].lower() == "--factoryreset")
-
-def should_start_app():
-    return len(sys.argv) <= 2 or (sys.argv[2].lower() != "nostartapp" and sys.argv[2].lower() != "--nostartapp")
 
 def needs_factory_reset():
     if not os.path.exists(PathsManager.PROGRAM_PATH):
@@ -89,6 +58,60 @@ def needs_factory_reset():
     if current_version != installer_version:
         return True
     return False
+
+@asynchronous()
+def factory_reset_process():
+    global msgBox
+    try:
+        time.sleep(1)
+        log_message("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
+        if os.path.exists(PathsManager.PROGRAM_PATH):
+                shutil.rmtree(PathsManager.PROGRAM_PATH)
+        log_message("Extracting web2board...")
+        shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
+        msgBox.end_successful()
+    except Exception as e:
+        log.exception("Failed performing Factory reset")
+        msgBox.end_error(str(e))
+
+def perform_factory_reset_if_needed():
+    if is_factory_reset() or needs_factory_reset():
+        Web2BoardUpdater().clear_new_versions()
+        app = start_dialog()
+        factory_reset_process()
+        app.mainloop()
+
+def update_if_necessary():
+    global msgBox
+    def handle_result(f):
+        try:
+            f.result()
+            msgBox.end_successful()
+        except UpdaterError as e:
+            msgBox.end_successful(str(e))
+
+    w2bUpdater = Web2BoardUpdater()
+    new_version = w2bUpdater.get_new_downloaded_version()
+    if new_version is not None:
+        app = start_dialog()
+        time.sleep(1)
+        log_message("updating web2board to version: {}".format(new_version))
+        future = w2bUpdater.update(new_version)
+        future.add_done_callback(handle_result)
+        app.mainloop()
+
+@asynchronous()
+def start_watchdog():
+    global msgBox
+    timePassed = 0
+    while not msgBox.taskEnded and timePassed < WATCHDOG_TIME:
+        time.sleep(0.3)
+        timePassed += 0.3
+    if timePassed >= WATCHDOG_TIME:
+        msgBox.end_error()
+
+def should_start_app():
+    return len(sys.argv) <= 2 or (sys.argv[2].lower() != "nostartapp" and sys.argv[2].lower() != "--nostartapp")
 
 def log_message(message):
     global msgBox
@@ -179,8 +202,8 @@ def start_dialog():
             self.successfully_ended = True
             self.close_button.configure(state=DISABLED)
             self.ok_button.configure(text="Start Web2Board", command=self.close, state=NORMAL)
-            self.set_message("Web2board successfully configured")
-            self.after(100, self.close)
+            self.set_message("Web2board successfully configured\nWeb2board will start in a moment")
+            self.after(1000, self.close)
 
         def end_error(self, error):
             self.task_ended = True
@@ -193,7 +216,7 @@ def start_dialog():
             self.task_ended = False
             self.close_button.configure(state=DISABLED)
             self.ok_button.configure(state=DISABLED)
-            factory_reset()
+            factory_reset_process()
 
     root = Tk()
     try:
@@ -201,6 +224,7 @@ def start_dialog():
     except:
         pass
     msgBox = Application(root)
+    start_watchdog()
     return root
 
 
@@ -209,11 +233,9 @@ if __name__ == '__main__':
     try:
         log.info("web2boardPath: {}".format(web2boardPath))
         utils.kill_process("web2board")
-        w2bUpdater = Web2BoardUpdater()
-        if is_factory_reset() or needs_factory_reset():
-            app = start_dialog()
-            factory_reset()
-            app.mainloop()
+
+        perform_factory_reset_if_needed()
+        update_if_necessary()
 
         if should_start_app() and (msgBox is None or msgBox.successfully_ended):
             if is_factory_reset():

@@ -8,7 +8,7 @@ from flexmock import flexmock, flexmock_teardown
 from Test.testingUtils import restore_test_resources, restore_paths
 from libs import utils
 from libs.PathsManager import PathsManager as pm
-from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater, UpdaterError
 
 
 class TestWeb2boardUpdater(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
     def test_update_updatesFilesInProgramPath(self):
         self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 
-        self.updater.update("0")
+        self.updater.update("0").result()
 
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
 
@@ -38,13 +38,14 @@ class TestWeb2boardUpdater(unittest.TestCase):
         pm.PROGRAM_PATH = os.path.join(self.test_data_path, 'otherProgramPath')
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
-        self.updater.update("0")
+        self.updater.update("0").result()
 
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
         self.assertFalse(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
     def test_update_raiseExceptionIfNoConfirmFile(self):
-        self.assertRaises(Exception, self.updater.update, "1")
+        with self.assertRaises(UpdaterError):
+            self.updater.update("1").result()
 
         self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 
