@@ -3,7 +3,8 @@ wshubsapi>=0.7.6
 glob2
 pyserial
 flexmock
-pyinstaller
+pyinstaller==3.0.0
+setuptools==19.2
 lockfile
 requests
 bottle
