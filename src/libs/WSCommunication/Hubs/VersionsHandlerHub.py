@@ -18,8 +18,8 @@ class VersionsHandlerHub(Hub):
         self.w2b_updater = Web2BoardUpdater()
         self.lib_updater = BitbloqLibsUpdater()
 
-    @staticmethod
-    def get_version():
+    def get_version(self):
+        self.w2b_updater.clear_new_versions()
         return Version.web2board
 
     def set_lib_version(self, version):
@@ -30,17 +30,16 @@ class VersionsHandlerHub(Hub):
     def set_web2board_version(self, version):
         if Config.check_online_updates and version != Version.web2board:
             try:
-                self.w2b_updater.downloadVersion(version, self.__download_progress, self.__download_ended).result()
-            except:
-                self.clients.get_subscribed_clients().download_ended(False)
+                self.w2b_updater.download_version(version, self.__download_progress).result()
+                self.__download_ended(True)
+            except Exception as e:
+                self.__download_ended(str(e))
                 raise
-            self.w2b_updater.makeAnAuxiliaryCopy()
-            self.w2b_updater.runAuxiliaryCopy(version)
             return True
         return False
 
     def __download_progress(self, current, total, percentage):
         self.clients.get_subscribed_clients().download_progress(current, total, percentage)
 
-    def __download_ended(self, task):
-        self.clients.get_subscribed_clients().downloadEnded(True)
+    def __download_ended(self, success):
+        self.clients.get_subscribed_clients().downloadEnded(success)

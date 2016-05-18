@@ -137,7 +137,7 @@ class TestUpdater(unittest.TestCase):
         self.assertEqual(self.updater.currentVersionInfo.librariesNames, ["l1", "l2"])
         self.assertEqual(self.updater.currentVersionInfo.version, onlineVersionInfo.version)
         self.assertEqual(self.updater.currentVersionInfo.version, onlineVersionInfo.version)
-        self.assertFalse(self.updater._areWeMissingLibraries())
+        self.assertFalse(self.updater._are_we_missing_libraries())
         self.assertFalse(self.updater._isVersionDifferentToCurrent(onlineVersionInfo))
         self.assertFalse(self.updater.isNecessaryToUpdate())
 

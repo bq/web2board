@@ -20,7 +20,7 @@ class Downloader:
         urllib.urlretrieve(url, dst)
 
     @asynchronous()
-    def download(self, url, dst=None, info_callback=None, end_callback=None):
+    def download(self, url, dst=None, info_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
 
@@ -45,6 +45,4 @@ class Downloader:
                     info_callback(pathSize, total_size, pathSize * 100.0 / float(total_size))
                 time.sleep(self.refreshTime)
 
-        if end_callback is not None:
-            download_task.add_done_callback(end_callback)
         return download_task.result()

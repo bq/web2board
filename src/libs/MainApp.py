@@ -7,7 +7,6 @@ import urllib2
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 
-from PySide import QtGui
 from tornado import web, ioloop
 from wshubsapi.hubs_inspector import HubsInspector
 

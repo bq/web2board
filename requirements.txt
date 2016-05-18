@@ -1,5 +1,5 @@
 click==5.1
-wshubsapi>=0.7.1
+wshubsapi>=0.7.6
 glob2
 pyserial
 flexmock
@@ -7,3 +7,4 @@ pyinstaller
 lockfile
 requests
 bottle
+tornado

@@ -1,3 +1,4 @@
+from glob import glob
 import logging
 import os
 import platform
@@ -35,8 +36,28 @@ class Web2BoardUpdater(Updater):
 
         self.downloader = Downloader(refreshTime=1)
 
-    def _areWeMissingLibraries(self):
+    def __extract_version_from_path(self, path):
+        version_to_end = path.rsplit("_",1)[1]
+        return version_to_end.split(".")[0]
+
+
+    def _are_we_missing_libraries(self):
         return False
+
+    def get_new_downloaded_version(self):
+        confirm_versions = glob(pm.get_dst_path_for_update("*.confirm"))
+        versions = [self.__extract_version_from_path(v) for v in confirm_versions]
+
+    def clear_new_versions(self):
+        confirm_versions = glob(pm.get_dst_path_for_update("*.confirm"))
+        for confirm_version in confirm_versions:
+            os.remove(confirm_version)
+        zip_versions = glob(pm.get_dst_path_for_update("*.zip"))
+        for zip_version in zip_versions:
+            os.remove(zip_version)
+        folder_versions = [f for f in glob(pm.get_dst_path_for_update("*")) if os.path.isdir(f)]
+        for folder_version in folder_versions:
+            shutil.rmtree(folder_version)
 
     def getDownloadUrl(self, onlineVersionInfo=None):
         if onlineVersionInfo is None:
@@ -49,41 +70,16 @@ class Web2BoardUpdater(Updater):
         return Config.download_url_template.format(**args)
 
     @asynchronous()
-    def downloadVersion(self, version, infoCallback=None, endCallback=None):
+    def download_version(self, version, infoCallback=None):
         confirmationPath = pm.get_dst_path_for_update(version) + ".confirm"
         zipDstPath = pm.get_dst_path_for_update(version) + ".zip"
         if not os.path.exists(confirmationPath):
             url = self.getDownloadUrl(VersionInfo(version))
-            self.downloader.download(url, dst=zipDstPath, info_callback=infoCallback, end_callback=endCallback).result()
+            self.downloader.download(url, dst=zipDstPath, info_callback=infoCallback).result()
             utils.extract_zip(zipDstPath, pm.get_dst_path_for_update(version))
             os.remove(zipDstPath)
             with open(confirmationPath, "w"):
                 pass
-        else:
-            endCallback(None)
-
-    def makeAnAuxiliaryCopy(self):
-        try:
-            self.log.info("Creating an auxiliary copy of the program in {}".format(pm.COPY_PATH))
-            if os.path.exists(pm.COPY_PATH):
-                shutil.rmtree(pm.COPY_PATH)
-            shutil.copytree(pm.MAIN_PATH, pm.COPY_PATH)
-            os.rename(self.__executableCopyOriginalName, self.__executableCopyNewName)
-        except:
-            self.log.critical("Upload process finished due to a problem in the uploader", exc_info=1)
-
-    def runAuxiliaryCopy(self, version):
-        try:
-            self.log.info("Running auxiliary copy")
-            command = '"{0}" --update2version {1} &'.format(self.__executableCopyNewName, version)
-            self.log.info("executing command: {}".format(command))
-            logging.getLogger().removeHandler(logging.getLogger().handlers[1])
-            os.popen(command)
-            self.log.info("waiting to be killed")
-            time.sleep(10)
-            raise Exception("Program not ended after calling copy")
-        except:
-            self.log.critical("Upload process finished due to a problem in the uploader", exc_info=1)
 
     def update(self, versionPath):
         try:
@@ -115,4 +111,5 @@ class Web2BoardUpdater(Updater):
             self.log.critical("Error updating", exc_info=1)
         finally:
             sys.exit(1)
+
 

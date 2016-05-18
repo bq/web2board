@@ -48,31 +48,6 @@ class TestWeb2boardUpdater(unittest.TestCase):
         time.sleep = lambda x: None
         self.updater = Web2BoardUpdater("readme", "readme_copy")
 
-    def test_makeAuxiliaryCopy_refreshContentInCopyPathIfCopyPathDoesNotExist(self):
-        self.__setUpForCopyingFolders()
-
-        self.updater.makeAnAuxiliaryCopy()
-
-        self.assertTrue(os.path.exists(self.copyPath))
-        self.assertTrue(os.path.isfile(self.copyPath + os.sep + "readme_copy"))
-
-    def test_makeAuxiliaryCopy_runsCopyProgram(self):
-        self.__setUpForCopyingFolders()
-        self.osMock.should_receive("popen").with_args('"{}" &'.format(self.copyPath + os.sep + "readme_copy"))
-
-        self.updater.makeAnAuxiliaryCopy()
-
-    def test_makeAuxiliaryCopy_callsLogCriticalEvenRaisingException(self):
-        self.__setUpForCopyingFolders()
-        flexmock(self.updater.log).should_receive("critical").once()
-        self.osMock.should_receive("rename").and_raise(Exception)
-
-        self.updater.makeAnAuxiliaryCopy()
-
-        self.assertTrue(os.path.exists(self.mainPath))
-        self.assertTrue(os.path.isfile(self.mainPath + os.sep + "readme"))
-        self.assertTrue(os.path.isfile(self.mainPath + os.sep + "0.zip"))
-
     def test_update_callsLogCriticalIfWeAreInOriginalPath(self):
         self.__setUpForCopyingFolders()
         flexmock(self.updater.log).should_receive("critical").once()

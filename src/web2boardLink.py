@@ -89,12 +89,10 @@ def needs_factory_reset():
         return True
     return False
 
-
 def log_message(message):
     global msgBox
     log.info(message)
     msgBox.set_message(message)
-
 
 def start_dialog():
     global msgBox

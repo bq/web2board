@@ -62,8 +62,6 @@ class TestVersionsHandlerHub(unittest.TestCase):
     def test_setWeb2boardVersion_returnsTrue(self):
         result = Future()
         result.set_result(True)
-        flexmock(self.updater).should_receive("downloadVersion").and_return(result).once()
-        flexmock(self.updater).should_receive("makeAnAuxiliaryCopy").once()
-        flexmock(self.updater).should_receive("runAuxiliaryCopy").once()
+        flexmock(self.updater).should_receive("download_version").and_return(result).once()
 
         self.versionsHandlerHub.set_web2board_version("0.0.1")

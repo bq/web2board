@@ -52,12 +52,3 @@ class TestDownloader(unittest.TestCase):
 
         self.downloader.download(url, dst, info_callback=self.__infoCallbackMock).result()
 
-    def test_download_callsFinishCallback(self):
-        url = "url"
-        dst = __file__
-
-        self.urlopenMock.once()
-        flexmock(self).should_receive("__finishCallbackMock").at_least().times(1)
-        flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
-
-        self.downloader.download(url, dst, end_callback=self.__finishCallbackMock).result()

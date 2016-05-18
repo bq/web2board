@@ -40,7 +40,7 @@ class Updater:
     def _getCurrentVersionNumber(self):
         return self.getVersionNumber(self.currentVersionInfo)
 
-    def _areWeMissingLibraries(self):
+    def _are_we_missing_libraries(self):
         log.debug("[{0}] Checking library names".format(self.name))
         if not os.path.exists(self.destinationPath):
             return True
@@ -91,7 +91,7 @@ class Updater:
         :type versionToCompare: VersionInfo
         """
         versionToCompare = self.currentVersionInfo if versionToCompare is None else versionToCompare
-        return self._isVersionDifferentToCurrent(versionToCompare) or self._areWeMissingLibraries()
+        return self._isVersionDifferentToCurrent(versionToCompare) or self._are_we_missing_libraries()
 
     def update(self, versionToUpload):
         log.info('[{0}] Downloading version {1}, from {2}'
