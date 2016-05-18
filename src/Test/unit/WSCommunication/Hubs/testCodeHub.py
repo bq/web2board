@@ -5,8 +5,9 @@ from wshubsapi.hub import UnsuccessfulReplay
 from wshubsapi.hubs_inspector import HubsInspector
 from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
-from Test.testingUtils import createCompilerUploaderMock, createSenderMock
+from Test.testingUtils import createCompilerUploaderMock, create_sender_mock
 from libs.CompilerUploader import CompilerUploader
+from libs.Version import Version
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
 from libs.PathsManager import PathsManager as pm
 from flexmock import flexmock, flexmock_teardown
@@ -21,7 +22,7 @@ class TestCodeHub(unittest.TestCase):
         self.codeHub = HubsInspector.get_hub_instance(CodeHub)
         """:type : CodeHub"""
 
-        self.sender = createSenderMock()
+        self.sender = create_sender_mock()
 
         self.originalConstruct = CompilerUploader.construct
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
@@ -83,7 +84,7 @@ class TestCodeHub(unittest.TestCase):
         result = self.codeHub.upload("myCode", self.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
-        self.assertEqual(result.replay, uploadReturn[1]["err"])
+        self.assertEqual(result.reply, uploadReturn[1]["err"])
 
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
         self.compileUploaderMock.should_receive("upload_avr_hex").and_return((True, {})).once()
@@ -99,4 +100,4 @@ class TestCodeHub(unittest.TestCase):
         result = self.codeHub.upload_hex("hexText", self.compileUploaderMock.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
-        self.assertEqual(result.replay, uploadReturn[1]["err"])
+        self.assertEqual(result.reply, uploadReturn[1]["err"])

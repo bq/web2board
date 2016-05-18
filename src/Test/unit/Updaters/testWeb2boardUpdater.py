@@ -2,84 +2,72 @@ import os
 import shutil
 import unittest
 import time
-
 import sys
-from flexmock import flexmock
+from flexmock import flexmock, flexmock_teardown
 
-from Test.testingUtils import restoreAllTestResources, restorePaths
+from Test.testingUtils import restore_test_resources, restore_paths
 from libs import utils
-from libs.PathsManager import PathsManager
+from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 
 
 class TestWeb2boardUpdater(unittest.TestCase):
     def setUp(self):
-        self.testDataPath = os.path.join(PathsManager.TEST_SETTINGS_PATH, "Updater", "Web2boardUpdater")
-        self.versionPath = os.path.join(self.testDataPath, "versionPath")
-        self.mainPath = os.path.join(self.testDataPath, "main")
-        self.copyPath = os.path.join(self.testDataPath, "copy")
+        relative_data_path = os.path.join("Updater", "Web2boardUpdater")
+        self.test_data_path = os.path.join(pm.TEST_SETTINGS_PATH, relative_data_path)
+        self.main_path = os.path.join(self.test_data_path, "main")
         self.updater = Web2BoardUpdater()
-        self.original_osPopen = os.popen
-        self.original_osRename = os.rename
-        self.original_sleep = time.sleep
-        self.original_logCritical = Web2BoardUpdater.log.critical
-        self.original_shutil_copy = shutil.copytree
-        self.original_killProcess = utils.kill_process
-        self.original_exit = sys.exit
-
-        self.osMock = flexmock(os, popen=lambda x: None)
-        self.exitMock = flexmock(sys, exit=lambda x: None)
-        restoreAllTestResources()
+        self.os_mock = flexmock(os, popen=lambda x: None)
+        self.exit_mock = flexmock(sys, exit=lambda x: None)
+        restore_test_resources(relative_data_path)
+        pm.get_dst_path_for_update = classmethod(lambda cls, v: self.main_path + os.sep + "_" + v)
+        pm.PROGRAM_PATH = os.path.join(self.test_data_path, 'programPath')
 
     def tearDown(self):
-        os.popen = self.original_osPopen
-        os.rename = self.original_osRename
-        time.sleep = self.original_sleep
-        utils.kill_process = self.original_killProcess
-        shutil.copytree = self.original_shutil_copy
-        sys.exit = self.original_exit
-        Web2BoardUpdater.log.critical = self.original_logCritical
-        restorePaths()
+        flexmock_teardown()
+        restore_paths()
 
-    def __setUpForCopyingFolders(self):
-        PathsManager.MAIN_PATH = self.mainPath
-        PathsManager.ORIGINAL_PATH = self.mainPath
-        PathsManager.COPY_PATH = self.copyPath
-        time.sleep = lambda x: None
-        self.updater = Web2BoardUpdater("readme", "readme_copy")
+    def test_update_updatesFilesInProgramPath(self):
+        self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 
-    def test_update_callsLogCriticalIfWeAreInOriginalPath(self):
-        self.__setUpForCopyingFolders()
-        flexmock(self.updater.log).should_receive("critical").once()
+        self.updater.update("0")
 
-        self.updater.update("/")
+        self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
 
-    def __setUpForUpdate(self):
-        self.__setUpForCopyingFolders()
-        PathsManager.MAIN_PATH = PathsManager.COPY_PATH
-        with open(self.versionPath + ".confirm", "w"):
-            pass
+    def test_update_removesOriginalFiles(self):
+        pm.PROGRAM_PATH = os.path.join(self.test_data_path, 'otherProgramPath')
+        self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
-    def test_update_killsWeb2boardProcess(self):
-        self.__setUpForUpdate()
-        flexmock(utils).should_receive("kill_process").with_args("web2board").once()
+        self.updater.update("0")
 
-        self.updater.update(self.versionPath)
+        self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
+        self.assertFalse(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
-    def test_update_updatesFilesInMain(self):
-        self.__setUpForUpdate()
-        flexmock(utils).should_receive("kill_process")
+    def test_update_raiseExceptionIfNoConfirmFile(self):
+        self.assertRaises(Exception, self.updater.update, "1")
 
-        self.updater.update(self.versionPath)
+        self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 
-        self.assertTrue(os.path.isfile(self.mainPath + os.sep + "new"))
-        self.assertFalse(os.path.isfile(self.mainPath + os.sep + "0.zip"))
-        self.assertFalse(os.path.isfile(self.mainPath + os.sep + "readme"))
+    def test_get_new_download_version__returnsVersionIfOnlyOneConfirm(self):
+        self.assertEqual(self.updater.get_new_downloaded_version(), "0")
 
-    def test_update_callsExitAfterExecutingUpdate(self):
-        self.__setUpForUpdate()
-        flexmock(utils).should_receive("kill_process")
-        self.exitMock.should_receive("exit").once()
+    def test_get_new_download_version__returnsNewerVersion(self):
+        versions = ["3.0.1", "3.0.0", "2.99.1"]
+        for v in versions:
+            with open(pm.get_dst_path_for_update(v) + ".confirm", "w"):
+                pass
 
-        self.updater.update(self.versionPath)
+        self.assertEqual(self.updater.get_new_downloaded_version(), versions[0])
 
+    def test_get_new_download_version__returnsNoneIfNoConfirm(self):
+        os.remove(pm.get_dst_path_for_update("0") + ".confirm")
+
+        self.assertIsNone(self.updater.get_new_downloaded_version())
+
+
+    def test_clear_new_versions_removesAllVersionsFiles(self):
+        self.updater.clear_new_versions()
+
+        files = os.listdir(self.main_path)
+        self.assertEqual(len(files), 1)
+        self.assertEqual(files[0], "readme")

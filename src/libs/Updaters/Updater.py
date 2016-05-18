@@ -17,6 +17,35 @@ class VersionInfo:
         self.file2DownloadUrl = file2DownloadUrl
         """:type : str | dict """
         self.librariesNames = librariesNames
+        try:
+            self.__get_version_numbers()
+        except (ValueError, AttributeError):
+            raise Exception("bad format version: {}".format(version))
+
+    def __eq__(self, other):
+        return self.version == other.version
+
+    def __ne__(self, other):
+        return self.version != other.version
+
+    def __gt__(self, other):
+        zipped = zip(self.__get_version_numbers(), other.__get_version_numbers())
+        for s, o in zipped:
+            if s > o:
+                return True
+        return False
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __le__(self, other):
+        return other >= self
+
+    def __lt__(self, other):
+        return other > self
+
+    def __get_version_numbers(self):
+        return [int(n) for n in self.version.split(".")]
 
     def getDictionary(self):
         return self.__dict__

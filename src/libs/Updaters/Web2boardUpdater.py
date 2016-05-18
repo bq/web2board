@@ -3,9 +3,6 @@ import logging
 import os
 import platform
 import shutil
-import subprocess
-import sys
-import time
 
 from libs import utils
 from libs.Config import Config
@@ -16,37 +13,25 @@ from libs.Updaters.Updater import Updater, VersionInfo
 from libs.Version import Version
 
 
-class Web2BoardUpdater(Updater):
+class Web2BoardUpdater():
     __globalWeb2BoardUpdater = None
     log = logging.getLogger(__name__)
 
-    def __init__(self, copyOriginName=None, copyNewName=None):
-        Updater.__init__(self)
-        self.currentVersionInfo = VersionInfo(Version.web2board)
-        self.destinationPath = pm.ORIGINAL_PATH
+    def __init__(self):
         self.name = "Web2BoardUpdater"
-
-        copyPath = pm.COPY_PATH
-        if copyOriginName is None:
-            copyOriginName = "web2board" + utils.get_executable_extension()
-        if copyNewName is None:
-            copyNewName = "web2board_copy" + utils.get_executable_extension()
-        self.__executableCopyOriginalName = os.path.join(copyPath, copyOriginName)
-        self.__executableCopyNewName = os.path.relpath(os.path.join(copyPath, copyNewName), os.getcwd())
-
         self.downloader = Downloader(refreshTime=1)
 
     def __extract_version_from_path(self, path):
-        version_to_end = path.rsplit("_",1)[1]
-        return version_to_end.split(".")[0]
-
-
-    def _are_we_missing_libraries(self):
-        return False
+        version_to_end = path.rsplit("_", 1)[1]
+        return VersionInfo(version_to_end.rsplit(".", 1)[0])
 
     def get_new_downloaded_version(self):
         confirm_versions = glob(pm.get_dst_path_for_update("*.confirm"))
         versions = [self.__extract_version_from_path(v) for v in confirm_versions]
+        if len(versions) == 0:
+            return None
+        greater_version = max(versions)
+        return greater_version.version
 
     def clear_new_versions(self):
         confirm_versions = glob(pm.get_dst_path_for_update("*.confirm"))
@@ -59,10 +44,7 @@ class Web2BoardUpdater(Updater):
         for folder_version in folder_versions:
             shutil.rmtree(folder_version)
 
-    def getDownloadUrl(self, onlineVersionInfo=None):
-        if onlineVersionInfo is None:
-            onlineVersionInfo = self.downloadOnlineVersionInfo()
-
+    def get_download_url(self, onlineVersionInfo):
         args = dict(arch=64 if utils.is64bits() else 32,
                     os=platform.system(),
                     version=onlineVersionInfo.version)
@@ -74,42 +56,26 @@ class Web2BoardUpdater(Updater):
         confirmationPath = pm.get_dst_path_for_update(version) + ".confirm"
         zipDstPath = pm.get_dst_path_for_update(version) + ".zip"
         if not os.path.exists(confirmationPath):
-            url = self.getDownloadUrl(VersionInfo(version))
+            url = self.get_download_url(VersionInfo(version))
             self.downloader.download(url, dst=zipDstPath, info_callback=infoCallback).result()
             utils.extract_zip(zipDstPath, pm.get_dst_path_for_update(version))
             os.remove(zipDstPath)
             with open(confirmationPath, "w"):
                 pass
 
-    def update(self, versionPath):
-        try:
-            if pm.MAIN_PATH != pm.COPY_PATH:
-                raise Exception("Unable to update, we are in the original version")
-            self.log.info("updating in process")
-            self.log.debug("killing original web2board")
-            utils.kill_process("web2board")
+    def update(self, version):
+        version_path = pm.get_dst_path_for_update(version)
+        confirm_path = version_path + ".confirm"
+        if not os.path.isdir(version_path) or not os.path.isfile(confirm_path):
+            raise Exception("Unable to update, not all necessary files downloaded")
 
-            if os.path.exists(pm.ORIGINAL_PATH):
-                self.log.info("removing original files")
-                utils.rmtree(pm.ORIGINAL_PATH)
-                self.log.info("removed original files")
-            else:
-                os.makedirs(pm.ORIGINAL_PATH)
-            utils.copytree(versionPath, pm.ORIGINAL_PATH)
-            os.remove(versionPath + ".confirm")
-            self.log.debug("removing old version...")
-            shutil.rmtree(versionPath)
-            self.log.debug("removed old version")
+        self.log.info("updating in process")
+        utils.copytree(version_path, pm.PROGRAM_PATH)
 
-            self.log.info("running new version")
-            originalExePath = os.path.join(pm.ORIGINAL_PATH, "web2board" + utils.get_executable_extension())
-            self.log.info(originalExePath)
-            subprocess.call(['chmod', '0777', originalExePath])
-            command = '"{0}" &'.format(originalExePath)
-            os.popen(command)
-        except:
-            self.log.critical("Error updating", exc_info=1)
-        finally:
-            sys.exit(1)
-
-
+        if os.path.exists(pm.PROGRAM_PATH):
+            self.log.info("removing original files")
+            utils.rmtree(pm.PROGRAM_PATH)
+            self.log.info("removed original files")
+        else:
+            os.makedirs(pm.ORIGINAL_PATH)
+        utils.copytree(version_path, pm.PROGRAM_PATH)

@@ -4,7 +4,7 @@ import unittest
 import logging
 from flexmock import flexmock_teardown
 
-from Test.testingUtils import restoreAllTestResources, restorePaths
+from Test.testingUtils import restore_test_resources, restore_paths
 from libs.PathsManager import PathsManager
 from libs.Config import Config
 
@@ -13,10 +13,10 @@ class TestConfig(unittest.TestCase):
     def setUp(self):
         self.myTestFolder = os.path.join(PathsManager.TEST_SETTINGS_PATH, "Config")
         self.originalConfigDict = Config.get_config_values()
-        restoreAllTestResources()
+        restore_test_resources()
 
     def tearDown(self):
-        restorePaths()
+        restore_paths()
         flexmock_teardown()
         Config.__dict__.update({x: y for x, y in self.originalConfigDict.items()})
 

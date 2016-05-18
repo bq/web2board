@@ -6,8 +6,8 @@ from libs.PathsManager import PathsManager
 
 class Version:
     _log = logging.getLogger(__name__)
-    web2board = None
-    bitbloq_libs = None
+    web2board = "0.0.0"
+    bitbloq_libs = "0.0.0"
     bitbloq_libs_libraries = []
 
     @classmethod

@@ -5,7 +5,7 @@ import unittest
 import shutil
 from flexmock import flexmock
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restore_test_resources
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
@@ -38,7 +38,7 @@ class TestUpdater(unittest.TestCase):
         self.original_listDirsInPath = utils.list_directories_in_path
         self.original_json_dump = json.dump
 
-        restoreAllTestResources()
+        restore_test_resources()
 
         self.zipToClearPath = None
 

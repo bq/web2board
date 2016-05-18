@@ -5,10 +5,10 @@ import unittest
 import serial.tools.list_ports
 from flexmock import flexmock
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restore_test_resources
 from libs import utils
 from libs.PathsManager import PathsManager
-
+from libs.Version import Version
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
@@ -19,7 +19,7 @@ class TestUtils(unittest.TestCase):
         self.zipFolder = os.path.join(self.myTestFolder, "zip")
 
         self.original_list_ports_comports = serial.tools.list_ports.comports
-        restoreAllTestResources()
+        restore_test_resources()
 
     def tearDown(self):
         serial.tools.list_ports.comports = self.original_list_ports_comports

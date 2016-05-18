@@ -3,7 +3,7 @@ import unittest
 from wshubsapi.hubs_inspector import HubsInspector
 from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
-from Test.testingUtils import createCompilerUploaderMock, createSenderMock
+from Test.testingUtils import createCompilerUploaderMock, create_sender_mock
 
 # do not remove
 import libs.WSCommunication.Hubs
@@ -19,7 +19,7 @@ class TestSerialMonitorHub(unittest.TestCase):
         HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
         self.serialMonitorHub = flexmock(HubsInspector.get_hub_instance(SerialMonitorHub))
         """:type : flexmock"""
-        self.sender = createSenderMock()
+        self.sender = create_sender_mock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
 

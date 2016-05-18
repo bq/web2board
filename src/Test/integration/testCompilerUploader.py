@@ -7,7 +7,7 @@ import click
 from PySide.QtGui import QApplication
 from flexmock import flexmock, flexmock_teardown
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restore_test_resources
 from libs.CompilerUploader import CompilerUploader, CompilerException
 from libs.LoggingUtils import initLogging
 from libs.PathsManager import PathsManager as pm
@@ -60,7 +60,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.connectedBoard = self.platformToUse
         self.compiler = CompilerUploader.construct(self.__getPlatformToUse())
 
-        restoreAllTestResources()
+        restore_test_resources()
 
     def tearDown(self):
         flexmock_teardown()

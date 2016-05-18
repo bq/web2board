@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restore_test_resources
 from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
@@ -14,7 +14,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
     def setUp(self):
         self.updater = BitbloqLibsUpdater()
         self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "newLibrariesPath")
-        restoreAllTestResources()
+        restore_test_resources()
         self.original_pathManagerDict = {x: y for x, y in pm.__dict__.items()}
 
         pm.CONFIG_PATH = pm.TEST_SETTINGS_PATH + os.sep + "config.json"

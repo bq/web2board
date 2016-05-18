@@ -1,5 +1,6 @@
 import os
 
+import shutil
 from flexmock import flexmock
 
 from libs import utils
@@ -9,12 +10,13 @@ from libs.PathsManager import PathsManager
 __original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
 
 
-def restoreAllTestResources():
+def restore_test_resources(relative_path=""):
+    settings_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, relative_path)
+    res_path = os.path.join(PathsManager.TEST_RES_PATH, relative_path)
     if os.path.exists(PathsManager.TEST_SETTINGS_PATH):
-        utils.rmtree(PathsManager.TEST_SETTINGS_PATH)
-    else:
-        os.makedirs(PathsManager.TEST_SETTINGS_PATH)
-    utils.copytree(PathsManager.TEST_RES_PATH, PathsManager.TEST_SETTINGS_PATH, ignore=".pioenvs", force_copy=True)
+        shutil.rmtree(PathsManager.TEST_SETTINGS_PATH)
+    os.makedirs(settings_path)
+    utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)
 
 
 def createCompilerUploaderMock():
@@ -27,7 +29,7 @@ def createCompilerUploaderMock():
     return compileUploaderMock, CompileUploaderConstructorMock
 
 
-def createSenderMock():
+def create_sender_mock():
     class Sender:
         def __init__(self):
             self.isCompiling = lambda: None
@@ -37,5 +39,5 @@ def createSenderMock():
     return flexmock(Sender(), ID="testID")
 
 
-def restorePaths():
+def restore_paths():
     PathsManager.__dict__ = {x: y for x, y in __original_pathManagerDict.items()}

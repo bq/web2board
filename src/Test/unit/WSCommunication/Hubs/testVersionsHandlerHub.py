@@ -1,11 +1,10 @@
 import unittest
 
 import sys
-from PySide.QtGui import QApplication
 from concurrent.futures import Future
 from wshubsapi.hubs_inspector import HubsInspector
 
-from Test.testingUtils import restoreAllTestResources, createCompilerUploaderMock, createSenderMock
+from Test.testingUtils import restore_test_resources, createCompilerUploaderMock, create_sender_mock
 from libs.Version import Version
 from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 
@@ -13,12 +12,6 @@ from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 import libs.WSCommunication.Hubs
 
 from flexmock import flexmock, flexmock_teardown
-
-try:
-    QApplication(sys.argv)
-except:
-    pass
-
 
 class TestVersionsHandlerHub(unittest.TestCase):
     def setUp(self):
@@ -28,12 +21,12 @@ class TestVersionsHandlerHub(unittest.TestCase):
         """ :type : VersionsHandlerHub"""
         self.libUpdater = self.versionsHandlerHub.lib_updater
         self.updater = self.versionsHandlerHub.w2b_updater
-        self.sender = createSenderMock()
+        self.sender = create_sender_mock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
         self.testLibVersion = "1.1.1"
 
-        restoreAllTestResources()
+        restore_test_resources()
 
     def tearDown(self):
         flexmock_teardown()

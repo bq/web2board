@@ -11,6 +11,7 @@ import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 from libs.Version import Version
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 import subprocess
 
 
@@ -48,7 +49,7 @@ def factory_reset():
         start_watchdog()
         log_message("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
         if os.path.exists(PathsManager.PROGRAM_PATH):
-            shutil.rmtree(PathsManager.PROGRAM_PATH)
+                shutil.rmtree(PathsManager.PROGRAM_PATH)
         log_message("Extracting web2board...")
         shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
         msgBox.end_successful()
@@ -208,6 +209,7 @@ if __name__ == '__main__':
     try:
         log.info("web2boardPath: {}".format(web2boardPath))
         utils.kill_process("web2board")
+        w2bUpdater = Web2BoardUpdater()
         if is_factory_reset() or needs_factory_reset():
             app = start_dialog()
             factory_reset()
