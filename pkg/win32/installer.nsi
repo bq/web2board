@@ -129,7 +129,7 @@ Section "Install FTDI Drivers"
   SetOutPath "$INSTDIR\drivers\"
   File /r "drivers\"
  
-  ExecWait '"$INSTDIR\drivers\CDM v2.10.00 WHQL Certified.exe" /lm'
+  ExecWait '"$INSTDIR\drivers\CDM21216_Setup.exe" /lm'
 SectionEnd
 
 Section "Install Arduino Drivers"

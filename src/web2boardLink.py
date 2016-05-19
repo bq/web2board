@@ -87,15 +87,16 @@ def perform_factory_reset_if_needed():
 
 def update_if_necessary():
     global msgBox
+    w2bUpdater = Web2BoardUpdater()
 
     def handle_result(f):
         try:
             f.result()
+            w2bUpdater.clear_new_versions()
             msgBox.end_successful()
         except UpdaterError as e:
             msgBox.end_successful(str(e))
 
-    w2bUpdater = Web2BoardUpdater()
     new_version = w2bUpdater.get_new_downloaded_version()
     if new_version is not None:
         app = start_dialog()
