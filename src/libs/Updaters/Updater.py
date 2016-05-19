@@ -6,6 +6,8 @@ import tempfile
 import shutil
 
 from libs import utils
+from libs.Config import Config
+from libs.Downloader import Downloader
 
 log = logging.getLogger(__name__)
 
@@ -65,6 +67,7 @@ class Updater:
         """:type : str """
 
         self.name = "Updater"
+        self.downloader = Downloader()
 
     def _getCurrentVersionNumber(self):
         return self.getVersionNumber(self.currentVersionInfo)
@@ -125,7 +128,9 @@ class Updater:
     def update(self, versionToUpload):
         log.info('[{0}] Downloading version {1}, from {2}'
                  .format(self.name, versionToUpload.version, versionToUpload.file2DownloadUrl))
-        downloadedFilePath = utils.download_file(versionToUpload.file2DownloadUrl)
+        downloadedFilePath = tempfile.gettempdir() + os.sep + "w2b_tmp_libs.zip"
+        self.downloader.download(versionToUpload.file2DownloadUrl, downloadedFilePath).result()
+
         extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
         if not os.path.exists(extractFolder):
             os.mkdir(extractFolder)
@@ -135,7 +140,5 @@ class Updater:
             self._moveDownloadedToDestinationPath(extractFolder)
             self._updateCurrentVersionInfoTo(versionToUpload)
         finally:
-            if os.path.exists(downloadedFilePath):
-                os.unlink(downloadedFilePath)
             if os.path.exists(extractFolder):
                 shutil.rmtree(extractFolder)

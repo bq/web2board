@@ -16,7 +16,8 @@ def restore_test_resources(relative_path=""):
     if os.path.exists(PathsManager.TEST_SETTINGS_PATH):
         shutil.rmtree(PathsManager.TEST_SETTINGS_PATH)
     os.makedirs(settings_path)
-    utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)
+    if os.path.isdir(res_path):
+        utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)
 
 
 def createCompilerUploaderMock():

@@ -269,6 +269,20 @@ class HubsAPI(object):
 
         class __Server(GenericServer):
             
+            def get_lib_version(self, ):
+                """
+                :rtype : Future
+                """
+                args = list()
+                
+                id_ = self._get_next_message_id()
+                body = {"hub": self.hub_name, "function": "get_lib_version", "args": args, "ID": id_}
+                future = self.ws_client.get_future(id_)
+                send_return_obj = self.ws_client.send(self._serialize_object(body))
+                if isinstance(send_return_obj, Future):
+                    return send_return_obj
+                return future
+        
             def get_subscribed_clients_to_hub(self, ):
                 """
                 :rtype : Future

@@ -21,7 +21,7 @@ class BitbloqLibsUpdater(Updater):
         Updater.__init__(self)
         self.currentVersionInfo = VersionInfo(Version.bitbloq_libs,
                                               librariesNames=Version.bitbloq_libs_libraries)
-        self.destinationPath = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_SKELETON, "lib")
+        self.destinationPath = Config.get_platformio_lib_dir()
         self.name = "BitbloqLibsUpdater"
 
     def _updateCurrentVersionInfoTo(self, versionToUpload):
@@ -32,10 +32,10 @@ class BitbloqLibsUpdater(Updater):
         Version.store_values()
 
     def _moveDownloadedToDestinationPath(self, downloadedPath):
-        directoriesInUnzippedFolder = utils.list_directories_in_path(downloadedPath)
-        if len(directoriesInUnzippedFolder) != 1:
+        directories_in_folder = utils.list_directories_in_path(downloadedPath)
+        if len(directories_in_folder) != 1:
             raise BitbloqLibsUpdaterError("Not only one bitbloqLibs folder in unzipped file")
-        downloadedPath = downloadedPath + os.sep + utils.list_directories_in_path(downloadedPath)[0]
+        downloadedPath = downloadedPath + os.sep + directories_in_folder[0]
 
         if not os.path.exists(self.destinationPath):
             os.makedirs(self.destinationPath)

@@ -5,6 +5,7 @@ import unittest
 import sys
 import libs.LoggingUtils
 
+
 def __runTests(suite, reportTitle="report"):
     from Test import setConfigurationFilesForTest
     from Test.HTMLTestRunner import HTMLTestRunner
@@ -58,7 +59,7 @@ def runAllTests():
 
 if __name__ == '__main__':
     log = libs.LoggingUtils.initLogging(__name__)
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         testing = sys.argv[1]
     else:
         testing = ""

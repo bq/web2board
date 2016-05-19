@@ -22,6 +22,9 @@ class VersionsHandlerHub(Hub):
         self.w2b_updater.clear_new_versions()
         return Version.web2board
 
+    def get_lib_version(self):
+        return self.lib_updater.currentVersionInfo.version
+
     def set_lib_version(self, version):
         versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
         if self.lib_updater.isNecessaryToUpdate(versionToCompare=versionInfo):

@@ -8,6 +8,7 @@ import tempfile
 import zipfile
 from glob import glob
 from urllib2 import urlopen
+import urllib2
 import glob2
 import serial.tools.list_ports
 
@@ -96,16 +97,21 @@ def find_modules_for_pyinstaller(path, patterns):
     return list(set(listModules))
 
 
-def get_data_from_url(url):
-    f = urlopen(url)
+def get_data_from_url(url, proxy):
+    if proxy == "":
+        f = urlopen(url)
+    else:
+        proxy_handler = urllib2.ProxyHandler({'http': proxy, 'https': proxy})
+        opener = urllib2.build_opener(proxy_handler)
+        f = opener.open(urllib2.Request(url))
     return f.read()
 
 
-def download_file(url, download_path=None):
+def download_file(url, proxy, download_path=None):
     log.info("downloading " + url)
     extension = url.rsplit(".", 1)
     extension = extension[1] if len(extension) == 2 else ""
-    urlData = get_data_from_url(url)
+    urlData = get_data_from_url(url, proxy)
 
     if download_path is None:
         downloadedTempFile = tempfile.NamedTemporaryFile(suffix="." + extension, delete=False)

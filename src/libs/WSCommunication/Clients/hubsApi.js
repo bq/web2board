@@ -241,9 +241,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('VersionsHandlerHub', 'set_lib_version', arguments);
         },
 
-        getVersion : function (){
+        getLibVersion : function (){
             
-            return constructMessage('VersionsHandlerHub', 'get_version', arguments);
+            return constructMessage('VersionsHandlerHub', 'get_lib_version', arguments);
         },
 
         setWeb2boardVersion : function (version){
@@ -259,6 +259,11 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
         subscribeToHub : function (){
             
             return constructMessage('VersionsHandlerHub', 'subscribe_to_hub', arguments);
+        },
+
+        getVersion : function (){
+            
+            return constructMessage('VersionsHandlerHub', 'get_version', arguments);
         },
 
         unsubscribeFromHub : function (){

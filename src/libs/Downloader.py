@@ -1,10 +1,9 @@
 import logging
 import os
 import urllib
-
 import time
-
 import sys
+import urllib2
 
 from libs.Decorators.Asynchronous import asynchronous
 
@@ -16,24 +15,32 @@ class Downloader:
         self.refreshTime = refreshTime
 
     @asynchronous()
-    def __real_download(self, url, dst):
-        urllib.urlretrieve(url, dst)
+    def __real_download(self, url_file, dst):
+        if os.path.exists(dst):
+            os.remove(dst)
+        while True:
+            read = url_file.read(10000)  # checking every 10 kb
+            if not read:
+                break
+            with open(dst, 'ab') as f:
+                f.write(read)
 
     @asynchronous()
     def download(self, url, dst=None, info_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
 
-        download_task = self.__real_download(url, dst)
+        site = urllib2.urlopen(url)
+        download_task = self.__real_download(site, dst)
         for i in range(3):
             try:
-                site = urllib.urlopen(url)
                 meta = site.info()
                 total_size = int(meta.getheaders("Content-Length")[0])
                 break
             except:
-                self.log.warning("Unable to get download file info. retrying in 0.5s")
+                self.log.exception("Unable to get download file info. retrying in 1s")
                 time.sleep(1)
+
         else:
             self.log.error("Unable to download file")
             total_size = sys.maxint

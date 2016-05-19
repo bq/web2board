@@ -3,9 +3,12 @@ import os
 import unittest
 
 import shutil
-from flexmock import flexmock
+
+from concurrent.futures import Future
+from flexmock import flexmock, flexmock_teardown
 
 from Test.testingUtils import restore_test_resources
+from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import Updater, VersionInfo
 from libs import utils
@@ -21,6 +24,7 @@ onlineVersionTestData = {
     "file2DownloadUrl": "file2DownloadUrl",
 }
 
+# todo: needs to refactor download process
 
 class TestUpdater(unittest.TestCase):
     ORIGINAL_DOWNLOAD_ZIP_PATH = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "bitbloqLibsV1.zip")
@@ -32,22 +36,17 @@ class TestUpdater(unittest.TestCase):
         self.updater.onlineVersionUrl = "onlineVersionUrl"
         self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
 
-        self.original_getDataFromUrl = utils.get_data_from_url
-        self.original_downloadFile = utils.download_file
-        self.original_extractZip = utils.extract_zip
-        self.original_listDirsInPath = utils.list_directories_in_path
-        self.original_json_dump = json.dump
+        def download(*args):
+            f = Future()
+            f.set_result(None)
+            return f
+        self.updater.downloader = flexmock(Downloader(), download=download)
 
         restore_test_resources()
-
         self.zipToClearPath = None
 
     def tearDown(self):
-        utils.get_data_from_url = self.original_getDataFromUrl
-        utils.download_file = self.original_downloadFile
-        utils.extract_zip = self.original_extractZip
-        utils.list_directories_in_path = self.original_listDirsInPath
-        json.dump = self.original_json_dump
+        flexmock_teardown()
 
         for libraryName in versionTestData["librariesNames"]:
             if os.path.exists(self.updater.destinationPath + os.sep + libraryName):
@@ -58,14 +57,16 @@ class TestUpdater(unittest.TestCase):
         if os.path.exists(self.updater.destinationPath):
             shutil.rmtree(self.updater.destinationPath)
 
-    def __getMockForGetDataFromUrl(self, returnValue=json.dumps(versionTestData)):
+    @staticmethod
+    def __getMockForGetDataFromUrl(returnValue=json.dumps(versionTestData)):
         return flexmock(utils).should_receive("get_data_from_url").and_return(returnValue)
 
     def __getMockForDownloadFile(self):
         shutil.copy2(self.ORIGINAL_DOWNLOAD_ZIP_PATH, self.COPY_DOWNLOAD_ZIP_PATH)
         return flexmock(utils).should_receive("download_file").and_return(self.COPY_DOWNLOAD_ZIP_PATH)
 
-    def __getMockForExtractZip(self):
+    @staticmethod
+    def __getMockForExtractZip():
         return flexmock(utils).should_receive("extract_zip")
 
     def test_downloadOnlineVersionInfo_setsOnlineVersionInfoValues(self):

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
 import urllib2
@@ -66,17 +67,47 @@ class MainApp:
 
         return parser.parse_args()
 
+    @asynchronous()
+    def update_libraries_if_necessary(self):
+        try:
+            BitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
+        except (HTTPError, URLError) as e:
+            log.error("unable to download libraries (might be a proxy problem)")
+        except:
+            log.exception("unable to copy libraries files, there could be a permissions problem.")
+
+    @asynchronous()
+    def check_connection_is_available(self):
+        time.sleep(1)
+        try:
+            api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
+            api.connect()
+        except Exception as e:
+            pass
+        else:
+            log.info("connection available")
+
+    @asynchronous()
+    def test_connection(self):
+        import socket
+        time.sleep(2)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((Config.get_client_ws_ip(), Config.web_socket_port))
+        if result == 0:
+            log.debug("Port is open")
+        else:
+            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
+
     def handle_system_arguments(self, options, args):
         log.info("init web2board with options: {}, and args: {}".format(options, args))
         utils.set_log_level(options.logLevel)
+        # self.set_up_proxy(options.proxy)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
 
         if options.proxy is not None:
-            proxy = urllib2.ProxyHandler({'http': options.proxy})
-            opener = urllib2.build_opener(proxy)
-            urllib2.install_opener(opener)
+            Config.proxy = options.proxy
 
         if options.update2version is not None:
             utils.set_log_level(logging.DEBUG)
@@ -91,36 +122,12 @@ class MainApp:
         # do not call this line in executable
         if not utils.are_we_frozen():
             HubsInspector.construct_js_file(path="libs/WSCommunication/Clients")
+            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static"))
             HubsInspector.construct_python_file(path="libs/WSCommunication/Clients")
         self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
         Config.web_socket_port = options.port
         self.w2b_server.listen(options.port)
         return self.w2b_server
-
-    @asynchronous()
-    def update_libraries_if_necessary(self):
-        try:
-            BitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
-        except (HTTPError, URLError) as e:
-            log.error("unable to download libraries (might be a proxy problem)")
-            proxyName = raw_input("introduce proxy name: ")
-            proxy = urllib2.ProxyHandler({'http': proxyName})
-            opener = urllib2.build_opener(proxy)
-            urllib2.install_opener(opener)
-            self.update_libraries_if_necessary()
-        except OSError:
-            log.exception("unable to copy libraries files, there could be a permissions problem.")
-
-    @asynchronous()
-    def check_connection_is_available(self):
-        time.sleep(1)
-        try:
-            api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
-            api.connect()
-        except Exception as e:
-            pass
-        else:
-            log.info("connection available")
 
     def start_server(self, options):
         self.w2b_server = self.initialize_server_and_communication_protocol(options)
@@ -151,17 +158,6 @@ class MainApp:
         if options.update2version is None:
             self.start_server(options)
             self.test_connection()
-
-    @asynchronous()
-    def test_connection(self):
-        import socket
-        time.sleep(2)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((Config.get_client_ws_ip(), Config.web_socket_port))
-        if result == 0:
-            log.debug("Port is open")
-        else:
-            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
 
 
 def force_quit():

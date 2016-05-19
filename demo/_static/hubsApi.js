@@ -211,9 +211,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('CodeHub', 'compile', arguments);
         },
 
-        getSubscribedClientsIds : function (){
+        getSubscribedClientsToHub : function (){
             
-            return constructMessage('CodeHub', 'get_subscribed_clients_ids', arguments);
+            return constructMessage('CodeHub', 'get_subscribed_clients_to_hub', arguments);
         },
 
         subscribeToHub : function (){
@@ -241,9 +241,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('VersionsHandlerHub', 'set_lib_version', arguments);
         },
 
-        getVersion : function (){
+        getLibVersion : function (){
             
-            return constructMessage('VersionsHandlerHub', 'get_version', arguments);
+            return constructMessage('VersionsHandlerHub', 'get_lib_version', arguments);
         },
 
         setWeb2boardVersion : function (version){
@@ -251,14 +251,19 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('VersionsHandlerHub', 'set_web2board_version', arguments);
         },
 
-        getSubscribedClientsIds : function (){
+        getSubscribedClientsToHub : function (){
             
-            return constructMessage('VersionsHandlerHub', 'get_subscribed_clients_ids', arguments);
+            return constructMessage('VersionsHandlerHub', 'get_subscribed_clients_to_hub', arguments);
         },
 
         subscribeToHub : function (){
             
             return constructMessage('VersionsHandlerHub', 'subscribe_to_hub', arguments);
+        },
+
+        getVersion : function (){
+            
+            return constructMessage('VersionsHandlerHub', 'get_version', arguments);
         },
 
         unsubscribeFromHub : function (){
@@ -276,6 +281,11 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('LoggingHub', 'subscribe_to_hub', arguments);
         },
 
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('LoggingHub', 'get_subscribed_clients_to_hub', arguments);
+        },
+
         getAllBufferedRecords : function (){
             
             return constructMessage('LoggingHub', 'get_all_buffered_records', arguments);
@@ -284,11 +294,6 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
         unsubscribeFromHub : function (){
             
             return constructMessage('LoggingHub', 'unsubscribe_from_hub', arguments);
-        },
-
-        getSubscribedClientsIds : function (){
-            
-            return constructMessage('LoggingHub', 'get_subscribed_clients_ids', arguments);
         }
     };
     this.LoggingHub.client = {};
@@ -306,14 +311,14 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('WindowHub', 'forceClose', arguments);
         },
 
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('WindowHub', 'get_subscribed_clients_to_hub', arguments);
+        },
+
         unsubscribeFromHub : function (){
             
             return constructMessage('WindowHub', 'unsubscribe_from_hub', arguments);
-        },
-
-        getSubscribedClientsIds : function (){
-            
-            return constructMessage('WindowHub', 'get_subscribed_clients_ids', arguments);
         }
     };
     this.WindowHub.client = {};
@@ -336,14 +341,14 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('UtilsAPIHub', 'get_id', arguments);
         },
 
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('UtilsAPIHub', 'get_subscribed_clients_to_hub', arguments);
+        },
+
         unsubscribeFromHub : function (){
             
             return constructMessage('UtilsAPIHub', 'unsubscribe_from_hub', arguments);
-        },
-
-        getSubscribedClientsIds : function (){
-            
-            return constructMessage('UtilsAPIHub', 'get_subscribed_clients_ids', arguments);
         },
 
         subscribeToHub : function (){
@@ -386,14 +391,14 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('SerialMonitorHub', 'write', arguments);
         },
 
+        getSubscribedClientsToHub : function (){
+            
+            return constructMessage('SerialMonitorHub', 'get_subscribed_clients_to_hub', arguments);
+        },
+
         startConnection : function (port, baudrate){
             arguments[1] = baudrate === undefined ? 9600 : baudrate;
             return constructMessage('SerialMonitorHub', 'start_connection', arguments);
-        },
-
-        getSubscribedClientsIds : function (){
-            
-            return constructMessage('SerialMonitorHub', 'get_subscribed_clients_ids', arguments);
         },
 
         subscribeToHub : function (){
@@ -471,9 +476,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('ConfigHub', 'get_config', arguments);
         },
 
-        getSubscribedClientsIds : function (){
+        unsubscribeFromHub : function (){
             
-            return constructMessage('ConfigHub', 'get_subscribed_clients_ids', arguments);
+            return constructMessage('ConfigHub', 'unsubscribe_from_hub', arguments);
         },
 
         getLibrariesPath : function (){
@@ -491,9 +496,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('ConfigHub', 'set_values', arguments);
         },
 
-        unsubscribeFromHub : function (){
+        getSubscribedClientsToHub : function (){
             
-            return constructMessage('ConfigHub', 'unsubscribe_from_hub', arguments);
+            return constructMessage('ConfigHub', 'get_subscribed_clients_to_hub', arguments);
         }
     };
     this.ConfigHub.client = {};
