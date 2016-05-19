@@ -36,7 +36,7 @@ Name=Web2board Launcher
 Name[en_US]=Web2board
 """
 
-bash = 'bash -c \"echo INSTALLING BITBLOQS WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;' \
+bash = 'bash -c \"echo INSTALLING WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;' \
        ' {0} factoryReset; exec bash\"'.format(sys.argv[0])
 
 
@@ -122,5 +122,5 @@ elif sys.argv[1] == "factoryReset":
     subprocess.call("/opt/web2board/web2boardLink --factoryReset --noStartApp".split(),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log.info("successfully performed factory reset")
-    if click.confirm("It is necessary to restart the computer, do you want to restart it now?"):
+    if click.confirm("\n\n\nIt is necessary to restart the computer.\nDo you want to restart it now?"):
         os.system("reboot")

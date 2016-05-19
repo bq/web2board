@@ -20,9 +20,9 @@ def startLogger():
     fileHandler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fileHandler.setFormatter(formatter)
-    log = logging.getLogger()
-    log.addHandler(fileHandler)
-    log.setLevel(logging.DEBUG)
+    logger = logging.getLogger()
+    logger.addHandler(fileHandler)
+    logger.setLevel(logging.DEBUG)
 
 
 if utils.are_we_frozen():
@@ -44,6 +44,7 @@ PathsManager.RES_ICONS_PATH = os.path.join(PathsManager.RES_PATH, 'icons')
 def is_factory_reset():
     return len(sys.argv) > 1 and (sys.argv[1].lower() == "factoryreset" or sys.argv[1].lower() == "--factoryreset")
 
+
 def needs_factory_reset():
     if not os.path.exists(PathsManager.PROGRAM_PATH):
         return True
@@ -59,6 +60,7 @@ def needs_factory_reset():
         return True
     return False
 
+
 @asynchronous()
 def factory_reset_process():
     global msgBox
@@ -66,13 +68,14 @@ def factory_reset_process():
         time.sleep(1)
         log_message("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
         if os.path.exists(PathsManager.PROGRAM_PATH):
-                shutil.rmtree(PathsManager.PROGRAM_PATH)
+            shutil.rmtree(PathsManager.PROGRAM_PATH)
         log_message("Extracting web2board...")
         shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
         msgBox.end_successful()
     except Exception as e:
         log.exception("Failed performing Factory reset")
         msgBox.end_error(str(e))
+
 
 def perform_factory_reset_if_needed():
     if is_factory_reset() or needs_factory_reset():
@@ -81,8 +84,10 @@ def perform_factory_reset_if_needed():
         factory_reset_process()
         app.mainloop()
 
+
 def update_if_necessary():
     global msgBox
+
     def handle_result(f):
         try:
             f.result()
@@ -100,6 +105,7 @@ def update_if_necessary():
         future.add_done_callback(handle_result)
         app.mainloop()
 
+
 @asynchronous()
 def start_watchdog():
     global msgBox
@@ -110,19 +116,22 @@ def start_watchdog():
     if timePassed >= WATCHDOG_TIME:
         msgBox.end_error()
 
+
 def should_start_app():
     return len(sys.argv) <= 2 or (sys.argv[2].lower() != "nostartapp" and sys.argv[2].lower() != "--nostartapp")
+
 
 def log_message(message):
     global msgBox
     log.info(message)
     msgBox.set_message(message)
 
+
 def start_dialog():
     global msgBox
 
     class Application(Frame):
-        MESSAGE_TEMPLATE = "Web2board is configuring some files.\nThis can takes a couple of minutes but it will be executed just once.\n\n{}"
+        MESSAGE_TEMPLATE = "Web2board is setting up some files.\nThis can takes a couple of minutes but it will be executed just once.\n\n{}"
 
         def __init__(self, parent):
             Frame.__init__(self, parent)
