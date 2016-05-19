@@ -6,12 +6,31 @@
     Path needs to match with Hub.constructJSFile path parameter-->
     <script type="text/javascript" src="_static/hubsApi.js"></script>
     <style>
-        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-        .string { color: green; }
-        .number { color: darkorange; }
-        .boolean { color: blue; }
-        .null { color: magenta; }
-        .key { color: red; }
+        pre {
+            outline: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .string {
+            color: green;
+        }
+
+        .number {
+            color: darkorange;
+        }
+
+        .boolean {
+            color: blue;
+        }
+
+        .null {
+            color: magenta;
+        }
+
+        .key {
+            color: red;
+        }
 
         #connectionStatus {
             margin-bottom: 4px;
@@ -20,6 +39,7 @@
         .connected {
             color: #16dd16;
         }
+
         .disconnected {
             color: darkred;
         }
@@ -31,21 +51,25 @@
         table, th, td {
             border: 1px solid black;
         }
+
         td button {
-            height:100%;
-            width:100%;
+            height: 100%;
+            width: 100%;
             min-height: 25px;
         }
 
         tr:nth-child(even) {
             background: #fff7db
         }
+
         tr:nth-child(even) input {
             background: #e5ddc2
         }
+
         tr:nth-child(odd) {
             background: #FFF
         }
+
         li {
             font-size: larger;
             margin: 7px;
@@ -55,7 +79,7 @@
 </head>
 <body>
 <div id="main" style="display: flex; flex-direction: column; height: 100vh">
-    <div class="container" >
+    <div class="container">
         <h2>Test all hubs functions</h2>
         <h3 id="connectionStatus">Disconnected</h3>
     </div>
@@ -67,7 +91,8 @@
     var hubsApi = new HubsAPI(),
         connectionStatusEle = document.getElementById("connectionStatus"),
         tablesDiv = document.getElementById("tables"),
-        resultDiv = document.getElementById("result");
+        resultDiv = document.getElementById("result"),
+        resultPreElement = document.createElement('pre');
     hubsApi.connect('ws://127.0.0.1:9876/', 2);
     hubsApi.callbacks.onOpen = function () {
         connectionStatusEle.innerText = "Connected";
@@ -114,8 +139,6 @@
         });
     }
 
-    var resultPreElement = document.createElement('pre');
-
     function output(inp, element) {
         inp = syntaxHighlight(inp);
         resultPreElement.innerHTML = inp;
@@ -140,7 +163,6 @@
             var title = document.createElement("li");
             var table = document.createElement("TABLE");
             var showButton = document.createElement("button");
-            var hideButton = document.createElement("button");
             var titleBr = document.createElement("br");
             table.style.display = 'none';
 
@@ -150,13 +172,13 @@
             showButton.innerHTML = "Show";
             showButton.table = table;
             showButton.onclick = function () {
-                this.table.style.display = '';
-            };
-            tablesDiv.appendChild(hideButton);
-            hideButton.innerHTML = "Hide";
-            hideButton.table = table;
-            hideButton.onclick = function () {
-                this.table.style.display = 'none';
+                if (this.table.style.display === '') {
+                    this.table.style.display = 'none';
+                    this.innerHTML = "Show";
+                } else {
+                    this.table.style.display = '';
+                    this.innerHTML = "Hide";
+                }
             };
             tablesDiv.appendChild(titleBr);
             tablesDiv.appendChild(table);
