@@ -57,7 +57,7 @@ class TestDownloader(unittest.TestCase):
     def test_download_callsInfoCallback(self):
         url = "url"
         dst = self.data_path + os.sep + 'testing.txt'
-        self.read_sleep = 0.05
+        self.read_sleep = 0.1
         self.urlopen_mock.with_args(url).once()
         flexmock(self).should_call("__infoCallbackMock") \
             .with_args(object, 1000, float).at_least().times(1)

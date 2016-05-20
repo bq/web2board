@@ -1,9 +1,11 @@
+import json
 import os
 import shutil
 import unittest
 
+from flexmock import flexmock, flexmock_teardown
+
 from Test.testingUtils import restore_test_resources
-from libs.Config import Config
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import Updater
@@ -20,6 +22,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         pm.CONFIG_PATH = pm.TEST_SETTINGS_PATH + os.sep + "config.json"
 
     def tearDown(self):
+        flexmock_teardown()
         pm.__dict__ = {x: y for x, y in self.original_pathManagerDict.items()}
 
     def test_construct_setsAllNecessaryAttributes(self):
@@ -43,7 +46,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         try:
             onlineVersion = self.updater.downloadOnlineVersionInfo()
             self.updater.update(onlineVersion)
-            self.assertTrue(self.updater.currentVersionInfo.version, onlineVersion.version)
+            self.assertEqual(self.updater.currentVersionInfo.version, onlineVersion.version)
             self.assertGreater(len(self.updater.currentVersionInfo.librariesNames), 0)
             self.assertFalse(self.updater._are_we_missing_libraries())
             self.assertFalse(self.updater._isVersionDifferentToCurrent(onlineVersion))
@@ -59,6 +62,14 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         self.updater.onlineVersionUrl = "https://raw.githubusercontent.com/bq/web2board/devel/src/Test/resources/Updater/onlineBitbloqLibsVersionV5.version"
         self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
         self.__testUploadProcess()
+
+    def test_update_raiseExceptionIfOnlineVersionIsNone(self):
+        flexmock(json).should_receive("dump").never()
+        flexmock(self.updater.downloader).should_receive("download").never()
+
+        with self.assertRaises(Exception):
+            self.updater.update(self.updater.currentVersionInfo)
+
 
     @unittest.skip("skip until we have good urls")
     def test_upload_withRealValues(self):

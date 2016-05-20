@@ -1,6 +1,5 @@
 import logging
 import os
-import urllib
 import time
 import sys
 import urllib2
