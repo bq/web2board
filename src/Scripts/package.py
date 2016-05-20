@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import inspect
 import os
 import sys
+
+modulePath = os.path.abspath(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename))
+sys.path.append(os.path.normpath(os.path.join(modulePath, os.pardir)))
 
 from libs.Config import Config
 from libs.Version import Version
