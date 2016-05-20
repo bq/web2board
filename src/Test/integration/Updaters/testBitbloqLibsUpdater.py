@@ -26,9 +26,9 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         pm.__dict__ = {x: y for x, y in self.original_pathManagerDict.items()}
 
     def test_construct_setsAllNecessaryAttributes(self):
-        self.assertIsNotNone(self.updater.currentVersionInfo)
-        self.assertEqual(self.updater.currentVersionInfo.version, Version.bitbloq_libs)
-        self.assertEqual(self.updater.currentVersionInfo.librariesNames, Version.bitbloq_libs_libraries)
+        self.assertIsNotNone(self.updater.current_version_info)
+        self.assertEqual(self.updater.current_version_info.version, Version.bitbloq_libs)
+        self.assertEqual(self.updater.current_version_info.librariesNames, Version.bitbloq_libs_libraries)
         self.assertIsNotNone(self.updater.destinationPath)
         self.assertNotEqual(self.updater.name, Updater().name)
 
@@ -46,13 +46,13 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         try:
             onlineVersion = self.updater.downloadOnlineVersionInfo()
             self.updater.update(onlineVersion)
-            self.assertEqual(self.updater.currentVersionInfo.version, onlineVersion.version)
-            self.assertGreater(len(self.updater.currentVersionInfo.librariesNames), 0)
+            self.assertEqual(self.updater.current_version_info.version, onlineVersion.version)
+            self.assertGreater(len(self.updater.current_version_info.librariesNames), 0)
             self.assertFalse(self.updater._are_we_missing_libraries())
-            self.assertFalse(self.updater._isVersionDifferentToCurrent(onlineVersion))
+            self.assertFalse(self.updater.current_version_info != onlineVersion)
             self.assertFalse(self.updater.isNecessaryToUpdate(onlineVersion))
-            self.assertEqual(self.updater.currentVersionInfo.version, Version.bitbloq_libs)
-            self.assertEqual(self.updater.currentVersionInfo.librariesNames, Version.bitbloq_libs_libraries)
+            self.assertEqual(self.updater.current_version_info.version, Version.bitbloq_libs)
+            self.assertEqual(self.updater.current_version_info.librariesNames, Version.bitbloq_libs_libraries)
         finally:
             if os.path.exists(self.updater.destinationPath):
                 shutil.rmtree(self.updater.destinationPath)
@@ -68,7 +68,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         flexmock(self.updater.downloader).should_receive("download").never()
 
         with self.assertRaises(Exception):
-            self.updater.update(self.updater.currentVersionInfo)
+            self.updater.update(self.updater.current_version_info)
 
 
     @unittest.skip("skip until we have good urls")

@@ -70,7 +70,7 @@ class MainApp:
     @asynchronous()
     def update_libraries_if_necessary(self):
         try:
-            BitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
+            BitbloqLibsUpdater().restore_current_version_if_necessary()
         except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
         except:

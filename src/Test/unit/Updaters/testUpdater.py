@@ -83,14 +83,14 @@ class TestUpdater(unittest.TestCase):
             self.updater.isNecessaryToUpdate()
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreDifferent(self):
-        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
+        self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
-        self.updater.currentVersionInfo.version = "0.1.1"
+        self.updater.current_version_info.version = "0.1.1"
 
         self.assertTrue(self.updater.isNecessaryToUpdate())
 
     def test_isNecessaryToUpdate_returnsTrueIfDestinationPathDoesNotExist(self):
-        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
+        self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         if os.path.exists(self.updater.destinationPath):
             shutil.rmtree(self.updater.destinationPath)
@@ -98,14 +98,14 @@ class TestUpdater(unittest.TestCase):
         self.assertTrue(self.updater.isNecessaryToUpdate())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualButNoLibrariesInDestinationPath(self):
-        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
+        self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         os.makedirs(self.updater.destinationPath)
 
         self.assertTrue(self.updater.isNecessaryToUpdate())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualAndLibrariesInDestinationPath(self):
-        self.updater.currentVersionInfo = VersionInfo(**versionTestData)
+        self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         for libraryName in versionTestData["libraries_names"]:
             if not os.path.exists(self.updater.destinationPath + os.sep + libraryName):

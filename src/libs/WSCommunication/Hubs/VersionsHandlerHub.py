@@ -23,7 +23,7 @@ class VersionsHandlerHub(Hub):
         return Version.web2board
 
     def get_lib_version(self):
-        return self.lib_updater.currentVersionInfo.version
+        return self.lib_updater.current_version_info.version
 
     def set_lib_version(self, version):
         versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))

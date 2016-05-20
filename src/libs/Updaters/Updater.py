@@ -57,7 +57,7 @@ class Updater:
     NONE_VERSION = "0.0.0"
 
     def __init__(self):
-        self.currentVersionInfo = None
+        self.current_version_info = None
         """:type : VersionInfo """
 
         self.onlineVersionUrl = None
@@ -76,27 +76,27 @@ class Updater:
             return True
         libraries = utils.list_directories_in_path(self.destinationPath)
         libraries = map(lambda x: x.lower(), libraries)
-        for cLibrary in self.currentVersionInfo.libraries_names:
+        for cLibrary in self.current_version_info.libraries_names:
             if cLibrary.lower() not in libraries:
                 return True
 
-        return len(self.currentVersionInfo.libraries_names) > len(libraries)
+        return len(self.current_version_info.libraries_names) > len(libraries)
 
-    def _updateCurrentVersionInfoTo(self, versionToUpload):
+    def _update_current_version_to(self, versionToUpload):
         """
         :type versionToUpload: VersionInfo
         """
         log.debug("[{0}] Updating version to: {1}".format(self.name, versionToUpload.version))
-        self.currentVersionInfo.version = versionToUpload.version
-        self.currentVersionInfo.file_to_download_url = versionToUpload.file_to_download_url
-        self.currentVersionInfo.libraries_names = utils.list_directories_in_path(self.destinationPath)
+        self.current_version_info.version = versionToUpload.version
+        self.current_version_info.file_to_download_url = versionToUpload.file_to_download_url
+        self.current_version_info.libraries_names = utils.list_directories_in_path(self.destinationPath)
         log.info("Current version updated")
 
     def getVersionNumber(self, versionInfo=None):
         """
         :type versionInfo: VersionInfo
         """
-        versionInfo = self.currentVersionInfo if versionInfo is None else versionInfo
+        versionInfo = self.current_version_info if versionInfo is None else versionInfo
         return int(versionInfo.version.replace('.', ''))
 
     def downloadOnlineVersionInfo(self):
@@ -109,7 +109,7 @@ class Updater:
         """
         :type versionToCompare: VersionInfo
         """
-        versionToCompare = self.currentVersionInfo if versionToCompare is None else versionToCompare
-        logArgs = self.name, self.currentVersionInfo.version, versionToCompare.version
+        versionToCompare = self.current_version_info if versionToCompare is None else versionToCompare
+        logArgs = self.name, self.current_version_info.version, versionToCompare.version
         log.debug("[{0}] Checking version {1} - {2}".format(*logArgs))
-        return self.currentVersionInfo != versionToCompare or self._are_we_missing_libraries()
+        return self.current_version_info != versionToCompare or self._are_we_missing_libraries()

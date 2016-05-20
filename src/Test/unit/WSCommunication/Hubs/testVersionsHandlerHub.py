@@ -38,7 +38,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
 
     def test_setLibVersion_doesNotDownloadLibsIfHasRightVersion(self):
         flexmock(self.libUpdater, isNecessaryToUpdate=lambda **kwargs: False).should_receive("update").never()
-        self.libUpdater.currentVersionInfo.version = self.testLibVersion
+        self.libUpdater.current_version_info.version = self.testLibVersion
 
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)
 
