@@ -5,6 +5,10 @@ import sys
 import urllib2
 
 from libs.Decorators.Asynchronous import asynchronous
+import warnings
+
+# ignore insecure warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='urllib2')
 
 
 class Downloader:
@@ -28,7 +32,6 @@ class Downloader:
     def download(self, url, dst=None, info_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
-
         site = urllib2.urlopen(url)
         download_task = self.__real_download(site, dst)
         for i in range(3):

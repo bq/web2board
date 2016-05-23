@@ -67,6 +67,28 @@ class MainApp:
 
         return parser.parse_args()
 
+    def handle_system_arguments(self, options, args):
+        log.info("init web2board with options: {}, and args: {}".format(options, args))
+        utils.set_log_level(options.logLevel)
+        # self.set_up_proxy(options.proxy)
+
+        if not os.environ.get("platformioBoard", False):
+            os.environ["platformioBoard"] = options.board
+
+        if options.proxy is not None:
+            Config.proxy = options.proxy
+            proxy_obj = dict(http=Config.proxy, https=Config.proxy)
+            utils.set_proxy(proxy_obj)
+
+        if options.update2version is not None:  # todo: check if this is still necessary
+            utils.set_log_level(logging.DEBUG)
+            log.debug("updating version")
+            Web2BoardUpdater().update(PathsManager.get_dst_path_for_update(options.update2version))
+
+        self.__handle_testing_options(options.testing.lower())
+
+        return options
+
     @asynchronous()
     def update_libraries_if_necessary(self):
         try:
@@ -74,7 +96,7 @@ class MainApp:
         except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
         except:
-            log.exception("unable to copy libraries files, there could be a permissions problem.")
+            log.exception("unable to copy libraries files, there could be a permission problem.")
 
     @asynchronous()
     def check_connection_is_available(self):
@@ -96,27 +118,7 @@ class MainApp:
         if result == 0:
             log.debug("Port is open")
         else:
-            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.web_socket_port))
-
-    def handle_system_arguments(self, options, args):
-        log.info("init web2board with options: {}, and args: {}".format(options, args))
-        utils.set_log_level(options.logLevel)
-        # self.set_up_proxy(options.proxy)
-
-        if not os.environ.get("platformioBoard", False):
-            os.environ["platformioBoard"] = options.board
-
-        if options.proxy is not None:
-            Config.proxy = options.proxy
-
-        if options.update2version is not None:
-            utils.set_log_level(logging.DEBUG)
-            log.debug("updating version")
-            Web2BoardUpdater().update(PathsManager.get_dst_path_for_update(options.update2version))
-
-        self.__handle_testing_options(options.testing.lower())
-
-        return options
+            log.error("Port: {} could not be opened, check antivirus configuration".format(Config.web_socket_port))
 
     def initialize_server_and_communication_protocol(self, options):
         # do not call this line in executable

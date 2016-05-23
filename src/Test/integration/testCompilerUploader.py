@@ -13,6 +13,7 @@ from libs.utils import is_windows, is_linux, is_mac
 
 log = initLogging(__name__)
 
+
 class TestCompilerUploader(unittest.TestCase):
     platformToUse = None
     portToUse = None

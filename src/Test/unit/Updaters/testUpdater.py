@@ -68,13 +68,6 @@ class TestUpdater(unittest.TestCase):
     def __getMockForExtractZip():
         return flexmock(utils).should_receive("extract_zip")
 
-    def test_downloadOnlineVersionInfo_setsOnlineVersionInfoValues(self):
-        self.__getMockForGetDataFromUrl().once()
-
-        onlineVersionInfo = self.updater.downloadOnlineVersionInfo()
-
-        self.assertEqual(onlineVersionInfo.version, "9.9.9")
-        self.assertEqual(onlineVersionInfo.libraries_names, ["l1"])
 
     def test_isNecessaryToUpdate_raiseExceptionIfCurrentVersionIsNone(self):
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)

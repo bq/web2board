@@ -1,12 +1,7 @@
-import json
 import logging
 import os
-import tempfile
-
-import shutil
 
 from libs import utils
-from libs.Config import Config
 from libs.Downloader import Downloader
 
 log = logging.getLogger(__name__)
@@ -98,12 +93,6 @@ class Updater:
         """
         versionInfo = self.current_version_info if versionInfo is None else versionInfo
         return int(versionInfo.version.replace('.', ''))
-
-    def downloadOnlineVersionInfo(self):
-        jsonVersion = json.loads(utils.get_data_from_url(self.onlineVersionUrl))
-        onlineVersionInfo = VersionInfo(**jsonVersion)
-        log.debug("[{0}] Downloaded online version: {1}".format(self.name, onlineVersionInfo.version))
-        return onlineVersionInfo
 
     def isNecessaryToUpdate(self, versionToCompare=None):
         """
