@@ -68,4 +68,4 @@ class ConfigHub(Hub):
     def test_proxy(self, proxyUrl):
         proxy = urllib2.ProxyHandler({'http': proxyUrl})
         opener = urllib2.build_opener(proxy)
-        log.debug(opener.open(urllib2.Request("http://bitbloq.bq.com/")).read())
+        log.debug(opener.open(urllib2.Request("http://bitbloq.bq.com/"), timeout=5).read())
