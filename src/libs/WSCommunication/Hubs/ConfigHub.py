@@ -32,6 +32,7 @@ class ConfigHub(Hub):
         for k in config_values.keys():
             if k in config_dic:
                 Config.__dict__[k] = config_dic[k]
+        utils.set_proxy(dict(http=Config.proxy, https= Config.proxy))
         Config.store_config_in_file()
         return True
 
@@ -66,6 +67,7 @@ class ConfigHub(Hub):
         Config.store_config_in_file()
 
     def test_proxy(self, proxyUrl):
-        proxy = urllib2.ProxyHandler({'http': proxyUrl})
+        proxy_info = dict(http=proxyUrl, https=proxyUrl) if proxyUrl != "" else None
+        proxy = urllib2.ProxyHandler(proxy_info)
         opener = urllib2.build_opener(proxy)
-        log.debug(opener.open(urllib2.Request("http://bitbloq.bq.com/"), timeout=5).read())
+        opener.open(urllib2.Request("http://bitbloq.bq.com/"), timeout=5).read()

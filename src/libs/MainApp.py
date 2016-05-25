@@ -157,6 +157,10 @@ class MainApp:
             PathsManager.log_relevant_environmental_paths()
         except:
             log.exception("Unable to log Paths")
+        try:
+            Config.log_values()
+        except:
+            log.exception("Unable to log Config")
         if options.update2version is None:
             self.start_server(options)
             self.test_connection()

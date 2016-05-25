@@ -23,6 +23,7 @@ class Config:
     download_url_template = "https://github.com/bq/web2board/archive/devel.zip"
     bitbloq_libs_download_url_template = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
     check_online_updates = True
+    check_libraries_updates = True
     log_level = logging.INFO
     plugins_path = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
@@ -58,6 +59,7 @@ class Config:
         configValues.pop("get_platformio_lib_dir")
         configValues.pop("get_config_values")
         configValues.pop("get_client_ws_ip")
+        configValues.pop("log_values")
         return configValues
 
     @classmethod
@@ -83,3 +85,7 @@ class Config:
     @classmethod
     def get_client_ws_ip(cls):
         return "127.0.0.1" if Config.web_socket_ip == "" else Config.web_socket_ip
+
+    @classmethod
+    def log_values(cls):
+        cls._log.debug("configuration: {}".format(cls.get_config_values()))

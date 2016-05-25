@@ -3,6 +3,8 @@ import logging
 import os
 import serial
 import time
+
+from wshubsapi.connected_clients_group import ConnectedClientsGroup
 from wshubsapi.hub import Hub
 
 from libs.CompilerUploader import CompilerUploader
@@ -33,7 +35,7 @@ class SerialConnection:
                     self.on_received_callback(self.serial.port, out)
             except IOError as e:
                 if e.errno == 5 or e.message == "call to ClearCommError failed":
-                    log.exception("Error in serial port, check connection")
+                    log.warning("Error in serial port, check connection")
                     self.close()
                 else:
                     raise
@@ -53,7 +55,7 @@ class SerialConnection:
     def close(self):
         self.is_about_to_be_closed = True
         self.serial.close()
-        time.sleep(2) #  we have to give time to really close the port
+        time.sleep(2)  # we have to give time to really close the port
 
     def is_closed(self):
         return not self.serial.isOpen()
@@ -70,6 +72,19 @@ class SerialMonitorHub(Hub):
         super(SerialMonitorHub, self).__init__()
         self.serial_connections = dict()
         """:type : dict from int to SerialConnection"""
+        self.subscribed_clients_ports = dict()
+
+    def __on_received_callback(self, port, data):
+        self.clients.get_subscribed_clients().received(port, data)
+        self._get_subscribed_clients_to_port(port).received(port, data)
+
+    def _get_subscribed_clients_to_port(self, port):
+        if port not in self.subscribed_clients_ports:
+            self.subscribed_clients_ports[port] = []
+        clients = self.subscribed_clients_ports[port]
+
+        self.subscribed_clients_ports[port] = list(filter(lambda c: not c.api_is_closed, clients))
+        return ConnectedClientsGroup(clients, self.__class__.__HubName__)
 
     def start_connection(self, port, baudrate=9600):
         if self.is_port_connected(port):
@@ -81,6 +96,8 @@ class SerialMonitorHub(Hub):
     def close_connection(self, port):
         if port in self.serial_connections:
             self.serial_connections[port].close()
+        self.clients.get_subscribed_clients().closed(port)
+        self._get_subscribed_clients_to_port(port).closed(port)
 
     def write(self, port, data, _sender):
         if not self.is_port_connected(port):
@@ -112,5 +129,31 @@ class SerialMonitorHub(Hub):
         for port in self.get_all_connected_ports():
             self.close_connection(port)
 
-    def __on_received_callback(self, port, data):
-        self.clients.get_subscribed_clients().received(port, data)
+    def close_unused_connections(self):
+        """
+        Close all ports without any subscribed client (this only take into account subscribed_clients_port, not global)
+        """
+        for port in self.get_all_connected_ports():
+            self._get_subscribed_clients_to_port(port)  # this function remove closed clients
+            if len(self.subscribed_clients_ports[port]):
+                self.close_connection(port)
+
+    def subscribe_to_port(self, port, _sender):
+        real_client = _sender.api_get_real_connected_client()
+        if port not in self.subscribed_clients_ports:
+            self.subscribed_clients_ports[port] = []
+
+        if real_client in self.subscribed_clients_ports.get(port):
+            return False
+        self.subscribed_clients_ports[port].append(real_client)
+        return True
+
+    def unsubscribe_from_port(self, port, _sender):
+        real_client = _sender.api_get_real_connected_client()
+        if real_client in self.subscribed_clients_ports[port]:
+            self.subscribed_clients_ports[port].remove(real_client)
+            return True
+        return False
+
+    def get_subscribed_clients_ids_to_port(self, port):
+        return [c.ID for c in self._get_subscribed_clients_to_port(port)]

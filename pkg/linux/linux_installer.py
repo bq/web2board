@@ -9,6 +9,7 @@ import pwd
 import click
 
 from libs.PathsManager import PathsManager
+from libs.Version import Version
 
 BITBLOQS_HANDLER1 = """
 
@@ -23,7 +24,7 @@ x-scheme-handler/web2board=web2board-handler.desktop
 """
 
 DESKTOP_TEXT = """[Desktop Entry]
-Version=2.0.1
+Version={version}
 Type=Application
 Icon=/opt/web2board/web2board/res/Web2board.ico
 Exec=/opt/web2board/web2boardLink
@@ -34,7 +35,7 @@ MineType=x-scheme-handler/vnc
 Comment=Launch web2board
 Name=Web2board Launcher
 Name[en_US]=Web2board
-"""
+""".format(version=Version.web2board)
 
 bash = 'bash -c \"echo INSTALLING WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;' \
        ' {0} factoryReset; exec bash\"'.format(sys.argv[0])

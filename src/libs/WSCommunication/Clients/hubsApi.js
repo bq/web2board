@@ -366,9 +366,19 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
     this.SerialMonitorHub.server = {
         __HUB_NAME : 'SerialMonitorHub',
         
-        getAvailablePorts : function (){
+        getAllConnectedPorts : function (){
             
-            return constructMessage('SerialMonitorHub', 'get_available_ports', arguments);
+            return constructMessage('SerialMonitorHub', 'get_all_connected_ports', arguments);
+        },
+
+        unsubscribeFromPort : function (port){
+            
+            return constructMessage('SerialMonitorHub', 'unsubscribe_from_port', arguments);
+        },
+
+        getSubscribedClientsIdsToPort : function (port){
+            
+            return constructMessage('SerialMonitorHub', 'get_subscribed_clients_ids_to_port', arguments);
         },
 
         findBoardPort : function (board){
@@ -381,9 +391,9 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
             return constructMessage('SerialMonitorHub', 'is_port_connected', arguments);
         },
 
-        getAllConnectedPorts : function (){
+        getAvailablePorts : function (){
             
-            return constructMessage('SerialMonitorHub', 'get_all_connected_ports', arguments);
+            return constructMessage('SerialMonitorHub', 'get_available_ports', arguments);
         },
 
         write : function (port, data){
@@ -394,6 +404,16 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
         startConnection : function (port, baudrate){
             arguments[1] = baudrate === undefined ? 9600 : baudrate;
             return constructMessage('SerialMonitorHub', 'start_connection', arguments);
+        },
+
+        closeUnusedConnections : function (){
+            
+            return constructMessage('SerialMonitorHub', 'close_unused_connections', arguments);
+        },
+
+        subscribeToPort : function (port){
+            
+            return constructMessage('SerialMonitorHub', 'subscribe_to_port', arguments);
         },
 
         getSubscribedClientsIds : function (){
