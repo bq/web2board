@@ -52,22 +52,22 @@ class LinuxPackager(Packager):
 
 
     def _create_linux_installer(self):
-        installer_files = ["linux_installer.py", "linux_installer.spec"]
+        installer_files = ["web2board_installer.py", "web2board_installer.spec"]
         for installer_file in installer_files:
             shutil.copy(self.pkgPlatformPath + os.sep + installer_file, self.installerPath + os.sep + installer_file)
         currentPath = os.getcwd()
         os.chdir(self.installerPath)
         try:
-            log.info("Creating linux_installer Executable")
-            os.system("pyinstaller \"{}\"".format("linux_installer.spec"))
-            shutil.copy(join("dist", "linux_installer"), "linux_installer")
+            log.info("Creating web2board_installer Executable")
+            os.system("pyinstaller \"{}\"".format("web2board_installer.spec"))
+            shutil.copy(join("dist", "web2board_installer"), "web2board_installer")
             for installer_file in installer_files:
                 os.remove(installer_file)
             if os.path.exists("build"):
                 shutil.rmtree("build")
             if os.path.exists("dist"):
                 shutil.rmtree("dist")
-            os.system("chmod 0777 linux_installer")
+            os.system("chmod 0777 web2board_installer")
         finally:
             os.chdir(currentPath)
 

@@ -2,7 +2,7 @@
 
 block_cipher = None
 
-a = Analysis(['linux_installer.py'],
+a = Analysis(['web2board_installer.py'],
              pathex=['../../src'],
              binaries=None,
              datas=[("web2board.deb", ".")],
