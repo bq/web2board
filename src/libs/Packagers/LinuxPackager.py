@@ -1,9 +1,8 @@
-import getpass
+from os.path import join
 from subprocess import call
 
 from libs.Packagers.Packager import Packager
 from libs.utils import *
-from os.path import join
 
 
 class LinuxPackager(Packager):
