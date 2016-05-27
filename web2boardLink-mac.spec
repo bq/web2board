@@ -28,7 +28,7 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='web2board',
+          name='web2boardLink',
           debug=False,
           strip=None,
           upx=True,
@@ -36,6 +36,6 @@ exe = EXE(pyz,
           icon=PathsManager.RES_ICO_PATH)
 
 app = BUNDLE(exe,
-             name='web2board.app',
+             name='web2boardLink.app',
              icon=None,
              bundle_identifier=None)

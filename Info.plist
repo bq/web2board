@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>LSUIElement</key>
+	<true/>
     <key>CFBundleIconFile</key>
-    <string>res/web2board.icns</string>
+    <string>../MacOS/res/web2board.icns</string>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
@@ -20,5 +22,6 @@
         <key>argv_emulation</key>
         <true/>
     </dict>
+
 </dict>
 </plist>

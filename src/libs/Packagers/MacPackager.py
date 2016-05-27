@@ -16,22 +16,20 @@ class MacPackager(Packager):
         self.installerOfflinePath = self.installerFolder + os.sep + "darwinOffline"
         self.installerCreationPath = self.web2boardPath + os.sep + "darwin_web2board_{}".format(self.version)
         self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")
-        self.installerCreationAppPath = os.path.join(self.installerCreationDistPath, 'web2board.app')
+        self.installerCreationAppPath = os.path.join(self.installerCreationDistPath, 'web2boardLink.app')
         self.installerCreationName = os.path.basename(self.installerCreationPath)
         self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
         self.pkgPlatformPath = os.path.join(self.pkgPath, "darwin")
         self.resPlatformPath = os.path.join(self.resPath, "darwin")
 
-        self.web2boardExecutableName = "web2board.app"
-
+        self.web2boardExecutableName = "web2boardLink.app"
         self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-mac.spec")
 
         self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
         self.installerBackgroundPath = os.path.join(self.resPlatformPath, "installer_background.jpg")
         self.licensePath = os.path.join(self.web2boardPath, "LICENSE.txt")
 
-        self.appResourcesPath = os.path.join(self.installerCreationAppPath, "Contents",
-                                             "MacOS", "res")
+        self.appResourcesPath = os.path.join(self.installerCreationAppPath, "Contents", "MacOS", "res")
         self.info_plist_path = os.path.join(self.web2boardPath, "info.plist")
         self.info_plist_path_dst = os.path.join(self.installerCreationAppPath, "Contents", "info.plist")
 
@@ -48,8 +46,8 @@ class MacPackager(Packager):
         os.chdir(self.srcPath)
         log.debug("Creating Web2boardLink Executable")
         os.system("pyinstaller -w --onefile \"{}\"".format(self.web2boardPath + os.sep + "web2boardLink-mac.spec"))
-        utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2board.app"), self.installerCreationAppPath)
-        shutil.move(os.path.join(self.installerCreationDistPath, 'web2board'), os.path.join(self.appResourcesPath, 'web2board'))
+        utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2boardLink.app"), self.installerCreationAppPath)
+        shutil.move(os.path.join(self.installerCreationDistPath, 'web2board'), os.path.join(self.appResourcesPath, os.pardir, 'web2board'))
         utils.copytree(self.resCommonPath, self.appResourcesPath)
 
     def _moveInstallerToInstallerFolder(self):
