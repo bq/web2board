@@ -44,7 +44,7 @@ class Downloader:
                 time.sleep(1)
 
         else:
-            self.log.error("Unable to download file")
+            self.log.warning("Unable get download file size")
             total_size = sys.maxint
 
         while not download_task.done():
