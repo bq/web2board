@@ -36,7 +36,7 @@ class Downloader:
         download_task = self.__real_download(site, dst)
         for i in range(3):
             try:
-                meta = site.info()
+                meta = urllib2.urlopen(url).info()
                 total_size = int(meta.getheaders("Content-Length")[0])
                 break
             except:
@@ -49,9 +49,9 @@ class Downloader:
 
         while not download_task.done():
             if os.path.exists(dst):
-                pathSize = os.path.getsize(dst)
+                file_size = os.path.getsize(dst)
                 if info_callback is not None:
-                    info_callback(pathSize, total_size, pathSize * 100.0 / float(total_size))
+                    info_callback(file_size, total_size, file_size * 100.0 / float(total_size))
                 time.sleep(self.refreshTime)
 
         return download_task.result()

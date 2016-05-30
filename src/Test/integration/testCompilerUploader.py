@@ -15,21 +15,21 @@ log = initLogging(__name__)
 
 
 class TestCompilerUploader(unittest.TestCase):
-    platformToUse = None
+    platform_to_use = None
     portToUse = None
 
     @classmethod
     def setUpClass(cls):
         if cls.portToUse is None:
             try:
-                cls.portToUse = CompilerUploader.construct(cls.__getPlatformToUse()).get_port()
+                cls.portToUse = CompilerUploader.construct(cls.__get_platform_to_use()).get_port()
             except:
                 cls.portToUse = -1
-        cls.platformToUse = cls.__getPlatformToUse()
+        cls.platform_to_use = cls.__get_platform_to_use()
         log.info("""\n\n
         #######################################
         Remember to connect a {} board
-        #######################################\n""".format(cls.platformToUse))
+        #######################################\n""".format(cls.platform_to_use))
 
         def clickConfirm(message):
             print message
@@ -38,21 +38,21 @@ class TestCompilerUploader(unittest.TestCase):
         click.confirm = clickConfirm
 
     @classmethod
-    def __getPlatformToUse(cls):
+    def __get_platform_to_use(cls):
         board = os.environ.get("platformioBoard", None)
         if board is None:
             raise Exception("No board defined")
         return board
 
     def setUp(self):
-        self.platformioPath = pm.PLATFORMIO_WORKSPACE_SKELETON
-        self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
-        self.srcCopyPath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
-        self.workingCppPath = os.path.join(self.srcCopyPath, "working.ino")
-        self.notWorkingCppPath = os.path.join(self.srcCopyPath, "notWorking.ino")
-        self.withLibrariesCppPath = os.path.join(self.srcCopyPath, "withLibraries.ino")
-        self.connectedBoard = self.platformToUse
-        self.compiler = CompilerUploader.construct(self.__getPlatformToUse())
+        self.platformio_path = pm.PLATFORMIO_WORKSPACE_SKELETON
+        self.hex_file_path = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
+        self.src_copy_path = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
+        self.working_cpp_path = os.path.join(self.src_copy_path, "working.ino")
+        self.not_working_cpp_path = os.path.join(self.src_copy_path, "notWorking.ino")
+        self.with_libraries_cpp_path = os.path.join(self.src_copy_path, "withLibraries.ino")
+        self.connected_board = self.platform_to_use
+        self.compiler = CompilerUploader.construct(self.__get_platform_to_use())
 
         restore_test_resources()
 
@@ -94,7 +94,7 @@ class TestCompilerUploader(unittest.TestCase):
             self.assertTrue(port.startswith("/dev/"))
 
     def test_getPort_returnsBoardConnectedBoard(self):
-        self.compiler.set_board(self.connectedBoard)
+        self.compiler.set_board(self.connected_board)
 
         port = self.compiler.get_port()
 
@@ -102,54 +102,54 @@ class TestCompilerUploader(unittest.TestCase):
 
     def test_compile_raisesExceptionIfBoardIsNotSet(self):
         self.compiler.board = None
-        with open(self.workingCppPath) as f:
+        with open(self.working_cpp_path) as f:
             workingCpp = f.read()
 
         self.assertRaises(CompilerException, self.compiler.compile, workingCpp)
 
     def test_compile_compilesSuccessfullyWithWorkingCpp(self):
-        self.compiler.set_board(self.connectedBoard)
-        with open(self.workingCppPath) as f:
+        self.compiler.set_board(self.connected_board)
+        with open(self.working_cpp_path) as f:
             workingCpp = f.read()
 
-        compileResult = self.compiler.compile(workingCpp)
+        compile_result = self.compiler.compile(workingCpp)
 
-        self.assertTrue(compileResult[0])
+        self.assertTrue(compile_result[0])
 
     def test_compile_compilesSuccessfullyWithLibraries(self):
-        self.compiler.set_board(self.connectedBoard)
-        with open(self.withLibrariesCppPath) as f:
-            withLibrariesCpp = f.read()
+        self.compiler.set_board(self.connected_board)
+        with open(self.with_libraries_cpp_path) as f:
+            with_libraries_cpp = f.read()
 
-        compileResult = self.compiler.compile(withLibrariesCpp)
-        pprint(compileResult)
-        self.assertTrue(compileResult[0])
+        compile_result = self.compiler.compile(with_libraries_cpp)
+        pprint(compile_result)
+        self.assertTrue(compile_result[0])
 
     def test_compile_resultErrorIsFalseUsingNotWorkingCpp(self):
-        self.compiler.set_board(self.connectedBoard)
-        with open(self.notWorkingCppPath) as f:
-            notWorkingCpp = f.read()
+        self.compiler.set_board(self.connected_board)
+        with open(self.not_working_cpp_path) as f:
+            not_working_cpp = f.read()
 
-        compileResult = self.compiler.compile(notWorkingCpp)
-        pprint(compileResult)
-        self.assertFalse(compileResult[0])
+        compile_result = self.compiler.compile(not_working_cpp)
+        pprint(compile_result)
+        self.assertFalse(compile_result[0])
 
     def __assertPortFount(self):
         if self.portToUse == -1:
-            self.assertFalse(True, "port not found, check board: {} is connected".format(self.connectedBoard))
+            self.assertFalse(True, "port not found, check board: {} is connected".format(self.connected_board))
 
     def test_upload_raisesExceptionIfBoardIsNotSet(self):
         self.__assertPortFount()
         self.compiler.board = None
-        with open(self.workingCppPath) as f:
+        with open(self.working_cpp_path) as f:
             workingCpp = f.read()
 
         self.assertRaises(CompilerException, self.compiler.upload, workingCpp, upload_port=self.portToUse)
 
     def test_upload_compilesSuccessfullyWithWorkingCpp(self):
         self.__assertPortFount()
-        self.compiler.set_board(self.connectedBoard)
-        with open(self.workingCppPath) as f:
+        self.compiler.set_board(self.connected_board)
+        with open(self.working_cpp_path) as f:
             workingCpp = f.read()
 
         uploadResult = self.compiler.upload(workingCpp, upload_port=self.portToUse)
@@ -159,8 +159,8 @@ class TestCompilerUploader(unittest.TestCase):
 
     def test_upload_resultErrorIsFalseUsingNotWorkingCpp(self):
         self.__assertPortFount()
-        self.compiler.set_board(self.connectedBoard)
-        with open(self.notWorkingCppPath) as f:
+        self.compiler.set_board(self.connected_board)
+        with open(self.not_working_cpp_path) as f:
             notWorkingCpp = f.read()
 
         uploadResult = self.compiler.upload(notWorkingCpp, upload_port=self.portToUse)
@@ -170,15 +170,15 @@ class TestCompilerUploader(unittest.TestCase):
 
     def test_uploadAvrHex_returnsOkResultWithWorkingHexFile(self):
         self.__assertPortFount()
-        self.compiler.set_board(self.connectedBoard)
-        path = os.path.relpath(self.hexFilePath, os.getcwd())
+        self.compiler.set_board(self.connected_board)
+        path = os.path.relpath(self.hex_file_path, os.getcwd())
         result = self.compiler.upload_avr_hex(path, upload_port=self.portToUse)
         print(result[1])
         self.assertTrue(result[0])
 
     def test_uploadAvrHex_returnsBadResultWithNonExistingFile(self):
         self.__assertPortFount()
-        self.compiler.set_board(self.connectedBoard)
+        self.compiler.set_board(self.connected_board)
 
         result = self.compiler.upload_avr_hex("notExistingFile", upload_port=self.portToUse)
 
