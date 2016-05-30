@@ -1,11 +1,10 @@
 import logging
 import os
 
-from wshubsapi.Hub import Hub, UnsuccessfulReplay
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hub import Hub, UnsuccessfulReplay
+from wshubsapi.hubs_inspector import HubsInspector
 
 from libs.CompilerUploader import CompilerException, CompilerUploader
-from libs.MainApp import getMainApp
 from libs.PathsManager import PathsManager
 from libs.WSCommunication.Hubs.SerialMonitorHub import SerialMonitorHub
 
@@ -19,6 +18,29 @@ class CodeHubException(Exception):
 class CodeHub(Hub):
     def __init__(self):
         super(CodeHub, self).__init__()
+        self.serial_hub = HubsInspector.get_hub_instance(SerialMonitorHub)
+        """ :type : SerialMonitorHub"""
+
+    def __handle_compile_report(self, report, port=True):
+        # second check to prevent problem with bluetooth
+        if report[0] or "Writing | #" in report[1]["err"]:
+            return port
+        else:
+            return self._construct_unsuccessful_replay(report[1]["err"])
+
+    def __prepare_upload(self, board, _sender, upload_port=None):
+        if upload_port is not None:
+            _sender.isUploading(upload_port)
+            return upload_port
+        compile_uploader = CompilerUploader.construct(board)
+        self.serial_hub.close_all_connections()
+        if upload_port is None:
+            try:
+                upload_port = compile_uploader.get_port()
+            except CompilerException as e:
+                return self._construct_unsuccessful_replay(dict(title="BOARD_NOT_READY", stdErr=e.message))
+        _sender.isUploading(upload_port)
+        return upload_port
 
     def compile(self, code, _sender):
         """
@@ -29,9 +51,9 @@ class CodeHub(Hub):
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.isCompiling()
         compileReport = CompilerUploader.construct().compile(code)
-        return self.__handleCompileReport(compileReport)
+        return self.__handle_compile_report(compileReport)
 
-    def getHexData(self, code, _sender):
+    def get_hex_data(self, code, _sender):
         """
         :type code: str
         :type _sender: ConnectedClientsGroup
@@ -39,8 +61,8 @@ class CodeHub(Hub):
         log.info("getting hexData from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.isCompiling()
-        compileReport, hexData = CompilerUploader.construct().getHexData(code)
-        return self.__handleCompileReport(compileReport), hexData
+        compileReport, hexData = CompilerUploader.construct().get_hex_data(code)
+        return self.__handle_compile_report(compileReport), hexData
 
     def upload(self, code, board, _sender, port=None):
         """
@@ -49,72 +71,37 @@ class CodeHub(Hub):
         """
         log.info("Uploading for board {} from {}".format(board, _sender.ID))
         log.debug("Uploading code: {}".format(code.encode("utf-8")))
-        uploadPort = self.__prepareUpload(board, _sender, port)
+        uploadPort = self.__prepare_upload(board, _sender, port)
         if isinstance(uploadPort, UnsuccessfulReplay):
             return uploadPort
 
-        compileReport = CompilerUploader.construct(board).upload(code, uploadPort=uploadPort)
+        compileReport = CompilerUploader.construct(board).upload(code, upload_port=uploadPort)
 
-        return self.__handleCompileReport(compileReport, uploadPort)
+        return self.__handle_compile_report(compileReport, uploadPort)
 
-    def uploadHex(self, hexText, board, _sender, port=None):
+    def upload_hex(self, hexText, board, _sender, port=None):
         """
         :type hexText: str
         :type _sender: ConnectedClientsGroup
         """
         log.info("upload Hex text for board {} from {}".format(board, _sender.ID))
-        uploadPort = self.__prepareUpload(board, _sender, port)
-        if isinstance(uploadPort, UnsuccessfulReplay):
-            return uploadPort
+        upload_port = self.__prepare_upload(board, _sender, port)
+        if isinstance(upload_port, UnsuccessfulReplay):
+            return upload_port
 
         with open(PathsManager.RES_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
             tmpHexFile.write(hexText)
 
-        relPath = os.path.relpath(tmpHexFile.name, os.getcwd())
-        compileReport = CompilerUploader.construct(board).uploadAvrHex(relPath, uploadPort=uploadPort)
-        return self.__handleCompileReport(compileReport, uploadPort)
+        rel_path = os.path.relpath(tmpHexFile.name, os.getcwd())
+        compileReport = CompilerUploader.construct(board).upload_avr_hex(rel_path, upload_port=upload_port)
+        return self.__handle_compile_report(compileReport, upload_port)
 
-    def uploadHexFile(self, hexFilePath, board, _sender, port=None):
+    def upload_hex_file(self, hex_file_path, board, _sender, port=None):
         """
-        :type hexFilePath: str
+        :type hex_file_path: str
         :type _sender: ConnectedClientsGroup
         """
         log.info("upload HexFile for board {} from {}".format(board, _sender[0].ID))
-        with open(hexFilePath) as hexFile:
+        with open(hex_file_path) as hexFile:
             hexText = hexFile.read()
-        return self.uploadHex(hexText, board, _sender, port)
-
-    @staticmethod
-    def tryToTerminateSerialCommProcess():
-        from libs.MainApp import getMainApp
-
-        if getMainApp().isSerialMonitorRunning():
-            try:
-                log.info("Terminating serial monitor app")
-                getMainApp().w2bGui.closeSerialMonitorApp()
-            except:
-                log.exception("unable to terminate process")
-
-    def __handleCompileReport(self, compileReport, port=True):
-        # second check to prevent problem with bluetooth
-        if compileReport[0] or "Writing | #" in compileReport[1]["err"]:
-            return port
-        else:
-            return self._constructUnsuccessfulReplay(compileReport[1]["err"])
-
-    def __prepareUpload(self, board, _sender, uploadPort=None):
-        if uploadPort is not None:
-            _sender.isUploading(uploadPort)
-            return uploadPort
-        compileUploader = CompilerUploader.construct(board)
-        serialHub = HubsInspector.getHubInstance(SerialMonitorHub)
-        serialHub.closeAllConnections()
-        self.tryToTerminateSerialCommProcess()
-        uploadPort = getMainApp().w2bGui.getSelectedPort()
-        if uploadPort is None:
-            try:
-                uploadPort = compileUploader.getPort()
-            except CompilerException as e:
-                return self._constructUnsuccessfulReplay(dict(title="BOARD_NOT_READY", stdErr=e.message))
-        _sender.isUploading(uploadPort)
-        return uploadPort
+        return self.upload_hex(hexText, board, _sender, port)

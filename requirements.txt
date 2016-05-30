@@ -1,9 +1,11 @@
 click==5.1
-wshubsapi
+wshubsapi>=0.7.8
 glob2
 pyserial
 flexmock
-pyinstaller
+pyinstaller==3.0.0
+setuptools==19.2
 lockfile
 requests
 bottle
+tornado

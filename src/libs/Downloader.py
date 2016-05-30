@@ -1,50 +1,57 @@
 import logging
 import os
-import urllib
-
 import time
-
 import sys
+import urllib2
 
 from libs.Decorators.Asynchronous import asynchronous
+import warnings
+
+# ignore insecure warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='urllib2')
 
 
 class Downloader:
     log = logging.getLogger(__name__)
 
-    def __init__(self, refreshTime=0.2):
-        self.refreshTime = refreshTime
+    def __init__(self, refresh_time=0.2):
+        self.refreshTime = refresh_time
 
     @asynchronous()
-    def __realDownload(self, url, dst):
-        urllib.urlretrieve(url, dst)
+    def __real_download(self, url_file, dst):
+        if os.path.exists(dst):
+            os.remove(dst)
+        while True:
+            read = url_file.read(10000)  # checking every 10 kb
+            if not read:
+                break
+            with open(dst, 'ab') as f:
+                f.write(read)
 
     @asynchronous()
-    def download(self, url, dst=None, infoCallback=None, endCallback=None):
+    def download(self, url, dst=None, info_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
-
-        downloadTask = self.__realDownload(url, dst)
+        site = urllib2.urlopen(url)
+        download_task = self.__real_download(site, dst)
         for i in range(3):
             try:
-                site = urllib.urlopen(url)
-                meta = site.info()
-                totalSize = int(meta.getheaders("Content-Length")[0])
+                meta = urllib2.urlopen(url).info()
+                total_size = int(meta.getheaders("Content-Length")[0])
                 break
             except:
-                self.log.warning("Unable to get download file info. retrying in 0.5s")
+                self.log.exception("Unable to get download file info. retrying in 1s")
                 time.sleep(1)
-        else:
-            self.log.error("Unable to download file")
-            totalSize = sys.maxint
 
-        while not downloadTask.isDone():
+        else:
+            self.log.warning("Unable get download file size")
+            total_size = sys.maxint
+
+        while not download_task.done():
             if os.path.exists(dst):
-                pathSize = os.path.getsize(dst)
-                if infoCallback is not None:
-                    infoCallback(pathSize, totalSize, pathSize * 100.0 / float(totalSize))
+                file_size = os.path.getsize(dst)
+                if info_callback is not None:
+                    info_callback(file_size, total_size, file_size * 100.0 / float(total_size))
                 time.sleep(self.refreshTime)
 
-        if endCallback is not None:
-            endCallback(downloadTask.get())
-        return downloadTask.get()
+        return download_task.result()

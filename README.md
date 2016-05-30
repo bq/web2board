@@ -10,7 +10,7 @@ Special Thanks
 
 * Arduino founders & staff (http://www.arduino.cc/) for creating all the Arduino Core that is widely used nowadays.
 * Akkana Peck <akkana@shallowsky.com> for the Makefile-arduino v0.8 in which our Makefile is based.
-* DP <https://github.com/opiate> for its great SimpleWebSocketServer library for python.
+* Platformio  team <http://platformio.org/> for its great cross-platform build system.
 
 
 # Installing
@@ -67,27 +67,8 @@ Following dependencies are included in deb package, but if you want to install i
 
 #### Python
 ```bash
-sudo apt-get install python-serial 
-```
-
-### WSHubsAPI
-```bash
-sudo pip install WSHubsAPI==0.5.1a0
-```
-
-### WXPython
-download and install binaries from http://www.wxpython.org/download.php#osx
-
-*Note: for Mac, use cocoa distribution: wxPython3.0-osx-cocoa-py2.7
-
-### flexmock
-```bash
-sudo pip install flexmock
-```
-
-### platformio
-```bash
-sudo pip install platformio
+# in web2board path
+sudo pip install -r requirements.txt
 ```
 
 #### AVRDUDE
@@ -97,16 +78,18 @@ sudo apt-get install avrdude
 
 In order to generate Debian and Windows packages, some extra dependencies are needed
 
-### Create executables
-```bash
-sudo pip install pyInstaller==2.1
-```
-
 #### Packaging
 ```bash
-sudo apt-get install build-essential pkg-config python-dev python-stdeb p7zip-full curl nsis
+# in web2board path
+# set up res folder (only once)
+python src/Scripts/ConstructRes.py
+# start packaging
+python src/Scripts/package.py
+
+# installer will be created in installer folder
 ```
 
+it is not possible to generate an installer for other platform other that the host due to a limitation in pyinstaller, see: http://pyinstaller.readthedocs.io/en/stable/usage.html?highlight=virtualbox#supporting-multiple-platforms
 ## 2. Download source code
 
 All source code is available on GitHub. You can download main web2board project by doing:
@@ -122,31 +105,14 @@ git clone git@github.com:bq/web2board.git
 In the project directory, execute the command:
 
 ```bash
+# in web2board path
+# set up res folder (only once)
+python src/Scripts/ConstructRes.py
+# start web2board
 python src/web2board.py
-```
-
-## 4. Build packages
-
-web2board development comes with a script "package.sh", this script has been designed to run under *nix OSes (Linux, MacOS). For Windows the package.sh script can be run from bash using git.
-The "package.sh" script generates a final release package. You should not need it during development, unless you are changing the release process. If you want to distribute your own version of web2board, then the package.sh script will allow you to do that.
-
-### GNU/Linux Ubuntu
-```bash
-bash package.sh debian     # Generate deb package
-bash package.sh debian -s  # Generate sources
-bash package.sh debian -i  # Install deb package
-bash package.sh debian -u  # Upload to launchpad
-```
-
-### Windows
-```bash
-bash package.sh win32  # Generate exe package
 ```
 
 ### GNU/Linux Fedora
 
 [TODO]
 
-### Mac OS X
-
-[TODO]

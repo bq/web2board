@@ -1,16 +1,13 @@
 import os
 import unittest
 
-from wshubsapi.ConnectedClient import ConnectedClient
-from wshubsapi.Hub import UnsuccessfulReplay
-from wshubsapi.HubsInspector import HubsInspector
-from wshubsapi.Test.utils.HubsUtils import removeHubsSubclasses
-from wshubsapi.CommEnvironment import _DEFAULT_PICKER
+from wshubsapi.hub import UnsuccessfulReplay
+from wshubsapi.hubs_inspector import HubsInspector
+from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
-from Test.testingUtils import createCompilerUploaderMock, createSenderMock
-from frames.Web2boardWindow import Web2boardWindow
+from Test.testingUtils import createCompilerUploaderMock, create_sender_mock
 from libs.CompilerUploader import CompilerUploader
-from libs.MainApp import getMainApp
+from libs.Version import Version
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
 from libs.PathsManager import PathsManager as pm
 from flexmock import flexmock, flexmock_teardown
@@ -20,15 +17,12 @@ import libs.WSCommunication.Hubs
 
 class TestCodeHub(unittest.TestCase):
     def setUp(self):
-        HubsInspector.inspectImplementedHubs(forceReconstruction=True)
+        HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
         self.hexFilePath = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
-        self.codeHub = HubsInspector.getHubInstance(CodeHub)
+        self.codeHub = HubsInspector.get_hub_instance(CodeHub)
         """:type : CodeHub"""
 
-        self.sender = createSenderMock()
-        getMainApp().w2bGui = flexmock(Web2boardWindow(),
-                                       getSelectedPort=lambda *args: None,
-                                       isSerialMonitorRunning=lambda: False)
+        self.sender = create_sender_mock()
 
         self.originalConstruct = CompilerUploader.construct
         self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
@@ -36,7 +30,7 @@ class TestCodeHub(unittest.TestCase):
 
     def tearDown(self):
         flexmock_teardown()
-        removeHubsSubclasses()
+        remove_hubs_subclasses()
 
     def test_construct_getsCompilerUploader(self):
         self.assertIsInstance(self.originalConstruct(), CompilerUploader)
@@ -71,7 +65,7 @@ class TestCodeHub(unittest.TestCase):
 
     def test_upload_senderIsAdvisedCodeIsUploadingWithPort(self):
         port = "PORT"
-        self.compileUploaderMock.should_receive("getPort").and_return(port).once()
+        self.compileUploaderMock.should_receive("get_port").and_return(port).once()
         self.compileUploaderMock.should_receive("upload").and_return((True, {})).once()
 
         self.codeHub.upload("myCode", self.board, self.sender)
@@ -90,20 +84,21 @@ class TestCodeHub(unittest.TestCase):
         result = self.codeHub.upload("myCode", self.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
-        self.assertEqual(result.replay, uploadReturn[1]["err"])
+        self.assertEqual(result.reply, uploadReturn[1]["err"])
 
     def test_uploadHexUrl_successfulHexUploadCallsUploadAvrHexAndReturnsTrue(self):
-        self.compileUploaderMock.should_receive("uploadAvrHex").and_return((True, {})).once()
+        self.compileUploaderMock.should_receive("upload_avr_hex").and_return((True, {})).once()
 
-        result = self.codeHub.uploadHex("hexText", self.board, self.sender)
+        result = self.codeHub.upload_hex("hexText", self.board, self.sender)
 
         self.assertEqual(result, "PORT")
 
     def test_upload_unsuccessfulHexUploadReturnsErrorString(self):
-        uploadReturn = (False, {"err": "errorMessage"},)
-        self.compileUploaderMock.should_receive("uploadAvrHex").and_return(uploadReturn).once()
 
-        result = self.codeHub.uploadHex("hexText", self.compileUploaderMock.board, self.sender)
+        uploadReturn = (False, {"err": "errorMessage"},)
+        self.compileUploaderMock.should_receive("upload_avr_hex").and_return(uploadReturn).once()
+
+        result = self.codeHub.upload_hex("hexText", self.compileUploaderMock.board, self.sender)
 
         self.assertIsInstance(result, UnsuccessfulReplay)
-        self.assertEqual(result.replay, uploadReturn[1]["err"])
+        self.assertEqual(result.reply, uploadReturn[1]["err"])

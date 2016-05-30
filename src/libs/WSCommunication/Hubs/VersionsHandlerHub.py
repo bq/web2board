@@ -1,10 +1,10 @@
-from wshubsapi.Hub import Hub
+from wshubsapi.hub import Hub
 
 from libs.Config import Config
-from libs.MainApp import getMainApp
-from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
+from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Version import Version
 
 
 class VersionsHandlerHubException(Exception):
@@ -12,34 +12,37 @@ class VersionsHandlerHubException(Exception):
 
 
 class VersionsHandlerHub(Hub):
-    def getVersion(self):
-        # todo: check in bitbloq if this is what we want
-        return Config.version
 
-    def setLibVersion(self, version):
-        libUpdater = getBitbloqLibsUpdater()
-        versionInfo = VersionInfo(version, Config.bitbloqLibsDownloadUrlTemplate.format(version=version))
-        if libUpdater.isNecessaryToUpdate(versionToCompare=versionInfo):
-            libUpdater.update(versionInfo)
-        return True  # if return None, client is not informed that the request is done
+    def __init__(self):
+        super(VersionsHandlerHub, self).__init__()
+        self.w2b_updater = Web2BoardUpdater()
+        self.lib_updater = BitbloqLibsUpdater()
 
-    def setWeb2boardVersion(self, version):
-        w2bUpdater = getWeb2boardUpdater()
-        try:
-            gui = getMainApp().w2bGui
-            gui.startDownload(version)
-            w2bUpdater.downloadVersion(version, gui.refreshProgressBar, gui.downloadEnded).get()
-        except:
-            self._getClientsHolder().getSubscribedClients().downloadEnded(False)
-            raise
-        w2bUpdater.makeAnAuxiliaryCopy()
-        w2bUpdater.runAuxiliaryCopy(version)
+    def get_version(self):
+        self.w2b_updater.clear_new_versions()
+        return Version.web2board
 
-    def __downloadProgress(self, current, total, percentage):
-        getMainApp().w2bGui.refreshProgressBar(current, total, percentage)
-        self._getClientsHolder().getSubscribedClients().downloadProgress(current, total, percentage)
+    def get_lib_version(self):
+        return self.lib_updater.current_version_info.version
 
+    def set_lib_version(self, version):
+        versionInfo = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
+        if self.lib_updater.isNecessaryToUpdate(versionToCompare=versionInfo):
+            self.lib_updater.update(versionInfo)
 
-    def __downloadEnded(self, task):
-        getMainApp().w2bGui.downloadEnded()
-        self._getClientsHolder().getSubscribedClients().downloadEnded(True)
+    def set_web2board_version(self, version):
+        if Config.check_online_updates and version != Version.web2board:
+            try:
+                self.w2b_updater.download_version(version, self.__download_progress).result()
+                self.__download_ended(True)
+            except Exception as e:
+                self.__download_ended(str(e))
+                raise
+            return True
+        return False
+
+    def __download_progress(self, current, total, percentage):
+        self.clients.get_subscribed_clients().download_progress(current, total, percentage)
+
+    def __download_ended(self, success):
+        self.clients.get_subscribed_clients().downloadEnded(success)

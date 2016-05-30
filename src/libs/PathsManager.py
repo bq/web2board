@@ -21,6 +21,7 @@ class PathsManager:
     PLATFORMIO_PACKAGES_NAME = "pp"
     PLATFORMIO_PACKAGES_PATH = None
     CONFIG_PATH = None
+    VERSION_PATH = None
     COPY_PATH = None
     ORIGINAL_PATH = None
 
@@ -42,56 +43,56 @@ class PathsManager:
     SCONS_EXECUTABLE_PATH = None
 
     @classmethod
-    def getMainPath(cls):
-        return cls.getBasePath()
+    def get_main_path(cls):
+        return cls.get_base_path()
 
     @staticmethod
-    def getBasePath():
-        if utils.areWeFrozen():
-            if utils.isMac():
+    def get_base_path():
+        if utils.are_we_frozen():
+            if utils.is_mac():
                 return os.getcwd()
             return os.getcwd()
         else:
             return os.getcwd()
 
     @classmethod
-    def getExternalDataFolder(cls):
-        if utils.isLinux():
+    def get_external_data_folder(cls):
+        if utils.is_linux():
             folder = ".web2board"
-        elif utils.isWindows():
+        elif utils.is_windows():
             folder = "web2board"
-        elif utils.isMac():
+        elif utils.is_mac():
             folder = ".web2board"
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
-        return os.path.join(cls.getHomePath(), folder)
+        return os.path.join(cls.get_home_path(), folder)
 
     @staticmethod
-    def getHomePath():
-        if utils.isLinux():
+    def get_home_path():
+        if utils.is_linux():
             return expanduser("~")
-        elif utils.isWindows():
+        elif utils.is_windows():
             return os.getenv('APPDATA')
-        elif utils.isMac():
+        elif utils.is_mac():
             return expanduser("~")
         else:
             raise Exception("Not supported platform: {}".format(platform.system()))
 
     @classmethod
-    def getDstPathForUpdate(cls, version):
-        return os.path.join(cls.getHomePath(), u"web2board_{}".format(version))
+    def get_dst_path_for_update(cls, version):
+        return os.path.join(cls.get_home_path(), u".web2board_{}".format(version))
 
     @classmethod
-    def getSonsExecutablePath(cls):
+    def get_sons_executable_path(cls):
         return os.path.abspath(os.path.join(cls.RES_PATH, "Scons", "sconsScript.py"))
 
     @classmethod
-    def getPlatformIOPackagesPath(cls):
+    def get_platformio_packages_path(cls):
         path = os.path.join(cls.RES_PATH, cls.PLATFORMIO_PACKAGES_NAME)
         return os.path.abspath(path)
 
     @classmethod
-    def logRelevantEnvironmentalPaths(cls):
+    def log_relevant_environmental_paths(cls):
         _pathsLog.debug('Working directory: {}'.format(os.getcwd()))
         items = cls.__dict__.items()
         items = sorted(items, key=lambda x: x[0])
@@ -100,27 +101,21 @@ class PathsManager:
                 _pathsLog.debug('{key}: {path}'.format(key=key, path=path))
 
     @classmethod
-    def getCopyPathForUpdate(cls):
-        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board_copy"))
+    def get_copy_path_for_update(cls):
+        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, ".web2board_copy"))
+
 
     @classmethod
-    def getOriginalPathForUpdate(cls):
-        return os.path.abspath(os.path.join(cls.MAIN_PATH, os.pardir, "web2board"))
-
-    @classmethod
-    def setAllConstants(cls):
+    def set_all_constants(cls):
         cls.EXECUTABLE_PATH = os.getcwd()
-        cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.getOsExecutableExtension()
-        cls.MAIN_PATH = cls.getMainPath()
-        cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, 'web2board-config.json'))
-        cls.COPY_PATH = cls.getCopyPathForUpdate()
-        cls.ORIGINAL_PATH = cls.getOriginalPathForUpdate()
+        cls.EXECUTABLE_FILE = os.getcwd() + os.sep + "web2board" + utils.get_executable_extension()
+        cls.MAIN_PATH = cls.get_main_path()
+        cls.CONFIG_PATH = os.path.normpath(os.path.join(cls.MAIN_PATH, os.pardir, '.web2board-config.json'))
+        cls.COPY_PATH = cls.get_copy_path_for_update()
+        cls.ORIGINAL_PATH = cls.get_external_data_folder()
 
-        if utils.isMac() and utils.areWeFrozen():
-            cls.RES_PATH = os.path.join(cls.MAIN_PATH, os.pardir, 'Resources', 'res')
-            cls.RES_PATH = os.path.abspath(cls.RES_PATH)
-        else:
-            cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
+        cls.RES_PATH = os.path.join(cls.MAIN_PATH, 'res')
+        cls.VERSION_PATH = os.path.join(cls.RES_PATH, 'web2board.version')
         cls.RES_ICO_PATH = os.path.join(cls.RES_PATH, 'Web2board.ico')
         cls.RES_ICONS_PATH = os.path.join(cls.RES_PATH, 'icons')
         cls.TEST_RES_PATH = os.path.join(cls.MAIN_PATH, 'Test', 'resources')
@@ -129,30 +124,30 @@ class PathsManager:
         cls.RES_LOGGING_CONFIG_PATH = os.path.join(cls.RES_PATH, 'logging.json')
         cls.RES_SCONS_ZIP_PATH = os.path.join(cls.MAIN_PATH, "res", "sconsRes.zip")
 
-        cls.PROGRAM_PATH = cls.getExternalDataFolder()
-        cls.PLATFORMIO_WORKSPACE_SKELETON = os.path.join(cls.RES_PATH, 'platformioWorkSpaceSkeleton')
+        cls.PROGRAM_PATH = cls.get_external_data_folder()
+        cls.PLATFORMIO_WORKSPACE_SKELETON = os.path.join(cls.RES_PATH, 'platformioWorkSpace')
         cls.PLATFORMIO_WORKSPACE_PATH = cls.PLATFORMIO_WORKSPACE_SKELETON
         cls.PLATFORMIO_INI_PATH = os.path.join(cls.PLATFORMIO_WORKSPACE_SKELETON, 'platformio.ini')
         cls.TEST_SETTINGS_PATH = os.path.join(cls.RES_PATH, 'TestSettings', 'resources')
-        cls.SCONS_EXECUTABLE_PATH = cls.getSonsExecutablePath()
+        cls.SCONS_EXECUTABLE_PATH = cls.get_sons_executable_path()
 
-        cls.PLATFORMIO_PACKAGES_PATH = cls.getPlatformIOPackagesPath()
+        cls.PLATFORMIO_PACKAGES_PATH = cls.get_platformio_packages_path()
 
     @classmethod
-    def getIconPath(cls, iconName):
+    def get_icon_path(cls, iconName):
         return os.path.join(PathsManager.RES_ICONS_PATH, iconName)
 
     @classmethod
-    def cleanPioEnvs(cls):
+    def clean_pio_envs(cls):
         path = os.path.join(cls.PLATFORMIO_WORKSPACE_PATH, ".pioenvs")
         if os.path.exists(path):
             shutil.rmtree(path)
 
 # set working directory to src
-if utils.areWeFrozen():
-    os.chdir(utils.getModulePath())
+if utils.are_we_frozen():
+    os.chdir(utils.get_module_path())
 else:
-    os.chdir(os.path.join(utils.getModulePath(), os.path.pardir))
+    os.chdir(os.path.join(utils.get_module_path(), os.path.pardir))
 
 
-PathsManager.setAllConstants()
+PathsManager.set_all_constants()

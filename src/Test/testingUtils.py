@@ -1,36 +1,36 @@
 import os
+
 import shutil
 from flexmock import flexmock
-from wshubsapi.ClientInHub import ClientInHub
-from wshubsapi.ConnectedClient import ConnectedClient
 
+from libs import utils
 from libs.CompilerUploader import CompilerUploader
 from libs.PathsManager import PathsManager
-from libs import utils
-from wshubsapi.CommEnvironment import _DEFAULT_PICKER
 
 __original_pathManagerDict = {x: y for x, y in PathsManager.__dict__.items()}
 
 
-def restoreAllTestResources():
+def restore_test_resources(relative_path=""):
+    settings_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, relative_path)
+    res_path = os.path.join(PathsManager.TEST_RES_PATH, relative_path)
     if os.path.exists(PathsManager.TEST_SETTINGS_PATH):
-        utils.rmtree(PathsManager.TEST_SETTINGS_PATH)
-    else:
-        os.makedirs(PathsManager.TEST_SETTINGS_PATH)
-    utils.copytree(PathsManager.TEST_RES_PATH, PathsManager.TEST_SETTINGS_PATH, ignore=".pioenvs", forceCopy=True)
+        shutil.rmtree(PathsManager.TEST_SETTINGS_PATH)
+    os.makedirs(settings_path)
+    if os.path.isdir(res_path):
+        utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)
 
 
 def createCompilerUploaderMock():
     compileUploaderMock = flexmock(CompilerUploader(),
                                    compile=lambda *args: [True, None],
-                                   getPort="PORT")
+                                   get_port="PORT")
     CompileUploaderConstructorMock = flexmock(CompilerUploader,
                                               construct=lambda *args: compileUploaderMock)
 
     return compileUploaderMock, CompileUploaderConstructorMock
 
 
-def createSenderMock():
+def create_sender_mock():
     class Sender:
         def __init__(self):
             self.isCompiling = lambda: None
@@ -40,5 +40,5 @@ def createSenderMock():
     return flexmock(Sender(), ID="testID")
 
 
-def restorePaths():
+def restore_paths():
     PathsManager.__dict__ = {x: y for x, y in __original_pathManagerDict.items()}

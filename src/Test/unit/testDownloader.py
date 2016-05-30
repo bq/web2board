@@ -1,27 +1,42 @@
+import os
 import time
 import unittest
-import urllib
+import urllib2
 from flexmock import flexmock, flexmock_teardown
 
+from Test.testingUtils import restore_test_resources
 from libs.Downloader import Downloader
+import logging
+
+from libs.PathsManager import PathsManager
 
 
 class TestDownloader(unittest.TestCase):
     def setUp(self):
-        global urllib
-        self.downloader = Downloader(refreshTime=0.01)
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
 
-        self.original_urlOpen = urllib.urlopen
-        self.original_urlretrieve = urllib.urlretrieve
-
+        self.relative_data_path = 'Downloader'
+        self.data_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, self.relative_data_path)
+        self.downloader = Downloader(refresh_time=0.01)
         self.metaMock = flexmock(getheaders=lambda x: [1000])
-        self.siteMock = flexmock(info=lambda: self.metaMock)
+        self.read_sleep = 0
 
-        self.urlopenMock = flexmock(urllib).should_receive("urlopen").and_return(self.siteMock)
+        def read_mock(bytes=-1):
+            if self.read_sleep is not None:
+                time.sleep(self.read_sleep)
+                self.read_sleep = None
+                return "testing"
+            return ''
+
+        self.site_mock = flexmock(info=lambda: self.metaMock, read=read_mock)
+        self.urllib2_mock = flexmock(urllib2)
+        self.urlopen_mock = self.urllib2_mock.should_receive("urlopen").and_return(self.site_mock)
+
+        restore_test_resources(self.relative_data_path)
 
     def tearDown(self):
-        urllib.urlopen = self.original_urlOpen
-        urllib.urlretrieve = self.original_urlretrieve
+        flexmock_teardown()
 
     def __infoCallbackMock(self, *args):
         pass
@@ -29,35 +44,22 @@ class TestDownloader(unittest.TestCase):
     def __finishCallbackMock(self, *args):
         pass
 
-    def test_download_callsUrlretrieveWithRightArguments(self):
+    def test_download_createsFileInDestinationPath(self):
         url = "url"
-        dst = "dst"
-        self.urlopenMock.once()
-        flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
+        dst = self.data_path + os.sep + 'testing.txt'
+        self.assertFalse(os.path.exists(dst))
+        self.urlopen_mock.with_args(url).once()
 
-        self.downloader.download(url, dst).get()
+        self.downloader.download(url, dst).result()
+
+        self.assertTrue(os.path.exists(dst))
 
     def test_download_callsInfoCallback(self):
         url = "url"
-        dst = __file__
-
-        def __waitingFunction(*args):
-            time.sleep(0.05)
-
-        urllib.urlretrieve = __waitingFunction
-        self.urlopenMock.once()
+        dst = self.data_path + os.sep + 'testing.txt'
+        self.read_sleep = 0.3
+        self.urlopen_mock.with_args(url).at_least().times(1)
         flexmock(self).should_call("__infoCallbackMock") \
             .with_args(object, 1000, float).at_least().times(1)
-        flexmock(self.downloader).should_call("__realDownload").with_args(url, dst).once()
 
-        self.downloader.download(url, dst, infoCallback=self.__infoCallbackMock).get()
-
-    def test_download_callsFinishCallback(self):
-        url = "url"
-        dst = __file__
-
-        self.urlopenMock.once()
-        flexmock(self).should_receive("__finishCallbackMock").at_least().times(1)
-        flexmock(urllib).should_receive("urlretrieve").with_args(url, dst).once()
-
-        self.downloader.download(url, dst, endCallback=self.__finishCallbackMock).get()
+        self.downloader.download(url, dst, info_callback=self.__infoCallbackMock).result()

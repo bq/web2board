@@ -25,9 +25,9 @@ a = Analysis(["src" + os.sep + 'web2board.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-a.datas += utils.findFilesForPyInstaller("platformio", ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller("res", ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller("Test/resources", ["*", "**/*"])
+a.datas += utils.find_files_for_pyinstaller("platformio", ["*", "**/*"])
+a.datas += utils.find_files_for_pyinstaller("res", ["*", "**/*"])
+a.datas += utils.find_files_for_pyinstaller("Test/resources", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,

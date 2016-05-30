@@ -8,21 +8,22 @@ import tempfile
 import zipfile
 from glob import glob
 from urllib2 import urlopen
+import urllib2
 import glob2
 import serial.tools.list_ports
 
 log = logging.getLogger(__name__)
 
 
-def areWeFrozen():
+def are_we_frozen():
     # All of the modules are built-in to the interpreter, e.g., by py2exe
     return hasattr(sys, "frozen")
 
 
-def getModulePath(frame=None):
+def get_module_path(frame=None):
     encoding = sys.getfilesystemencoding()
     encoding = encoding if encoding is not None else 'utf-8'
-    if not areWeFrozen():
+    if not are_we_frozen():
         frame = frame if frame is not None else inspect.currentframe().f_back
         info = inspect.getframeinfo(frame)
         fileName = info.filename
@@ -31,9 +32,9 @@ def getModulePath(frame=None):
         return os.path.dirname(os.path.abspath(unicode(sys.executable, encoding)))
 
 
-def copytree(src, dst, filter=None, ignore=None, forceCopy=False):
-    if filter is None:
-        filter = lambda x: True
+def copytree(src, dst, filter_func=None, ignore=None, force_copy=False):
+    if filter_func is None:
+        filter_func = lambda x: True
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
@@ -41,13 +42,13 @@ def copytree(src, dst, filter=None, ignore=None, forceCopy=False):
             continue
         s = os.path.join(src, item)
 
-        if not filter(s):
+        if not filter_func(s):
             continue
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            copytree(s, d, filter, ignore, forceCopy)
+            copytree(s, d, filter_func, ignore, force_copy)
         else:
-            if forceCopy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+            if force_copy or not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
 
@@ -63,11 +64,11 @@ def rmtree(folder):
             log.exception("error removing file")
 
 
-def listDirectoriesInPath(path):
+def list_directories_in_path(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
 
 
-def findFiles(path, patterns):
+def find_files(path, patterns):
     if not isinstance(patterns, (list, tuple, set)):
         patterns = [patterns]
     files = []
@@ -76,13 +77,13 @@ def findFiles(path, patterns):
     return list(set(files))
 
 
-def findFilesForPyInstaller(path, patterns):
-    files = findFiles(path, patterns)
+def find_files_for_pyinstaller(path, patterns):
+    files = find_files(path, patterns)
     return [(f, f, 'DATA') for f in files if os.path.isfile(f)]
 
 
-def findModulesForPyInstaller(path, patterns):
-    files = findFiles(path, patterns)
+def find_modules_for_pyinstaller(path, patterns):
+    files = find_files(path, patterns)
 
     def getModuleFromFile(file):
         """
@@ -96,50 +97,29 @@ def findModulesForPyInstaller(path, patterns):
     return list(set(listModules))
 
 
-def getDataFromUrl(url):
-    f = urlopen(url)
-    return f.read()
-
-
-def downloadFile(url, downloadPath=None):
-    log.info("downloading " + url)
-    extension = url.rsplit(".", 1)
-    extension = extension[1] if len(extension) == 2 else ""
-    urlData = getDataFromUrl(url)
-
-    if downloadPath is None:
-        downloadedTempFile = tempfile.NamedTemporaryFile(suffix="." + extension, delete=False)
-    else:
-        downloadedTempFile = open(downloadPath, "w")
-    with downloadedTempFile:
-        downloadedTempFile.write(urlData)
-
-    return os.path.abspath(downloadedTempFile.name)
-
-
-def extractZip(origin, destination):
+def extract_zip(origin, destination):
     with zipfile.ZipFile(origin, "r") as z:
         return z.extractall(destination)
 
 
-def listSerialPorts(portsFilter=None):
+def list_serial_ports(ports_filter=None):
     ports = list(serial.tools.list_ports.comports())
-    if portsFilter is not None:
-        ports = filter(portsFilter, ports)
-    if isMac():
+    if ports_filter is not None:
+        ports = filter(ports_filter, ports)
+    if is_mac():
         ports = ports + [[x] for x in glob('/dev/tty.*') if x not in map(lambda x: x[0], ports)]
     return list(ports)
 
 
-def isLinux():
+def is_linux():
     return platform.system() == 'Linux'
 
 
-def isWindows():
+def is_windows():
     return platform.system() == 'Windows'
 
 
-def isMac():
+def is_mac():
     return platform.system() == 'Darwin'
 
 
@@ -147,11 +127,11 @@ def is64bits():
     return sys.maxsize > 2 ** 32
 
 
-def killProcess(name):
-    name += getOsExecutableExtension()
-    if isWindows():
+def kill_process(name):
+    name += get_executable_extension()
+    if is_windows():
         try:
-            os.system("taskkill /im {}".format(name))
+            os.system("taskkill /im {} -F".format(name))
         except:
             log.exception("Failing killing old web2board process")
     else:
@@ -162,28 +142,27 @@ def killProcess(name):
             log.exception("Failing killing old web2board process")
 
 
-def getOsExecutableExtension(frozen=False):
-    if not areWeFrozen() and not frozen:
+def get_executable_extension(frozen=False):
+    if not are_we_frozen() and not frozen:
         return ".py"
-    if isMac():
+    if is_mac():
         return ""
-    if isWindows():
+    if is_windows():
         return ".exe"
-    if isLinux():
+    if is_linux():
         return ""
 
 
-def setLogLevel(logLevel):
-    logLevels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
-                 "error": logging.ERROR, "critical": logging.CRITICAL}
+def set_log_level(log_level):
+    log_levels = {"debug": logging.DEBUG, "info": logging.INFO, "warning": logging.WARNING,
+                  "error": logging.ERROR, "critical": logging.CRITICAL}
 
-    logLevel = logLevel if isinstance(logLevel, int) else logLevels[logLevel.lower()]
-    logging.getLogger().handlers[0].level = logLevel
+    log_level = log_level if isinstance(log_level, int) else log_levels[log_level.lower()]
+    logging.getLogger().handlers[0].level = log_level
 
 
-def openFile(filename):
+def open_file(filename):
     filePath = filename.encode(sys.getfilesystemencoding())
-
     if sys.platform == "win32":
         os.popen('"{0}" {1}'.format(filePath, " ".join(sys.argv[1:])))
     else:
@@ -192,3 +171,9 @@ def openFile(filename):
         else:
             template = "'./{0}' {1}"
         os.popen(template.format(filePath, " ".join(sys.argv[1:])))
+
+
+def set_proxy(proxy):
+    proxy = urllib2.ProxyHandler(proxy)
+    opener = urllib2.build_opener(proxy)
+    urllib2.install_opener(opener)

@@ -4,8 +4,8 @@ import os
 import serial
 import time
 
-from serial.serialutil import SerialException
-from wshubsapi.Hub import Hub
+from wshubsapi.connected_clients_group import ConnectedClientsGroup
+from wshubsapi.hub import Hub
 
 from libs.CompilerUploader import CompilerUploader
 from libs.Decorators.Asynchronous import asynchronous
@@ -15,14 +15,14 @@ log = logging.getLogger(__name__)
 
 
 class SerialConnection:
-    def __init__(self, port, baudrate, onReceivedCallback):
+    def __init__(self, port, baudrate, on_received_callback):
         self.serial = serial.Serial()
         self.serial.port = port
         self.serial.baudrate = baudrate
         self.serial.open()
-        self.onReceivedCallback = onReceivedCallback
+        self.on_received_callback = on_received_callback
         self.__getData()
-        self.isAboutToBeClosed = False
+        self.is_about_to_be_closed = False
 
     @asynchronous()
     def __getData(self):
@@ -32,32 +32,32 @@ class SerialConnection:
                 while self.serial.inWaiting() > 0:
                     out += self.serial.read(1)
                 if out != '':
-                    self.onReceivedCallback(self.serial.port, out)
+                    self.on_received_callback(self.serial.port, out)
             except IOError as e:
                 if e.errno == 5 or e.message == "call to ClearCommError failed":
-                    log.exception("Error in serial port, check connection")
+                    log.warning("Error in serial port, check connection")
                     self.close()
                 else:
                     raise
             except Exception as e:
-                if not self.isAboutToBeClosed:
+                if not self.is_about_to_be_closed:
                     log.exception("error getting data: {}".format(e))
             time.sleep(0.1)
 
     def write(self, data):
         self.serial.write(data.encode('utf-8', 'replace'))
 
-    def changeBaudRate(self, value):
+    def change_baudrate(self, value):
         self.serial.close()
         self.serial.baudrate = value
         self.serial.open()
 
     def close(self):
-        self.isAboutToBeClosed = True
+        self.is_about_to_be_closed = True
         self.serial.close()
-        time.sleep(2) #  we have to give time to really close the port
+        time.sleep(2)  # we have to give time to really close the port
 
-    def isClosed(self):
+    def is_closed(self):
         return not self.serial.isOpen()
 
 
@@ -70,62 +70,90 @@ class SerialMonitorHub(Hub):
 
     def __init__(self):
         super(SerialMonitorHub, self).__init__()
-        self.serialConnections = dict()
+        self.serial_connections = dict()
         """:type : dict from int to SerialConnection"""
+        self.subscribed_clients_ports = dict()
 
-    def startApp(self, port, board):
-        compilerUploader = CompilerUploader.construct(board)
-        from libs.MainApp import getMainApp
-        mainApp = getMainApp()
-        if mainApp.w2bGui.isSerialMonitorRunning():
-            port = mainApp.w2bGui.serialMonitor.port
-        if port is None:
-            port = compilerUploader.getPort()
-        port = mainApp.w2bGui.startSerialMonitorApp(port).get()
-        return port
+    def __on_received_callback(self, port, data):
+        self.clients.get_subscribed_clients().received(port, data)
+        self._get_subscribed_clients_to_port(port).received(port, data)
 
-    def startConnection(self, port, baudrate=9600):
-        if self.isPortConnected(port):
+    def _get_subscribed_clients_to_port(self, port):
+        if port not in self.subscribed_clients_ports:
+            self.subscribed_clients_ports[port] = []
+        clients = self.subscribed_clients_ports[port]
+
+        self.subscribed_clients_ports[port] = list(filter(lambda c: not c.api_is_closed, clients))
+        return ConnectedClientsGroup(clients, self.__class__.__HubName__)
+
+    def start_connection(self, port, baudrate=9600):
+        if self.is_port_connected(port):
             raise SerialMonitorHubException("Port {} already in use".format(port))
 
-        self.serialConnections[port] = SerialConnection(port, baudrate, self.__onReceivedCallback)
+        self.serial_connections[port] = SerialConnection(port, baudrate, self.__on_received_callback)
         return True
 
-    def closeConnection(self, port):
-        if port in self.serialConnections:
-            self.serialConnections[port].close()
+    def close_connection(self, port):
+        if port in self.serial_connections:
+            self.serial_connections[port].close()
+        self.clients.get_subscribed_clients().closed(port)
+        self._get_subscribed_clients_to_port(port).closed(port)
 
     def write(self, port, data, _sender):
-        if not self.isPortConnected(port):
-            self.startConnection(port)
+        if not self.is_port_connected(port):
+            self.start_connection(port)
 
-        self.serialConnections[port].write(data)
-        self._getClientsHolder().getSubscribedClients().writted(data, port, _sender.ID)
+        self.serial_connections[port].write(data)
+        self.clients.get_subscribed_clients().written(data, port, _sender.ID)
 
-    def changeBaudrate(self, port, baudrate):
-        if not self.isPortConnected(port):
-            self.startConnection(port, baudrate)
+    def change_baudrate(self, port, baudrate):
+        if not self.is_port_connected(port):
+            self.start_connection(port, baudrate)
         else:
-            self.serialConnections[port].changeBaudRate(baudrate)
-        self._getClientsHolder().getSubscribedClients().baudrateChanged(port, baudrate)
+            self.serial_connections[port].change_baudrate(baudrate)
+        self.clients.get_subscribed_clients().baudrate_changed(port, baudrate)
+
+    def get_available_ports(self):
+        return CompilerUploader.construct().get_available_ports()
+
+    def find_board_port(self, board):
+        return CompilerUploader.construct(board).get_port()
+
+    def is_port_connected(self, port):
+        return port in self.serial_connections and not self.serial_connections[port].is_closed()
+
+    def get_all_connected_ports(self):
+        return [port for port, connection in self.serial_connections.items() if not connection.is_closed()]
+
+    def close_all_connections(self):
+        for port in self.get_all_connected_ports():
+            self.close_connection(port)
+
+    def close_unused_connections(self):
+        """
+        Close all ports without any subscribed client (this only take into account subscribed_clients_port, not global)
+        """
+        for port in self.get_all_connected_ports():
+            self._get_subscribed_clients_to_port(port)  # this function remove closed clients
+            if len(self.subscribed_clients_ports[port]):
+                self.close_connection(port)
+
+    def subscribe_to_port(self, port, _sender):
+        real_client = _sender.api_get_real_connected_client()
+        if port not in self.subscribed_clients_ports:
+            self.subscribed_clients_ports[port] = []
+
+        if real_client in self.subscribed_clients_ports.get(port):
+            return False
+        self.subscribed_clients_ports[port].append(real_client)
         return True
 
-    def getAvailablePorts(self):
-        return CompilerUploader.construct().getAvailablePorts()
+    def unsubscribe_from_port(self, port, _sender):
+        real_client = _sender.api_get_real_connected_client()
+        if real_client in self.subscribed_clients_ports[port]:
+            self.subscribed_clients_ports[port].remove(real_client)
+            return True
+        return False
 
-    def findBoardPort(self, board):
-        return CompilerUploader.construct(board).getPort()
-
-    def isPortConnected(self, port):
-        return port in self.serialConnections and not self.serialConnections[port].isClosed()
-
-    def getAllConnectedPorts(self):
-        return [port for port, connection in self.serialConnections.items() if not connection.isClosed()]
-
-    def closeAllConnections(self):
-        for port in self.getAllConnectedPorts():
-            self.closeConnection(port)
-        return True
-
-    def __onReceivedCallback(self, port, data):
-        self._getClientsHolder().getSubscribedClients().received(port, data)
+    def get_subscribed_clients_ids_to_port(self, port):
+        return [c.ID for c in self._get_subscribed_clients_to_port(port)]

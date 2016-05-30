@@ -17,6 +17,7 @@ def startLogger():
     log.addHandler(fileHandler)
     log.setLevel(logging.DEBUG)
 
+
 def open_file(filename):
     if sys.platform == "win32":
         subprocess.call([filename] + sys.argv[1:])
@@ -25,8 +26,8 @@ def open_file(filename):
 
 startLogger()
 log = logging.getLogger(__name__)
-web2boardPath = "web2board" + utils.getOsExecutableExtension()
+web2boardPath = "web2board" + utils.get_executable_extension()
 
 if __name__ == '__main__':
-    utils.killProcess("web2board")
+    utils.kill_process("web2board")
     open_file("web2board")

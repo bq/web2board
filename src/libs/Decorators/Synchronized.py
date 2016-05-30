@@ -1,5 +1,5 @@
 def synchronized(lock):
-    '''Synchronization decorator.'''
+    """Synchronization decorator."""
 
     def wrap(f):
         def new_function(*args, **kw):
@@ -8,5 +8,7 @@ def synchronized(lock):
                 return f(*args, **kw)
             finally:
                 lock.release()
+
         return new_function
+
     return wrap

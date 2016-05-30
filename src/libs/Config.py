@@ -17,38 +17,18 @@ class ConfigException(Exception):
 
 class Config:
     _log = logging.getLogger(__name__)
-    webSocketIP = ""
-    webSocketPort = 9876
+    web_socket_ip = ""
+    web_socket_port = 9876
     proxy = None
-    version = "2.0.0"
-    downloadUrlTemplate = "https://github.com/bq/web2board/archive/devel.zip"
-    bitbloqLibsVersion = "0.1.1"
-    bitbloqLibsLibraries = [
-        "BitbloqBatteryReader",
-        "BitbloqButtonPad",
-        "BitbloqEnableInterrupt",
-        "BitbloqEncoder",
-        "BitbloqEvolution",
-        "BitbloqHTS221",
-        "BitbloqJoystick",
-        "BitbloqLedMatrix",
-        "BitbloqLineFollower",
-        "BitbloqLiquidCrystal",
-        "BitbloqOscillator",
-        "BitbloqRGB",
-        "BitbloqRTC",
-        "BitbloqSoftwareSerial",
-        "BitbloqUS",
-        "BitbloqZowi",
-        "BitbloqZowiSerialCommand"
-    ]
-    bitbloqLibsDownloadUrlTemplate = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
-    checkOnlineUpdates = True
-    logLevel = logging.INFO
-    pluginsPath = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
+    download_url_template = "https://github.com/bq/web2board/archive/devel.zip"
+    bitbloq_libs_download_url_template = 'https://github.com/bq/bitbloqLibs/archive/v{version}.zip'
+    check_online_updates = True
+    check_libraries_updates = True
+    log_level = logging.INFO
+    plugins_path = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
 
     @classmethod
-    def getPlatformioLibDir(cls):
+    def get_platformio_lib_dir(cls):
         parser = ConfigParser()
         with open(PathsManager.PLATFORMIO_WORKSPACE_SKELETON + os.sep + "platformio.ini") as platformioIniFile:
             parser.readfp(platformioIniFile)
@@ -58,7 +38,7 @@ class Config:
             return PathsManager.PLATFORMIO_WORKSPACE_SKELETON + os.sep + "lib"
 
     @classmethod
-    def setPlatformioLibDir(cls, libDir):
+    def set_platformio_lib_dir(cls, libDir):
         if not os.path.exists(libDir):
             raise ConfigException("Libraries directory does not exist")
         parser = ConfigParser()
@@ -71,18 +51,19 @@ class Config:
             parser.write(platformioIniFile)
 
     @classmethod
-    def getConfigValues(cls):
+    def get_config_values(cls):
         configValues = {k: v for k, v in cls.__dict__.items() if not k.startswith("_")}
-        configValues.pop("readConfigFile")
-        configValues.pop("storeConfigInFile")
-        configValues.pop("setPlatformioLibDir")
-        configValues.pop("getPlatformioLibDir")
-        configValues.pop("getConfigValues")
-        configValues.pop("getClientWSIP")
+        configValues.pop("read_config_file")
+        configValues.pop("store_config_in_file")
+        configValues.pop("set_platformio_lib_dir")
+        configValues.pop("get_platformio_lib_dir")
+        configValues.pop("get_config_values")
+        configValues.pop("get_client_ws_ip")
+        configValues.pop("log_values")
         return configValues
 
     @classmethod
-    def readConfigFile(cls):
+    def read_config_file(cls):
         if os.path.exists(PathsManager.CONFIG_PATH):
             try:
                 cls._log.info("Reading config file")
@@ -92,15 +73,19 @@ class Config:
             except ValueError:
                 cls._log.error("Json corrupted so it was ignored, necessary to check!")
         else:
-            cls.storeConfigInFile()
+            cls.store_config_in_file()
 
     @classmethod
     @synchronized(my_lock)
-    def storeConfigInFile(cls):
+    def store_config_in_file(cls):
         with open(PathsManager.CONFIG_PATH, "w") as f:
-            configValues = cls.getConfigValues()
+            configValues = cls.get_config_values()
             json.dump(configValues, f, indent=4)
 
     @classmethod
-    def getClientWSIP(cls):
-        return "127.0.0.1" if Config.webSocketIP == "" else Config.webSocketIP
+    def get_client_ws_ip(cls):
+        return "127.0.0.1" if Config.web_socket_ip == "" else Config.web_socket_ip
+
+    @classmethod
+    def log_values(cls):
+        cls._log.debug("configuration: {}".format(cls.get_config_values()))

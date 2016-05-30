@@ -5,10 +5,10 @@ import unittest
 import serial.tools.list_ports
 from flexmock import flexmock
 
-from Test.testingUtils import restoreAllTestResources
+from Test.testingUtils import restore_test_resources
 from libs import utils
 from libs.PathsManager import PathsManager
-
+from libs.Version import Version
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
@@ -19,7 +19,7 @@ class TestUtils(unittest.TestCase):
         self.zipFolder = os.path.join(self.myTestFolder, "zip")
 
         self.original_list_ports_comports = serial.tools.list_ports.comports
-        restoreAllTestResources()
+        restore_test_resources()
 
     def tearDown(self):
         serial.tools.list_ports.comports = self.original_list_ports_comports
@@ -29,16 +29,16 @@ class TestUtils(unittest.TestCase):
         if os.path.exists(self.zipFolder):
             shutil.rmtree(self.zipFolder)
 
-    @unittest.skipIf(utils.areWeFrozen(), "module path returns exe path and can not be tested")
+    @unittest.skipIf(utils.are_we_frozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_returnsThisModulePath(self):
-        modulePath = utils.getModulePath()
+        modulePath = utils.get_module_path()
 
         self.assertIn(os.path.join("src", "Test"), modulePath)
 
-    @unittest.skipIf(utils.areWeFrozen(), "module path returns exe path and can not be tested")
+    @unittest.skipIf(utils.are_we_frozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_getsUnittestPathWithPreviousFrame(self):
         import inspect
-        modulePath = utils.getModulePath(inspect.currentframe().f_back)
+        modulePath = utils.get_module_path(inspect.currentframe().f_back)
 
         self.assertIn("unittest", modulePath)
 
@@ -74,12 +74,12 @@ class TestUtils(unittest.TestCase):
 
     def test_listDirectoriesInPath(self):
         print self.myTestFolder
-        directories = utils.listDirectoriesInPath(self.myTestFolder)
+        directories = utils.list_directories_in_path(self.myTestFolder)
         directories = map(lambda x: x.lower(), directories)
         self.assertEqual(set(directories), {"copytree_old", "otherdir"})
 
     def test_extractZip(self):
-        utils.extractZip(self.zipPath, self.myTestFolder)
+        utils.extract_zip(self.zipPath, self.myTestFolder)
 
         self.assertTrue(os.path.exists(self.zipFolder))
         self.assertTrue(os.path.exists(self.zipFolder + os.sep + "zip.txt"))
@@ -88,11 +88,11 @@ class TestUtils(unittest.TestCase):
         ports = [(1,2,3), (4,5,6)]
         flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
-        self.assertEqual(utils.listSerialPorts(), ports)
+        self.assertEqual(utils.list_serial_ports(), ports)
 
     def test_listSerialPorts_filterWithFunction(self):
         portsFilter = lambda x: x[0] == 1
         ports = [(1,2,3), (4,5,6)]
         flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
-        self.assertEqual(utils.listSerialPorts(portsFilter), ports[0:1])
+        self.assertEqual(utils.list_serial_ports(portsFilter), ports[0:1])

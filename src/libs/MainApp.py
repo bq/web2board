@@ -1,28 +1,25 @@
-import importlib
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
 import urllib2
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 
-from PySide import QtGui
-from PySide.QtCore import Qt
-
 from tornado import web, ioloop
-from wshubsapi.HubsInspector import HubsInspector
+from wshubsapi.hubs_inspector import HubsInspector
 
 from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
 from libs import utils
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
-from libs.Decorators.InGuiThread import InGuiThread
 from libs.PathsManager import PathsManager
-from libs.Updaters.BitbloqLibsUpdater import getBitbloqLibsUpdater
-from libs.Updaters.Web2boardUpdater import getWeb2boardUpdater
-from libs.WSCommunication.Clients.WSHubsApi import HubsAPI
+from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
+from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
+from libs.Version import Version
+from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 
 log = logging.getLogger(__name__)
@@ -31,14 +28,12 @@ __mainApp = None
 
 class MainApp:
     def __init__(self):
-        self.w2bGui = None
-        """:type : frames.Web2boardWindow.Web2boardWindow"""
-        self.w2bServer = None
-        self.isAppRunning = False
-        self.qtApp = None
+        Version.read_version_values()
+        Config.read_config_file()
+        self.w2b_server = None
 
-    @InGuiThread()
-    def __handleTestingOptions(self, testing):
+    @staticmethod
+    def __handle_testing_options(testing):
         sys.argv[1:] = []
         if testing != "none":
             if testing == "unit":
@@ -52,15 +47,35 @@ class MainApp:
             time.sleep(10)
             os._exit(1)
 
-    def parseSystemArguments(self):
+    @staticmethod
+    def __log_environment():
+        Version.log_data()
+        log.debug("Enviromental data:")
+        try:
+            log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
+        except:
+            log.exception("unable to log environmental data")
+        try:
+            PathsManager.log_relevant_environmental_paths()
+        except:
+            log.exception("Unable to log Paths")
+        try:
+            Config.log_values()
+        except:
+            log.exception("Unable to log Config")
+
+    @staticmethod
+    def parse_system_arguments():
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
-        parser.add_option("--host", default=Config.webSocketIP, type='string', action="store", dest="host", help="hostname (localhost)")
-        parser.add_option("--port", default=Config.webSocketPort, type='int', action="store", dest="port", help="port (9876)")
+        parser.add_option("--host", default=Config.web_socket_ip, type='string', action="store", dest="host",
+                          help="hostname (localhost)")
+        parser.add_option("--port", default=Config.web_socket_port, type='int', action="store", dest="port",
+                          help="port (9876)")
         parser.add_option("--test", default='none', type='string', action="store", dest="testing",
                           help="options: [none, unit, integration, all]")
         parser.add_option("--board", default="uno", type='string', action="store", dest="board",
                           help="board connected for integration tests")
-        parser.add_option("--logLevel", default=Config.logLevel, type='string', action="store", dest="logLevel",
+        parser.add_option("--logLevel", default=Config.log_level, type='string', action="store", dest="logLevel",
                           help="show more or less info, options[debug, info, warning, error, critical")
         parser.add_option("--update2version", default=None, type='string', action="store", dest="update2version",
                           help="auto update to version")
@@ -69,205 +84,94 @@ class MainApp:
 
         return parser.parse_args()
 
-    def handleSystemArguments(self, options, args):
+    def handle_system_arguments(self, options, args):
         log.info("init web2board with options: {}, and args: {}".format(options, args))
-        utils.setLogLevel(options.logLevel)
+        utils.set_log_level(options.logLevel)
+        # self.set_up_proxy(options.proxy)
 
         if not os.environ.get("platformioBoard", False):
             os.environ["platformioBoard"] = options.board
 
         if options.proxy is not None:
-            proxy = urllib2.ProxyHandler({'http': options.proxy})
-            opener = urllib2.build_opener(proxy)
-            urllib2.install_opener(opener)
+            Config.proxy = options.proxy
+            proxy_obj = dict(http=Config.proxy, https=Config.proxy)
+            utils.set_proxy(proxy_obj)
 
-        if options.update2version is not None:
+        if options.update2version is not None:  # todo: check if this is still necessary
+            utils.set_log_level(logging.DEBUG)
             log.debug("updating version")
-            getWeb2boardUpdater().update(PathsManager.getDstPathForUpdate(options.update2version))
+            Web2BoardUpdater().update(PathsManager.get_dst_path_for_update(options.update2version))
 
-        self.__handleTestingOptions(options.testing.lower())
+        self.__handle_testing_options(options.testing.lower())
 
         return options
 
-    def initializeServerAndCommunicationProtocol(self, options):
-        # do not call this line in executable
-        if not utils.areWeFrozen():
-            HubsInspector.constructJSFile(path="libs/WSCommunication/Clients")
-            HubsInspector.constructPythonFile(path="libs/WSCommunication/Clients")
-        self.w2bServer = web.Application([
-            (r'/(.*)', WSConnectionHandler),
-        ])
-        Config.webSocketPort = options.port
-        self.w2bServer.listen(options.port)
-        return self.w2bServer
-
     @asynchronous()
-    def updateLibrariesIfNecessary(self):
+    def update_libraries_if_necessary(self):
         try:
-            getBitbloqLibsUpdater().restoreCurrentVersionIfNecessary()
+            BitbloqLibsUpdater().restore_current_version_if_necessary()
         except (HTTPError, URLError) as e:
             log.error("unable to download libraries (might be a proxy problem)")
-            proxyName = raw_input("introduce proxy name: ")
-            proxy = urllib2.ProxyHandler({'http': proxyName})
-            opener = urllib2.build_opener(proxy)
-            urllib2.install_opener(opener)
-            self.updateLibrariesIfNecessary()
-        except OSError:
-            log.exception("unable to copy libraries files, there could be a permissions problem.")
-
-    def startConsoleViewer(self):
-        from frames.Web2boardWindow import Web2boardWindow
-
-        app = QtGui.QApplication(sys.argv)
-        app.setQuitOnLastWindowClosed(False)
-        self.w2bGui = Web2boardWindow()
-        if not isTrayIconAvailable():
-            self.w2bGui.setWindowState(Qt.WindowMinimized)
-        self.isAppRunning = True
-        return app
+        except:
+            log.exception("unable to copy libraries files, there could be a permission problem.")
 
     @asynchronous()
-    def checkConnectionIsAvailable(self):
+    def check_connection_is_available(self):
         time.sleep(1)
-        self.api = HubsAPI("ws://{0}:{1}".format(Config.webSocketIP, Config.webSocketPort))
         try:
-            self.api.connect()
+            api = HubsAPI("ws://{0}:{1}".format(Config.web_socket_ip, Config.web_socket_port))
+            api.connect()
         except Exception as e:
             pass
         else:
             log.info("connection available")
 
     @asynchronous()
-    def startServer(self, options):
-        while not self.isAppRunning:
-            time.sleep(0.1)
+    def test_connection(self):
+        import socket
+        time.sleep(2)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((Config.get_client_ws_ip(), Config.web_socket_port))
+        if result == 0:
+            log.debug("Port is open")
+        else:
+            log.error("Port: {} could not be opened, check antivirus configuration".format(Config.web_socket_port))
 
-        self.w2bServer = self.initializeServerAndCommunicationProtocol(options)
+    def initialize_server_and_communication_protocol(self, options):
+        # do not call this line in executable
+        if not utils.are_we_frozen():
+            HubsInspector.construct_js_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubsApi.js"))
+            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static", "hubsApi.js"))
+            HubsInspector.construct_python_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubs_api.py"))
+        self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
+        Config.web_socket_port = options.port
+        self.w2b_server.listen(options.port)
+        return self.w2b_server
+
+    def start_server(self, options):
+        self.w2b_server = self.initialize_server_and_communication_protocol(options)
 
         try:
             log.info("listening...")
             # self.checkConnectionIsAvailable()
             ioloop.IOLoop.instance().start()
         finally:
-            forceQuit()
+            force_quit()
 
-    def startMain(self):
-        Config.readConfigFile()
-        PathsManager.cleanPioEnvs()
-        options, args = self.parseSystemArguments()
-        self.qtApp = self.startConsoleViewer()
-        self.updateLibrariesIfNecessary()
-        self.handleSystemArguments(options, args)
-        log.debug("Enviromental data:")
-        try:
-            log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
-        except:
-            log.exception("unable to log environmental data")
-        try:
-            PathsManager.logRelevantEnvironmentalPaths()
-        except:
-            log.exception("Unable to log Paths")
+    def start_main(self):
+        PathsManager.clean_pio_envs()
+        options, args = self.parse_system_arguments()
+        self.handle_system_arguments(options, args)
+        self.update_libraries_if_necessary()
+
+        self.__log_environment()
         if options.update2version is None:
-            self.startServer(options)
-            self.testConnection()
-
-        return self.qtApp
-
-    def isSerialMonitorRunning(self):
-        return self.w2bGui is not None and self.w2bGui.isSerialMonitorRunning()
-
-    @InGuiThread()
-    def executeSconsScript(self):
-        def revert_io():
-            # This call is added to revert stderr and stdout to the original
-            # ones just in case some build rule or something else in the system
-            # has redirected them elsewhere.
-            sys.stderr = sys.__stderr__
-            sys.stdout = sys.__stdout__
-        import res.Scons.sconsFiles.scons
-        try:
-            class auxFile:
-                def __init__(self, *args):
-                    self.buffer = ""
-
-                def write(self, message):
-                    try:
-                        self.buffer += message
-                    except:
-                        try:
-                            self.buffer += message.encode("utf-8")
-                        except:
-                            self.buffer += message.decode(sys.getfilesystemencoding())
-
-                def writelines(self, messages):
-                    self.buffer += "\n".join(messages)
-
-                def flush(self, *args):
-                    pass
-
-            sys.stderr = auxFile()
-            sys.stdout = auxFile()
-            import res.Scons.sconsFiles.SCons.Script
-            res.Scons.sconsFiles.SCons.Script.main()
-
-        except SystemExit as e:
-            outBuffer = sys.stdout.file.buffer
-            errBuffer = sys.stderr.file.buffer
-            returnObject = {"returncode": e.code, "out": sys.stdout.file.buffer, "err": sys.stderr.file.buffer}
-            revert_io()
-            sys.stdout.write(outBuffer)
-            sys.stderr.write(errBuffer)
-            return returnObject
-
-        except:
-            log.exception("failed to execute Scons script")
-        finally:
-            revert_io()
-
-    @InGuiThread()
-    def bringWidgetToFront(self, widget):
-        if widget.isVisible() and not utils.isMac():
-            widget.hide()
-        if not utils.isMac():
-            widget.show()
-            if widget.windowState() & Qt.WindowMinimized:
-                widget.setWindowState(Qt.WindowNoState)
-
-        widget.raise_()
-        self.qtApp.setActiveWindow(widget)
-        if not utils.isLinux():
-            widget.activateWindow()
-            widget.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
-            widget.update()
-
-    @asynchronous()
-    def testConnection(self):
-        import socket
-        time.sleep(2)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((Config.getClientWSIP(), Config.webSocketPort))
-        if result == 0:
-            log.debug("Port is open")
-        else:
-            log.error("Port: {} could not be opened, check Antivirus configuration".format(Config.webSocketPort))
+            self.start_server(options)
+            self.test_connection()
 
 
-def getMainApp():
-    global __mainApp
-    if __mainApp is None:
-        __mainApp = MainApp()
-    return __mainApp
-
-
-def isTrayIconAvailable():
-    return utils.isWindows() and QtGui.QSystemTrayIcon.isSystemTrayAvailable()
-
-
-@InGuiThread()
-def forceQuit():
+def force_quit():
     try:
-        mainApp = getMainApp()
-        mainApp.w2bGui.closeTrayIcon()
-        mainApp.qtApp.quit()
+        os._exit(1)
     finally:
         pass

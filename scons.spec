@@ -26,8 +26,8 @@ a = Analysis([os.path.join(os.getcwd(), os.path.dirname(PathsManager.SCONS_EXECU
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
 
-a.datas += utils.findFilesForPyInstaller(os.path.join(originalWorkingPath, "platformio"), ["*", "**/*"])
-a.datas += utils.findFilesForPyInstaller(os.path.join(originalWorkingPath, PathsManager.RES_PATH), ["*", "**/*"])
+a.datas += utils.find_files_for_pyinstaller(os.path.join(originalWorkingPath, "platformio"), ["*", "**/*"])
+a.datas += utils.find_files_for_pyinstaller(os.path.join(originalWorkingPath, PathsManager.RES_PATH), ["*", "**/*"])
 
 
 print a.datas
