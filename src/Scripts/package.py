@@ -23,14 +23,14 @@ if "32" in sys.argv:
 Version.read_version_values()
 Config.read_config_file()
 architecture = Packager.ARCH_32 if architectureInt == 32 else Packager.ARCH_64
-packager = Packager.constructCurrentPlatformPackager(architecture=architecture)
-packager.prepareResFolderForExecutable()
+packager = Packager.construct_current_platform_packager(architecture=architecture)
+packager.prepare_res_folder_for_executable()
 
 log = initLogging(__name__)
 log.info("packaging for architecture: {}".format(architecture))
 if offline:
     log.info("packaging for OFFLINE")
-    packager.createPackageForOffline()
+    packager.create_package_for_offline()
 else:
     log.info("packaging")
-    packager.createPackage()
+    packager.create_package()

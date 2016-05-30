@@ -1,5 +1,5 @@
 click==5.1
-wshubsapi>=0.7.6
+wshubsapi>=0.7.8
 glob2
 pyserial
 flexmock

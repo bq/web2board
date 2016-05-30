@@ -27,7 +27,7 @@ DATA_FILES = ['src/res', 'src/platformio', 'src/Test/resources']
 setup(
         author='bq',
         name='Web2Board',
-        version='2.1.0',
+        version='2.1.1',
         author_email='support-bitbloq@bq.com',
         description='Native program that connects a web and a board. It compiles Arduino sketches and uploads them onto an Arduino board.',
         license='GNU GPL',

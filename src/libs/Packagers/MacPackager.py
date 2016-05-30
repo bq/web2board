@@ -12,60 +12,63 @@ class MacPackager(Packager):
     def __init__(self):
         Packager.__init__(self)
 
-        self.installerPath = self.installerFolder + os.sep + "darwin"
-        self.installerOfflinePath = self.installerFolder + os.sep + "darwinOffline"
-        self.installerCreationPath = self.web2boardPath + os.sep + "darwin_web2board_{}".format(self.version)
-        self.installerCreationDistPath = os.path.join(self.installerCreationPath, "dist")
-        self.installerCreationAppPath = os.path.join(self.installerCreationDistPath, 'web2boardLink.app')
-        self.installerCreationName = os.path.basename(self.installerCreationPath)
-        self.installerCreationExecutablesPath = os.path.join(self.installerCreationPath, "executables")
-        self.pkgPlatformPath = os.path.join(self.pkgPath, "darwin")
-        self.resPlatformPath = os.path.join(self.resPath, "darwin")
+        self.installer_path = self.installer_folder + os.sep + "darwin"
+        self.installer_offline_path = self.installer_folder + os.sep + "darwinOffline"
+        self.installer_creation_path = self.web2board_path + os.sep + "darwin_web2board_{}".format(self.version)
+        self.installer_creation_dist_path = os.path.join(self.installer_creation_path, "dist")
+        self.installerCreationAppPath = os.path.join(self.installer_creation_dist_path, 'web2boardLink.app')
+        self.installer_creation_name = os.path.basename(self.installer_creation_path)
+        self.installer_creation_executables_path = os.path.join(self.installer_creation_path, "executables")
+        self.pkg_platform_path = os.path.join(self.pkg_path, "darwin")
+        self.res_platform_path = os.path.join(self.res_path, "darwin")
 
-        self.web2boardExecutableName = "web2boardLink.app"
-        self.web2boardSpecPath = os.path.join(self.web2boardPath, "web2board-mac.spec")
+        self.web2board_executable_name = "web2boardLink.app"
+        self.web2board_spec_path = os.path.join(self.web2board_path, "web2board-mac.spec")
 
-        self.pkgprojPath = os.path.join(self.installerCreationPath, "create-mpkg", "web2board", "web2board.pkgproj")
-        self.installerBackgroundPath = os.path.join(self.resPlatformPath, "installer_background.jpg")
-        self.licensePath = os.path.join(self.web2boardPath, "LICENSE.txt")
+        self.pkgprojPath = os.path.join(self.installer_creation_path, "create-mpkg", "web2board", "web2board.pkgproj")
+        self.installer_background_path = os.path.join(self.res_platform_path, "installer_background.jpg")
+        self.licensePath = os.path.join(self.web2board_path, "LICENSE.txt")
 
-        self.appResourcesPath = os.path.join(self.installerCreationAppPath, "Contents", "MacOS", "res")
-        self.info_plist_path = os.path.join(self.web2boardPath, "info.plist")
+        self.app_resources_path = os.path.join(self.installerCreationAppPath, "Contents", "MacOS", "res")
+        self.info_plist_path = os.path.join(self.web2board_path, "info.plist")
         self.info_plist_path_dst = os.path.join(self.installerCreationAppPath, "Contents", "info.plist")
 
-    def _addMetadataForInstaller(self):
-        Packager._addMetadataForInstaller(self)
-        copytree(self.pkgPlatformPath, self.installerCreationPath)
-        shutil.copy2(self.installerBackgroundPath, self.installerCreationDistPath)
-        shutil.copy2(self.licensePath, self.installerCreationDistPath)
+    def _add_metadata_for_installer(self):
+        Packager._add_metadata_for_installer(self)
+        copytree(self.pkg_platform_path, self.installer_creation_path)
+        shutil.copy2(self.installer_background_path, self.installer_creation_dist_path)
+        shutil.copy2(self.licensePath, self.installer_creation_dist_path)
         shutil.copyfile(self.info_plist_path, self.info_plist_path_dst)
         #  copytree(self._getInstallerCreationResPath(), self.appResourcesPath)
 
-    def _constructLinkExecutable(self):
-        self._clearBuildFiles()
-        os.chdir(self.srcPath)
+    def _construct_link_executable(self):
+        self._clear_build_files()
+        os.chdir(self.src_path)
         log.debug("Creating Web2boardLink Executable")
-        os.system("pyinstaller -w --onefile \"{}\"".format(self.web2boardPath + os.sep + "web2boardLink-mac.spec"))
-        utils.copytree(os.path.join(self.pyInstallerDistFolder, "web2boardLink.app"), self.installerCreationAppPath)
-        shutil.move(os.path.join(self.installerCreationDistPath, 'web2board'), os.path.join(self.appResourcesPath, os.pardir, 'web2board'))
-        utils.copytree(self.resCommonPath, self.appResourcesPath)
+        os.system("pyinstaller -w --onefile \"{}\"".format(self.web2board_path + os.sep + "web2boardLink-mac.spec"))
+        utils.copytree(os.path.join(self.pyinstaller_dist_folder, "web2boardLink.app"), self.installerCreationAppPath)
 
-    def _moveInstallerToInstallerFolder(self):
-        shutil.copy2(self.installerCreationDistPath + os.sep + "Web2Board.pkg", self.installerPath)
+        w2b_origin = os.path.join(self.installer_creation_dist_path, 'web2board')
+        w2b_dst = os.path.join(self.app_resources_path, os.pardir, 'web2board')
+        shutil.move(w2b_origin, w2b_dst)
+        utils.copytree(self.res_common_path, self.app_resources_path)
 
-    def createPackage(self):
+    def _move_installer_to_installer_folder(self):
+        shutil.copy2(self.installer_creation_dist_path + os.sep + "Web2Board.pkg", self.installer_path)
+
+    def create_package(self):
         try:
-            self._createMainStructureAndExecutables()
+            self._create_main_structure_and_executables()
             log.debug("Adding metadata for installer")
-            self._addMetadataForInstaller()
-            os.chdir(self.installerCreationDistPath)
+            self._add_metadata_for_installer()
+            os.chdir(self.installer_creation_dist_path)
             log.info("Creating Installer")
 
             call(["/usr/local/bin/packagesbuild", self.pkgprojPath])
-            self._moveInstallerToInstallerFolder()
+            self._move_installer_to_installer_folder()
             log.info("installer created successfully")
         finally:
             log.debug("Cleaning files")
-            os.chdir(self.web2boardPath)
-            self._clearBuildFiles()
+            os.chdir(self.web2board_path)
+            self._clear_build_files()
             # self._deleteInstallerCreationFolder()
