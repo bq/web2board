@@ -10,7 +10,7 @@ Special Thanks
 
 * Arduino founders & staff (http://www.arduino.cc/) for creating all the Arduino Core that is widely used nowadays.
 * Akkana Peck <akkana@shallowsky.com> for the Makefile-arduino v0.8 in which our Makefile is based.
-* DP <https://github.com/opiate> for its great SimpleWebSocketServer library for python.
+* Platformio  team <http://platformio.org/> for its great cross-platform build system.
 
 
 # Installing
@@ -67,7 +67,7 @@ Following dependencies are included in deb package, but if you want to install i
 
 #### Python
 ```bash
-# int web2board path
+# in web2board path
 sudo pip install -r requirements.txt
 ```
 
@@ -80,8 +80,10 @@ In order to generate Debian and Windows packages, some extra dependencies are ne
 
 #### Packaging
 ```bash
-# int web2board path
+# in web2board path
+# set up res folder (only once)
 python src/Scripts/ConstructRes.py
+# start packaging
 python src/Scripts/package.py
 
 # installer will be created in installer folder
@@ -103,6 +105,7 @@ git clone git@github.com:bq/web2board.git
 In the project directory, execute the command:
 
 ```bash
+# in web2board path
 # set up res folder (only once)
 python src/Scripts/ConstructRes.py
 # start web2board

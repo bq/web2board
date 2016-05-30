@@ -28,36 +28,36 @@ originalEcho = click.echo
 originalSEcho = click.secho
 
 
-def getEchoFunction(original):
-    def clickEchoForExecutable(message, *args, **kwargs):
+def get_echo_function(original):
+    def click_echo_for_executable(message, *args, **kwargs):
         try:
             original(message, *args, **kwargs)
         except:
             log.debug(message)
-    return clickEchoForExecutable
+    return click_echo_for_executable
 
 
-click.echo = getEchoFunction(originalEcho)
-click.secho = getEchoFunction(originalSEcho)
+click.echo = get_echo_function(originalEcho)
+click.secho = get_echo_function(originalSEcho)
 
 
-def clickConfirm(message):
+def click_confirm(message):
     print message
     return True
 
-click.confirm = clickConfirm
+click.confirm = click_confirm
 
 
-def runSconsScript():
+def run_scons_script():
     pprint.pprint(sys.path)
-    platformioPath = sys.argv.pop(-1)
-    pathDiff = os.path.relpath(os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), platformioPath)
-    os.chdir(platformioPath)
-    sys.path.extend([pathDiff + os.sep + 'sconsFiles'])
-    execfile(pathDiff + os.sep + "sconsFiles" + os.sep + "scons.py")
+    platformio_path = sys.argv.pop(-1)
+    path_diff = os.path.relpath(os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), platformio_path)
+    os.chdir(platformio_path)
+    sys.path.extend([path_diff + os.sep + 'sconsFiles'])
+    execfile(path_diff + os.sep + "sconsFiles" + os.sep + "scons.py")
 
 if "-Q" in sys.argv:
-    runSconsScript()
+    run_scons_script()
     os._exit(1)
 
 if __name__ == "__main__":
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         from libs.MainApp import force_quit, MainApp
         app = MainApp()
 
-        def closeSigHandler(signal, frame):
+        def close_sig_handler(signal, frame):
             try:
                 log.warning("closing server")
                 app.w2b_server.server_close()
@@ -76,7 +76,7 @@ if __name__ == "__main__":
             force_quit()
         HubsInspector.inspect_implemented_hubs()
 
-        signal.signal(signal.SIGINT, closeSigHandler)
+        signal.signal(signal.SIGINT, close_sig_handler)
         app.start_main()
     except SystemExit:
         pass
