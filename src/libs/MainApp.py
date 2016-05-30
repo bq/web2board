@@ -48,6 +48,22 @@ class MainApp:
             os._exit(1)
 
     @staticmethod
+    def __log_environment():
+        log.debug("Enviromental data:")
+        try:
+            log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
+        except:
+            log.exception("unable to log environmental data")
+        try:
+            PathsManager.log_relevant_environmental_paths()
+        except:
+            log.exception("Unable to log Paths")
+        try:
+            Config.log_values()
+        except:
+            log.exception("Unable to log Config")
+
+    @staticmethod
     def parse_system_arguments():
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
         parser.add_option("--host", default=Config.web_socket_ip, type='string', action="store", dest="host",
@@ -123,9 +139,9 @@ class MainApp:
     def initialize_server_and_communication_protocol(self, options):
         # do not call this line in executable
         if not utils.are_we_frozen():
-            HubsInspector.construct_js_file(path="libs/WSCommunication/Clients")
-            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static"))
-            HubsInspector.construct_python_file(path="libs/WSCommunication/Clients")
+            HubsInspector.construct_js_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubsApi.js"))
+            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static", "hubsApi.js"))
+            HubsInspector.construct_python_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubs_api.py"))
         self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
         Config.web_socket_port = options.port
         self.w2b_server.listen(options.port)
@@ -148,19 +164,7 @@ class MainApp:
         self.update_libraries_if_necessary()
 
         Version.log_data()
-        log.debug("Enviromental data:")
-        try:
-            log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
-        except:
-            log.exception("unable to log environmental data")
-        try:
-            PathsManager.log_relevant_environmental_paths()
-        except:
-            log.exception("Unable to log Paths")
-        try:
-            Config.log_values()
-        except:
-            log.exception("Unable to log Config")
+        self.__log_environment()
         if options.update2version is None:
             self.start_server(options)
             self.test_connection()
