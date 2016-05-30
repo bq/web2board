@@ -14,8 +14,8 @@ warnings.filterwarnings("ignore", category=UserWarning, module='urllib2')
 class Downloader:
     log = logging.getLogger(__name__)
 
-    def __init__(self, refreshTime=0.2):
-        self.refreshTime = refreshTime
+    def __init__(self, refresh_time=0.2):
+        self.refreshTime = refresh_time
 
     @asynchronous()
     def __real_download(self, url_file, dst):

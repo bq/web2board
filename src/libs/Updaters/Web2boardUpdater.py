@@ -20,7 +20,7 @@ class Web2BoardUpdater:
 
     def __init__(self):
         self.name = "Web2BoardUpdater"
-        self.downloader = Downloader(refreshTime=1)
+        self.downloader = Downloader(refresh_time=1)
 
     def __extract_version_from_path(self, path):
         version_to_end = path.rsplit("_", 1)[1]

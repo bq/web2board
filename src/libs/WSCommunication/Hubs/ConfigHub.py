@@ -3,6 +3,7 @@ import os
 import urllib2
 from copy import deepcopy
 
+import time
 from wshubsapi.hub import Hub
 from libs.Config import Config
 from libs import utils
@@ -20,6 +21,7 @@ class ConfigHub(Hub):
         super(ConfigHub, self).__init__()
 
     def get_config(self):
+        time.sleep(15)
         config = deepcopy(Config.get_config_values())
         config.update(dict(libraries_path=self.get_libraries_path()))
         return config

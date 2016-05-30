@@ -49,6 +49,7 @@ class MainApp:
 
     @staticmethod
     def __log_environment():
+        Version.log_data()
         log.debug("Enviromental data:")
         try:
             log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))
@@ -163,7 +164,6 @@ class MainApp:
         self.handle_system_arguments(options, args)
         self.update_libraries_if_necessary()
 
-        Version.log_data()
         self.__log_environment()
         if options.update2version is None:
             self.start_server(options)

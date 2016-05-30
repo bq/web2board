@@ -18,7 +18,7 @@ class TestDownloader(unittest.TestCase):
 
         self.relative_data_path = 'Downloader'
         self.data_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, self.relative_data_path)
-        self.downloader = Downloader(refreshTime=0.01)
+        self.downloader = Downloader(refresh_time=0.01)
         self.metaMock = flexmock(getheaders=lambda x: [1000])
         self.read_sleep = 0
 
