@@ -23,13 +23,13 @@ class WSConnectionHandler(ConnectionHandler):
                 libs.MainApp.force_quit()
 
     def on_message(self, message):
-        if message == "version":  # bitbloq thinks we are in version 1
+        if message.startswith('setBitbloqLibsVersion'):  # bitbloq thinks we are in version 1
             # send an empty dict to alert bitbloq we are in version 2
             self._connected_client.api_write_message(json.dumps(dict()))
         else:
             try:
-                sortMessage = message if len(message) < 500 else message[:300] + "..."
-                log.debug("Message received from ID: %s\n%s " % (str(self._connected_client.ID), sortMessage))
+                sort_message = message if len(message) < 500 else message[:300] + "..."
+                log.debug("Message received from ID: %s\n%s " % (str(self._connected_client.ID), sort_message))
             except UnicodeError:
                 pass
             self.comm_environment.on_async_message(self._connected_client, message.encode('utf-8', 'ignore'))
