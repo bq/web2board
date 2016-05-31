@@ -51,22 +51,22 @@ class BitbloqLibsUpdater(Updater):
         else:
             log.debug("BitbloqLibs is up to date")
 
-    def update(self, versionToUpload):
+    def update(self, version_to_upload):
         log.info('[{0}] Downloading version {1}, from {2}'
-                 .format(self.name, versionToUpload.version, versionToUpload.file_to_download_url))
-        downloadedFilePath = tempfile.gettempdir() + os.sep + "w2b_tmp_libs.zip"
-        self.downloader.download(versionToUpload.file_to_download_url, downloadedFilePath).result()
+                 .format(self.name, version_to_upload.version, version_to_upload.file_to_download_url))
+        downloaded_file_path = tempfile.gettempdir() + os.sep + "w2b_tmp_libs.zip"
+        self.downloader.download(version_to_upload.file_to_download_url, downloaded_file_path).result()
 
-        extractFolder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
-        if not os.path.exists(extractFolder):
-            os.mkdir(extractFolder)
+        extract_folder = tempfile.gettempdir() + os.sep + "web2board_tmp_folder"
+        if not os.path.exists(extract_folder):
+            os.mkdir(extract_folder)
         try:
-            log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloadedFilePath))
-            utils.extract_zip(downloadedFilePath, extractFolder)
-            self._move_libs_to_destination(extractFolder)
-            self._update_current_version_to(versionToUpload)
+            log.info('[{0}] extracting zipfile: {1}'.format(self.name, downloaded_file_path))
+            utils.extract_zip(downloaded_file_path, extract_folder)
+            self._move_libs_to_destination(extract_folder)
+            self._update_current_version_to(version_to_upload)
         finally:
-            if os.path.exists(extractFolder):
-                shutil.rmtree(extractFolder)
+            if os.path.exists(extract_folder):
+                shutil.rmtree(extract_folder)
 
 

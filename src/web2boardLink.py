@@ -15,7 +15,7 @@ from libs.Updaters.Web2boardUpdater import Web2BoardUpdater, UpdaterError
 import subprocess
 
 
-def startLogger():
+def start_logger():
     fileHandler = logging.FileHandler(PathsManager.get_home_path() + os.sep + "web2boardLink.log", 'a')
     fileHandler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,7 +30,7 @@ if utils.are_we_frozen():
     PathsManager.set_all_constants()
 
 msgBox = None
-startLogger()
+start_logger()
 log = logging.getLogger(__name__)
 log.info("starting")
 web2boardPath = os.path.join(PathsManager.PROGRAM_PATH, "web2board" + utils.get_executable_extension())

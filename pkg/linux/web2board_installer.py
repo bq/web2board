@@ -41,29 +41,29 @@ bash = 'bash -c \"echo INSTALLING WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;'
        ' {0} factoryReset; exec bash\"'.format(sys.argv[0])
 
 
-def startLogger():
+def start_logger():
     formatter = logging.Formatter('%(asctime)s - %(message)s')
-    consoleHandler = logging.StreamHandler(sys.stdout)
-    consoleHandler.setLevel(logging.DEBUG)
-    consoleHandler.setFormatter(formatter)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
     # fileHandler = logging.FileHandler("installer.log", 'a')
     # fileHandler.setLevel(logging.DEBUG)
     # fileHandler.setFormatter(formatter)
     logger = logging.getLogger()
     # logger.addHandler(fileHandler)
-    logger.addHandler(consoleHandler)
+    logger.addHandler(console_handler)
     logger.setLevel(logging.DEBUG)
     return logging.getLogger(__name__)
 
 
-def addAllUsersToDialOut():
+def add_all_users_to_dial_out():
     allUsers = [p[0] for p in pwd.getpwall()]
     with click.progressbar(allUsers) as bar:
         for user in bar:
             subprocess.call(["sudo", "adduser", user, "dialout"], stdout=subprocess.PIPE)
 
 
-def addHandlerInMimeapps():
+def add_handler_in_mimeapps():
     if not os.path.exists(applications_path):
         os.makedirs(applications_path)
 
@@ -100,11 +100,12 @@ elif sys.argv[1] == "onTerminal":
 
     log = None
     try:
-        log = startLogger()
+        log = start_logger()
         log.info("Script started")
         log.info("Adding users to dialout...")
-        os.remove(web2board_desktop)
-        addAllUsersToDialOut()
+        if os.path.exists(web2board_desktop):
+            os.remove(web2board_desktop)
+        add_all_users_to_dial_out()
         log.info("Installing web2board")
         os.system("sudo dpkg -i '{}'".format(os.path.join(sys._MEIPASS, "web2board.deb")))
         log.info("Successfully installed web2board")
@@ -116,9 +117,9 @@ elif sys.argv[1] == "onTerminal":
     log.info("web2board successfully installed")
 
 elif sys.argv[1] == "factoryReset":
-    log = startLogger()
+    log = start_logger()
     log.info("Adding handler in Mimeapps file: {}".format(mimeapps_file_path))
-    addHandlerInMimeapps()
+    add_handler_in_mimeapps()
     log.info("running factory reset")
     subprocess.call("/opt/web2board/web2boardLink --factoryReset --noStartApp".split(),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
