@@ -26,9 +26,12 @@ class VersionsHandlerHub(Hub):
         return self.lib_updater.current_version_info.version
 
     def set_lib_version(self, version):
-        version_info = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
-        if self.lib_updater.isNecessaryToUpdate(versionToCompare=version_info):
-            self.lib_updater.update(version_info)
+        if Config.check_libraries_updates:
+            version_info = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
+            if self.lib_updater.isNecessaryToUpdate(version_to_compare=version_info):
+                self.lib_updater.update(version_info)
+        else:
+            return "Check libraries flag is false"
 
     def set_web2board_version(self, version):
         if Config.check_online_updates and version != Version.web2board:

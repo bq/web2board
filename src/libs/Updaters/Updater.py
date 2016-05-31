@@ -94,11 +94,11 @@ class Updater:
         versionInfo = self.current_version_info if versionInfo is None else versionInfo
         return int(versionInfo.version.replace('.', ''))
 
-    def isNecessaryToUpdate(self, versionToCompare=None):
+    def isNecessaryToUpdate(self, version_to_compare=None):
         """
-        :type versionToCompare: VersionInfo
+        :type version_to_compare: VersionInfo
         """
-        versionToCompare = self.current_version_info if versionToCompare is None else versionToCompare
-        logArgs = self.name, self.current_version_info.version, versionToCompare.version
-        log.debug("[{0}] Checking version {1} - {2}".format(*logArgs))
-        return self.current_version_info != versionToCompare or self._are_we_missing_libraries()
+        version_to_compare = self.current_version_info if version_to_compare is None else version_to_compare
+        log_args = self.name, self.current_version_info.version, version_to_compare.version
+        log.debug("[{0}] Checking version {1} - {2}".format(*log_args))
+        return self.current_version_info != version_to_compare or self._are_we_missing_libraries()
