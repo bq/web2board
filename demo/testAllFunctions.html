@@ -94,11 +94,11 @@
         resultDiv = document.getElementById("result"),
         resultPreElement = document.createElement('pre');
     hubsApi.connect('ws://127.0.0.1:9876/', 2);
-    hubsApi.callbacks.onOpen = function () {
+    hubsApi.onOpen = function () {
         connectionStatusEle.innerText = "Connected";
         connectionStatusEle.className = 'connected';
     };
-    hubsApi.callbacks.onClose = function (error) {
+    hubsApi.onClose = function (error) {
         connectionStatusEle.innerText = "Disconnected";
         connectionStatusEle.className = 'disconnected';
         console.error(error);

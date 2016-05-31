@@ -68,9 +68,12 @@ def factory_reset_process():
         time.sleep(1)
         log_message("deleting web2board in: {}".format(PathsManager.PROGRAM_PATH))
         if os.path.exists(PathsManager.PROGRAM_PATH):
-            shutil.rmtree(PathsManager.PROGRAM_PATH)
+            if utils.is_windows():
+                os.system('rmdir /S /Q \"{}\"'.format(PathsManager.PROGRAM_PATH))
+            else:
+                shutil.rmtree(PathsManager.PROGRAM_PATH)
         log_message("Extracting web2board...")
-        shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH)
+        shutil.copytree(utils.get_module_path() + os.sep + "web2board", PathsManager.PROGRAM_PATH.decode(sys.getfilesystemencoding()))
         msgBox.end_successful()
     except Exception as e:
         log.exception("Failed performing Factory reset")

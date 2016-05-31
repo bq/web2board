@@ -80,7 +80,7 @@ class PathsManager:
 
     @classmethod
     def get_dst_path_for_update(cls, version):
-        return os.path.join(cls.get_home_path(), u".web2board_{}".format(version))
+        return os.path.join(cls.get_home_path(), ".web2board_{}".format(version))
 
     @classmethod
     def get_sons_executable_path(cls):
