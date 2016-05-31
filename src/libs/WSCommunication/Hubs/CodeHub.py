@@ -50,8 +50,8 @@ class CodeHub(Hub):
         log.info("Compiling from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.isCompiling()
-        compileReport = CompilerUploader.construct().compile(code)
-        return self.__handle_compile_report(compileReport)
+        compile_report = CompilerUploader.construct().compile(code)
+        return self.__handle_compile_report(compile_report)
 
     def get_hex_data(self, code, _sender):
         """
@@ -71,17 +71,17 @@ class CodeHub(Hub):
         """
         log.info("Uploading for board {} from {}".format(board, _sender.ID))
         log.debug("Uploading code: {}".format(code.encode("utf-8")))
-        uploadPort = self.__prepare_upload(board, _sender, port)
-        if isinstance(uploadPort, UnsuccessfulReplay):
-            return uploadPort
+        upload_port = self.__prepare_upload(board, _sender, port)
+        if isinstance(upload_port, UnsuccessfulReplay):
+            return upload_port
 
-        compileReport = CompilerUploader.construct(board).upload(code, upload_port=uploadPort)
+        compile_report = CompilerUploader.construct(board).upload(code, upload_port=upload_port)
 
-        return self.__handle_compile_report(compileReport, uploadPort)
+        return self.__handle_compile_report(compile_report, upload_port)
 
-    def upload_hex(self, hexText, board, _sender, port=None):
+    def upload_hex(self, hex_text, board, _sender, port=None):
         """
-        :type hexText: str
+        :type hex_text: str
         :type _sender: ConnectedClientsGroup
         """
         log.info("upload Hex text for board {} from {}".format(board, _sender.ID))
@@ -90,7 +90,7 @@ class CodeHub(Hub):
             return upload_port
 
         with open(PathsManager.RES_PATH + os.sep + "factory.hex", 'w+b') as tmpHexFile:
-            tmpHexFile.write(hexText)
+            tmpHexFile.write(hex_text)
 
         rel_path = os.path.relpath(tmpHexFile.name, os.getcwd())
         compileReport = CompilerUploader.construct(board).upload_avr_hex(rel_path, upload_port=upload_port)
@@ -103,5 +103,5 @@ class CodeHub(Hub):
         """
         log.info("upload HexFile for board {} from {}".format(board, _sender[0].ID))
         with open(hex_file_path) as hexFile:
-            hexText = hexFile.read()
-        return self.upload_hex(hexText, board, _sender, port)
+            hex_text = hexFile.read()
+        return self.upload_hex(hex_text, board, _sender, port)
