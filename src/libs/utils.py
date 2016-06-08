@@ -85,16 +85,16 @@ def find_files_for_pyinstaller(path, patterns):
 def find_modules_for_pyinstaller(path, patterns):
     files = find_files(path, patterns)
 
-    def getModuleFromFile(file):
+    def get_module_from_file(file):
         """
         :type file: str
         """
         module = file.replace(os.sep, ".")
         return module[:-3]  # removing .py
 
-    listModules = [getModuleFromFile(f) for f in files if
+    list_modules = [get_module_from_file(f) for f in files if
                    os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
-    return list(set(listModules))
+    return list(set(list_modules))
 
 
 def extract_zip(origin, destination):
@@ -161,16 +161,18 @@ def set_log_level(log_level):
     logging.getLogger().handlers[0].level = log_level
 
 
-def open_file(filename):
-    filePath = filename.encode(sys.getfilesystemencoding())
+def open_file(file_path):
+    if isinstance(file_path, str):
+        file_path = file_path.decode(sys.getfilesystemencoding())
+    # file_path.encode(sys.getfilesystemencoding())
     if sys.platform == "win32":
-        os.popen('"{0}" {1}'.format(filePath, " ".join(sys.argv[1:])))
+        template = u'"{0}" {1}'
     else:
-        if filePath[0] == "/":
-            template = "'{0}' {1}"
+        if file_path[0] == "/":
+            template = u"'{0}' {1}"
         else:
-            template = "'./{0}' {1}"
-        os.popen(template.format(filePath, " ".join(sys.argv[1:])))
+            template = u"'./{0}' {1}"
+    os.popen(u'"{0}" {1}'.format(file_path, " ".join(sys.argv[1:])).encode(sys.getfilesystemencoding()))
 
 
 def set_proxy(proxy):

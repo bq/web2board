@@ -242,7 +242,6 @@ def start_dialog():
 
 
 if __name__ == '__main__':
-    global msgBox
     try:
         log.info("web2boardPath: {}".format(web2boardPath))
         utils.kill_process("web2board")
