@@ -1,12 +1,10 @@
 import os
-import shutil
-import unittest
-import time
 import sys
+import unittest
+
 from flexmock import flexmock, flexmock_teardown
 
 from Test.testingUtils import restore_test_resources, restore_paths
-from libs import utils
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater, UpdaterError
 

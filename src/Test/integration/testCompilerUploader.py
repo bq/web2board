@@ -31,11 +31,11 @@ class TestCompilerUploader(unittest.TestCase):
         Remember to connect a {} board
         #######################################\n""".format(cls.platform_to_use))
 
-        def clickConfirm(message):
+        def click_confirm(message):
             print message
             return True
 
-        click.confirm = clickConfirm
+        click.confirm = click_confirm
 
     @classmethod
     def __get_platform_to_use(cls):
@@ -49,6 +49,7 @@ class TestCompilerUploader(unittest.TestCase):
         self.hex_file_path = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "hex.hex")
         self.src_copy_path = os.path.join(pm.TEST_SETTINGS_PATH, "CompilerUploader", "srcCopy")
         self.working_cpp_path = os.path.join(self.src_copy_path, "working.ino")
+        self.working_pre_compiler_cpp_path = os.path.join(self.src_copy_path, "precompiller.ino")
         self.not_working_cpp_path = os.path.join(self.src_copy_path, "notWorking.ino")
         self.with_libraries_cpp_path = os.path.join(self.src_copy_path, "withLibraries.ino")
         self.connected_board = self.platform_to_use
@@ -133,6 +134,15 @@ class TestCompilerUploader(unittest.TestCase):
         compile_result = self.compiler.compile(not_working_cpp)
         pprint(compile_result)
         self.assertFalse(compile_result[0])
+
+    def test_compile_worksWithArduinoPreCompiler(self):
+        self.compiler.set_board(self.connected_board)
+        with open(self.working_pre_compiler_cpp_path) as f:
+            working_pre_compiler_cpp = f.read()
+
+        compile_result = self.compiler.compile(working_pre_compiler_cpp)
+        pprint(compile_result)
+        self.assertTrue(compile_result[0])
 
     def __assertPortFount(self):
         if self.portToUse == -1:
