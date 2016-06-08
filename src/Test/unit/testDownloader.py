@@ -48,7 +48,7 @@ class TestDownloader(unittest.TestCase):
         url = "url"
         dst = self.data_path + os.sep + 'testing.txt'
         self.assertFalse(os.path.exists(dst))
-        self.urlopen_mock.with_args(url).once()
+        self.urlopen_mock.with_args(url).at_least().times(1)
 
         self.downloader.download(url, dst).result()
 
