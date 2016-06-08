@@ -49,7 +49,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
             self.assertFalse(os.path.exists(self.updater.destinationPath))
 
     def test_upload_writesLibrariesInDestinationPathWithControlledData(self):
-        version = VersionInfo("0.0.5", "file://" + self.res_path + "/bitbloqLibsV5.zip")
+        version = VersionInfo("0.0.5", "file:" + os.sep + os.sep + self.res_path + os.sep + "bitbloqLibsV5.zip")
         self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
         self.__testUploadProcess(version)
 

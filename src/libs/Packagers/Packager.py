@@ -4,6 +4,7 @@ import shutil
 import zipfile
 from os.path import join
 import click
+import sys
 
 from libs import utils
 from libs.PathsManager import PathsManager as pm
