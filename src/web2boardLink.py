@@ -174,7 +174,7 @@ def start_dialog():
 
         def update_message(self):
             for m in self.messages:
-                self.message.configure(text=m)
+                self.message.configure(text=self.MESSAGE_TEMPLATE.format(m))
             self.messages = []
 
             self.after(100, self.update_message)
