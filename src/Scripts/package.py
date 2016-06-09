@@ -2,6 +2,7 @@
 import inspect
 import os
 import sys
+import subprocess
 
 modulePath = os.path.abspath(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename))
 sys.path.append(os.path.normpath(os.path.join(modulePath, os.pardir)))
@@ -20,8 +21,12 @@ offline = "offline" in sys.argv
 if "32" in sys.argv:
     architectureInt = int(sys.argv[1])
 
+
+subprocess.call(["python", modulePath + os.sep + "ConstructRes.py"])
 Version.read_version_values()
 Config.read_config_file()
+
+
 architecture = Packager.ARCH_32 if architectureInt == 32 else Packager.ARCH_64
 packager = Packager.construct_current_platform_packager(architecture=architecture)
 packager.prepare_res_folder_for_executable()

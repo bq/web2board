@@ -10,11 +10,11 @@ from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
 from platformio import exception, util
-from platformio.platformioUtils import run as platformioRun
+from platformio.platformioUtils import run as platformio_run
 from platformio.util import get_boards
+import re
 
 log = logging.getLogger(__name__)
-
 
 ERROR_BOARD_NOT_SET = {"code": 0, "message": "Necessary to define board before to run/compile"}
 ERROR_BOARD_NOT_SUPPORTED = {"code": 1, "message": "Board: {0} not Supported"}
@@ -80,7 +80,7 @@ class CompilerUploader:
         else:
             raise Exception("Platform not supported")
 
-        os.chmod(avr_exe_path, int("755", 8)) # force to have executable rights in avrdude
+        os.chmod(avr_exe_path, int("755", 8))  # force to have executable rights in avrdude
 
         avr_exe_path = os.path.normpath(os.path.relpath(avr_exe_path, os.getcwd()))
         avr_config_path = os.path.normpath(os.path.relpath(avr_config_path, os.getcwd()))
@@ -95,6 +95,26 @@ class CompilerUploader:
         log.debug(output)
         log.debug(err)
         return output, err
+
+    @staticmethod
+    def _format_compile_result(result):
+        def is_error(l):
+            p = re.compile(r'.*:[0-9]+:[0-9]+: error.*')
+            return l != "" and not l.startswith("scons") and p.match(l) is not None
+
+        if result[0]:
+            return result
+        error_str = result[1]["err"]
+        lines = [l for l in error_str.split("\n\n", 1)[-1].split("\n") if is_error(l)]
+        errors = list()
+        for line in lines:
+            split_line = line.split(":", 4)
+            error = dict(file=split_line[0], line=int(split_line[1]), column=int(split_line[2]), error=split_line[4])
+            error["error"] = error["error"].decode('string_escape').strip()
+            errors.append(error)
+        if len(errors) > 0:
+            result[1]["err"] = errors
+        return result
 
     @asynchronous()
     def _check_port(self, port, mcu, baud_rate):
@@ -116,19 +136,19 @@ class CompilerUploader:
         if isinstance(code, unicode):
             code = code.encode("utf-8")
 
-        mainInoPath = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
-        if not os.path.exists(mainInoPath):
-            os.makedirs(mainInoPath)
-        with open(os.path.join(mainInoPath, "main.ino"), 'w') as mainCppFile:
+        main_ino_path = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
+        if not os.path.exists(main_ino_path):
+            os.makedirs(main_ino_path)
+        with open(os.path.join(main_ino_path, "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
-        runResult = platformioRun(target=target, environment=(self.board,),
-                                  project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0]
+        run_result = platformio_run(target=target, environment=(self.board,),
+                                    project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0]
         if get_hex_string:
             raise NotImplementedError()
             # hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
             # return runResult, hexResult
-        return runResult
+        return self._format_compile_result(run_result)
 
     def _check_board_configuration(self):
         if self.board is None:
@@ -207,4 +227,3 @@ class CompilerUploader:
         if board not in cls.__global_compiler_uploader_holder:
             cls.__global_compiler_uploader_holder[board] = CompilerUploader(board)
         return cls.__global_compiler_uploader_holder[board]
-

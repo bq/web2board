@@ -1,8 +1,16 @@
+import json
 from distutils.core import setup
+from os.path import join
+
+
+def get_version():
+    version_json = json.load(open(join('res', 'common', 'web2board.version')))
+    return version_json['version']
+
 
 setup(
     name='web2board',
-    version='2.1.1',
+    version=get_version(),
     packages=['pkg', 'res', 'res.common', 'res.common.Scons', 'res.common.Scons.sconsFiles',
               'res.common.Scons.sconsFiles.SCons', 'res.common.Scons.sconsFiles.SCons.Node',
               'res.common.Scons.sconsFiles.SCons.Tool', 'res.common.Scons.sconsFiles.SCons.Tool.docbook',

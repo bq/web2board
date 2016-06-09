@@ -133,6 +133,7 @@ class TestCompilerUploader(unittest.TestCase):
 
         compile_result = self.compiler.compile(not_working_cpp)
         pprint(compile_result)
+        print compile_result[1]['err']
         self.assertFalse(compile_result[0])
 
     def test_compile_worksWithArduinoPreCompiler(self):
