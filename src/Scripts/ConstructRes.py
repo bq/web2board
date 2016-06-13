@@ -22,10 +22,12 @@ srcResPath = join(srcPath, "res")
 
 sys.path += [srcPath]
 
-if os.path.exists(srcResPath):
-    shutil.rmtree(srcResPath)
 
-os.makedirs(srcResPath)
+if "removeFolder" in sys.argv:
+    if os.path.exists(srcResPath):
+        shutil.rmtree(srcResPath)
+if not os.path.exists(srcResPath):
+    os.makedirs(srcResPath)
 
 from libs import utils
 

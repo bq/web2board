@@ -24,8 +24,9 @@ pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
 
 a.datas += utils.find_files_for_pyinstaller("platformio", ["*", "**/*"])
-a.datas += utils.find_files_for_pyinstaller("res", ["*", "**/*"])
-a.datas += utils.find_files_for_pyinstaller("Test/resources", ["*", "**/*"])
+# // move by code because pyinstaller doesn't work very well
+# a.datas += utils.find_files_for_pyinstaller("res", ["*", "**/*"])
+# a.datas += utils.find_files_for_pyinstaller("Test/resources", ["*", "**/*"])
 
 exe = EXE(pyz,
           a.scripts,

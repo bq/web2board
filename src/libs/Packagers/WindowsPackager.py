@@ -35,7 +35,14 @@ class WindowsPackager(Packager):
         self._add_bat_scrips_to_win_dist()
 
     def _move_installer_to_installer_folder(self):
-        shutil.copy2(self.installer_creation_path + os.sep + "Web2board.exe", self.installer_path)
+        shutil.copy2(self.installer_creation_path + os.sep + "windows_web2board_installer.exe", self.installer_path)
+
+    def _construct_web2board_executable(self):
+        Packager._construct_web2board_executable(self)
+        exe_res_path = join(self.installer_creation_executables_path, "res")
+        log.info("copying res files...")
+        shutil.copytree(self.src_res_path, exe_res_path)
+        shutil.copytree(join(self.src_path, "Test"), join(self.installer_creation_executables_path, "Test"))
 
     def create_package(self):
         try:

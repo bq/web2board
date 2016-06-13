@@ -70,6 +70,8 @@ def factory_reset_process():
         if os.path.exists(PathsManager.PROGRAM_PATH):
             if utils.is_windows():
                 os.system('rmdir /S /Q \"{}\"'.format(PathsManager.PROGRAM_PATH))
+                if os.path.exists(PathsManager.PROGRAM_PATH):
+                    os.rmdir(PathsManager.PROGRAM_PATH)
             else:
                 shutil.rmtree(PathsManager.PROGRAM_PATH)
         log_message("Extracting web2board...")

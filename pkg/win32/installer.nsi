@@ -3,10 +3,10 @@
 !endif
 !addplugindir "nsisPlugins"
 ; The name of the installer
-Name "Web2board"
+Name "Web2Board.exe"
 
 ; The file to write
-OutFile "Web2board.exe"
+OutFile "windows_web2board_installer.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\Web2board
