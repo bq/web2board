@@ -1,3 +1,3 @@
 #!/bin/bash
 
-killall -9 web2board
+killall -9 web2board || true

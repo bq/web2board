@@ -497,7 +497,7 @@
 				<key>PREINSTALL_PATH</key>
 				<dict>
 					<key>PATH</key>
-					<string>bitbloqLibs.sh</string>
+					<string>install.sh</string>
 					<key>PATH_TYPE</key>
 					<integer>1</integer>
 				</dict>
