@@ -37,6 +37,20 @@ Name=Web2board Launcher
 Name[en_US]=Web2board
 """.format(version=Version.web2board)
 
+RESTART_MESSAGE = """
+
+############################
+
+READ ME!
+Restart the computer to complete the installation.
+If you don't restart your computer, Bitbloq will not detect your board
+
+LÉEME!
+Reinicia el ordenador para terminar la instalación.
+Si no reinicias el ordenador, Bitbloq no detectará tu placa.
+
+Do you want to restart it now? / ¿Quieres reiniciarlo ahora?"""
+
 bash = 'bash -c \"echo INSTALLING WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;' \
        ' {0} factoryReset; exec bash\"'.format(sys.argv[0])
 
@@ -124,5 +138,5 @@ elif sys.argv[1] == "factoryReset":
     subprocess.call("/opt/web2board/web2boardLink --factoryReset --noStartApp".split(),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log.info("successfully performed factory reset")
-    if click.confirm("\n\n\nIt is necessary to restart the computer.\nDo you want to restart it now?"):
+    if click.confirm(RESTART_MESSAGE):
         os.system("reboot")
