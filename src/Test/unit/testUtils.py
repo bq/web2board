@@ -8,15 +8,15 @@ from flexmock import flexmock
 from Test.testingUtils import restore_test_resources
 from libs import utils
 from libs.PathsManager import PathsManager
-from libs.Version import Version
+
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        self.myTestFolder = os.path.join(PathsManager.TEST_SETTINGS_PATH, "testUtils")
-        self.copyTreeOld = os.path.join(self.myTestFolder, "copytree_old")
-        self.copyTreeNew = os.path.join(self.myTestFolder, "copytree_new")
-        self.zipPath = os.path.join(self.myTestFolder, "zip.zip")
-        self.zipFolder = os.path.join(self.myTestFolder, "zip")
+        self.my_test_folder = os.path.join(PathsManager.TEST_SETTINGS_PATH, "testUtils")
+        self.copy_tree_old = os.path.join(self.my_test_folder, "copytree_old")
+        self.copy_tree_new = os.path.join(self.my_test_folder, "copytree_new")
+        self.zip_path = os.path.join(self.my_test_folder, "zip.zip")
+        self.zip_folder = os.path.join(self.my_test_folder, "zip")
 
         self.original_list_ports_comports = serial.tools.list_ports.comports
         restore_test_resources()
@@ -24,75 +24,74 @@ class TestUtils(unittest.TestCase):
     def tearDown(self):
         serial.tools.list_ports.comports = self.original_list_ports_comports
 
-        if os.path.exists(self.copyTreeNew):
-            shutil.rmtree(self.copyTreeNew)
-        if os.path.exists(self.zipFolder):
-            shutil.rmtree(self.zipFolder)
+        if os.path.exists(self.copy_tree_new):
+            shutil.rmtree(self.copy_tree_new)
+        if os.path.exists(self.zip_folder):
+            shutil.rmtree(self.zip_folder)
 
     @unittest.skipIf(utils.are_we_frozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_returnsThisModulePath(self):
-        modulePath = utils.get_module_path()
+        module_path = utils.get_module_path()
 
-        self.assertIn(os.path.join("src", "Test"), modulePath)
+        self.assertIn(os.path.join("src", "Test"), module_path)
 
     @unittest.skipIf(utils.are_we_frozen(), "module path returns exe path and can not be tested")
     def test_getModulePath_getsUnittestPathWithPreviousFrame(self):
         import inspect
-        modulePath = utils.get_module_path(inspect.currentframe().f_back)
+        module_path = utils.get_module_path(inspect.currentframe().f_back)
 
-        self.assertIn("unittest", modulePath)
+        self.assertIn("unittest", module_path)
 
     def __assertCopyTreeNewHasAllFiles(self):
-        self.assertTrue(os.path.exists(self.copyTreeNew))
-        self.assertTrue(os.path.exists(self.copyTreeNew + os.path.sep + "01.txt"))
-        self.assertTrue(os.path.exists(self.copyTreeNew + os.path.sep + "02.txt"))
+        self.assertTrue(os.path.exists(self.copy_tree_new))
+        self.assertTrue(os.path.exists(self.copy_tree_new + os.path.sep + "01.txt"))
+        self.assertTrue(os.path.exists(self.copy_tree_new + os.path.sep + "02.txt"))
 
     def test_copytree_createsNewFolderIfNotExists(self):
-        utils.copytree(self.copyTreeOld, self.copyTreeNew)
+        utils.copytree(self.copy_tree_old, self.copy_tree_new)
 
         self.__assertCopyTreeNewHasAllFiles()
 
     def test_copytree_worksEvenWithExistingFolder(self):
-        os.mkdir(self.copyTreeNew)
+        os.mkdir(self.copy_tree_new)
 
-        utils.copytree(self.copyTreeOld, self.copyTreeNew)
+        utils.copytree(self.copy_tree_old, self.copy_tree_new)
 
         self.__assertCopyTreeNewHasAllFiles()
 
     def test_copytree_doNotOverwriteExistingFiles(self):
-        os.mkdir(self.copyTreeNew)
-        txtFilePath = self.copyTreeNew + os.path.sep + "01.txt"
-        with open(txtFilePath, "w") as f:
+        os.mkdir(self.copy_tree_new)
+        txt_file_path = self.copy_tree_new + os.path.sep + "01.txt"
+        with open(txt_file_path, "w") as f:
             f.write("01")
 
-        utils.copytree(self.copyTreeOld, self.copyTreeNew)
-        with open(txtFilePath, "r") as f:
-            fileData = f.read()
+        utils.copytree(self.copy_tree_old, self.copy_tree_new)
+        with open(txt_file_path, "r") as f:
+            file_data = f.read()
 
         self.__assertCopyTreeNewHasAllFiles()
-        self.assertEqual(fileData, "01")
+        self.assertEqual(file_data, "01")
 
     def test_listDirectoriesInPath(self):
-        print self.myTestFolder
-        directories = utils.list_directories_in_path(self.myTestFolder)
+        print self.my_test_folder
+        directories = utils.list_directories_in_path(self.my_test_folder)
         directories = map(lambda x: x.lower(), directories)
         self.assertEqual(set(directories), {"copytree_old", "otherdir"})
 
     def test_extractZip(self):
-        utils.extract_zip(self.zipPath, self.myTestFolder)
+        utils.extract_zip(self.zip_path, self.my_test_folder)
 
-        self.assertTrue(os.path.exists(self.zipFolder))
-        self.assertTrue(os.path.exists(self.zipFolder + os.sep + "zip.txt"))
+        self.assertTrue(os.path.exists(self.zip_folder))
+        self.assertTrue(os.path.exists(self.zip_folder + os.sep + "zip.txt"))
 
     def test_listSerialPorts_useSerialLib(self):
-        ports = [(1,2,3), (4,5,6)]
+        ports = [(1, 2, 3), (4, 5, 6)]
         flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
         self.assertEqual(utils.list_serial_ports(), ports)
 
     def test_listSerialPorts_filterWithFunction(self):
-        portsFilter = lambda x: x[0] == 1
-        ports = [(1,2,3), (4,5,6)]
+        ports = [(1, 2, 3), (4, 5, 6)]
         flexmock(serial.tools.list_ports).should_receive("comports").and_return(ports).once()
 
-        self.assertEqual(utils.list_serial_ports(portsFilter), ports[0:1])
+        self.assertEqual(utils.list_serial_ports(lambda x: x[0] == 1), ports[0:1])

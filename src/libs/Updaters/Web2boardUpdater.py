@@ -11,8 +11,10 @@ from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.Updater import VersionInfo
 
+
 class UpdaterError(Exception):
     pass
+
 
 class Web2BoardUpdater:
     __globalWeb2BoardUpdater = None
@@ -79,5 +81,5 @@ class Web2BoardUpdater:
             utils.rmtree(pm.PROGRAM_PATH)
             self.log.info("removed original files")
         else:
-            os.makedirs(pm.ORIGINAL_PATH)
+            os.makedirs(pm.PROGRAM_PATH)
         utils.copytree(version_path, pm.PROGRAM_PATH)

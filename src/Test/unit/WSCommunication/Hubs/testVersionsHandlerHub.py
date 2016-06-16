@@ -4,7 +4,7 @@ import sys
 from concurrent.futures import Future
 from wshubsapi.hubs_inspector import HubsInspector
 
-from Test.testingUtils import restore_test_resources, createCompilerUploaderMock, create_sender_mock
+from Test.testingUtils import restore_test_resources, create_compiler_uploader_mock, create_sender_mock
 from libs.Version import Version
 from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 
@@ -23,7 +23,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.updater = self.versionsHandlerHub.w2b_updater
         self.sender = create_sender_mock()
 
-        self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
+        self.compileUploaderMock, self.CompileUploaderConstructorMock = create_compiler_uploader_mock()
         self.testLibVersion = "1.1.1"
 
         restore_test_resources()

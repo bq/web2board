@@ -5,7 +5,7 @@ from wshubsapi.hub import UnsuccessfulReplay
 from wshubsapi.hubs_inspector import HubsInspector
 from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
-from Test.testingUtils import createCompilerUploaderMock, create_sender_mock
+from Test.testingUtils import create_compiler_uploader_mock, create_sender_mock
 from libs.CompilerUploader import CompilerUploader
 from libs.Version import Version
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
@@ -25,7 +25,7 @@ class TestCodeHub(unittest.TestCase):
         self.sender = create_sender_mock()
 
         self.originalConstruct = CompilerUploader.construct
-        self.compileUploaderMock, self.CompileUploaderConstructorMock = createCompilerUploaderMock()
+        self.compileUploaderMock, self.CompileUploaderConstructorMock = create_compiler_uploader_mock()
         self.board = CompilerUploader.DEFAULT_BOARD
 
     def tearDown(self):

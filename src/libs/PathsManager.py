@@ -23,7 +23,6 @@ class PathsManager:
     CONFIG_PATH = None
     VERSION_PATH = None
     COPY_PATH = None
-    ORIGINAL_PATH = None
 
     RES_PATH = None
     RES_ICO_PATH = None
@@ -112,7 +111,6 @@ class PathsManager:
         cls.MAIN_PATH = cls.get_main_path()
         cls.CONFIG_PATH = os.path.normpath(join(cls.MAIN_PATH, os.pardir, '.web2board-config.json'))
         cls.COPY_PATH = cls.get_copy_path_for_update()
-        cls.ORIGINAL_PATH = cls.get_external_data_folder()
 
         cls.RES_PATH = join(cls.MAIN_PATH, 'res')
         cls.VERSION_PATH = join(cls.RES_PATH, 'web2board.version')
@@ -124,7 +122,10 @@ class PathsManager:
         cls.RES_LOGGING_CONFIG_PATH = join(cls.RES_PATH, 'logging.json')
         cls.RES_SCONS_ZIP_PATH = join(cls.MAIN_PATH, "res", "sconsRes.zip")
 
-        cls.PROGRAM_PATH = cls.get_external_data_folder()
+        if utils.are_we_frozen():
+            cls.PROGRAM_PATH = cls.MAIN_PATH
+        else:
+            cls.PROGRAM_PATH = cls.get_external_data_folder()
         cls.PLATFORMIO_WORKSPACE_SKELETON = join(cls.RES_PATH, 'platformioWorkSpace')
         cls.PLATFORMIO_WORKSPACE_PATH = cls.PLATFORMIO_WORKSPACE_SKELETON
         cls.PLATFORMIO_INI_PATH = join(cls.PLATFORMIO_WORKSPACE_SKELETON, 'platformio.ini')

@@ -20,7 +20,7 @@ def restore_test_resources(relative_path=""):
         utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)
 
 
-def createCompilerUploaderMock():
+def create_compiler_uploader_mock():
     compileUploaderMock = flexmock(CompilerUploader(),
                                    compile=lambda *args: [True, None],
                                    get_port="PORT")
