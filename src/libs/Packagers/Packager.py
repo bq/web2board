@@ -73,6 +73,7 @@ class Packager:
             shutil.rmtree(self.installer_creation_path)
 
     def _clear_main_folders(self):
+        log.info("cleaning folders %s, %s", self.installer_path, self.installer_offline_path)
         if os.path.exists(self.installer_path):
             shutil.rmtree(self.installer_path)
         if os.path.exists(self.installer_offline_path):
@@ -81,6 +82,7 @@ class Packager:
         self._delete_installer_creation_folder()
 
     def _clear_build_files(self):
+        log.info("cleaning folders %s, %s", self.pyinstaller_dist_folder, self.pyinstaller_build_folder)
         if os.path.exists(self.pyinstaller_dist_folder):
             shutil.rmtree(self.pyinstaller_dist_folder)
         if os.path.exists(self.pyinstaller_build_folder):
