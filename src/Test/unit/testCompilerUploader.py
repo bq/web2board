@@ -3,9 +3,9 @@ import unittest
 from flexmock import flexmock, flexmock_teardown
 
 from libs import CompilerUploader
-from libs.LoggingUtils import initLogging
+from libs.LoggingUtils import init_logging
 
-log = initLogging(__name__)
+log = init_logging(__name__)
 
 
 class TestCompilerUploader(unittest.TestCase):

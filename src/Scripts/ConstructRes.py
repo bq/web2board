@@ -7,15 +7,14 @@ from os.path import join
 import shutil
 
 
-
-platformToFolder = dict(Linux="linux", Windows="windows", Darwin="darwin")
+platform_to_folder = dict(Linux="linux", Windows="windows", Darwin="darwin")
 
 modulePath = os.path.abspath(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename))
 os.chdir(modulePath)
 resPath = os.path.abspath(os.path.normpath(join(modulePath, os.pardir, os.pardir, "res")))
 srcPath = os.path.abspath(os.path.normpath(join(modulePath, os.pardir)))
 
-resPlatformPath = join(resPath, platformToFolder[platform.system()])
+resPlatformPath = join(resPath, platform_to_folder[platform.system()])
 resCommonPath = join(resPath, "common")
 
 srcResPath = join(srcPath, "res")

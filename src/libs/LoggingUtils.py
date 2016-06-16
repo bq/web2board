@@ -91,17 +91,17 @@ class HubsHandler(Handler):
         subscribedClients.onLoggingMessage(datetime.now().isoformat(), r.levelno, r.msg, self.format(r))
 
 
-def initLogging(name):
+def init_logging(name):
     """
     :rtype: logging.Logger
     """
     if PathsManager.MAIN_PATH == PathsManager.get_copy_path_for_update():
-        fileh = logging.FileHandler(PathsManager.get_copy_path_for_update() + os.sep + "info.log", 'a')
-        fileh.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(PathsManager.get_copy_path_for_update() + os.sep + "info.log", 'a')
+        file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fileh.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
         log = logging.getLogger()
-        log.addHandler(fileh)
+        log.addHandler(file_handler)
         log.setLevel(logging.DEBUG)
     else:
         logging.config.dictConfig(json.load(open(PathsManager.RES_LOGGING_CONFIG_PATH)))

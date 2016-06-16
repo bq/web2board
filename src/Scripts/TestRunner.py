@@ -58,7 +58,7 @@ def runAllTests():
 
 
 if __name__ == '__main__':
-    log = libs.LoggingUtils.initLogging(__name__)
+    log = libs.LoggingUtils.init_logging(__name__)
     if len(sys.argv) > 1:
         testing = sys.argv[1]
     else:

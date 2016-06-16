@@ -20,10 +20,10 @@ import click
 from wshubsapi.hubs_inspector import HubsInspector
 
 from Scripts.TestRunner import *
-from libs.LoggingUtils import initLogging
+from libs.LoggingUtils import init_logging
 from libs.PathsManager import PathsManager
 
-log = initLogging(__name__)  # initialized in main
+log = init_logging(__name__)  # initialized in main
 originalEcho = click.echo
 originalSEcho = click.secho
 

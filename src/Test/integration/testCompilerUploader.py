@@ -7,11 +7,11 @@ from flexmock import flexmock, flexmock_teardown
 
 from Test.testingUtils import restore_test_resources
 from libs.CompilerUploader import CompilerUploader, CompilerException
-from libs.LoggingUtils import initLogging
+from libs.LoggingUtils import init_logging
 from libs.PathsManager import PathsManager as pm
 from libs.utils import is_windows, is_linux, is_mac
 
-log = initLogging(__name__)
+log = init_logging(__name__)
 
 
 class TestCompilerUploader(unittest.TestCase):
