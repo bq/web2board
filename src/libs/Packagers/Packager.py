@@ -23,7 +23,7 @@ class Packager:
     ARCH_64, ARCH_32 = "amd64", "i386"
 
     def __init__(self):
-        module_path = utils.get_module_path()
+        module_path = utils.get_module_path().encode(sys.getfilesystemencoding())
         self.packager_res_path = join(module_path, "res")
         self.web2board_path = os.path.abspath(join(module_path, pardir, pardir, pardir))
         self.src_path = join(self.web2board_path, "src")
