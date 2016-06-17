@@ -36,6 +36,7 @@ def start_logger():
     global log
     file_handler = logging.FileHandler(join(get_web2board_dir_path(), os.pardir, ".web2boardLink.log"), 'a')
     file_handler.setLevel(logging.DEBUG)
+    file_handler.name = "linkLog"
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     logger = logging.getLogger()
@@ -71,12 +72,7 @@ def factory_reset_process():
         time.sleep(1)
         log_message("deleting web2board in: {}".format(get_web2board_dir_path()))
         if os.path.exists(get_web2board_dir_path()):
-            if utils.is_windows():
-                os.system('rmdir /S /Q \"{}\"'.format(get_web2board_dir_path()))
-                if os.path.exists(get_web2board_dir_path()):
-                    os.rmdir(get_web2board_dir_path())
-            else:
-                shutil.rmtree(get_web2board_dir_path())
+            utils.remove_folder(get_web2board_dir_path())
         log_message("Extracting web2board...")
         shutil.copytree(os.getcwd(), get_web2board_dir_path())
         msg_box.end_successful()
@@ -256,7 +252,8 @@ def set_w2b_path():
     global web2board_path
     w2b_redirection_path = join(os.getcwd(), os.pardir, "web2board_path.txt")
     if os.path.exists(w2b_redirection_path):
-        new_direction_path = open(w2b_redirection_path).read().strip()
+        with open(w2b_redirection_path) as f:
+            new_direction_path = f.read().strip().decode('utf-8').encode(sys.getfilesystemencoding())
         if not os.path.isdir(new_direction_path):
             raise RuntimeError("{} not found, using default".format(new_direction_path))
         else:

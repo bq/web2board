@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 import os
 import shutil
 import unittest
@@ -21,12 +22,13 @@ class TestWeb2boardLink(unittest.TestCase):
 
         PathsManager.MAIN_PATH = self.my_test_folder
         restore_test_resources("Web2boardLink")
-        pass
 
     def tearDown(self):
         flexmock_teardown()
         os.chdir(self.original_working_dir)
         PathsManager.set_all_constants()
+        logger = logging.getLogger()
+        [logger.removeHandler(h) for h in logger.handlers if h.name == "linkLog"]
 
     def __prepare_new_path_file(self, file):
         shutil.copyfile(join(self.my_test_folder, file), join(self.my_test_folder, "web2board_path.txt"))
@@ -95,7 +97,9 @@ class TestWeb2boardLink(unittest.TestCase):
 
     def test_get_w2b_path_ChangeW2bPathWithNoAsciiChars(self):
         self.__prepare_new_path_file("new_utf_8_path.txt")
+        new_path = "new ñ path".decode('utf-8').encode(sys.getfilesystemencoding())
 
         w2b_link.set_w2b_path()
 
-        self.assertEquals(w2b_link.get_web2board_dir_path(), "new ñ path")
+
+        self.assertEquals(w2b_link.get_web2board_dir_path(), new_path)

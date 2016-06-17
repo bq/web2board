@@ -14,7 +14,7 @@ def restore_test_resources(relative_path=""):
     settings_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, relative_path)
     res_path = os.path.join(PathsManager.TEST_RES_PATH, relative_path)
     if os.path.exists(PathsManager.TEST_SETTINGS_PATH):
-        shutil.rmtree(PathsManager.TEST_SETTINGS_PATH)
+        utils.remove_folder(PathsManager.TEST_SETTINGS_PATH)
     os.makedirs(settings_path)
     if os.path.isdir(res_path):
         utils.copytree(res_path, settings_path, ignore=".pioenvs", force_copy=True)

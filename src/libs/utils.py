@@ -179,3 +179,12 @@ def set_proxy(proxy):
     proxy = urllib2.ProxyHandler(proxy)
     opener = urllib2.build_opener(proxy)
     urllib2.install_opener(opener)
+
+
+def remove_folder(path):
+    if is_windows():
+        os.system('rmdir /S /Q \"{}\"'.format(path))
+        if os.path.exists(path):
+            os.rmdir(path)
+    else:
+        shutil.rmtree(path)
