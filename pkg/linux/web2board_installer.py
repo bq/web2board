@@ -52,7 +52,7 @@ Si no reinicias el ordenador, Bitbloq no detectará tu placa.
 Do you want to restart it now? / ¿Quieres reiniciarlo ahora?"""
 
 bash = 'bash -c \"echo INSTALLING WEB2BOARD. DO NOT CLOSE; sudo {0} onTerminal;' \
-       ' {0} factoryReset; exec bash\"'.format(sys.argv[0])
+       ' {0} factoryReset; sudo {0} reboot;\"'.format(sys.argv[0])
 
 
 def start_logger():
@@ -138,5 +138,8 @@ elif sys.argv[1] == "factoryReset":
     subprocess.call("/opt/web2board/web2boardLink --factoryReset --noStartApp".split(),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log.info("successfully performed factory reset")
+
+
+elif sys.argv[1] == "reboot":
     if click.confirm(RESTART_MESSAGE):
         os.system("reboot")
