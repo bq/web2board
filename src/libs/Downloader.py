@@ -32,6 +32,8 @@ class Downloader:
     def download(self, url, dst=None, info_callback=None):
         if dst is None:
             dst = url.rsplit("/", 1)[1]
+        if not isinstance(url, str):
+            url = str(url)
         site = urllib2.urlopen(url)
         download_task = self.__real_download(site, dst)
         for i in range(3):

@@ -73,14 +73,14 @@ class TestUpdater(unittest.TestCase):
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
 
         with self.assertRaises(Exception):
-            self.updater.isNecessaryToUpdate()
+            self.updater.is_necessary_to_update()
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreDifferent(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
         self.updater.current_version_info.version = "0.1.1"
 
-        self.assertTrue(self.updater.isNecessaryToUpdate())
+        self.assertTrue(self.updater.is_necessary_to_update())
 
     def test_isNecessaryToUpdate_returnsTrueIfDestinationPathDoesNotExist(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
@@ -88,14 +88,14 @@ class TestUpdater(unittest.TestCase):
         if os.path.exists(self.updater.destinationPath):
             shutil.rmtree(self.updater.destinationPath)
 
-        self.assertTrue(self.updater.isNecessaryToUpdate())
+        self.assertTrue(self.updater.is_necessary_to_update())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualButNoLibrariesInDestinationPath(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         os.makedirs(self.updater.destinationPath)
 
-        self.assertTrue(self.updater.isNecessaryToUpdate())
+        self.assertTrue(self.updater.is_necessary_to_update())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualAndLibrariesInDestinationPath(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
@@ -104,4 +104,4 @@ class TestUpdater(unittest.TestCase):
             if not os.path.exists(self.updater.destinationPath + os.sep + libraryName):
                 os.makedirs(self.updater.destinationPath + os.sep + libraryName)
 
-        self.assertFalse(self.updater.isNecessaryToUpdate())
+        self.assertFalse(self.updater.is_necessary_to_update())

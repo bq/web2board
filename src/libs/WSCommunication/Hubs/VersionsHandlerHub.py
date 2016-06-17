@@ -28,7 +28,7 @@ class VersionsHandlerHub(Hub):
     def set_lib_version(self, version):
         if Config.check_libraries_updates:
             version_info = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
-            if self.lib_updater.isNecessaryToUpdate(version_to_compare=version_info):
+            if self.lib_updater.is_necessary_to_update(version_to_compare=version_info):
                 self.lib_updater.update(version_info)
         else:
             return "Check libraries flag is false"

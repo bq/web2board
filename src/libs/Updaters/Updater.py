@@ -44,7 +44,7 @@ class VersionInfo:
     def __get_version_numbers(self):
         return [int(n) for n in self.version.split(".")]
 
-    def getDictionary(self):
+    def get_dictionary(self):
         return self.__dict__
 
 
@@ -77,24 +77,24 @@ class Updater:
 
         return len(self.current_version_info.libraries_names) > len(libraries)
 
-    def _update_current_version_to(self, versionToUpload):
+    def _update_current_version_to(self, version_to_upload):
         """
-        :type versionToUpload: VersionInfo
+        :type version_to_upload: VersionInfo
         """
-        log.debug("[{0}] Updating version to: {1}".format(self.name, versionToUpload.version))
-        self.current_version_info.version = versionToUpload.version
-        self.current_version_info.file_to_download_url = versionToUpload.file_to_download_url
+        log.debug("[{0}] Updating version to: {1}".format(self.name, version_to_upload.version))
+        self.current_version_info.version = version_to_upload.version
+        self.current_version_info.file_to_download_url = version_to_upload.file_to_download_url
         self.current_version_info.libraries_names = utils.list_directories_in_path(self.destinationPath)
         log.info("Current version updated")
 
-    def getVersionNumber(self, versionInfo=None):
+    def get_version_number(self, version_info=None):
         """
-        :type versionInfo: VersionInfo
+        :type version_info: VersionInfo
         """
-        versionInfo = self.current_version_info if versionInfo is None else versionInfo
-        return int(versionInfo.version.replace('.', ''))
+        version_info = self.current_version_info if version_info is None else version_info
+        return int(version_info.version.replace('.', ''))
 
-    def isNecessaryToUpdate(self, version_to_compare=None):
+    def is_necessary_to_update(self, version_to_compare=None):
         """
         :type version_to_compare: VersionInfo
         """

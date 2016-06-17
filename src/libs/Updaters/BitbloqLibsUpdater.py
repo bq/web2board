@@ -45,7 +45,7 @@ class BitbloqLibsUpdater(Updater):
         utils.copytree(downloaded_path, self.destinationPath, force_copy=True)
 
     def restore_current_version_if_necessary(self):
-        if self.isNecessaryToUpdate():
+        if self.is_necessary_to_update():
             log.warning("It is necessary to upload BitbloqLibs")
             url = Config.bitbloq_libs_download_url_template.format(**self.current_version_info.__dict__)
             self.current_version_info.file_to_download_url = url

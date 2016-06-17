@@ -37,7 +37,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.assertRegexpMatches(version, '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
     def test_setLibVersion_doesNotDownloadLibsIfHasRightVersion(self):
-        flexmock(self.libUpdater, isNecessaryToUpdate=lambda **kwargs: False).should_receive("update").never()
+        flexmock(self.libUpdater, is_necessary_to_update=lambda **kwargs: False).should_receive("update").never()
         self.libUpdater.current_version_info.version = self.testLibVersion
 
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)

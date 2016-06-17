@@ -40,7 +40,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
             self.assertGreater(len(self.updater.current_version_info.libraries_names), 0)
             self.assertFalse(self.updater._are_we_missing_libraries())
             self.assertFalse(self.updater.current_version_info != online_version)
-            self.assertFalse(self.updater.isNecessaryToUpdate(online_version))
+            self.assertFalse(self.updater.is_necessary_to_update(online_version))
             self.assertEqual(self.updater.current_version_info.version, Version.bitbloq_libs)
             self.assertEqual(self.updater.current_version_info.libraries_names, Version.bitbloq_libs_libraries)
         finally:
