@@ -7,7 +7,6 @@ from os.path import join
 import shutil
 
 
-
 platformToFolder = dict(Linux="linux", Windows="windows", Darwin="darwin")
 
 modulePath = os.path.abspath(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename))

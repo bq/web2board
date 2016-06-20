@@ -63,7 +63,6 @@ class TestWeb2boardUpdater(unittest.TestCase):
 
         self.assertIsNone(self.updater.get_new_downloaded_version())
 
-
     def test_clear_new_versions_removesAllVersionsFiles(self):
         self.updater.clear_new_versions()
 

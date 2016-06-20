@@ -30,6 +30,8 @@ class VersionInfo:
         for s, o in zipped:
             if s > o:
                 return True
+            if s < o:
+                return False
         return False
 
     def __ge__(self, other):
