@@ -183,8 +183,11 @@ def set_proxy(proxy):
 
 def remove_folder(path):
     if is_windows():
-        os.system('rmdir /S /Q \"{}\"'.format(path))
-        if os.path.exists(path):
-            os.rmdir(path)
+        try:
+            shutil.rmtree(path)
+        except:
+            os.system('rmdir /S /Q \"{}\"'.format(path))
+            if os.path.exists(path):
+                os.rmdir(path)
     else:
         shutil.rmtree(path)

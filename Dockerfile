@@ -19,5 +19,9 @@ WORKDIR web2board
 RUN pip install -r requirements.txt
 RUN chown w2b -R /home/w2b
 
-
+CMD cd /home/w2b/repos/web2board/
+CMD su - w2b
+CMD git pull
+CMD git checkout devel
+CMD pip install -r /home/w2b/repos/web2board/requirements.txt
 CMD sleep 99999999999999
