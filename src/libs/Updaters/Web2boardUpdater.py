@@ -67,19 +67,19 @@ class Web2BoardUpdater:
                 pass
 
     @asynchronous()
-    def update(self, version):
+    def update(self, version, destination):
         version_path = pm.get_dst_path_for_update(version)
         confirm_path = version_path + ".confirm"
         if not os.path.isdir(version_path) or not os.path.isfile(confirm_path):
             raise UpdaterError("Unable to update, not all necessary files downloaded")
 
         self.log.info("updating in process")
-        utils.copytree(version_path, pm.PROGRAM_PATH)
+        utils.copytree(version_path, destination)
 
-        if os.path.exists(pm.PROGRAM_PATH):
+        if os.path.exists(destination):
             self.log.info("removing original files")
-            utils.rmtree(pm.PROGRAM_PATH)
+            utils.rmtree(destination)
             self.log.info("removed original files")
         else:
-            os.makedirs(pm.PROGRAM_PATH)
-        utils.copytree(version_path, pm.PROGRAM_PATH)
+            os.makedirs(destination)
+        utils.copytree(version_path, destination)

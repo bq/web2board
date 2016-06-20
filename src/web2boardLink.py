@@ -106,7 +106,7 @@ def update_if_necessary():
         app = start_dialog()
         time.sleep(1)
         log_message("updating web2board to version: {}".format(new_version))
-        future = w2b_updater.update(new_version)
+        future = w2b_updater.update(new_version, get_web2board_dir_path())
         future.add_done_callback(handle_result)
         app.mainloop()
 
@@ -119,7 +119,7 @@ def start_watchdog():
         time.sleep(0.3)
         time_passed += 0.3
     if time_passed >= WATCHDOG_TIME:
-        msg_box.end_error()
+        msg_box.end_error("watchdog error")
 
 
 def should_start_app():

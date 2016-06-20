@@ -11,6 +11,7 @@ from urllib2 import urlopen
 import urllib2
 import glob2
 import serial.tools.list_ports
+import time
 
 log = logging.getLogger(__name__)
 
@@ -186,6 +187,8 @@ def remove_folder(path):
         try:
             shutil.rmtree(path)
         except:
+            # it sometimes breaks once but the second time works
+            time.sleep(1)
             os.system('rmdir /S /Q \"{}\"'.format(path))
             if os.path.exists(path):
                 os.rmdir(path)

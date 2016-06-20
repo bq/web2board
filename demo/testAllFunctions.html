@@ -88,7 +88,7 @@
 </div>
 
 <script>
-    var hubsApi = new HubsAPI(15000),
+    var hubsApi = new HubsAPI(35000),
         connectionStatusEle = document.getElementById("connectionStatus"),
         tablesDiv = document.getElementById("tables"),
         resultDiv = document.getElementById("result"),
@@ -103,11 +103,17 @@
         connectionStatusEle.className = 'disconnected';
         console.error(error);
     };
+    hubsApi.onClientFunctionNotFound = function () {
+        console.log(arguments);
+    };
 
     hubsApi.LoggingHub.client.onLoggingMessage = function () {
         console.log(arguments);
     };
     hubsApi.LoggingHub.server.subscribeToHub();
+    hubsApi.UtilsAPIHub.server.setId("TestAllFunctions").then(function () {
+        hubsApi.VersionsHandlerHub.server.subscribeToHub();
+    });
 
     var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
     var ARGUMENT_NAMES = /([^\s,]+)/g;
@@ -120,7 +126,7 @@
     }
 
     function syntaxHighlight(json) {
-        json = JSON.stringify(arguments, null, 2)
+        json = JSON.stringify(arguments, null, 2);
         json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
             var cls = 'number';
@@ -149,7 +155,7 @@
         if (hubsApi.hasOwnProperty(hubName) && hubsApi[hubName] && hubsApi[hubName].server && hubsApi[hubName].server.__HUB_NAME) {
             var hubServer = hubsApi[hubName].server;
             hubsInfo[hubServer.__HUB_NAME] = {};
-            for (fun in hubServer) {
+            for (var fun in hubServer) {
                 if (hubServer.hasOwnProperty(fun) && typeof hubServer[fun] === 'function') {
                     hubsInfo[hubServer.__HUB_NAME][fun] = {args: getParamNames(hubServer[fun])}
                 }

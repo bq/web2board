@@ -160,7 +160,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.CodeHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -302,7 +302,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.VersionsHandlerHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -424,7 +424,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.LoggingHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -504,7 +504,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.WindowHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -584,7 +584,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.UtilsAPIHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -706,7 +706,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.SerialMonitorHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
@@ -957,7 +957,7 @@ class HubsAPI(object):
             self.client = self.ClientClass()
 
         def get_clients(self, client_ids):
-            return HubsAPI.ChatHubClass.ClientsInServer(client_ids, self)
+            return HubsAPI.ConfigHubClass.ClientsInServer(client_ids, self)
 
         class ServerClass(GenericServer):
             
