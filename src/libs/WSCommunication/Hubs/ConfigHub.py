@@ -33,7 +33,7 @@ class ConfigHub(Hub):
         for k in config_values.keys():
             if k in config_dic:
                 Config.__dict__[k] = config_dic[k]
-        utils.set_proxy(dict(http=Config.proxy, https= Config.proxy))
+        utils.set_proxy(dict(http=Config.proxy, https=Config.proxy))
         Config.store_config_in_file()
         return True
 
@@ -42,8 +42,8 @@ class ConfigHub(Hub):
         Config.web_socket_port = port
         Config.store_config_in_file()
 
-    def set_log_level(self, logLevel):
-        utils.set_log_level(logLevel)
+    def set_log_level(self, log_level):
+        utils.set_log_level(log_level)
 
     def set_libraries_path(self, lib_dir):
         Config.set_platformio_lib_dir(lib_dir)
@@ -63,12 +63,12 @@ class ConfigHub(Hub):
             with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
                 f.write(fcopy.read())
 
-    def set_proxy(self, proxyUrl):
-        Config.proxy = proxyUrl
+    def set_proxy(self, proxy_url):
+        Config.proxy = proxy_url
         Config.store_config_in_file()
 
-    def test_proxy(self, proxyUrl):
-        proxy_info = dict(http=proxyUrl, https=proxyUrl) if proxyUrl != "" else None
+    def test_proxy(self, proxy_url):
+        proxy_info = dict(http=proxy_url, https=proxy_url) if proxy_url not in ("", None) else None
         proxy = urllib2.ProxyHandler(proxy_info)
         opener = urllib2.build_opener(proxy)
         opener.open(urllib2.Request("http://bitbloq.bq.com/"), timeout=5).read()

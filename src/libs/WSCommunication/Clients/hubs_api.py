@@ -989,12 +989,12 @@ class HubsAPI(object):
                     return send_return_obj
                 return future
 
-            def test_proxy(self, proxyUrl):
+            def test_proxy(self, proxy_url):
                 """
                 :rtype : Future
                 """
                 args = list()
-                args.append(proxyUrl)
+                args.append(proxy_url)
                 id_ = self._get_next_message_id()
                 body = {"hub": self.hub.name, "function": "test_proxy", "args": args, "ID": id_}
                 future = self.hub.ws_client.get_future(id_)
@@ -1003,12 +1003,12 @@ class HubsAPI(object):
                     return send_return_obj
                 return future
 
-            def set_proxy(self, proxyUrl):
+            def set_proxy(self, proxy_url):
                 """
                 :rtype : Future
                 """
                 args = list()
-                args.append(proxyUrl)
+                args.append(proxy_url)
                 id_ = self._get_next_message_id()
                 body = {"hub": self.hub.name, "function": "set_proxy", "args": args, "ID": id_}
                 future = self.hub.ws_client.get_future(id_)
@@ -1032,12 +1032,12 @@ class HubsAPI(object):
                     return send_return_obj
                 return future
 
-            def set_log_level(self, logLevel):
+            def set_log_level(self, log_level):
                 """
                 :rtype : Future
                 """
                 args = list()
-                args.append(logLevel)
+                args.append(log_level)
                 id_ = self._get_next_message_id()
                 body = {"hub": self.hub.name, "function": "set_log_level", "args": args, "ID": id_}
                 future = self.hub.ws_client.get_future(id_)

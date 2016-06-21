@@ -133,7 +133,7 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
                                 }
                             }
                         } else {
-                            thisApi.onClientFunctionNotFound(msgObj.hub, msgObj.function, msgObj.args);
+                            thisApi.onClientFunctionNotFound(msgObj.hub, msgObj.function);
                         }
                     }
                 } catch (err) {
