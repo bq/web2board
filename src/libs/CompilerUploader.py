@@ -99,7 +99,7 @@ class CompilerUploader:
     @staticmethod
     def _format_compile_result(result):
         def is_error(l):
-            p = re.compile(r'.*:[0-9]+:[0-9]+: error.*')
+            p = re.compile(r'.*:[0-9]+:[0-9]+: (fatal error|error).*')
             return l != "" and not l.startswith("scons") and p.match(l) is not None
 
         if result[0]:
