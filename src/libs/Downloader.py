@@ -34,7 +34,7 @@ class Downloader:
             dst = url.rsplit("/", 1)[1]
         if not isinstance(url, str):
             url = str(url)
-        self.log("downloading form: %s", url)
+        self.log.debug("downloading form: %s", url)
         site = urllib2.urlopen(url)
         download_task = self.__real_download(site, dst)
         for i in range(3):

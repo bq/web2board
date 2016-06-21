@@ -70,6 +70,7 @@ class Config:
                 with open(PathsManager.CONFIG_PATH) as f:
                     jsonObject = json.load(f)
                 cls.__dict__.update(jsonObject)
+                cls.proxy = cls.proxy if cls.proxy != "" else None
             except ValueError:
                 cls._log.error("Json corrupted so it was ignored, necessary to check!")
         else:
