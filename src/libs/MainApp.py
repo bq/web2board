@@ -111,7 +111,7 @@ class MainApp:
         try:
             BitbloqLibsUpdater().restore_current_version_if_necessary()
         except (HTTPError, URLError) as e:
-            log.error("unable to download libraries (might be a proxy problem)")
+            log.exception("unable to download libraries (might be a proxy problem)")
         except:
             log.exception("unable to copy libraries files, there could be a permission problem.")
 
