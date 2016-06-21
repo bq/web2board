@@ -8,6 +8,7 @@ from ConfigParser import ConfigParser
 from libs.Decorators.Synchronized import synchronized
 from libs.PathsManager import PathsManager
 from threading import Lock
+from libs.utils import rmtree
 my_lock = Lock()
 
 
@@ -38,29 +39,32 @@ class Config:
             return PathsManager.PLATFORMIO_WORKSPACE_SKELETON + os.sep + "lib"
 
     @classmethod
-    def set_platformio_lib_dir(cls, libDir):
-        if not os.path.exists(libDir):
+    def set_platformio_lib_dir(cls, lib_dir):
+        if not os.path.exists(lib_dir):
             raise ConfigException("Libraries directory does not exist")
         parser = ConfigParser()
         with open(PathsManager.PLATFORMIO_INI_PATH) as platformioIniFile:
             parser.readfp(platformioIniFile)
         if not parser.has_section("platformio"):
             parser.add_section("platformio")
-        parser.set("platformio", "lib_dir", os.path.abspath(libDir))
+        parser.set("platformio", "lib_dir", os.path.abspath(lib_dir))
+        platformio_libs_path = os.path.join(PathsManager.PLATFORMIO_WORKSPACE_PATH, 'lib')
+        if os.path.exists(platformio_libs_path) and lib_dir != platformio_libs_path:
+            rmtree(platformio_libs_path)
         with open(PathsManager.PLATFORMIO_INI_PATH, "wb") as platformioIniFile:
             parser.write(platformioIniFile)
 
     @classmethod
     def get_config_values(cls):
-        configValues = {k: v for k, v in cls.__dict__.items() if not k.startswith("_")}
-        configValues.pop("read_config_file")
-        configValues.pop("store_config_in_file")
-        configValues.pop("set_platformio_lib_dir")
-        configValues.pop("get_platformio_lib_dir")
-        configValues.pop("get_config_values")
-        configValues.pop("get_client_ws_ip")
-        configValues.pop("log_values")
-        return configValues
+        config_values = {k: v for k, v in cls.__dict__.items() if not k.startswith("_")}
+        config_values.pop("read_config_file")
+        config_values.pop("store_config_in_file")
+        config_values.pop("set_platformio_lib_dir")
+        config_values.pop("get_platformio_lib_dir")
+        config_values.pop("get_config_values")
+        config_values.pop("get_client_ws_ip")
+        config_values.pop("log_values")
+        return config_values
 
     @classmethod
     def read_config_file(cls):
@@ -68,8 +72,8 @@ class Config:
             try:
                 cls._log.info("Reading config file")
                 with open(PathsManager.CONFIG_PATH) as f:
-                    jsonObject = json.load(f)
-                cls.__dict__.update(jsonObject)
+                    json_object = json.load(f)
+                cls.__dict__.update(json_object)
                 cls.proxy = cls.proxy if cls.proxy != "" else None
             except ValueError:
                 cls._log.error("Json corrupted so it was ignored, necessary to check!")

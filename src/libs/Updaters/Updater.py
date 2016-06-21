@@ -60,18 +60,19 @@ class Updater:
         self.onlineVersionUrl = None
         """:type : str """
 
-        self.destinationPath = None
-        """:type : str """
-
         self.name = "Updater"
         self.downloader = Downloader()
+
+    @property
+    def destination_path(self):
+        return None
 
     def _are_we_missing_libraries(self):
         # todo: this is only for librariesUpdater
         log.debug("[{0}] Checking library names".format(self.name))
-        if not os.path.exists(self.destinationPath):
+        if not os.path.exists(self.destination_path):
             return True
-        libraries = utils.list_directories_in_path(self.destinationPath)
+        libraries = utils.list_directories_in_path(self.destination_path)
         libraries = map(lambda x: x.lower(), libraries)
         for cLibrary in self.current_version_info.libraries_names:
             if cLibrary.lower() not in libraries:
@@ -86,7 +87,7 @@ class Updater:
         log.debug("[{0}] Updating version to: {1}".format(self.name, version_to_upload.version))
         self.current_version_info.version = version_to_upload.version
         self.current_version_info.file_to_download_url = version_to_upload.file_to_download_url
-        self.current_version_info.libraries_names = utils.list_directories_in_path(self.destinationPath)
+        self.current_version_info.libraries_names = utils.list_directories_in_path(self.destination_path)
         log.info("Current version updated")
 
     def get_version_number(self, version_info=None):

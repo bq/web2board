@@ -24,8 +24,11 @@ class BitbloqLibsUpdater(Updater):
         Updater.__init__(self)
         self.current_version_info = VersionInfo(Version.bitbloq_libs,
                                                 libraries_names=Version.bitbloq_libs_libraries)
-        self.destinationPath = Config.get_platformio_lib_dir()
         self.name = "BitbloqLibsUpdater"
+
+    @property
+    def destination_path(self):
+        return Config.get_platformio_lib_dir()
 
     def _update_current_version_to(self, version_to_upload):
         Updater._update_current_version_to(self, version_to_upload)
@@ -40,9 +43,9 @@ class BitbloqLibsUpdater(Updater):
             raise BitbloqLibsUpdaterError("Not only one bitbloqLibs folder in unzipped file")
         downloaded_path = downloaded_path + os.sep + directories_in_folder[0]
 
-        if not os.path.exists(self.destinationPath):
-            os.makedirs(self.destinationPath)
-        utils.copytree(downloaded_path, self.destinationPath, force_copy=True)
+        if not os.path.exists(self.destination_path):
+            os.makedirs(self.destination_path)
+        utils.copytree(downloaded_path, self.destination_path, force_copy=True)
 
     def restore_current_version_if_necessary(self):
         if self.is_necessary_to_update():

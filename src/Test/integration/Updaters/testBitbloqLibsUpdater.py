@@ -30,7 +30,7 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
         self.assertIsNotNone(self.updater.current_version_info)
         self.assertEqual(self.updater.current_version_info.version, Version.bitbloq_libs)
         self.assertEqual(self.updater.current_version_info.libraries_names, Version.bitbloq_libs_libraries)
-        self.assertIsNotNone(self.updater.destinationPath)
+        self.assertIsNotNone(self.updater.destination_path)
         self.assertNotEqual(self.updater.name, Updater().name)
 
     def __testUploadProcess(self, online_version):
@@ -44,9 +44,9 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
             self.assertEqual(self.updater.current_version_info.version, Version.bitbloq_libs)
             self.assertEqual(self.updater.current_version_info.libraries_names, Version.bitbloq_libs_libraries)
         finally:
-            if os.path.exists(self.updater.destinationPath):
-                shutil.rmtree(self.updater.destinationPath)
-            self.assertFalse(os.path.exists(self.updater.destinationPath))
+            if os.path.exists(self.updater.destination_path):
+                shutil.rmtree(self.updater.destination_path)
+            self.assertFalse(os.path.exists(self.updater.destination_path))
 
     def test_upload_writesLibrariesInDestinationPathWithControlledData(self):
         version = VersionInfo("0.0.5", "file:" + os.sep + os.sep + self.res_path + os.sep + "bitbloqLibsV5.zip")

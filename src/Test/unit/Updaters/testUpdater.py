@@ -33,7 +33,7 @@ class TestUpdater(unittest.TestCase):
         self.updater = Updater()
         self.updater.currentVersionInfoPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "currentVersion.version")
         self.updater.onlineVersionUrl = "onlineVersionUrl"
-        self.updater.destinationPath = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
+        self.updater.destination_path = os.path.join(pm.TEST_SETTINGS_PATH, "Updater", "destinationPath")
 
         def download(*args):
             f = Future()
@@ -48,13 +48,13 @@ class TestUpdater(unittest.TestCase):
         flexmock_teardown()
 
         for libraryName in versionTestData["libraries_names"]:
-            if os.path.exists(self.updater.destinationPath + os.sep + libraryName):
-                shutil.rmtree(self.updater.destinationPath + os.sep + libraryName)
+            if os.path.exists(self.updater.destination_path + os.sep + libraryName):
+                shutil.rmtree(self.updater.destination_path + os.sep + libraryName)
         if os.path.exists(self.COPY_DOWNLOAD_ZIP_PATH):
             os.remove(self.COPY_DOWNLOAD_ZIP_PATH)
 
-        if os.path.exists(self.updater.destinationPath):
-            shutil.rmtree(self.updater.destinationPath)
+        if os.path.exists(self.updater.destination_path):
+            shutil.rmtree(self.updater.destination_path)
 
     @staticmethod
     def __getMockForGetDataFromUrl(returnValue=json.dumps(versionTestData)):
@@ -85,15 +85,15 @@ class TestUpdater(unittest.TestCase):
     def test_isNecessaryToUpdate_returnsTrueIfDestinationPathDoesNotExist(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
-        if os.path.exists(self.updater.destinationPath):
-            shutil.rmtree(self.updater.destinationPath)
+        if os.path.exists(self.updater.destination_path):
+            shutil.rmtree(self.updater.destination_path)
 
         self.assertTrue(self.updater.is_necessary_to_update())
 
     def test_isNecessaryToUpdate_returnsTrueIfVersionsAreEqualButNoLibrariesInDestinationPath(self):
         self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
-        os.makedirs(self.updater.destinationPath)
+        os.makedirs(self.updater.destination_path)
 
         self.assertTrue(self.updater.is_necessary_to_update())
 
@@ -101,7 +101,7 @@ class TestUpdater(unittest.TestCase):
         self.updater.current_version_info = VersionInfo(**versionTestData)
         self.updater.onlineVersionInfo = VersionInfo(**versionTestData)
         for libraryName in versionTestData["libraries_names"]:
-            if not os.path.exists(self.updater.destinationPath + os.sep + libraryName):
-                os.makedirs(self.updater.destinationPath + os.sep + libraryName)
+            if not os.path.exists(self.updater.destination_path + os.sep + libraryName):
+                os.makedirs(self.updater.destination_path + os.sep + libraryName)
 
         self.assertFalse(self.updater.is_necessary_to_update())

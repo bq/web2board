@@ -28,7 +28,7 @@ class TestWeb2boardUpdater(unittest.TestCase):
     def test_update_updatesFilesInProgramPath(self):
         self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 
-        self.updater.update("0").result()
+        self.updater.update("0", pm.PROGRAM_PATH).result()
 
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
 
@@ -36,14 +36,14 @@ class TestWeb2boardUpdater(unittest.TestCase):
         pm.PROGRAM_PATH = os.path.join(self.test_data_path, 'otherProgramPath')
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
-        self.updater.update("0").result()
+        self.updater.update("0", pm.PROGRAM_PATH).result()
 
         self.assertTrue(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'readme'))
         self.assertFalse(os.path.isfile(pm.PROGRAM_PATH + os.sep + 'new'))
 
     def test_update_raiseExceptionIfNoConfirmFile(self):
         with self.assertRaises(UpdaterError):
-            self.updater.update("1").result()
+            self.updater.update("1", pm.PROGRAM_PATH).result()
 
         self.assertFalse(os.path.isdir(pm.PROGRAM_PATH))
 

@@ -33,7 +33,8 @@ class ConfigHub(Hub):
         for k in config_values.keys():
             if k in config_dic:
                 Config.__dict__[k] = config_dic[k]
-        utils.set_proxy(dict(http=Config.proxy, https=Config.proxy))
+        if Config.proxy is not None:
+            utils.set_proxy(dict(http=Config.proxy, https=Config.proxy))
         Config.store_config_in_file()
         return True
 
@@ -47,6 +48,7 @@ class ConfigHub(Hub):
 
     def set_libraries_path(self, lib_dir):
         Config.set_platformio_lib_dir(lib_dir)
+        PathsManager.clean_pio_envs()
 
     def get_libraries_path(self):
         return Config.get_platformio_lib_dir()
