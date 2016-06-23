@@ -1,14 +1,10 @@
-import json
 import logging
-import os
+import sys
 import time
 
-import sys
 from wshubsapi.comm_environment import CommEnvironment
 from wshubsapi.connected_client import ConnectedClient
-from wshubsapi.connection_handlers.tornado_handler import ConnectionHandler
 
-import libs.MainApp
 from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.LoggingUtils import init_logging
@@ -32,10 +28,10 @@ class ConsoleHandler:
             message = raw_input()
             messages = self.parser.add_data(message)
             for m in messages:
-                self.on_message(m)
+                self.on_message(m.decode('utf-8'))
 
     def write_message(self, message, binary=False):
-        pass
+        self.log.info("%s%s%s", self.parser.INIT, message, self.parser.END)
 
     def open(self, name=None):
         client_id = name
@@ -44,15 +40,10 @@ class ConsoleHandler:
 
     def on_message(self, message):
         self.log.debug(u"Message received from ID: {}\n{} ".format(self._connected_client.ID, message))
-        self.comm_environment.on_async_message(self._connected_client, message)
+        self.comm_environment.on_message(self._connected_client, message)
 
     def on_close(self):
         pass
-
-
-@asynchronous()
-def infinite():
-    time.sleep(1)
 
 if __name__ == '__main__':
     c = ConsoleHandler()

@@ -4,12 +4,10 @@ import logging
 class ConsoleMessageParser:
     INIT = "_$INIT$_"
     END = "_$END$_"
-    NO_MESSAGE, ON_MESSAGE = range(2)
     log = logging.getLogger(__name__)
 
     def __init__(self):
         self.buffer = ""
-        self.state = self.NO_MESSAGE
 
     def add_data(self, data):
         data = data if isinstance(data, str) else data.decode('utf-8')
