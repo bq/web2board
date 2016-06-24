@@ -8,6 +8,7 @@ from datetime import timedelta, datetime
 
 from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
+from libs.ErrorParser import format_compile_result
 from libs.PathsManager import PathsManager as pm
 from platformio import exception, util
 from platformio.platformioUtils import run as platformio_run
@@ -96,26 +97,6 @@ class CompilerUploader:
         log.debug(err)
         return output, err
 
-    @staticmethod
-    def _format_compile_result(result):
-        def is_error(l):
-            p = re.compile(r'.*:[0-9]+:[0-9]+: (fatal error|error).*')
-            return l != "" and not l.startswith("scons") and p.match(l) is not None
-
-        if result[0]:
-            return result
-        error_str = result[1]["err"]
-        lines = [l for l in error_str.split("\n\n", 1)[-1].split("\n") if is_error(l)]
-        errors = list()
-        for line in lines:
-            split_line = line.split(":", 4)
-            error = dict(file=split_line[0], line=int(split_line[1]), column=int(split_line[2]), error=split_line[4])
-            error["error"] = error["error"].decode('string_escape').strip()
-            errors.append(error)
-        if len(errors) > 0:
-            result[1]["err"] = errors
-        return result
-
     @asynchronous()
     def _check_port(self, port, mcu, baud_rate):
         try:
@@ -148,7 +129,7 @@ class CompilerUploader:
             raise NotImplementedError()
             # hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
             # return runResult, hexResult
-        return self._format_compile_result(run_result)
+        return format_compile_result(run_result)
 
     def _check_board_configuration(self):
         if self.board is None:

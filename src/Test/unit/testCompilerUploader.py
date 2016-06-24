@@ -27,19 +27,19 @@ scons: *** [.pioenvs/bt328/src/tmp_ino_to.o] Error 1"""
         self.platformio_run_mock.should_receive("platformio_run").and_return(error_info)
 
         result = self.compiler.compile("")
-        error_info = result[1]["err"]
+        parse_error = result[1]["err"]
 
         self.assertFalse(result[0])
-        self.assertEqual(len(error_info), 2)
-        self.assertEqual(error_info[0]["file"], 'main.ino')
-        self.assertEqual(error_info[0]["line"], 9)
-        self.assertEqual(error_info[0]["column"], 14)
-        self.assertEqual(error_info[0]["error"], "invalid conversion from 'const char*' to 'int' [-fpermissive]")
+        self.assertEqual(len(parse_error), 2)
+        self.assertEqual(parse_error[0]["file"], 'main.ino')
+        self.assertEqual(parse_error[0]["line"], 9)
+        self.assertEqual(parse_error[0]["column"], 14)
+        self.assertEqual(parse_error[0]["error"], "invalid conversion from 'const char*' to 'int' [-fpermissive]")
 
-        self.assertEqual(error_info[1]["file"], 'main.ino')
-        self.assertEqual(error_info[1]["line"], 14)
-        self.assertEqual(error_info[1]["column"], 1)
-        self.assertEqual(error_info[1]["error"], "expected ';' before '}' token")
+        self.assertEqual(parse_error[1]["file"], 'main.ino')
+        self.assertEqual(parse_error[1]["line"], 14)
+        self.assertEqual(parse_error[1]["column"], 1)
+        self.assertEqual(parse_error[1]["error"], "expected ';' before '}' token")
 
     def test_parse_error_doesNotParseIfCompileSuccess(self):
         error_message = """"main.ino: In function 'int sum(int, int)':
@@ -66,3 +66,24 @@ scons: *** [.pioenvs/bt328/src/tmp_ino_to.o] Error 1"""
 
         self.assertFalse(result[0])
         self.assertEqual(result[1]["err"], error_message)
+
+    def test_parse_error_getsErrorDataIfReferenceError(self):
+        error_message = """".pioenvs/bt328/libFrameworkArduino.a(main.o): In function `main':
+/home/startic/repos/web2board/src/res/platformioWorkSpace/.pioenvs/bt328/FrameworkArduino/main.cpp:37: undefined reference to `setup'
+/home/startic/repos/web2board/src/res/platformioWorkSpace/.pioenvs/bt328/FrameworkArduino/main.cpp:47: undefined reference to `loop'
+collect2: error: ld returned 1 exit status
+scons: *** [.pioenvs/bt328/firmware.elf] Error 1"""
+
+        error_info = [[False, dict(err=error_message)]]
+        self.platformio_run_mock.should_receive("platformio_run").and_return(error_info)
+
+        result = self.compiler.compile("")
+        parse_error = result[1]["err"]
+
+        self.assertFalse(result[0])
+        self.assertEqual(len(parse_error), 2)
+        self.assertIn("main.cpp", parse_error[0]["file"])
+        self.assertEqual(parse_error[0]["error"], 'undefined reference to `setup\'')
+
+        self.assertIn("main.cpp", parse_error[1]["file"])
+        self.assertEqual(parse_error[1]["error"], 'undefined reference to `loop\'')
