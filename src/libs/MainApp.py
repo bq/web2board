@@ -11,7 +11,7 @@ from urllib2 import HTTPError, URLError
 from tornado import web, ioloop
 from wshubsapi.hubs_inspector import HubsInspector
 
-from Scripts.TestRunner import runAllTests, runIntegrationTests, runUnitTests
+from Scripts.TestRunner import run_all_test, run_integration_test, run_unit_test
 from libs import utils
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
@@ -37,11 +37,11 @@ class MainApp:
         sys.argv[1:] = []
         if testing != "none":
             if testing == "unit":
-                runUnitTests()
+                run_unit_test()
             elif testing == "integration":
-                runIntegrationTests()
+                run_integration_test()
             elif testing == "all":
-                runAllTests()
+                run_all_test()
 
             log.warning("\nexiting program in 10s")
             time.sleep(10)

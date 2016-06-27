@@ -55,7 +55,7 @@ class TestWeb2boardLink(unittest.TestCase):
 
     def test_is_factory_reset_WithArgument(self):
         if len(sys.argv) <= 1:
-            sys.argv.push("")
+            sys.argv.append("")
         possible_options = [
             "factoryreset",
             "factoryReset",
