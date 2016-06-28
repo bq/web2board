@@ -15,7 +15,7 @@ def get_module_path():
 
 
 def get_ws_relative_route(file_path):
-    relative_path = file_path.split(os.path.join("web2board", "src", ""), 1)[1]
+    relative_path = file_path.split(os.path.join("web2board", "src", ""), 1)[1]  # todo: use generic path
     return relative_path.split(os.sep)
 
 
@@ -70,5 +70,7 @@ if __name__ == '__main__':
                 run_integration_test()
             elif testing == "all":
                 run_all_test()
+    except:
+        raise
     finally:
         os._exit(0)
