@@ -16,15 +16,15 @@ class TestBitbloqLibsUpdater(unittest.TestCase):
     def setUp(self):
         self.res_path = os.path.join(pm.TEST_SETTINGS_PATH, "Updater")
         self.updater = BitbloqLibsUpdater()
-        self.updater.destinationPath = os.path.join(self.res_path, "newLibrariesPath")
-        restore_test_resources()
-        self.original_pathManagerDict = {x: y for x, y in pm.__dict__.items()}
+        self.updater.destination_path = os.path.join(self.res_path, "newLibrariesPath")
+        restore_test_resources("Updater")
 
-        pm.CONFIG_PATH = pm.TEST_SETTINGS_PATH + os.sep + "config.json"
+        pm.CONFIG_PATH = self.res_path + os.sep + "config.json"
+        pm.VERSION_PATH = self.res_path + os.sep + "web2board.version"
 
     def tearDown(self):
         flexmock_teardown()
-        pm.__dict__ = {x: y for x, y in self.original_pathManagerDict.items()}
+        pm.set_all_constants()
 
     def test_construct_setsAllNecessaryAttributes(self):
         self.assertIsNotNone(self.updater.current_version_info)
