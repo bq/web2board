@@ -103,7 +103,7 @@ class Packager:
         try:
             self._get_platformio_packages()
             self._construct_web2board_executable()
-            shutil.move(self.installer_creation_executables_path, join(self.installer_creation_dist_path, "web2board"))
+            # shutil.move(self.installer_creation_executables_path, join(self.installer_creation_dist_path, "web2board"))
             self._construct_link_executable()
         finally:
             os.chdir(current_path)
@@ -117,7 +117,9 @@ class Packager:
     def _construct_web2board_executable(self):
         log.debug("Creating Web2board Executable")
         os.system("pyinstaller \"{}\"".format(self.web2board_spec_path))
-        utils.copytree(join(self.pyinstaller_dist_folder, "web2board"), self.installer_creation_executables_path)
+        src = join(self.pyinstaller_dist_folder, "web2board")
+        dst = join(self.installer_creation_dist_path, "web2board")
+        utils.copytree(src, dst)
 
     def _compress_executables(self):
         packages_files = find_files(self.installer_creation_executables_path, ["*", "**/*"])
@@ -130,7 +132,7 @@ class Packager:
                     z.write(zipFilePath)
 
     def _get_platformio_packages(self):
-        log.debug("Gettings Scons Packages")
+        log.debug("Getting Scons Packages")
         ori_current_dir = os.getcwd()
         ori_click_confirm = click.confirm
 
@@ -183,11 +185,6 @@ class Packager:
             click.confirm = ori_click_confirm
 
     def _create_main_structure_and_executables(self):
-        if self.version == Updater.NONE_VERSION:
-            self.prepare_res_folder_for_executable()
-            self.__init__()
-            return self._create_main_structure_and_executables()
-
         log.debug("Removing main folders")
         self._clear_main_folders()
         log.debug("Creating main folders")
