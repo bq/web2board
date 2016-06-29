@@ -6,13 +6,18 @@ import zipfile
 sys.path.append(os.getcwd())
 import libs.utils as utils
 from libs.PathsManager import PathsManager
+from Scripts import TestRunner
 
-block_cipher = None
+hidden_imports = ['libs.LoggingUtils', 'libs.WSCommunication.Hubs', 'UserList', 'UserString', 'ConfigParser']
+hidden_imports.extend(TestRunner.get_module_string('Test/**/test*.py'))
+print hidden_imports
+
 print os.getcwd()
+block_cipher = None
 
 a = Analysis(['src' + os.sep + 'web2board.py'],
              pathex=[os.getcwd()],
-             hiddenimports=['libs.LoggingUtils', 'libs.WSCommunication.Hubs', 'UserList', 'UserString', 'ConfigParser'],
+             hiddenimports=hidden_imports,
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)
