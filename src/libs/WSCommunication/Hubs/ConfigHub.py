@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import urllib2
 from copy import deepcopy
 
@@ -19,6 +20,7 @@ class ConfigHubException(Exception):
 class ConfigHub(Hub):
     def __init__(self):
         super(ConfigHub, self).__init__()
+        self.default_platformio_ini_path = PathsManager.PLATFORMIO_INI_PATH + ".default"
 
     def get_config(self):
         config = deepcopy(Config.get_config_values())
@@ -57,13 +59,19 @@ class ConfigHub(Hub):
         return os.path.exists(path)
 
     def change_platformio_ini_file(self, content):
+        if not os.path.exists(self.default_platformio_ini_path):
+            shutil.copyfile(PathsManager.PLATFORMIO_INI_PATH, self.default_platformio_ini_path)
         with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
             f.write(content)
 
     def restore_platformio_ini_file(self):
-        with open(PathsManager.PLATFORMIO_INI_PATH + ".copy") as fcopy:
-            with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
-                f.write(fcopy.read())
+        if os.path.exists(self.default_platformio_ini_path):
+            with open(self.default_platformio_ini_path) as f_default:
+                with open(PathsManager.PLATFORMIO_INI_PATH, "w") as f:
+                    f.write(f_default.read())
+            return True
+        else:
+            return False
 
     def set_proxy(self, proxy_url):
         Config.proxy = proxy_url
