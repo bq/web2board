@@ -33,8 +33,8 @@ def create_compiler_uploader_mock():
 def create_sender_mock():
     class Sender:
         def __init__(self):
-            self.isCompiling = lambda: None
-            self.isUploading = lambda x: None
+            self.is_compiling = lambda: None
+            self.is_uploading = lambda x: None
             self.ID = None
 
     return flexmock(Sender(), ID="testID")

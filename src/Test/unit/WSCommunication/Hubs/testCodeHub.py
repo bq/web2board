@@ -49,7 +49,7 @@ class TestCodeHub(unittest.TestCase):
         self.assertIs(compiler1, compiler2)
 
     def test_compile_senderIsAdvisedCompilingIsOngoing(self):
-        self.sender.should_receive("isCompiling").once()
+        self.sender.should_receive("is_compiling").once()
 
         self.codeHub.compile("myCode", self.sender)
 

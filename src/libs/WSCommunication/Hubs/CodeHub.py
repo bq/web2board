@@ -30,16 +30,15 @@ class CodeHub(Hub):
 
     def __prepare_upload(self, board, _sender, upload_port=None):
         if upload_port is not None:
-            _sender.isUploading(upload_port)
+            _sender.is_uploading(upload_port)
             return upload_port
         compile_uploader = CompilerUploader.construct(board)
         self.serial_hub.close_all_connections()
-        if upload_port is None:
-            try:
-                upload_port = compile_uploader.get_port()
-            except CompilerException as e:
-                return self._construct_unsuccessful_replay(dict(title="BOARD_NOT_READY", stdErr=e.message))
-        _sender.isUploading(upload_port)
+        try:
+            upload_port = compile_uploader.get_port()
+        except CompilerException as e:
+            return self._construct_unsuccessful_replay(dict(title="BOARD_NOT_READY", stdErr=e.message))
+        _sender.is_uploading(upload_port)
         return upload_port
 
     def compile(self, code, _sender):
@@ -49,7 +48,7 @@ class CodeHub(Hub):
         """
         log.info("Compiling from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
-        _sender.isCompiling()
+        _sender.is_compiling()
         compile_report = CompilerUploader.construct().compile(code)
         return self.__handle_compile_report(compile_report)
 
@@ -60,7 +59,7 @@ class CodeHub(Hub):
         """
         log.info("getting hexData from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
-        _sender.isCompiling()
+        _sender.is_compiling()
         compileReport, hexData = CompilerUploader.construct().get_hex_data(code)
         return self.__handle_compile_report(compileReport), hexData
 
