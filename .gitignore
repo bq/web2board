@@ -22,6 +22,7 @@ installers/
 **/info.log.*
 **/.web2board-config.json
 src/*.spec
+src/test-reports
 res/common/platformIoPackages
 /dist/
 /build/

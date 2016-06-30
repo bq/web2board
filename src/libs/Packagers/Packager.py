@@ -205,10 +205,7 @@ class Packager:
         try:
             self._get_platformio_packages()
             self._construct_web2board_executable()
-            shutil.move(self.installer_creation_executables_path, self.installer_offline_path)
-            web2board_launcher_name = "web2boardLauncher" + utils.get_executable_extension(True)
-            web2board_launcher_path = join(self.installer_offline_path, "res", web2board_launcher_name)
-            shutil.move(web2board_launcher_path, self.installer_offline_path)
+            shutil.move(join(self.installer_creation_dist_path, "web2board"), self.installer_offline_path)
         finally:
             os.chdir(current_path)
             self._clear_build_files()
