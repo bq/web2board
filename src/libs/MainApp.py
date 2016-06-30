@@ -21,6 +21,7 @@ from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.Version import Version
 from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
+from libs.WSCommunication.ConsoleHandler import ConsoleHandler
 
 log = logging.getLogger(__name__)
 __mainApp = None
@@ -31,6 +32,7 @@ class MainApp:
         Version.read_version_values()
         Config.read_config_file()
         self.w2b_server = None
+        self.consoleHandler = ConsoleHandler()
 
     @staticmethod
     def __handle_testing_options(testing):
@@ -65,6 +67,13 @@ class MainApp:
             log.exception("Unable to log Config")
 
     @staticmethod
+    def __construct_api_files():
+        if not utils.are_we_frozen():
+            HubsInspector.construct_js_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubsApi.js"))
+            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static", "hubsApi.js"))
+            HubsInspector.construct_python_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubs_api.py"))
+
+    @staticmethod
     def parse_system_arguments():
         parser = OptionParser(usage="usage: %prog [options] filename", version="%prog 1.0")
         parser.add_option("--host", default=Config.web_socket_ip, type='string', action="store", dest="host",
@@ -81,6 +90,7 @@ class MainApp:
                           help="auto update to version")
         parser.add_option("--proxy", default=Config.proxy, type='string', action="store", dest="proxy",
                           help="define proxy for internet connections")
+        parser.add_option("--offline", action="store_true", dest="offline", help="define proxy for internet connections")
 
         return parser.parse_args()
 
@@ -140,10 +150,7 @@ class MainApp:
 
     def initialize_server_and_communication_protocol(self, options):
         # do not call this line in executable
-        if not utils.are_we_frozen():
-            HubsInspector.construct_js_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubsApi.js"))
-            HubsInspector.construct_js_file(path=os.path.join(os.pardir, "demo", "_static", "hubsApi.js"))
-            HubsInspector.construct_python_file(path=os.path.join("libs", "WSCommunication", "Clients", "hubs_api.py"))
+        self.__construct_api_files()
         self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
         Config.web_socket_port = options.port
         self.w2b_server.listen(options.port)
@@ -159,6 +166,10 @@ class MainApp:
         finally:
             force_quit()
 
+    def start_listening_console(self):
+        log.info("listening console...")
+        self.consoleHandler.listener_loop()
+
     def start_main(self):
         PathsManager.clean_pio_envs()
         options, args = self.parse_system_arguments()
@@ -167,8 +178,11 @@ class MainApp:
 
         self.__log_environment()
         if options.update2version is None:
-            self.start_server(options)
-            self.test_connection()
+            if not options.offline:
+                self.start_server(options)
+                self.test_connection()
+            else:
+                self.start_listening_console()
 
 
 def force_quit():
