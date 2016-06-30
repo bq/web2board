@@ -4,7 +4,7 @@ from flexmock import flexmock, flexmock_teardown
 from libs.WSCommunication.ConsoleMessageParser import ConsoleMessageParser
 
 
-class TestCodeHub(unittest.TestCase):
+class TestConsoleMessageParserHub(unittest.TestCase):
     def setUp(self):
         self.parser = ConsoleMessageParser()
 
