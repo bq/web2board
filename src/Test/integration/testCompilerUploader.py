@@ -60,10 +60,6 @@ class TestCompilerUploader(unittest.TestCase):
     def tearDown(self):
         flexmock_teardown()
 
-    def test_getPort_raisesExceptionIfBoardNotSet(self):
-        self.compiler.board = None
-        self.assertRaises(CompilerException, self.compiler.get_port)
-
     def test_getPort_raiseExceptionIfNotReturningPort(self):
         self.compiler = flexmock(self.compiler, _search_board_port=lambda: None)
 
@@ -100,13 +96,6 @@ class TestCompilerUploader(unittest.TestCase):
         port = self.compiler.get_port()
 
         self.__assertRightPortName(port)
-
-    def test_compile_raisesExceptionIfBoardIsNotSet(self):
-        self.compiler.board = None
-        with open(self.working_cpp_path) as f:
-            workingCpp = f.read()
-
-        self.assertRaises(CompilerException, self.compiler.compile, workingCpp)
 
     def test_compile_compilesSuccessfullyWithWorkingCpp(self):
         self.compiler.set_board(self.connected_board)
@@ -148,14 +137,6 @@ class TestCompilerUploader(unittest.TestCase):
     def __assertPortFount(self):
         if self.portToUse == -1:
             self.assertFalse(True, "port not found, check board: {} is connected".format(self.connected_board))
-
-    def test_upload_raisesExceptionIfBoardIsNotSet(self):
-        self.__assertPortFount()
-        self.compiler.board = None
-        with open(self.working_cpp_path) as f:
-            workingCpp = f.read()
-
-        self.assertRaises(CompilerException, self.compiler.upload, workingCpp, upload_port=self.portToUse)
 
     def test_upload_compilesSuccessfullyWithWorkingCpp(self):
         self.__assertPortFount()

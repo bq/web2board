@@ -80,6 +80,7 @@ class CodeHub(Hub):
 
     def upload_hex(self, hex_text, board, _sender, port=None):
         """
+        :type board: str
         :type hex_text: str
         :type _sender: ConnectedClientsGroup
         """
@@ -97,6 +98,7 @@ class CodeHub(Hub):
 
     def upload_hex_file(self, hex_file_path, board, _sender, port=None):
         """
+        :type board: str
         :type hex_file_path: str
         :type _sender: ConnectedClientsGroup
         """

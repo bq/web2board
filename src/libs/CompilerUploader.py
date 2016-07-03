@@ -41,12 +41,12 @@ class CompilerUploader:
     def __init__(self, board=DEFAULT_BOARD):
         self.lastPortUsed = None
         self.board = board  # we use the board name as the environment (check platformio.ini)
-        self._check_board_configuration()
+        self.build_options = self._get_build_options(self.board)
 
     @staticmethod
-    def _get_ini_config(environment):
+    def _get_build_options(board):
         """
-        :type environment: str
+        :type board: str
             """
         with util.cd(pm.PLATFORMIO_WORKSPACE_PATH):
             config = util.get_project_config()
@@ -56,16 +56,18 @@ class CompilerUploader:
 
             known = set([s[4:] for s in config.sections()
                          if s.startswith("env:")])
-            unknown = set((environment,)) - known
+            unknown = set((board,)) - known
             if unknown:
                 return None
 
             for section in config.sections():
                 envName = section[4:]
-                if environment and envName and envName == environment:
-                    iniConfig = {k: v for k, v in config.items(section)}
-                    iniConfig["boardData"] = get_boards(iniConfig["board"])
-                    return iniConfig
+                if board and envName and envName == board:
+                    build_options = {k: v for k, v in config.items(section)}
+                    build_options["boardData"] = get_boards(build_options["board"])
+                    return build_options
+
+            raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, board)
 
     @staticmethod
     def _call_avrdude(args):
@@ -110,7 +112,6 @@ class CompilerUploader:
             return False
 
     def _run(self, code, upload=False, upload_port=None, get_hex_string=False):
-        self._check_board_configuration()
         target = ("upload",) if upload else ()
         upload_port = self.get_port() if upload and upload_port is None else upload_port
 
@@ -131,17 +132,9 @@ class CompilerUploader:
             # return runResult, hexResult
         return format_compile_result(run_result)
 
-    def _check_board_configuration(self):
-        if self.board is None:
-            raise CompilerException(ERROR_BOARD_NOT_SET)
-        if self._get_ini_config(self.board) is None:
-            raise CompilerException(ERROR_BOARD_NOT_SUPPORTED, self.board)
-
     def _search_board_port(self):
-        self._check_board_configuration()
-        options = self._get_ini_config(self.board)
-        mcu = options["boardData"]["build"]["mcu"]
-        baud_rate = options["boardData"]["upload"]["speed"]
+        mcu = self.build_options["boardData"]["build"]["mcu"]
+        baud_rate = self.build_options["boardData"]["upload"]["speed"]
         available_ports = self.get_available_ports()
         if len(available_ports) <= 0:
             return None
@@ -167,7 +160,6 @@ class CompilerUploader:
         return sorted(available_ports, cmp=lambda x, y: -1 if x == self.lastPortUsed else 1)
 
     def get_port(self):
-        self._check_board_configuration()
         port_to_upload = self._search_board_port()
         if port_to_upload is None:
             raise CompilerException(ERROR_NO_PORT_FOUND, self.board)
@@ -176,7 +168,7 @@ class CompilerUploader:
 
     def set_board(self, board):
         self.board = board
-        self._check_board_configuration()
+        self._get_build_options(board)
 
     def compile(self, code):
         return self._run(code, upload=False)
@@ -188,11 +180,9 @@ class CompilerUploader:
         return self._run(code, upload=True, upload_port=upload_port)
 
     def upload_avr_hex(self, hex_file_path, upload_port=None):
-        self._check_board_configuration()
-        options = self._get_ini_config(self.board)
         port = upload_port if upload_port is not None else self.get_port()
-        mcu = options["boardData"]["build"]["mcu"]
-        baud_rate = str(options["boardData"]["upload"]["speed"])
+        mcu = self.build_options["boardData"]["build"]["mcu"]
+        baud_rate = str(self.build_options["boardData"]["upload"]["speed"])
         args = "-V -P " + port + " -p " + mcu + " -b " + baud_rate + " -c arduino -D -U flash:w:" + hex_file_path + ":i"
         output, err = self._call_avrdude(args)
         ok_text = "bytes of flash written"
