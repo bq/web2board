@@ -1,3 +1,4 @@
+import SocketServer
 import json
 import logging
 import os
@@ -22,6 +23,7 @@ from libs.Version import Version
 from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from libs.WSCommunication.ConsoleHandler import ConsoleHandler
+from libs.WSCommunication.RequestHandler import RequestHandler
 
 log = logging.getLogger(__name__)
 __mainApp = None
@@ -90,7 +92,8 @@ class MainApp:
                           help="auto update to version")
         parser.add_option("--proxy", default=Config.proxy, type='string', action="store", dest="proxy",
                           help="define proxy for internet connections")
-        parser.add_option("--offline", action="store_true", dest="offline", help="define proxy for internet connections")
+        parser.add_option("--offline", action="store_true", dest="offline", help="communication through console")
+        parser.add_option("--server", action="store_true", dest="server", help="communication through http request")
 
         return parser.parse_args()
 
@@ -150,7 +153,6 @@ class MainApp:
 
     def initialize_server_and_communication_protocol(self, options):
         # do not call this line in executable
-        self.__construct_api_files()
         self.w2b_server = web.Application([(r'/(.*)', WSConnectionHandler)])
         Config.web_socket_port = options.port
         self.w2b_server.listen(options.port)
@@ -170,6 +172,10 @@ class MainApp:
         log.info("listening console...")
         self.consoleHandler.listener_loop()
 
+    def initialize_request_server(self):
+        httpd = SocketServer.TCPServer(("", 9876), RequestHandler)
+        httpd.serve_forever()
+
     def start_main(self):
         PathsManager.clean_pio_envs()
         options, args = self.parse_system_arguments()
@@ -178,11 +184,14 @@ class MainApp:
 
         self.__log_environment()
         if options.update2version is None:
-            if not options.offline:
+            self.__construct_api_files()
+            if options.offline:
+                self.start_listening_console()
+            elif options.server:
+                self.initialize_request_server()
+            else:
                 self.start_server(options)
                 self.test_connection()
-            else:
-                self.start_listening_console()
 
 
 def force_quit():
