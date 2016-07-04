@@ -20,7 +20,7 @@ class LinuxPackager(Packager):
         self.installer_creation_path = join(self.web2board_path,
                                             "deb_web2board_{}_{}".format(architecture, self.version))
         self.installer_creation_name = os.path.basename(self.installer_creation_path)
-        self.installer_creation_executables_path = join(self.installer_creation_path, "executables")
+        self.installer_creation_w2b_path = join(self.installer_creation_path, "executables")
         self.installer_creation_dist_path = join(self.installer_creation_path, "opt", "web2board")
 
         self.pkg_platform_path = join(self.pkg_path, "linux")

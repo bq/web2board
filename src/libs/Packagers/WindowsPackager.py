@@ -14,7 +14,7 @@ class WindowsPackager(Packager):
         self.installer_creation_path = self.web2board_path + os.sep + "win_web2board_{}".format(self.version)
         self.installer_creation_name = os.path.basename(self.installer_creation_path)
         self.installer_creation_dist_path = join(self.installer_creation_path, "dist")
-        self.installer_creation_executables_path = join(self.installer_creation_path, "executables")
+        self.installer_creation_w2b_path = join(self.installer_creation_dist_path, "web2board")
         self.pkg_platform_path = join(self.pkg_path, "win32")
         self.res_platform_path = join(self.res_path, "windows")
         self.web2board_executable_name = "web2board.exe"
@@ -39,10 +39,10 @@ class WindowsPackager(Packager):
 
     def _construct_web2board_executable(self):
         Packager._construct_web2board_executable(self)
-        exe_res_path = join(self.installer_creation_executables_path, "res")
+        exe_res_path = join(self.installer_creation_w2b_path, "res")
         log.info("copying res files...")
         shutil.copytree(self.src_res_path, exe_res_path)
-        shutil.copytree(join(self.src_path, "Test"), join(self.installer_creation_executables_path, "Test"))
+        shutil.copytree(join(self.src_path, "Test"), join(self.installer_creation_w2b_path, "Test"))
 
     def create_package(self):
         try:

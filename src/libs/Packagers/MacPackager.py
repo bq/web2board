@@ -18,7 +18,7 @@ class MacPackager(Packager):
         self.installer_creation_dist_path = os.path.join(self.installer_creation_path, "dist")
         self.installerCreationAppPath = os.path.join(self.installer_creation_dist_path, 'web2boardLink.app')
         self.installer_creation_name = os.path.basename(self.installer_creation_path)
-        self.installer_creation_executables_path = os.path.join(self.installer_creation_path, "executables")
+        self.installer_creation_w2b_path = os.path.join(self.installer_creation_path, "executables")
         self.pkg_platform_path = os.path.join(self.pkg_path, "darwin")
         self.res_platform_path = os.path.join(self.res_path, "darwin")
 

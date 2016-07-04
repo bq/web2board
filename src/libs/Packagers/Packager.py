@@ -44,7 +44,7 @@ class Packager:
         self.installer_path = None
         self.installer_offline_path = None
         self.installer_creation_path = None
-        self.installer_creation_executables_path = None
+        self.installer_creation_w2b_path = None
         self.installer_creation_dist_path = None
         self.installer_creation_name = None
         self.pkg_platform_path = None
@@ -54,7 +54,7 @@ class Packager:
 
     # todo move this to attribute
     def _get_installer_creation_res_path(self):
-        return join(self.installer_creation_executables_path, 'res')
+        return join(self.installer_creation_w2b_path, 'res')
 
     # todo move this to attribute
     def _get_platformio_packages_path(self):
@@ -94,7 +94,7 @@ class Packager:
     def _make_main_dirs(self):
         os.makedirs(self.installer_creation_path)
         os.makedirs(self.installer_creation_dist_path)
-        os.makedirs(self.installer_creation_executables_path)
+        os.makedirs(self.installer_creation_w2b_path)
         os.makedirs(self.installer_path)
 
     def _construct_and_move_executable(self):
@@ -103,7 +103,7 @@ class Packager:
         try:
             self._get_platformio_packages()
             self._construct_web2board_executable()
-            # shutil.move(self.installer_creation_executables_path, join(self.installer_creation_dist_path, "web2board"))
+            # shutil.move(self.installer_creation_w2b_path, join(self.installer_creation_dist_path, "web2board"))
             self._construct_link_executable()
         finally:
             os.chdir(current_path)
@@ -118,15 +118,14 @@ class Packager:
         log.debug("Creating Web2board Executable")
         os.system("pyinstaller \"{}\"".format(self.web2board_spec_path))
         src = join(self.pyinstaller_dist_folder, "web2board")
-        dst = join(self.installer_creation_dist_path, "web2board")
-        utils.copytree(src, dst)
+        utils.copytree(src, self.installer_creation_w2b_path)
 
     def _compress_executables(self):
-        packages_files = find_files(self.installer_creation_executables_path, ["*", "**/*"])
-        packages_files = [x[len(self.installer_creation_executables_path) + 1:] for x in packages_files]
+        packages_files = find_files(self.installer_creation_w2b_path, ["*", "**/*"])
+        packages_files = [x[len(self.installer_creation_w2b_path) + 1:] for x in packages_files]
         with zipfile.ZipFile(self.installer_creation_dist_path + os.sep + "web2board.zip", "w",
                              zipfile.ZIP_DEFLATED) as z:
-            os.chdir(self.installer_creation_executables_path)
+            os.chdir(self.installer_creation_w2b_path)
             with click.progressbar(packages_files, label='Compressing...') as packagesFilesInProgressBar:
                 for zipFilePath in packagesFilesInProgressBar:
                     z.write(zipFilePath)
