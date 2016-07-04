@@ -48,7 +48,7 @@ class CodeHub(Hub):
         """
         log.info("Compiling from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
-        _sender.is_compiling()
+        # _sender.is_compiling()
         compile_report = CompilerUploader.construct().compile(code)
         return self.__handle_compile_report(compile_report)
 

@@ -172,9 +172,11 @@ class MainApp:
         log.info("listening console...")
         self.consoleHandler.listener_loop()
 
-    def initialize_request_server(self):
-        httpd = SocketServer.TCPServer(("", 9876), RequestHandler)
-        httpd.serve_forever()
+    def initialize_request_server(self, options):
+        self.w2b_server = web.Application([(r'/(.*)', RequestHandler)])
+        self.w2b_server.listen(options.port)
+        log.debug("listening http server on: %s", options.port)
+        ioloop.IOLoop.instance().start()
 
     def start_main(self):
         PathsManager.clean_pio_envs()
@@ -188,7 +190,7 @@ class MainApp:
             if options.offline:
                 self.start_listening_console()
             elif options.server:
-                self.initialize_request_server()
+                self.initialize_request_server(options)
             else:
                 self.start_server(options)
                 self.test_connection()
