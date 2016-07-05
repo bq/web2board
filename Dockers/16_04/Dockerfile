@@ -17,6 +17,12 @@ WORKDIR web2board
 RUN git checkout devel
 RUN pip install -r /home/w2b/repos/web2board/requirements.txt
 RUN chown w2b -R /home/w2b
+ADD init.sh /tmp/init.sh
+RUN chmod a+x /tmp/init.sh
+
+CMD ["/tmp/init.sh"]
+//Dejo mi fichero compilado en la carpeta X
+// Al correr la imagen hago un volumen de mi carpeta del ordenador Y a la X
 
 CMD pip install -r /home/w2b/repos/web2board/requirements.txt
 CMD su - w2b

@@ -109,7 +109,7 @@ class CompilerUploader:
             log.debug("Error searching port: {}".format(port), exc_info=1)
             return False
 
-    def _run(self, code, upload=False, upload_port=None, get_hex_string=False):
+    def _run(self, code, upload=False, upload_port=None, work_space=pm.PLATFORMIO_WORKSPACE_PATH):
         self._check_board_configuration()
         target = ("upload",) if upload else ()
         upload_port = self.get_port() if upload and upload_port is None else upload_port
@@ -117,18 +117,15 @@ class CompilerUploader:
         if isinstance(code, unicode):
             code = code.encode("utf-8")
 
-        main_ino_path = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, "src")
+        main_ino_path = os.path.join(work_space, "src")
         if not os.path.exists(main_ino_path):
             os.makedirs(main_ino_path)
         with open(os.path.join(main_ino_path, "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
         run_result = platformio_run(target=target, environment=(self.board,),
-                                    project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0]
-        if get_hex_string:
-            raise NotImplementedError()
-            # hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
-            # return runResult, hexResult
+                                    project_dir=work_space, upload_port=upload_port)[0]
+
         return format_compile_result(run_result)
 
     def _check_board_configuration(self):
