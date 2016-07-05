@@ -7,7 +7,7 @@ from wshubsapi.test.utils.hubs_utils import remove_hubs_subclasses
 
 from Test.testingUtils import create_compiler_uploader_mock, create_sender_mock
 from libs.CompilerUploader import CompilerUploader
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 from libs.WSCommunication.Hubs.CodeHub import CodeHub
 from libs.PathsManager import PathsManager as pm
 from flexmock import flexmock, flexmock_teardown

@@ -10,7 +10,7 @@ from libs import utils
 from libs.PathsManager import PathsManager as pm
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import Updater
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 from libs.utils import find_files
 from platformio import util
 from platformio.platforms.base import PlatformFactory
@@ -35,8 +35,8 @@ class Packager:
         self.pyinstaller_dist_folder = self.src_path + os.sep + "dist"
         self.pyinstaller_build_folder = self.src_path + os.sep + "build"
         self.installer_folder = join(self.web2board_path, "installers")
-        Version.read_version_values()
-        self.version = Version.web2board
+        AppVersion.read_version_values()
+        self.version = AppVersion.web2board
 
         self.web2board_spec_path = join(self.web2board_path, "web2board.spec")
 

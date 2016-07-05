@@ -5,7 +5,7 @@ from concurrent.futures import Future
 from wshubsapi.hubs_inspector import HubsInspector
 
 from Test.testingUtils import restore_test_resources, create_compiler_uploader_mock, create_sender_mock
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 from libs.WSCommunication.Hubs.VersionsHandlerHub import VersionsHandlerHub
 
 # do not remove
@@ -16,7 +16,7 @@ from flexmock import flexmock, flexmock_teardown
 class TestVersionsHandlerHub(unittest.TestCase):
     def setUp(self):
         HubsInspector.inspect_implemented_hubs(force_reconstruction=True)
-        Version.read_version_values()
+        AppVersion.read_version_values()
         self.versionsHandlerHub = HubsInspector.get_hub_instance(VersionsHandlerHub)
         """ :type : VersionsHandlerHub"""
         self.libUpdater = self.versionsHandlerHub.lib_updater
@@ -43,7 +43,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)
 
     def test_setLibVersion_DownloadsLibsIfHasNotTheRightVersion(self):
-        Version.bitbloq_libs = "0.0.1"
+        AppVersion.libs = "0.0.1"
         self.libUpdater = flexmock(self.libUpdater).should_receive("update").once()
 
         self.versionsHandlerHub.set_lib_version(self.testLibVersion)

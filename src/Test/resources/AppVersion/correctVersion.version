@@ -1,0 +1,10 @@
+{
+    "version": "0.1.1",
+    "libs": {
+        "version": "0.1.2", 
+        "librariesNames": [
+            "BitbloqButtonPad"
+        ],
+        "url": "http://bitbloq.com"
+    }
+}

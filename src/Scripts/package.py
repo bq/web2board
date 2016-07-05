@@ -8,7 +8,7 @@ modulePath = os.path.abspath(os.path.dirname(inspect.getframeinfo(inspect.curren
 sys.path.append(os.path.normpath(os.path.join(modulePath, os.pardir)))
 
 from libs.Config import Config
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 
 print os.getcwd()
 sys.path.append(os.getcwd())
@@ -23,7 +23,7 @@ if "32" in sys.argv:
 
 
 subprocess.call(["python", modulePath + os.sep + "ConstructRes.py"])
-Version.read_version_values()
+AppVersion.read_version_values()
 Config.read_config_file()
 
 

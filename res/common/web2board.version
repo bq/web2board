@@ -1,6 +1,6 @@
 {
     "version": "2.1.2",
-    "bitbloqLibs": {
+    "libs": {
         "version": "0.1.2",
         "librariesNames": [
             "BitbloqJoystick",
@@ -20,6 +20,7 @@
             "BitbloqEnableInterrupt",
             "BitbloqRTC",
             "BitbloqUS"
-        ]
+        ],
+        "url": ""
     }
 }

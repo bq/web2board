@@ -9,7 +9,7 @@ import pwd
 import click
 
 from libs.PathsManager import PathsManager
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 
 BITBLOQS_HANDLER1 = """
 
@@ -35,7 +35,7 @@ MineType=x-scheme-handler/vnc
 Comment=Launch web2board
 Name=Web2board Launcher
 Name[en_US]=Web2board
-""".format(version=Version.web2board)
+""".format(version=AppVersion.web2board)
 
 RESTART_MESSAGE = """
 

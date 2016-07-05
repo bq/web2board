@@ -18,7 +18,7 @@ from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from libs.WSCommunication.ConsoleHandler import ConsoleHandler
@@ -29,7 +29,7 @@ __mainApp = None
 
 class MainApp:
     def __init__(self):
-        Version.read_version_values()
+        AppVersion.read_version_values()
         Config.read_config_file()
         self.w2b_server = None
         self.consoleHandler = ConsoleHandler()
@@ -51,7 +51,7 @@ class MainApp:
 
     @staticmethod
     def __log_environment():
-        Version.log_data()
+        AppVersion.log_data()
         log.debug("Enviromental data:")
         try:
             log.debug(json.dumps(os.environ.data, indent=4, encoding=sys.getfilesystemencoding()))

@@ -6,7 +6,7 @@ from libs import utils
 from libs.Config import Config
 from libs.PathsManager import PathsManager
 from libs.Updaters.Updater import Updater, VersionInfo
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 import threading
 
 log = logging.getLogger(__name__)
@@ -22,8 +22,8 @@ class BitbloqLibsUpdater(Updater):
 
     def __init__(self):
         Updater.__init__(self)
-        self.current_version_info = VersionInfo(Version.bitbloq_libs,
-                                                libraries_names=Version.bitbloq_libs_libraries)
+        self.current_version_info = VersionInfo(AppVersion.libs,
+                                                libraries_names=AppVersion.bitbloq_libs_libraries)
         self.name = "BitbloqLibsUpdater"
 
     @property
@@ -33,14 +33,14 @@ class BitbloqLibsUpdater(Updater):
     def _update_current_version_to(self, version_to_upload):
         Updater._update_current_version_to(self, version_to_upload)
 
-        Version.bitbloq_libs_libraries = self.current_version_info.libraries_names
-        Version.bitbloq_libs = self.current_version_info.version
-        Version.store_values()
+        AppVersion.bitbloq_libs_libraries = self.current_version_info.libraries_names
+        AppVersion.libs = self.current_version_info.version
+        AppVersion.store_values()
 
     def _move_libs_to_destination(self, downloaded_path):
         directories_in_folder = utils.list_directories_in_path(downloaded_path)
         if len(directories_in_folder) != 1:
-            raise BitbloqLibsUpdaterError("Not only one bitbloqLibs folder in unzipped file")
+            raise BitbloqLibsUpdaterError("Not only one libs folder in unzipped file")
         downloaded_path = downloaded_path + os.sep + directories_in_folder[0]
 
         if not os.path.exists(self.destination_path):

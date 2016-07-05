@@ -11,7 +11,7 @@ from os.path import join
 import libs.utils as utils
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager as pm
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater, UpdaterError
 import subprocess
 
@@ -52,14 +52,14 @@ def is_factory_reset():
 def needs_factory_reset():
     if not os.path.exists(get_web2board_dir_path()):
         return True
-    Version.read_version_values()
-    installer_version = Version.web2board
+    AppVersion.read_version_values()
+    installer_version = AppVersion.web2board
     main_to_version_path = os.path.relpath(pm.VERSION_PATH, pm.MAIN_PATH)
     pm.VERSION_PATH = join(get_web2board_dir_path(), main_to_version_path)
     if not os.path.exists(pm.VERSION_PATH):
         return True
-    Version.read_version_values()
-    current_version = Version.web2board
+    AppVersion.read_version_values()
+    current_version = AppVersion.web2board
     if current_version != installer_version:
         return True
     return False

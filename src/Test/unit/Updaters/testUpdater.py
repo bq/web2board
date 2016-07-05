@@ -68,7 +68,6 @@ class TestUpdater(unittest.TestCase):
     def __getMockForExtractZip():
         return flexmock(utils).should_receive("extract_zip")
 
-
     def test_isNecessaryToUpdate_raiseExceptionIfCurrentVersionIsNone(self):
         self.updater.onlineVersionInfo = VersionInfo(**onlineVersionTestData)
 

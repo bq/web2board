@@ -4,7 +4,7 @@ from libs.Config import Config
 from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
 from libs.Updaters.Updater import VersionInfo
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
-from libs.Version import Version
+from libs.AppVersion import AppVersion
 
 
 class VersionsHandlerHubException(Exception):
@@ -20,7 +20,7 @@ class VersionsHandlerHub(Hub):
 
     def get_version(self):
         self.w2b_updater.clear_new_versions()
-        return Version.web2board
+        return AppVersion.web2board
 
     def get_lib_version(self):
         return self.lib_updater.current_version_info.version
@@ -34,7 +34,7 @@ class VersionsHandlerHub(Hub):
             return "Check libraries flag is false"
 
     def set_web2board_version(self, version):
-        if Config.check_online_updates and version != Version.web2board:
+        if Config.check_online_updates and version != AppVersion.web2board:
             try:
                 self.w2b_updater.download_version(version, self.__download_progress).result()
                 self.__download_ended(True)

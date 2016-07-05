@@ -1,0 +1,26 @@
+{
+    "version": "0.a.b",
+    "libs": {
+        "version": "0.1.2", 
+        "librariesNames": [
+            "BitbloqButtonPad", 
+            "BitbloqLiquidCrystal", 
+            "BitbloqZowi", 
+            "BitbloqLineFollower", 
+            "BitbloqZowiSerialCommand", 
+            "BitbloqUS", 
+            "BitbloqOscillator", 
+            "BitbloqLedMatrix", 
+            "BitbloqRTC", 
+            "BitbloqEncoder", 
+            "BitbloqBatteryReader", 
+            "BitbloqJoystick", 
+            "BitbloqEvolution", 
+            "BitbloqRGB", 
+            "BitbloqHTS221", 
+            "BitbloqEnableInterrupt", 
+            "BitbloqSoftwareSerial"
+        ],
+        "url": ""
+    }
+}
