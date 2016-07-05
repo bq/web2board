@@ -1,4 +1,3 @@
-# coding=mbcs
 import inspect
 import logging
 import os
