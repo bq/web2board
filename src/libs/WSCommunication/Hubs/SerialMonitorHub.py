@@ -135,7 +135,7 @@ class SerialMonitorHub(Hub):
         """
         for port in self.get_all_connected_ports():
             self._get_subscribed_clients_to_port(port)  # this function remove closed clients
-            if len(self.subscribed_clients_ports[port]):
+            if len(self.subscribed_clients_ports[port]) == 0:
                 self.close_connection(port)
 
     def subscribe_to_port(self, port, _sender):
