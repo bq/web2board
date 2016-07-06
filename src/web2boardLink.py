@@ -64,6 +64,18 @@ def needs_factory_reset():
         return True
     return False
 
+def _create_startup_shortcut():
+    import winshell
+    from win32com.client import Dispatch
+    path = os.path.join(winshell.startup(), "web2boardLink.lnk")
+
+    shell = Dispatch('WScript.Shell')
+    shortcut = shell.CreateShortCut(path)
+    shortcut.Targetpath = sys._MEIPASS
+    shortcut.WorkingDirectory = get_web2board_dir_path()
+    shortcut.IconLocation = pm.RES_ICO_PATH
+    shortcut.save()
+
 
 @asynchronous()
 def factory_reset_process():
@@ -76,6 +88,10 @@ def factory_reset_process():
         log_message("Extracting web2board...")
         shutil.copytree(os.getcwd(), get_web2board_dir_path())
         msg_box.end_successful()
+
+        if utils.is_windows():
+            _create_startup_shortcut()
+
     except Exception as e:
         log.exception("Failed performing Factory reset")
         msg_box.end_error(str(e))
