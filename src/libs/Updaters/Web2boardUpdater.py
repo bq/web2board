@@ -47,10 +47,10 @@ class Web2BoardUpdater:
         for folder_version in folder_versions:
             shutil.rmtree(folder_version)
 
-    def get_download_url(self, onlineVersionInfo):
+    def get_download_url(self, online_version_info):
         args = dict(arch=64 if utils.is64bits() else 32,
                     os=platform.system(),
-                    version=onlineVersionInfo.version)
+                    version=online_version_info.version)
 
         return Config.download_url_template.format(**args)
 

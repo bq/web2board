@@ -67,7 +67,7 @@ class LibsUpdater:
                 self._move_libs_to_destination(extract_folder)
 
                 version_values = {"version": version_string,
-                                  "libraries_names": utils.list_directories_in_path(self.destination_path),
+                                  "librariesNames": utils.list_directories_in_path(self.destination_path),
                                   "url": url}
                 AppVersion.libs.set_version_values(version_values)
                 AppVersion.store_values()
@@ -97,3 +97,4 @@ class LibsUpdater:
         if not os.path.exists(self.destination_path):
             os.makedirs(self.destination_path)
         utils.copytree(downloaded_path, self.destination_path, force_copy=True)
+

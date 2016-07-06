@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from flexmock import flexmock, flexmock_teardown
-
 from Test.testingUtils import restore_test_resources
 from libs.PathsManager import PathsManager
 from libs.AppVersion import AppVersion
@@ -21,7 +19,6 @@ class TestLibsUpdater(unittest.TestCase):
     def tearDown(self):
         PathsManager.set_all_constants()
         AppVersion.read_version_values()
-        flexmock_teardown()
 
     def test_is_necessary_to_update_returnsTrueIfDifferentVersions(self):
         AppVersion.libs.version_string = "0.1.1"
@@ -44,16 +41,4 @@ class TestLibsUpdater(unittest.TestCase):
 
         with self.assertRaises(Exception):
             self.libs_updater.is_necessary_to_update("a.b.c")
-
-    def test__are_we_missing_libraries_returnsTrueIfDestinationPathDoesNotExist(self):
-        self.assertTrue(self.libs_updater._are_we_missing_libraries())
-
-    def test__are_we_missing_libraries_returnsTrueIfMissingLibrariesInDestinationPath(self):
-        AppVersion.libs.libraries_names = ["l1", "l2", "l3"]
-        os.makedirs(self.libs_updater.destination_path)
-
-        self.assertTrue(self.libs_updater._are_we_missing_libraries())
-
-    def test_restore_current_version_if_necessary_returnsFalseIfAllLibrariesInDestinationPath(self):
-        AppVersion.libs.libraries_names = ["l1", "l2", "l3"]
 

@@ -22,8 +22,8 @@ class BitbloqLibsUpdater(Updater):
 
     def __init__(self):
         Updater.__init__(self)
-        self.current_version_info = VersionInfo(AppVersion.libs,
-                                                libraries_names=AppVersion.bitbloq_libs_libraries)
+        self.current_version_info = VersionInfo(AppVersion.libs.version_string,
+                                                libraries_names=AppVersion.libs.libraries_names)
         self.name = "BitbloqLibsUpdater"
 
     @property
@@ -33,8 +33,8 @@ class BitbloqLibsUpdater(Updater):
     def _update_current_version_to(self, version_to_upload):
         Updater._update_current_version_to(self, version_to_upload)
 
-        AppVersion.bitbloq_libs_libraries = self.current_version_info.libraries_names
-        AppVersion.libs = self.current_version_info.version
+        AppVersion.libs.libraries_names = self.current_version_info.libraries_names
+        AppVersion.libs.version_string = self.current_version_info.version
         AppVersion.store_values()
 
     def _move_libs_to_destination(self, downloaded_path):

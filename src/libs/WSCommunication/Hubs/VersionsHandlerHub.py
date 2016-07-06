@@ -1,8 +1,7 @@
 from wshubsapi.hub import Hub
 
 from libs.Config import Config
-from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
-from libs.Updaters.Updater import VersionInfo
+from libs.Updaters.LibsUpdater import LibsUpdater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.AppVersion import AppVersion
 
@@ -16,20 +15,19 @@ class VersionsHandlerHub(Hub):
     def __init__(self):
         super(VersionsHandlerHub, self).__init__()
         self.w2b_updater = Web2BoardUpdater()
-        self.lib_updater = BitbloqLibsUpdater()
+        self.lib_updater = LibsUpdater()
 
     def get_version(self):
         self.w2b_updater.clear_new_versions()
-        return AppVersion.web2board
+        return AppVersion.web2board.version_string
 
     def get_lib_version(self):
-        return self.lib_updater.current_version_info.version
+        return AppVersion.libs.version_string
 
-    def set_lib_version(self, version):
+    def set_lib_version(self, version, url):
         if Config.check_libraries_updates:
-            version_info = VersionInfo(version, Config.bitbloq_libs_download_url_template.format(version=version))
-            if self.lib_updater.is_necessary_to_update(version_to_compare=version_info):
-                self.lib_updater.update(version_info)
+            if self.lib_updater.is_necessary_to_update(version):
+                self.lib_updater.update(version, url)
         else:
             return "Check libraries flag is false"
 

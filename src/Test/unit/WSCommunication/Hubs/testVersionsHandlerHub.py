@@ -19,17 +19,19 @@ class TestVersionsHandlerHub(unittest.TestCase):
         AppVersion.read_version_values()
         self.versionsHandlerHub = HubsInspector.get_hub_instance(VersionsHandlerHub)
         """ :type : VersionsHandlerHub"""
-        self.libUpdater = self.versionsHandlerHub.lib_updater
+        self.lib_updater = self.versionsHandlerHub.lib_updater
         self.updater = self.versionsHandlerHub.w2b_updater
         self.sender = create_sender_mock()
 
         self.compileUploaderMock, self.CompileUploaderConstructorMock = create_compiler_uploader_mock()
         self.testLibVersion = "1.1.1"
+        self.testLibUrl = ""
 
         restore_test_resources()
 
     def tearDown(self):
         flexmock_teardown()
+        AppVersion.read_version_values()
 
     def test_getVersion_returnsAVersionStringFormat(self):
         version = self.versionsHandlerHub.get_version()
@@ -37,20 +39,20 @@ class TestVersionsHandlerHub(unittest.TestCase):
         self.assertRegexpMatches(version, '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
 
     def test_setLibVersion_doesNotDownloadLibsIfHasRightVersion(self):
-        flexmock(self.libUpdater, is_necessary_to_update=lambda **kwargs: False).should_receive("update").never()
-        self.libUpdater.current_version_info.version = self.testLibVersion
+        flexmock(self.lib_updater, is_necessary_to_update=lambda *args, **kwargs: False).should_receive("update").never()
+        AppVersion.libs.version_string = self.testLibVersion
 
-        self.versionsHandlerHub.set_lib_version(self.testLibVersion)
+        self.versionsHandlerHub.set_lib_version(self.testLibVersion, self.testLibUrl)
 
     def test_setLibVersion_DownloadsLibsIfHasNotTheRightVersion(self):
-        AppVersion.libs = "0.0.1"
-        self.libUpdater = flexmock(self.libUpdater).should_receive("update").once()
+        AppVersion.libs.version_string = "0.0.1"
+        self.lib_updater = flexmock(self.lib_updater).should_receive("update").once()
 
-        self.versionsHandlerHub.set_lib_version(self.testLibVersion)
+        self.versionsHandlerHub.set_lib_version(self.testLibVersion, self.testLibUrl)
 
     def test_setLibVersion_returnsTrue(self):
-        self.libUpdater = flexmock(self.libUpdater, update=lambda x: None)
-        self.versionsHandlerHub.set_lib_version(self.testLibVersion)
+        self.lib_updater = flexmock(self.lib_updater, update=lambda version, url: None)
+        self.versionsHandlerHub.set_lib_version(self.testLibVersion, self.testLibUrl)
 
     def test_setWeb2boardVersion_returnsTrue(self):
         result = Future()
