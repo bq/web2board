@@ -16,7 +16,7 @@ from libs import utils
 from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.PathsManager import PathsManager
-from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
+from libs.Updaters.LibsUpdater import LibsUpdater
 from libs.Updaters.Web2boardUpdater import Web2BoardUpdater
 from libs.AppVersion import AppVersion
 from libs.WSCommunication.Clients.hubs_api import HubsAPI
@@ -120,7 +120,7 @@ class MainApp:
     def update_libraries_if_necessary(self):
         try:
             if Config.check_libraries_updates:
-                BitbloqLibsUpdater().restore_current_version_if_necessary()
+                LibsUpdater().restore_current_version_if_necessary()
         except (HTTPError, URLError) as e:
             log.exception("unable to download libraries (might be a proxy problem)")
         except:

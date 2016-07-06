@@ -8,8 +8,7 @@ import sys
 
 from libs import utils
 from libs.PathsManager import PathsManager as pm
-from libs.Updaters.BitbloqLibsUpdater import BitbloqLibsUpdater
-from libs.Updaters.Updater import Updater
+from libs.Updaters.LibsUpdater import LibsUpdater
 from libs.AppVersion import AppVersion
 from libs.utils import find_files
 from platformio import util
@@ -66,7 +65,7 @@ class Packager:
 
         utils.copytree(self.res_common_path, self.src_res_path, force_copy=True)
         utils.copytree(self.res_platform_path, self.src_res_path, force_copy=True)
-        BitbloqLibsUpdater().restore_current_version_if_necessary()
+        LibsUpdater().restore_current_version_if_necessary()
 
     def _delete_installer_creation_folder(self):
         if os.path.exists(self.installer_creation_path):
