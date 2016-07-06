@@ -1,10 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import json
 import logging
 import os
+import shutil
 import subprocess
 from datetime import timedelta, datetime
+from threading import Lock
+
+import time
 
 from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
@@ -36,6 +40,7 @@ class CompilerException(Exception):
 #
 class CompilerUploader:
     __global_compiler_uploader_holder = {}
+    parallel_compiler_lock = Lock()
     DEFAULT_BOARD = "bt328"
 
     def __init__(self, board=DEFAULT_BOARD):
@@ -109,24 +114,65 @@ class CompilerUploader:
             log.debug("Error searching port: {}".format(port), exc_info=1)
             return False
 
-    def _run(self, code, upload=False, upload_port=None, work_space=pm.PLATFORMIO_WORKSPACE_PATH):
+    def _parse_parallel_result(self, raw_result_str):
+        result_str = raw_result_str.split("###RESULT###", 1)[1]
+        return json.loads(result_str)
+
+    def _get_parallel_working_space(self):
+        while True:
+            for i in range(1, 150):
+                current_work_space = os.path.join(pm.PARALLEL_COMPILERS_PATH, str(i))
+                if not os.path.exists(current_work_space):
+                    return current_work_space
+            time.sleep(0.3)
+
+    def _prepare_parallel_work_space(self, code):
+        with self.parallel_compiler_lock:
+            current_work_space = self._get_parallel_working_space()
+            try:
+                if not os.path.exists(current_work_space):
+                    os.makedirs(current_work_space)
+                utils.remove_folder(current_work_space)
+                shutil.copytree(pm.PLATFORMIO_WORKSPACE_PATH, current_work_space)
+                main_ino_path = os.path.join(current_work_space, "src")
+                if not os.path.exists(main_ino_path):
+                    os.makedirs(main_ino_path)
+                with open(os.path.join(main_ino_path, "main.ino"), 'w') as mainCppFile:
+                    mainCppFile.write(code)
+            except:
+                if os.path.exists(current_work_space):
+                    utils.remove_folder(current_work_space)
+                raise
+        return current_work_space
+
+    def platformio_run(self, work_space, upload=False, upload_port=None):
         self._check_board_configuration()
         target = ("upload",) if upload else ()
+        return format_compile_result(platformio_run(target=target, environment=(self.board,),
+                                                    project_dir=work_space, upload_port=upload_port)[0])
+
+    def _run(self, code, upload=False, upload_port=None):
+        self._check_board_configuration()
         upload_port = self.get_port() if upload and upload_port is None else upload_port
 
         if isinstance(code, unicode):
             code = code.encode("utf-8")
 
-        main_ino_path = os.path.join(work_space, "src")
-        if not os.path.exists(main_ino_path):
-            os.makedirs(main_ino_path)
-        with open(os.path.join(main_ino_path, "main.ino"), 'w') as mainCppFile:
-            mainCppFile.write(code)
+        current_work_space = self._prepare_parallel_work_space(code)
 
-        run_result = platformio_run(target=target, environment=(self.board,),
-                                    project_dir=work_space, upload_port=upload_port)[0]
+        try:
+            process_args = [pm.EXECUTABLE_FILE, "--board", self.board, "--workSpace", current_work_space]
+            if upload:
+                process_args.extend(["--upload", "--port", upload_port])
+            if pm.EXECUTABLE_FILE.endswith(".py"):
+                process_args = ["python"] + process_args
+            process_args.append("parallelCompile")
 
-        return format_compile_result(run_result)
+            result = self._parse_parallel_result(subprocess.check_output(process_args))
+        finally:
+            if os.path.exists(current_work_space):
+                utils.remove_folder(current_work_space)
+        return result
 
     def _check_board_configuration(self):
         if self.board is None:

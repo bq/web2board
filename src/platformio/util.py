@@ -181,10 +181,7 @@ def get_lib_dir():
 
 
 def get_source_dir():
-    if utils.is_mac():
-        return PathsManager.RES_PLATFORMIO_PATH
-    else:
-        return dirname(realpath(__file__))
+    return PathsManager.RES_PLATFORMIO_PATH
 
 
 def get_project_dir():

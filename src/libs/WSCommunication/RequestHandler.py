@@ -34,7 +34,3 @@ class RequestHandler(TornadoRequestHandler):
 
     def write(self, chunk):
         return super(RequestHandler, self).write(chunk)
-
-
-import sys
-sys.get

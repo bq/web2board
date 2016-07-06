@@ -92,8 +92,9 @@
         connectionStatusEle = document.getElementById("connectionStatus"),
         tablesDiv = document.getElementById("tables"),
         resultDiv = document.getElementById("result"),
-        resultPreElement = document.createElement('pre');
-    hubsApi.connect('ws://127.0.0.1:9876/', 2);
+        resultPreElement = document.createElement('pre'),
+        timeID = 0;
+    hubsApi.connect('ws://127.0.0.1:9876/', 1000);
     hubsApi.onOpen = function () {
         connectionStatusEle.innerText = "Connected";
         connectionStatusEle.className = 'connected';
@@ -221,6 +222,8 @@
                         return input.value;
                     });
                     var f = hubsApi[this.hubName].server[this.functionName];
+                    var myTimeID = timeID ++;
+                    console.time(myTimeID);
                     f.apply(f, args).then(
                         function () {
                             output({Sucess: true, args: arguments});
@@ -229,7 +232,9 @@
                             output({Sucess: false, args: arguments});
                             console.error(arguments)
                         }
-                    )
+                    ).finally(function () {
+                        console.timeEnd(myTimeID);
+                    })
                 };
             }
         }

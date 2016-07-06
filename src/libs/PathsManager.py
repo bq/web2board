@@ -34,8 +34,8 @@ class PathsManager:
     TEST_RES_PATH = None
 
     PROGRAM_PATH = None
-    PLATFORMIO_WORKSPACE_SKELETON = None
     PLATFORMIO_WORKSPACE_PATH = None
+    PARALLEL_COMPILERS_PATH = None
     PLATFORMIO_INI_PATH = None
     TEST_SETTINGS_PATH = None
 
@@ -126,9 +126,9 @@ class PathsManager:
             cls.PROGRAM_PATH = cls.MAIN_PATH
         else:
             cls.PROGRAM_PATH = cls.get_external_data_folder()
-        cls.PLATFORMIO_WORKSPACE_SKELETON = join(cls.RES_PATH, 'platformioWorkSpace')
-        cls.PLATFORMIO_WORKSPACE_PATH = cls.PLATFORMIO_WORKSPACE_SKELETON
-        cls.PLATFORMIO_INI_PATH = join(cls.PLATFORMIO_WORKSPACE_SKELETON, 'platformio.ini')
+        cls.PLATFORMIO_WORKSPACE_PATH = join(cls.RES_PATH, 'platformioWorkSpace')
+        cls.PARALLEL_COMPILERS_PATH = join(cls.RES_PATH, 'parallelWS')
+        cls.PLATFORMIO_INI_PATH = join(cls.PLATFORMIO_WORKSPACE_PATH, 'platformio.ini')
         cls.TEST_SETTINGS_PATH = join(cls.RES_PATH, 'TestSettings', 'resources')
         cls.SCONS_EXECUTABLE_PATH = cls.get_sons_executable_path()
 
@@ -143,6 +143,11 @@ class PathsManager:
         path = join(cls.PLATFORMIO_WORKSPACE_PATH, ".pioenvs")
         if os.path.exists(path):
             shutil.rmtree(path)
+
+    @classmethod
+    def clean_parallel_compilers_path(cls):
+        if os.path.exists(cls.PARALLEL_COMPILERS_PATH):
+            utils.remove_folder(cls.PARALLEL_COMPILERS_PATH)
 
 # set working directory to src
 if utils.are_we_frozen():

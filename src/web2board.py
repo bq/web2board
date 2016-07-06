@@ -60,6 +60,12 @@ if "-Q" in sys.argv:
     run_scons_script()
     os._exit(1)
 
+if "parallelCompile" == sys.argv[-1]:
+    sys.argv.pop()
+    import ParallelCompiler
+    ParallelCompiler.run()
+    sys.exit()
+
 if __name__ == "__main__":
     try:
         importlib.import_module("libs.WSCommunication.Hubs")

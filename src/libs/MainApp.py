@@ -180,6 +180,7 @@ class MainApp:
 
     def start_main(self):
         PathsManager.clean_pio_envs()
+        PathsManager.clean_parallel_compilers_path()
         options, args = self.parse_system_arguments()
         self.handle_system_arguments(options, args)
         self.update_libraries_if_necessary()
