@@ -246,8 +246,8 @@ function HubsAPI(serverTimeout, wsClientClass, PromiseClass) {
     this.VersionsHandlerHub.server = {
         __HUB_NAME : 'VersionsHandlerHub',
         
-        setLibVersion : function (version){
-            
+        setLibVersion : function (version, url){
+            arguments[1] = url === undefined ? "" : url;
             return constructMessage('VersionsHandlerHub', 'set_lib_version', arguments);
         },
 

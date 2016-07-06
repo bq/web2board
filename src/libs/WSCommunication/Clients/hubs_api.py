@@ -306,12 +306,13 @@ class HubsAPI(object):
 
         class ServerClass(GenericServer):
             
-            def set_lib_version(self, version):
+            def set_lib_version(self, version, url=""):
                 """
                 :rtype : Future
                 """
                 args = list()
                 args.append(version)
+                args.append(url)
                 id_ = self._get_next_message_id()
                 body = {"hub": self.hub.name, "function": "set_lib_version", "args": args, "ID": id_}
                 future = self.hub.ws_client.get_future(id_)

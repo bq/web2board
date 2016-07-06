@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import tempfile
@@ -69,8 +70,10 @@ class LibsUpdater:
                 version_values = {"version": version_string,
                                   "librariesNames": utils.list_directories_in_path(self.destination_path),
                                   "url": url}
+                log.debug('Updating version info: %s', json.dumps(version_values, indent=4))
                 AppVersion.libs.set_version_values(version_values)
                 AppVersion.store_values()
+                log.info("Libs updated successfully")
             finally:
                 if os.path.exists(extract_folder):
                     shutil.rmtree(extract_folder)
@@ -97,4 +100,4 @@ class LibsUpdater:
         if not os.path.exists(self.destination_path):
             os.makedirs(self.destination_path)
         utils.copytree(downloaded_path, self.destination_path, force_copy=True)
-
+        log.info('Moving libs from %s to destination folder %s', downloaded_path, self.destination_path)

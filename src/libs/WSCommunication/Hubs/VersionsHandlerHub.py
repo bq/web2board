@@ -24,7 +24,7 @@ class VersionsHandlerHub(Hub):
     def get_lib_version(self):
         return AppVersion.libs.version_string
 
-    def set_lib_version(self, version, url):
+    def set_lib_version(self, version, url=""):
         if Config.check_libraries_updates:
             if self.lib_updater.is_necessary_to_update(version):
                 self.lib_updater.update(version, url)

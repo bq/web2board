@@ -9,13 +9,15 @@ from libs.Updaters.LibsUpdater import LibsUpdater
 
 class TestLibsUpdater(unittest.TestCase):
     def setUp(self):
+        restore_test_resources("Updater")
         self.test_settings_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, "Updater")
 
+        PathsManager.VERSION_PATH = os.path.join(self.test_settings_path, "w2b.version")
 
         self.libs_updater = LibsUpdater()
         self.libs_updater.destination_path = os.path.join(self.test_settings_path,
                                                           "newLibrariesPath")
-        restore_test_resources("Updater")
+
 
     def tearDown(self):
         PathsManager.set_all_constants()
