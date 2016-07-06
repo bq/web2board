@@ -26,7 +26,7 @@ class Config:
     check_online_updates = True
     check_libraries_updates = True
     log_level = logging.INFO
-    plugins_path = (PathsManager.MAIN_PATH + os.sep + "plugins").decode(sys.getfilesystemencoding())
+    parallel_compiling_max_threads = 50
 
     @classmethod
     def get_platformio_lib_dir(cls):

@@ -11,6 +11,7 @@ from threading import Lock
 import time
 
 from libs import utils
+from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.ErrorParser import format_compile_result
 from libs.PathsManager import PathsManager as pm
@@ -120,7 +121,7 @@ class CompilerUploader:
 
     def _get_parallel_working_space(self):
         while True:
-            for i in range(1, 150):
+            for i in range(1, Config.parallel_compiling_max_threads):
                 current_work_space = os.path.join(pm.PARALLEL_COMPILERS_PATH, str(i))
                 if not os.path.exists(current_work_space):
                     return current_work_space
@@ -152,6 +153,7 @@ class CompilerUploader:
                                                     project_dir=work_space, upload_port=upload_port)[0])
 
     def _run(self, code, upload=False, upload_port=None):
+        start = time.time()
         self._check_board_configuration()
         upload_port = self.get_port() if upload and upload_port is None else upload_port
 
@@ -172,6 +174,7 @@ class CompilerUploader:
         finally:
             if os.path.exists(current_work_space):
                 utils.remove_folder(current_work_space)
+        print (time.time()-start)
         return result
 
     def _check_board_configuration(self):

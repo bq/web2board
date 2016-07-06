@@ -2,10 +2,9 @@ import SocketServer
 import json
 import logging
 import os
-import subprocess
 import sys
 import time
-import urllib2
+from BaseHTTPServer import HTTPServer
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
 
@@ -173,10 +172,11 @@ class MainApp:
         self.consoleHandler.listener_loop()
 
     def initialize_request_server(self, options):
-        self.w2b_server = web.Application([(r'/(.*)', RequestHandler)])
-        self.w2b_server.listen(options.port)
+        class ThreadedHTTPServer(SocketServer.ThreadingMixIn, HTTPServer):
+            """Handle requests in a separate thread."""
+        httpd = ThreadedHTTPServer((options.host, options.port), RequestHandler)
         log.debug("listening http server on: %s", options.port)
-        ioloop.IOLoop.instance().start()
+        httpd.serve_forever()
 
     def start_main(self):
         PathsManager.clean_pio_envs()
