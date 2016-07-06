@@ -219,7 +219,7 @@ please try again later or check log."""
                 self.gif.config(image=img)
                 self.gif.image = img
                 self.num += 1
-            except TclError as e:
+            except TclError:
                 self.num = 0
             except Exception as e:
                 print e
