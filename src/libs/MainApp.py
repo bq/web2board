@@ -2,8 +2,10 @@ import SocketServer
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
+import urllib2
 from BaseHTTPServer import HTTPServer
 from optparse import OptionParser
 from urllib2 import HTTPError, URLError
@@ -22,7 +24,7 @@ from libs.Version import Version
 from libs.WSCommunication.Clients.hubs_api import HubsAPI
 from libs.WSCommunication.ConnectionHandler import WSConnectionHandler
 from libs.WSCommunication.ConsoleHandler import ConsoleHandler
-from libs.WSCommunication.RequestHandler import RequestHandler
+from libs.WSCommunication import RequestHandler
 
 log = logging.getLogger(__name__)
 __mainApp = None
@@ -172,11 +174,7 @@ class MainApp:
         self.consoleHandler.listener_loop()
 
     def initialize_request_server(self, options):
-        class ThreadedHTTPServer(SocketServer.ThreadingMixIn, HTTPServer):
-            """Handle requests in a separate thread."""
-        httpd = ThreadedHTTPServer((options.host, options.port), RequestHandler)
-        log.debug("listening http server on: %s", options.port)
-        httpd.serve_forever()
+        RequestHandler.start(options)
 
     def start_main(self):
         PathsManager.clean_pio_envs()
