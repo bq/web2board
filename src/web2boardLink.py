@@ -53,13 +53,13 @@ def needs_factory_reset():
     if not os.path.exists(get_web2board_dir_path()):
         return True
     AppVersion.read_version_values()
-    installer_version = AppVersion.web2board
+    installer_version = AppVersion.web2board.version_string
     main_to_version_path = os.path.relpath(pm.VERSION_PATH, pm.MAIN_PATH)
     pm.VERSION_PATH = join(get_web2board_dir_path(), main_to_version_path)
     if not os.path.exists(pm.VERSION_PATH):
         return True
     AppVersion.read_version_values()
-    current_version = AppVersion.web2board
+    current_version = AppVersion.web2board.version_string
     if current_version != installer_version:
         return True
     return False
