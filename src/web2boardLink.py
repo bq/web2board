@@ -158,7 +158,7 @@ def start_dialog():
 
     class Application(Frame):
         MESSAGE_TEMPLATE = """"Web2board is setting up some files.
-This can takes a couple of minutes but it will be executed just once.
+This can take a couple of minutes but it will be executed just once.
 
 {}"""
         ERROR_TEMPLATE = """Failed to configure web2board due to:
