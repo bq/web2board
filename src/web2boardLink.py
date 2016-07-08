@@ -65,18 +65,21 @@ def needs_factory_reset():
     return False
 
 def _create_startup_shortcut():
-    from win32com.client import Dispatch
-    path = os.path.join(pm.get_home_path(), "Microsoft\Windows\Start Menu\Programs\Startup\web2boardLink.lnk")
-    log.debug("Path to startup shortcut: %s", path)
+    log.info("calling CoInitialize")
+    import pythoncom
+    pythoncom.CoInitialize()
 
+    path = os.path.join(pm.get_home_path(), "Microsoft\Windows\Start Menu\Programs\Startup\web2boardLink.lnk")
+    log.info("Path to startup shortcut: %s" % path)
     if os.path.exists(path):
         os.remove(path)
-        log.debug("Shortcut already exists. Deleting and replacing")
+        log.info("Shortcut already exists. Deleting and replacing")
 
+    from win32com.client import Dispatch
     shell = Dispatch('WScript.Shell')
     shortcut = shell.CreateShortCut(path)
-    shortcut.Targetpath = sys._MEIPASS
-    log.debug("Path web2board.exe: %s", shortcut.Targetpath)
+    shortcut.Targetpath = sys._MEIPASS + "\web2boardLink.exe"
+    log.info("Path web2board.exe: %s" % shortcut.Targetpath)
     shortcut.WorkingDirectory = get_web2board_dir_path()
     shortcut.IconLocation = pm.RES_ICO_PATH
     shortcut.save()
