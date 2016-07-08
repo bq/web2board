@@ -68,10 +68,12 @@ def _create_startup_shortcut():
     import winshell
     from win32com.client import Dispatch
     path = os.path.join(winshell.startup(), "web2boardLink.lnk")
+    log.debug("Path to startup shortcut: %s", path)
 
     shell = Dispatch('WScript.Shell')
     shortcut = shell.CreateShortCut(path)
     shortcut.Targetpath = sys._MEIPASS
+    log.debug("Path web2board.exe: %s", path)
     shortcut.WorkingDirectory = get_web2board_dir_path()
     shortcut.IconLocation = pm.RES_ICO_PATH
     shortcut.save()
