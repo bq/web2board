@@ -35,7 +35,7 @@ class Packager:
         self.pyinstaller_build_folder = self.src_path + os.sep + "build"
         self.installer_folder = join(self.web2board_path, "installers")
         AppVersion.read_version_values()
-        self.version = AppVersion.web2board
+        self.version = AppVersion.web2board.version_string
 
         self.web2board_spec_path = join(self.web2board_path, "web2board.spec")
 
