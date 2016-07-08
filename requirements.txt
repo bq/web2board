@@ -12,3 +12,4 @@ lockfile
 requests
 bottle
 tornado
+winshell;sys_platform == 'windows'

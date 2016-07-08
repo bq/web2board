@@ -73,7 +73,7 @@ def _create_startup_shortcut():
     shell = Dispatch('WScript.Shell')
     shortcut = shell.CreateShortCut(path)
     shortcut.Targetpath = sys._MEIPASS
-    log.debug("Path web2board.exe: %s", path)
+    log.debug("Path web2board.exe: %s", shortcut.Targetpath)
     shortcut.WorkingDirectory = get_web2board_dir_path()
     shortcut.IconLocation = pm.RES_ICO_PATH
     shortcut.save()
