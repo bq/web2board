@@ -69,6 +69,10 @@ def _create_startup_shortcut():
     path = os.path.join(pm.get_home_path(), "Microsoft\Windows\Start Menu\Programs\Startup\web2boardLink.lnk")
     log.debug("Path to startup shortcut: %s", path)
 
+    if os.path.exists(path):
+        os.remove(path)
+        log.debug("Shortcut already exists. Deleting and replacing")
+
     shell = Dispatch('WScript.Shell')
     shortcut = shell.CreateShortCut(path)
     shortcut.Targetpath = sys._MEIPASS
