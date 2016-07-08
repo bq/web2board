@@ -65,9 +65,8 @@ def needs_factory_reset():
     return False
 
 def _create_startup_shortcut():
-    import winshell
     from win32com.client import Dispatch
-    path = os.path.join(winshell.startup(), "web2boardLink.lnk")
+    path = os.path.join(pm.get_home_path(), "Microsoft\Windows\Start Menu\Programs\Startup\web2boardLink.lnk")
     log.debug("Path to startup shortcut: %s", path)
 
     shell = Dispatch('WScript.Shell')
