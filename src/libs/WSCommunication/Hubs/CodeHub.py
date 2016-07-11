@@ -26,7 +26,7 @@ class CodeHub(Hub):
         if report[0] or "Writing | #" in report[1]["err"]:
             return port
         else:
-            return self._construct_unsuccessful_replay(report[1]["err"])
+            return self._construct_unsuccessful_replay(dict(title="COMPILE_ERROR", stdErr=report[1]["err"]))
 
     def __prepare_upload(self, board, _sender, upload_port=None):
         if upload_port is not None:
