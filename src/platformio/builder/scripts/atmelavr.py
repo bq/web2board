@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +27,15 @@ from platformio.util import get_serialports
 
 def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
 
+    if "program" in COMMAND_LINE_TARGETS:
+        return
+
     if "micronucleus" in env['UPLOADER']:
         print "Please unplug/plug device ..."
 
     upload_options = env.get("BOARD_OPTIONS", {}).get("upload", {})
 
+    # Deprecated: compatibility with old projects. Use `program` instead
     if "usb" in env.subst("$UPLOAD_PROTOCOL"):
         upload_options['require_upload_port'] = False
         env.Replace(UPLOAD_SPEED=None)
@@ -43,25 +47,26 @@ def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
         return
 
     env.AutodetectUploadPort()
-    env.Append(UPLOADERFLAGS=["-P", "$UPLOAD_PORT"])
+    env.Append(UPLOADERFLAGS=["-P", '"$UPLOAD_PORT"'])
 
-    if env.subst("$BOARD") == "raspduino":
+    if env.subst("$BOARD") in ("raspduino", "emonpi"):
 
         def _rpi_sysgpio(path, value):
             with open(path, "w") as f:
                 f.write(str(value))
 
-        _rpi_sysgpio("/sys/class/gpio/export", 18)
-        _rpi_sysgpio("/sys/class/gpio/gpio18/direction", "out")
-        _rpi_sysgpio("/sys/class/gpio/gpio18/value", 1)
+        pin_num = 18 if env.subst("$BOARD") == "raspduino" else 4
+        _rpi_sysgpio("/sys/class/gpio/export", pin_num)
+        _rpi_sysgpio("/sys/class/gpio/gpio%d/direction" % pin_num, "out")
+        _rpi_sysgpio("/sys/class/gpio/gpio%d/value" % pin_num, 1)
         sleep(0.1)
-        _rpi_sysgpio("/sys/class/gpio/gpio18/value", 0)
-        _rpi_sysgpio("/sys/class/gpio/unexport", 18)
+        _rpi_sysgpio("/sys/class/gpio/gpio%d/value" % pin_num, 0)
+        _rpi_sysgpio("/sys/class/gpio/unexport", pin_num)
     else:
         if not upload_options.get("disable_flushing", False):
             env.FlushSerialBuffer("$UPLOAD_PORT")
 
-        before_ports = [i['port'] for i in get_serialports()]
+        before_ports = get_serialports()
 
         if upload_options.get("use_1200bps_touch", False):
             env.TouchSerialPort("$UPLOAD_PORT", 1200)
@@ -73,6 +78,16 @@ def BeforeUpload(target, source, env):  # pylint: disable=W0613,W0621
 env = DefaultEnvironment()
 
 SConscript(env.subst(join("$PIOBUILDER_DIR", "scripts", "baseavr.py")))
+
+env.Append(
+    CFLAGS=[
+        "-std=gnu11"
+    ],
+
+    CXXFLAGS=[
+        "-std=gnu++11"
+    ]
+)
 
 if "digispark" in env.get(
         "BOARD_OPTIONS", {}).get("build", {}).get("core", ""):
@@ -107,13 +122,6 @@ else:
 target_elf = env.BuildProgram()
 
 #
-# Target: Extract EEPROM data (from EEMEM directive) to .eep file
-#
-
-target_eep = env.Alias("eep", env.ElfToEep(join("$BUILD_DIR", "firmware"),
-                                           target_elf))
-
-#
 # Target: Build the .hex file
 #
 
@@ -138,10 +146,12 @@ upload = env.Alias(["upload", "uploadlazy"], target_firm,
 AlwaysBuild(upload)
 
 #
-# Target: Upload .eep file
+# Target: Upload EEPROM data (from EEMEM directive)
 #
 
-uploadeep = env.Alias("uploadeep", target_eep, [BeforeUpload, "$UPLOADEEPCMD"])
+uploadeep = env.Alias("uploadeep",
+                      env.ElfToEep(join("$BUILD_DIR", "firmware"), target_elf),
+                      [BeforeUpload, "$UPLOADEEPCMD"])
 AlwaysBuild(uploadeep)
 
 #

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,22 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
+
+import base64
 import os
 import re
+import sys
 from imp import load_source
 from multiprocessing import cpu_count
 from os.path import isdir, isfile, join
 
 import click
-import sys
 
 from libs.PathsManager import PathsManager
 from platformio import app, exception, util
 from platformio.app import get_state_item, set_state_item
 from platformio.pkgmanager import PackageManager
-
-log = logging.getLogger(__name__)
 
 PLATFORM_PACKAGES = {
 
@@ -49,6 +48,18 @@ PLATFORM_PACKAGES = {
     "framework-arduinoespressif": [
         ("Arduino Wiring-based Framework (ESP8266 Core)",
          "https://github.com/esp8266/Arduino")
+    ],
+    "framework-arduinomicrochippic32": [
+        ("Arduino Wiring-based Framework (PIC32 Core)",
+         "https://github.com/chipKIT32/chipKIT-core")
+    ],
+    "framework-arduinointel": [
+        ("Arduino Wiring-based Framework (Intel ARC Core)",
+         "https://github.com/01org/corelibs-arduino101")
+    ],
+    "framework-arduinonordicnrf51": [
+        ("Arduino Wiring-based Framework (RFduino Core)",
+         "https://github.com/RFduino/RFduino")
     ],
     "framework-energiamsp430": [
         ("Energia Wiring-based Framework (MSP430 Core)",
@@ -77,6 +88,9 @@ PLATFORM_PACKAGES = {
     ],
     "framework-wiringpi": [
         ("GPIO Interface library for the Raspberry Pi", "http://wiringpi.com")
+    ],
+    "framework-simba": [
+        ("Simba Framework", "https://github.com/eerimoq/simba")
     ],
     "sdk-esp8266": [
         ("ESP8266 SDK", "http://bbs.espressif.com")
@@ -116,6 +130,19 @@ PLATFORM_PACKAGES = {
         ("msp-gcc", "http://sourceforge.net/projects/mspgcc/"),
         ("GDB", "http://www.gnu.org/software/gdb/")
     ],
+    "toolchain-icestorm": [
+        ("GCC for FPGA IceStorm", "http://www.clifford.at/icestorm/")
+    ],
+    "toolchain-microchippic32": [
+        ("GCC for Microchip PIC32", "https://github.com/chipKIT32/chipKIT-cxx")
+    ],
+    "toolchain-intelarc32": [
+        ("GCC for Intel ARC",
+         "https://github.com/foss-for-synopsys-dwc-arc-processors/toolchain")
+    ],
+    "tool-scons": [
+        ("SCons software construction tool", "http://www.scons.org")
+    ],
     "tool-avrdude": [
         ("AVRDUDE", "http://www.nongnu.org/avrdude/")
     ],
@@ -124,6 +151,9 @@ PLATFORM_PACKAGES = {
     ],
     "tool-bossac": [
         ("BOSSA CLI", "https://sourceforge.net/projects/b-o-s-s-a/")
+    ],
+    "tool-openocd": [
+        ("OpenOCD", "http://openocd.org")
     ],
     "tool-stlink": [
         ("ST-Link", "https://github.com/texane/stlink")
@@ -139,6 +169,19 @@ PLATFORM_PACKAGES = {
     ],
     "tool-esptool": [
         ("esptool-ck", "https://github.com/igrr/esptool-ck")
+    ],
+    "tool-rfdloader": [
+        ("rfdloader", "https://github.com/RFduino/RFduino")
+    ],
+    "tool-mkspiffs": [
+        ("Tool to build and unpack SPIFFS images",
+         "https://github.com/igrr/mkspiffs")
+    ],
+    "tool-pic32prog": [
+        ("pic32prog", "https://github.com/sergev/pic32prog")
+    ],
+    "tool-arduino101load": [
+        ("Genuino101 uploader", "https://github.com/01org/intel-arduino-tools")
     ]
 }
 
@@ -148,6 +191,7 @@ def get_packages():
 
 
 class PlatformFactory(object):
+
     @staticmethod
     def get_clsname(type_):
         return "%s%sPlatform" % (type_.upper()[0], type_.lower()[1:])
@@ -172,7 +216,7 @@ class PlatformFactory(object):
                 continue
             for p in sorted(os.listdir(pdir)):
                 if (p in ("__init__.py", "base.py") or not
-                p.endswith(".py")):
+                        p.endswith(".py")):
                     continue
                 type_ = p[:-3]
                 path = join(pdir, p)
@@ -215,6 +259,7 @@ class PlatformFactory(object):
 
 
 class BasePlatform(object):
+
     PACKAGES = {}
     LINE_ERROR_RE = re.compile(r"(\s+error|error[:\s]+)", re.I)
 
@@ -305,7 +350,7 @@ class BasePlatform(object):
             if name in without_packages:
                 continue
             elif (name in with_packages or (not skip_default_packages and
-                                                opts.get("default"))):
+                                            opts.get("default"))):
                 requirements.append(name)
 
         pm = PackageManager()
@@ -357,15 +402,18 @@ class BasePlatform(object):
         obsolated = pm.get_outdated()
         return not set(self.get_packages().keys()).isdisjoint(set(obsolated))
 
-    def configure_default_packages(self, envoptions, targets):
+    def configure_default_packages(self, variables, targets):
         # enbale used frameworks
         for pkg_name in self.pkg_aliases_to_names(["framework"]):
-            for framework in envoptions.get("framework", "").split(","):
+            for framework in variables.get("framework", "").split(","):
                 framework = framework.lower().strip()
                 if not framework:
                     continue
                 if framework in pkg_name:
                     self.PACKAGES[pkg_name]['default'] = True
+
+        # append SCons tool
+        self.PACKAGES['tool-scons'] = {"default": True}
 
         # enable upload tools for upload targets
         if any(["upload" in t for t in targets] + ["program" in targets]):
@@ -381,29 +429,24 @@ class BasePlatform(object):
             installed=True).keys()
 
         if (self.get_type() in installed_platforms and
-                    set(self.get_default_packages()) <=
-                    set(self.get_installed_packages())):
+                set(self.get_default_packages()) <=
+                set(self.get_installed_packages())):
             return True
 
         if (not app.get_setting("enable_prompts") or
-                    self.get_type() in installed_platforms or
+                self.get_type() in installed_platforms or
                 click.confirm(
-                        "The platform '%s' has not been installed yet. "
-                        "Would you like to install it now?" % self.get_type())):
+                    "The platform '%s' has not been installed yet. "
+                    "Would you like to install it now?" % self.get_type())):
             return self.install()
         else:
             raise exception.PlatformNotInstalledYet(self.get_type())
 
     def run(self, variables, targets, verbose):
-        assert isinstance(variables, list)
+        assert isinstance(variables, dict)
         assert isinstance(targets, list)
 
-        envoptions = {}
-        for v in variables:
-            _name, _value = v.split("=", 1)
-            envoptions[_name.lower()] = _value
-
-        self.configure_default_packages(envoptions, targets)
+        self.configure_default_packages(variables, targets)
         self._install_default_packages()
 
         self._verbose_level = int(verbose)
@@ -412,46 +455,20 @@ class BasePlatform(object):
             targets.remove("clean")
             targets.append("-c")
 
-        if "build_script" not in envoptions:
-            variables.append("BUILD_SCRIPT=%s" % self.get_build_script())
-
-        for v in variables:
-            if not v.startswith("BUILD_SCRIPT="):
-                continue
-            _, path = v.split("=", 1)
-            if not isfile(path):
-                raise exception.BuildScriptNotFound(path)
+        if "build_script" not in variables:
+            variables['build_script'] = self.get_build_script()
+        if not isfile(variables['build_script']):
+            raise exception.BuildScriptNotFound(variables['build_script'])
 
         # append aliases of the installed packages
         installed_packages = PackageManager.get_installed()
         for name, options in self.get_packages().items():
             if "alias" not in options or name not in installed_packages:
                 continue
-            variables.append(
-                "PIOPACKAGE_%s=%s" % (options['alias'].upper(), name))
+            variables['piopackage_%s' % options['alias']] = name
 
         self._found_error = False
-        args = []
-        try:
-            args = [os.path.relpath(PathsManager.EXECUTABLE_FILE),  # [JORGE_GARCIA] modified for scons compatibility
-                    "-Q",
-                    "-j %d" % self.get_job_nums(),
-                    "--warn=no-no-parallel-support",
-                    "-f", join(util.get_source_dir(), "builder", "main.py")
-                    ] + variables + targets + [os.getcwd()]
-            if PathsManager.EXECUTABLE_FILE.endswith(".py"):
-                args = ["python"] + args
-            # test that SCons is installed correctly
-            # assert util.test_scons()
-            log.debug("Executing: {}".format("\n".join(args)))
-            result = util.exec_command(args,
-                                       stdout=util.AsyncPipe(self.on_run_out),
-                                       stderr=util.AsyncPipe(self.on_run_err))
-
-        except (OSError, AssertionError) as e:
-            log.exception("error running scons with \n{}".format(args))
-            raise exception.SConsNotInstalledError()
-
+        result = self._run_scons(variables, targets)
         assert "returncode" in result
         # if self._found_error:
         #     result['returncode'] = 1
@@ -459,6 +476,42 @@ class BasePlatform(object):
         if self._last_echo_line == ".":
             click.echo("")
 
+        return result
+
+    def _run_scons(self, variables, targets):
+        # pass current PYTHONPATH to SCons
+        if "PYTHONPATH" in os.environ:
+            _PYTHONPATH = os.environ.get("PYTHONPATH").split(os.pathsep)
+        else:
+            _PYTHONPATH = []
+        for p in os.sys.path:
+            if p not in _PYTHONPATH:
+                _PYTHONPATH.append(p)
+        os.environ['PYTHONPATH'] = os.pathsep.join(_PYTHONPATH)
+
+        cmd = [
+            os.path.relpath(PathsManager.EXECUTABLE_FILE),
+            PathsManager.get_sons_executable_path(),
+            "-Q",
+            "-j %d" % self.get_job_nums(),
+            "--warn=no-no-parallel-support",
+            "-f", join(util.get_source_dir(), "builder", "main.py")
+        ] + targets
+
+        if PathsManager.EXECUTABLE_FILE.endswith(".py"):
+            cmd = ["python"] + cmd
+
+        # encode and append variables
+        for key, value in variables.items():
+            cmd.append("%s=%s" % (key.upper(), base64.b64encode(value)))
+
+        cmd.append(os.getcwd())
+
+        result = util.exec_command(
+            cmd,
+            stdout=util.AsyncPipe(self.on_run_out),
+            stderr=util.AsyncPipe(self.on_run_err)
+        )
         return result
 
     def on_run_out(self, line):

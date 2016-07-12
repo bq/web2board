@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import os
+import sys
 
 import click
 import requests
@@ -31,8 +34,17 @@ def cli():
         click.secho("Please wait while upgrading PlatformIO ...",
                     fg="yellow")
 
+        to_develop = False
+        try:
+            from pkg_resources import parse_version
+            to_develop = parse_version(last) < parse_version(__version__)
+        except ImportError:
+            pass
+
         cmds = (
-            ["pip", "install", "--upgrade", "platformio"],
+            ["pip", "install", "--upgrade",
+             "https://github.com/platformio/platformio/archive/develop.zip"
+             if to_develop else "platformio"],
             ["platformio", "--version"]
         )
 
@@ -40,18 +52,21 @@ def cli():
         r = None
         try:
             for cmd in cmds:
+                cmd = [os.path.normpath(sys.executable), "-m"] + cmd
                 r = None
                 r = util.exec_command(cmd)
 
                 # try pip with disabled cache
-                if r['returncode'] != 0 and cmd[0] == "pip":
-                    r = util.exec_command(["pip", "--no-cache-dir"] + cmd[1:])
+                if r['returncode'] != 0 and cmd[2] == "pip":
+                    cmd.insert(3, "--no-cache-dir")
+                    r = util.exec_command(cmd)
 
                 assert r['returncode'] == 0
-            assert last in r['out'].strip()
+            assert "version" in r['out']
+            actual_version = r['out'].strip().split("version", 1)[1].strip()
             click.secho(
-                "PlatformIO has been successfully upgraded to %s" % last,
-                fg="green")
+                "PlatformIO has been successfully upgraded to %s" %
+                actual_version, fg="green")
             click.echo("Release notes: ", nl=False)
             click.secho("http://docs.platformio.org/en/latest/history.html",
                         fg="cyan")

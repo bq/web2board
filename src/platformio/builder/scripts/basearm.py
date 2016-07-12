@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ env.Replace(
 
     ARFLAGS=["rcs"],
 
-    ASPPFLAGS=["-x", "assembler-with-cpp"],
+    ASFLAGS=["-x", "assembler-with-cpp"],
 
-    CPPFLAGS=[
+    CCFLAGS=[
         "-g",   # include debugging info (so errors include line numbers)
         "-Os",  # optimize for size
         "-ffunction-sections",  # place each function in its own section
@@ -41,8 +41,7 @@ env.Replace(
         "-Wall",
         "-mthumb",
         "-mcpu=${BOARD_OPTIONS['build']['cpu']}",
-        "-nostdlib",
-        "-MMD"  # output dependancy info
+        "-nostdlib"
     ],
 
     CXXFLAGS=[
@@ -69,7 +68,10 @@ env.Replace(
     PROGSUFFIX=".elf"
 )
 
+
 env.Append(
+    ASFLAGS=env.get("CCFLAGS", [])[:],
+
     BUILDERS=dict(
         ElfToBin=Builder(
             action=" ".join([

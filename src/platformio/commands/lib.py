@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,12 +56,14 @@ def cli():
 
 
 @cli.command("search", short_help="Search for library")
+@click.option("--json-output", is_flag=True)
+@click.option("--page", type=click.INT, default=1)
 @click.option("-a", "--author", multiple=True)
 @click.option("-k", "--keyword", multiple=True)
 @click.option("-f", "--framework", multiple=True)
 @click.option("-p", "--platform", multiple=True)
 @click.argument("query", required=False, nargs=-1)
-def lib_search(query, **filters):
+def lib_search(query, json_output, page, **filters):
     if not query:
         query = []
     if not isinstance(query, list):
@@ -71,7 +73,13 @@ def lib_search(query, **filters):
         for value in values:
             query.append('%s:"%s"' % (key, value))
 
-    result = get_api_result("/lib/search", dict(query=" ".join(query)))
+    result = get_api_result("/lib/search",
+                            dict(query=" ".join(query), page=page))
+
+    if json_output:
+        click.echo(json.dumps(result))
+        return
+
     if result['total'] == 0:
         click.secho(
             "Nothing has been found by your request\n"
@@ -95,14 +103,15 @@ def lib_search(query, **filters):
         for item in result['items']:
             echo_liblist_item(item)
 
-        if int(result['page'])*int(result['perpage']) >= int(result['total']):
+        if (int(result['page']) * int(result['perpage']) >=
+                int(result['total'])):
             break
 
         if (app.get_setting("enable_prompts") and
                 click.confirm("Show next libraries?")):
             result = get_api_result(
                 "/lib/search",
-                dict(query=" ".join(query), page=str(int(result['page']) + 1))
+                dict(query=" ".join(query), page=int(result['page']) + 1)
             )
         else:
             break

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class Linux_i686Platform(BasePlatform):
         Using host OS (Mac OS X or Linux 32-bit) you can build native
         application for Linux i686 platform.
 
-        http://platformio.org/#!/platforms/linux_i686
+        http://platformio.org/platforms/linux_i686
     """
 
     PACKAGES = {

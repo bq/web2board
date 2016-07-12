@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@ from os import environ, getenv
 from os.path import getmtime, isfile, join
 from time import time
 
-try:
-    from lockfile import LockFile
-except:
-    from lockfile import FileLock as LockFile
+from lockfile import LockFile
 
-
-from platformio import __version__
+from platformio import __version__, util
 from platformio.exception import InvalidSettingName, InvalidSettingValue
-from platformio.util import get_home_dir, is_ci
 
 DEFAULT_SETTINGS = {
     "check_platformio_interval": {
@@ -80,7 +75,7 @@ class State(object):
         self.path = path
         self.lock = lock
         if not self.path:
-            self.path = join(get_home_dir(), "appstate.json")
+            self.path = join(util.get_home_dir(), "appstate.json")
         self._state = {}
         self._prev_state = {}
         self._lockfile = None
@@ -89,8 +84,7 @@ class State(object):
         try:
             self._lock_state_file()
             if isfile(self.path):
-                with open(self.path, "r") as fp:
-                    self._state = json.load(fp)
+                self._state = util.load_json(self.path)
         except ValueError:
             self._state = {}
         self._prev_state = deepcopy(self._state)
@@ -153,7 +147,7 @@ def get_setting(name):
     if name == "enable_prompts":
         # disable prompts for Continuous Integration systems
         # and when global "--force" option is set
-        if any([is_ci(), get_session_var("force_option")]):
+        if any([util.is_ci(), get_session_var("force_option")]):
             return False
 
     _env_name = "PLATFORMIO_SETTING_%s" % name.upper()
@@ -187,3 +181,8 @@ def get_session_var(name, default=None):
 def set_session_var(name, value):
     assert name in SESSION_VARS
     SESSION_VARS[name] = value
+
+
+def is_disabled_progressbar():
+    return (not get_setting("enable_prompts") or
+            getenv("PLATFORMIO_DISABLE_PROGRESSBAR") == "true")

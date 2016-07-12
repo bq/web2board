@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,26 +31,23 @@ env.Replace(
 
     ARFLAGS=["rcs"],
 
-    ASPPFLAGS=["-x", "assembler-with-cpp"],
+    ASFLAGS=["-x", "assembler-with-cpp"],
 
-    CPPFLAGS=[
+    CCFLAGS=[
         "-g",  # include debugging info (so errors include line numbers)
         "-Os",  # optimize for size
         "-Wall",  # show warnings
         "-ffunction-sections",  # place each function in its own section
         "-fdata-sections",
-        "-MMD",  # output dependency info
         "-mmcu=$BOARD_MCU"
-    ],
-
-    CPPDEFINES=[
-        "F_CPU=$BOARD_F_CPU"
     ],
 
     CXXFLAGS=[
         "-fno-exceptions",
         "-fno-threadsafe-statics"
     ],
+
+    CPPDEFINES=["F_CPU=$BOARD_F_CPU"],
 
     LINKFLAGS=[
         "-Os",
@@ -67,6 +64,8 @@ env.Replace(
 )
 
 env.Append(
+    ASFLAGS=env.get("CCFLAGS", [])[:],
+
     BUILDERS=dict(
         ElfToEep=Builder(
             action=" ".join([

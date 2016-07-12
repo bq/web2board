@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,8 +37,22 @@ class Nordicnrf51Platform(BasePlatform):
 
         "framework-mbed": {
             "alias": "framework"
+        },
+
+        "framework-arduinonordicnrf51": {
+            "alias": "framework"
+        },
+
+        "tool-rfdloader": {
         }
     }
 
     def get_name(self):
         return "Nordic nRF51"
+
+    def configure_default_packages(self, envoptions, targets):
+        if envoptions.get("board") == "rfduino":
+            self.PACKAGES['tool-rfdloader']['alias'] = "uploader"
+
+        return BasePlatform.configure_default_packages(
+            self, envoptions, targets)

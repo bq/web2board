@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,16 +61,16 @@ def cli(query, json_output):  # pylint: disable=R0912
             flash_size = ""
             if "maximum_size" in data.get("upload", None):
                 flash_size = int(data['upload']['maximum_size'])
-                flash_size = "%dKb" % (flash_size / 1024)
+                flash_size = "%dkB" % (flash_size / 1024)
 
             ram_size = ""
             if "maximum_ram_size" in data.get("upload", None):
                 ram_size = int(data['upload']['maximum_ram_size'])
                 if ram_size >= 1024:
                     if ram_size % 1024:
-                        ram_size = "%.1fKb" % (ram_size / 1024.0)
+                        ram_size = "%.1fkB" % (ram_size / 1024.0)
                     else:
-                        ram_size = "%dKb" % (ram_size / 1024)
+                        ram_size = "%dkB" % (ram_size / 1024)
                 else:
                     ram_size = "%dB" % ram_size
 

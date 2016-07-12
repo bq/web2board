@@ -204,7 +204,7 @@ class Packager:
         try:
             self._get_platformio_packages()
             self._construct_web2board_executable()
-            shutil.move(join(self.installer_creation_dist_path, "web2board"), self.installer_offline_path)
+            shutil.move(join(self.pyinstaller_dist_folder, "web2board"), self.installer_offline_path)
         finally:
             os.chdir(current_path)
             self._clear_build_files()
