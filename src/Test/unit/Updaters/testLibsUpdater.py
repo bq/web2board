@@ -42,3 +42,14 @@ class TestLibsUpdater(unittest.TestCase):
         with self.assertRaises(Exception):
             self.libs_updater.is_necessary_to_update("a.b.c")
 
+    def test_update_raisesExceptionIfNoVersionProvided(self):
+        AppVersion.libs.version_string = "0.1.1"
+
+        with self.assertRaises(Exception):
+            self.libs_updater.update()
+
+    def test_update_raisesExceptionIfBadFormattedVersion(self):
+        AppVersion.libs.version_string = "0.1.1"
+
+        with self.assertRaises(Exception):
+            self.libs_updater.update("a.b.c")

@@ -8,7 +8,7 @@ class VersionError(Exception):
     pass
 
 
-class _Version:
+class Version:
     def __init__(self, version_string):
         self.version_string = version_string
         """:type : str """
@@ -18,7 +18,8 @@ class _Version:
     def version_numbers(self):
         return self.parse_version_string(self.version_string)
 
-    def parse_version_string(self, version_string):
+    @staticmethod
+    def parse_version_string(version_string):
         try:
             return [int(n) for n in version_string.split(".")]
         except (ValueError, AttributeError):
@@ -49,14 +50,14 @@ class _Version:
         return self < version_string or self == version_string
 
 
-class _LibsVersion(_Version):
+class LibsVersion(Version):
     def __init__(self, version_string, libraries_names=None, url=""):
-        _Version.__init__(self, version_string)
+        Version.__init__(self, version_string)
         self.libraries_names = list() if libraries_names is None else libraries_names
         self.url = url
 
     def set_version_values(self, version_values):
-        _Version.set_version_values(self, version_values["version"])
+        Version.set_version_values(self, version_values["version"])
         try:
             self.libraries_names= [l.encode("utf-8") for l in version_values["librariesNames"]]
         except UnicodeError:
@@ -70,15 +71,15 @@ class _LibsVersion(_Version):
 
     def compare_libraries_names(self, libs_names):
         """
-        :type other: _LibsVersion
+        :type other: LibsVersion
         """
         return set(self.libraries_names) == set(libs_names)
 
 
 class AppVersion:
     _log = logging.getLogger("AppVersion")
-    web2board = _Version("0.0.0")
-    libs = _LibsVersion("0.0.0")
+    web2board = Version("0.0.0")
+    libs = LibsVersion("0.0.0")
 
     @classmethod
     def read_version_values(cls):

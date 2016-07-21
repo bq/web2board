@@ -1,12 +1,10 @@
-import json
-import logging
 import os
 import tempfile
 import shutil
 import threading
 
 from libs import utils
-from libs.AppVersion import AppVersion
+from libs.AppVersion import *
 from libs.Config import Config
 from libs.Downloader import Downloader
 
@@ -43,6 +41,7 @@ class LibsUpdater:
         return AppVersion.libs != version_string
 
     def update(self, version_string, url):
+        Version.parse_version_string(version_string)
         log.debug("Updating version to: %s", version_string)
         self._replace_libs(version_string, url)
         return True
@@ -74,6 +73,7 @@ class LibsUpdater:
                 AppVersion.libs.set_version_values(version_values)
                 AppVersion.store_values()
                 log.info("Libs updated successfully")
+
             finally:
                 if os.path.exists(extract_folder):
                     shutil.rmtree(extract_folder)
