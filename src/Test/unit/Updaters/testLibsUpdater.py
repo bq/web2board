@@ -20,6 +20,10 @@ class TestLibsUpdater(unittest.TestCase):
         PathsManager.set_all_constants()
         AppVersion.read_version_values()
 
+    def test_default_url_for_version_constructedCorrectly(self):
+        self.assertEqual(self.libs_updater.default_url_for_version("0.0.1"),
+                         "https://github.com/bq/bitbloqLibs/archive/v0.0.1.zip")
+
     def test_is_necessary_to_update_returnsTrueIfDifferentVersions(self):
         AppVersion.libs.version_string = "0.1.1"
 

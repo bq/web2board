@@ -27,6 +27,9 @@ class LibsUpdater:
     def destination_path(self):
         return Config.get_platformio_lib_dir()
 
+    def default_url_for_version(self, version_string):
+        return Config.bitbloq_libs_download_url_template.format(version=version_string)
+
     def restore_current_version_if_necessary(self):
         if self._are_we_missing_libraries():
             log.warning("Necessary to restore libs")
@@ -43,6 +46,8 @@ class LibsUpdater:
     def update(self, version_string, url):
         Version.parse_version_string(version_string)
         log.debug("Updating version to: %s", version_string)
+        if url == "":
+            url = self.default_url_for_version(version_string)
         self._replace_libs(version_string, url)
         return True
 

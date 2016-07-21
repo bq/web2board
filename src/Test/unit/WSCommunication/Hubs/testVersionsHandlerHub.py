@@ -52,7 +52,7 @@ class TestVersionsHandlerHub(unittest.TestCase):
 
     def test_setLibVersion_returnsTrue(self):
         self.lib_updater = flexmock(self.lib_updater, update=lambda version, url: None)
-        self.versionsHandlerHub.set_lib_version(self.testLibVersion, self.testLibUrl)
+        self.versionsHandlerHub.set_lib_version(self.testLibVersion)
 
     def test_setWeb2boardVersion_returnsTrue(self):
         result = Future()

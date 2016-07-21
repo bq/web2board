@@ -89,3 +89,8 @@ class TestLibsUpdater(unittest.TestCase):
     def test_update_successfullyUpdatesVersion(self):
         self.assertTrue(self.libs_updater.update("0.1.2", "https://github.com/bq/bitbloqLibs/archive/v0.1.2.zip"))
         self._check_correct_version()
+
+
+    def test_update_successfullyUpdatesVersionWithDefaultUrl(self):
+        self.assertTrue(self.libs_updater.update("0.1.2", ""))
+        self._check_correct_version()
