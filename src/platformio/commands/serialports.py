@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -121,9 +121,9 @@ else:
                   help="Enable RTS/CTS flow control, default=Off")
     @click.option("--xonxoff", is_flag=True,
                   help="Enable software flow control, default=Off")
-    @click.option("--rts", default="0", type=click.Choice(["0", "1"]),
+    @click.option("--rts", default=None, type=click.Choice(["0", "1"]),
                   help="Set initial RTS line state, default=0")
-    @click.option("--dtr", default="0", type=click.Choice(["0", "1"]),
+    @click.option("--dtr", default=None, type=click.Choice(["0", "1"]),
                   help="Set initial DTR line state, default=0")
     @click.option("--echo", is_flag=True,
                   help="Enable local echo, default=Off")

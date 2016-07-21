@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ def find_ldscript(src_dir):
     elif isfile(join(src_dir, BOARD_BUILDOPTS['ldscript'])):
         ldscript = join(src_dir, BOARD_BUILDOPTS['ldscript'])
 
-    assert isfile(ldscript)
     return ldscript
 
 
@@ -169,7 +168,8 @@ if BOARD_BUILDOPTS.get("core") == "stm32":
     root_dir = join(root_dir, BOARD_BUILDOPTS.get("variant")[5:7])
 
 ldscript_path = find_ldscript(root_dir)
-merge_ld_scripts(ldscript_path)
+if ldscript_path:
+    merge_ld_scripts(ldscript_path)
 generate_nvic_files()
 
 # override ldscript by libopencm3

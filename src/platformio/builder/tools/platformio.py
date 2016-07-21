@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@ from __future__ import absolute_import
 
 import re
 from glob import glob
-from os import getenv, listdir, sep, walk
+from os import listdir, sep, walk
 from os.path import basename, dirname, isdir, isfile, join, normpath, realpath
 
-from SCons.Script import (COMMAND_LINE_TARGETS, DefaultEnvironment, Exit,
-                          SConscript)
+from SCons.Script import COMMAND_LINE_TARGETS, DefaultEnvironment, SConscript
 from SCons.Util import case_sensitive_suffixes
 
 from platformio.util import pioversion_to_intstr
@@ -28,11 +27,23 @@ from platformio.util import pioversion_to_intstr
 SRC_BUILD_EXT = ["c", "cpp", "S", "spp", "SPP", "sx", "s", "asm", "ASM"]
 SRC_HEADER_EXT = ["h", "hpp"]
 SRC_DEFAULT_FILTER = " ".join([
-    "+<*>", "-<.git%s>" % sep, "-<svn%s>" % sep, "-<examples%s>" % sep
+    "+<*>", "-<.git%s>" % sep, "-<svn%s>" % sep,
+    "-<example%s>" % sep, "-<examples%s>" % sep,
+    "-<test%s>" % sep, "-<tests%s>" % sep
 ])
 
 
 def BuildProgram(env):
+
+    def _append_pio_macros():
+        if any(["PLATFORMIO=" in str(d) for d in env.get("CPPDEFINES", [])]):
+            return
+        env.Append(
+            CPPDEFINES=["PLATFORMIO={0:02d}{1:02d}{2:02d}".format(
+                *pioversion_to_intstr())],
+        )
+
+    _append_pio_macros()
 
     # fix ASM handling under non-casitive OS
     if not case_sensitive_suffixes(".s", ".S"):
@@ -41,15 +52,21 @@ def BuildProgram(env):
             ASCOM="$ASPPCOM"
         )
 
+    # process extra flags from board
     env.ProcessFlags([
-        env.get("BOARD_OPTIONS", {}).get("build", {}).get("extra_flags"),
-        env.get("BUILD_FLAGS"),
-        getenv("PLATFORMIO_BUILD_FLAGS"),
+        env.get("BOARD_OPTIONS", {}).get("build", {}).get("extra_flags")
     ])
+    # remove base flags
+    env.ProcessUnFlags(env.get("BUILD_UNFLAGS"))
+    # apply user flags
+    env.ProcessFlags([env.get("BUILD_FLAGS")])
 
     if env.get("FRAMEWORK"):
         env.BuildFrameworks([
             f.lower().strip() for f in env.get("FRAMEWORK", "").split(",")])
+
+    # restore PIO macros if it was deleted by framework
+    _append_pio_macros()
 
     # build dependent libs
     deplibs = env.BuildDependentLibraries("$PROJECTSRC_DIR")
@@ -71,44 +88,75 @@ def BuildProgram(env):
         )
 
     # Handle SRC_BUILD_FLAGS
-    env.ProcessFlags([
-        env.get("SRC_BUILD_FLAGS", None),
-        getenv("PLATFORMIO_SRC_BUILD_FLAGS"),
-    ])
+    env.ProcessFlags([env.get("SRC_BUILD_FLAGS", None)])
 
     env.Append(
-        CPPDEFINES=["PLATFORMIO={0:02d}{1:02d}{2:02d}".format(
-            *pioversion_to_intstr())],
+        CPPPATH=["$PROJECTSRC_DIR"],
         LIBS=deplibs,
         LIBPATH=["$BUILD_DIR"]
     )
 
-    return env.Program(
+    sources = env.LookupSources(
+        "$BUILDSRC_DIR", "$PROJECTSRC_DIR", duplicate=False,
+        src_filter=env.get("SRC_FILTER"))
+
+    if not sources and not COMMAND_LINE_TARGETS:
+        env.Exit(
+            "Error: Nothing to build. Please put your source code files "
+            "to '%s' folder" % env.subst("$PROJECTSRC_DIR"))
+
+    program = env.Program(
         join("$BUILD_DIR", env.subst("$PROGNAME")),
-        env.LookupSources(
-            "$BUILDSRC_DIR", "$PROJECTSRC_DIR", duplicate=False,
-            src_filter=getenv("PLATFORMIO_SRC_FILTER",
-                              env.get("SRC_FILTER")))
+        sources
     )
+
+    if set(["upload", "uploadlazy", "program"]) & set(COMMAND_LINE_TARGETS):
+        env.AddPostAction(program, env.CheckUploadSize)
+
+    return program
 
 
 def ProcessFlags(env, flags):
     for f in flags:
-        if f:
-            env.MergeFlags(str(f))
+        if not f:
+            continue
+        parsed_flags = env.ParseFlags(str(f))
+        for flag in parsed_flags.pop("CPPDEFINES"):
+            if not isinstance(flag, list):
+                env.Append(CPPDEFINES=flag)
+                continue
+            if '\"' in flag[1]:
+                flag[1] = flag[1].replace('\"', '\\\"')
+            env.Append(CPPDEFINES=[flag])
+        env.Append(**parsed_flags)
 
-    # fix relative CPPPATH
-    for i, p in enumerate(env.get("CPPPATH", [])):
-        if isdir(p):
-            env['CPPPATH'][i] = realpath(p)
+    # fix relative CPPPATH & LIBPATH
+    for k in ("CPPPATH", "LIBPATH"):
+        for i, p in enumerate(env.get(k, [])):
+            if isdir(p):
+                env[k][i] = realpath(p)
+    # fix relative path for "-include"
+    for i, f in enumerate(env.get("CCFLAGS", [])):
+        if isinstance(f, tuple) and f[0] == "-include":
+            env['CCFLAGS'][i] = (f[0], env.File(realpath(f[1].get_path())))
 
     # Cancel any previous definition of name, either built in or
     # provided with a -D option // Issue #191
-    undefines = [u for u in env.get("CCFLAGS", []) if u.startswith("-U")]
+    undefines = [u for u in env.get("CCFLAGS", [])
+                 if isinstance(u, basestring) and u.startswith("-U")]
     if undefines:
         for undef in undefines:
             env['CCFLAGS'].remove(undef)
         env.Append(_CPPDEFFLAGS=" %s" % " ".join(undefines))
+
+
+def ProcessUnFlags(env, flags):
+    if not flags:
+        return
+    for var, values in env.ParseFlags(flags).items():
+        for v in values:
+            if v in env[var]:
+                env[var].remove(v)
 
 
 def IsFileWithExt(env, file_, ext):  # pylint: disable=W0613
@@ -178,12 +226,12 @@ def BuildFrameworks(env, frameworks):
     if not frameworks or "uploadlazy" in COMMAND_LINE_TARGETS:
         return
 
-    board_frameworks = env.get("BOARD_OPTIONS", {}).get("frameworks")
+    board_frameworks = env.get("BOARD_OPTIONS", {}).get("frameworks", [])
     if frameworks == ["platformio"]:
         if board_frameworks:
             frameworks.insert(0, board_frameworks[0])
         else:
-            Exit("Error: Please specify board type")
+            env.Exit("Error: Please specify board type")
 
     for f in frameworks:
         if f in ("arduino", "energia"):
@@ -193,7 +241,7 @@ def BuildFrameworks(env, frameworks):
             SConscript(env.subst(
                 join("$PIOBUILDER_DIR", "scripts", "frameworks", "%s.py" % f)))
         else:
-            Exit("Error: This board doesn't support %s framework!" % f)
+            env.Exit("Error: This board doesn't support %s framework!" % f)
 
 
 def BuildLibrary(env, variant_dir, src_dir, src_filter=None):
@@ -354,6 +402,7 @@ def exists(_):
 def generate(env):
     env.AddMethod(BuildProgram)
     env.AddMethod(ProcessFlags)
+    env.AddMethod(ProcessUnFlags)
     env.AddMethod(IsFileWithExt)
     env.AddMethod(VariantDirWrap)
     env.AddMethod(LookupSources)

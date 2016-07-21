@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 import atexit
 import platform
 import Queue
-import re
 import sys
 import threading
 import uuid
@@ -48,6 +47,13 @@ class TelemetryBase(object):
         if name in self._params:
             del self._params[name]
 
+    def get_cid(self):
+        cid = app.get_state_item("cid")
+        if not cid:
+            cid = self.MACHINE_ID
+            app.set_state_item("cid", cid)
+        return cid
+
     def send(self, hittype):
         raise NotImplementedError()
 
@@ -67,7 +73,7 @@ class MeasurementProtocol(TelemetryBase):
         TelemetryBase.__init__(self)
         self['v'] = 1
         self['tid'] = self.TRACKING_ID
-        self['cid'] = self.MACHINE_ID
+        self['cid'] = self.get_cid()
 
         self['sr'] = "%dx%d" % click.get_terminal_size()
         self._prefill_screen_name()
@@ -89,16 +95,11 @@ class MeasurementProtocol(TelemetryBase):
 
         # gather dependent packages
         dpdata = []
-        dpdata.append("Click/%s" % click.__version__)
+        dpdata.append("PlatformIO/%s" % __version__)
         if app.get_session_var("caller_id"):
             dpdata.append("Caller/%s" % app.get_session_var("caller_id"))
-        try:
-            result = util.exec_command(["scons", "--version"])
-            match = re.search(r"engine: v([\d\.]+)", result['out'])
-            if match:
-                dpdata.append("SCons/%s" % match.group(1))
-        except:  # pylint: disable=W0702
-            pass
+        if getenv("PLATFORMIO_IDE"):
+            dpdata.append("IDE/%s" % getenv("PLATFORMIO_IDE"))
         self['an'] = " ".join(dpdata)
 
     def _prefill_custom_data(self):
@@ -197,26 +198,25 @@ class MPDataPusher(object):
                 self._failedque.append(_item)
                 if self._send_data(item):
                     self._failedque.remove(_item)
-                else:
-                    self._http_offline = True
                 self._queue.task_done()
             except:  # pylint: disable=W0702
                 pass
 
     def _send_data(self, data):
-        result = False
+        if self._http_offline:
+            return False
         try:
             r = self._http_session.post(
                 "https://ssl.google-analytics.com/collect",
                 data=data,
                 headers=util.get_request_defheaders(),
-                timeout=2
+                timeout=1
             )
             r.raise_for_status()
-            result = True
+            return True
         except:  # pylint: disable=W0702
-            pass
-        return result
+            self._http_offline = True
+        return False
 
 
 def on_command():
@@ -304,12 +304,15 @@ def on_exception(e):
 def _finalize():
     timeout = 1000  # msec
     elapsed = 0
-    while elapsed < timeout:
-        if not MPDataPusher().in_wait():
-            break
-        sleep(0.2)
-        elapsed += 200
-    backup_reports(MPDataPusher().get_items())
+    try:
+        while elapsed < timeout:
+            if not MPDataPusher().in_wait():
+                break
+            sleep(0.2)
+            elapsed += 200
+        backup_reports(MPDataPusher().get_items())
+    except KeyboardInterrupt:
+        pass
 
 
 def backup_reports(items):

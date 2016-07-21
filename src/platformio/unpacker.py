@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from zipfile import ZipFile
 
 import click
 
-from platformio import util
+from platformio import app, util
 from platformio.exception import UnsupportedArchiveType
 
 
@@ -92,7 +92,7 @@ class FileUnpacker(object):
             raise UnsupportedArchiveType(archpath)
 
     def start(self):
-        if util.is_ci():
+        if app.is_disabled_progressbar():
             click.echo("Unpacking...")
             for item in self._unpacker.get_items():
                 self._unpacker.extract_item(item, self._dest_dir)

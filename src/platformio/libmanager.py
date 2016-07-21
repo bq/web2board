@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import re
 from os import listdir, makedirs, remove, rename
 from os.path import isdir, isfile, join
@@ -51,8 +50,7 @@ class LibraryManager(object):
             conf_path = join(self.lib_dir, dirname, self.CONFIG_NAME)
             if not isfile(conf_path):
                 continue
-            with open(conf_path, "r") as f:
-                items[dirname] = json.load(f)
+            items[dirname] = util.load_json(conf_path)
         return items
 
     def get_latest_versions(self):

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,8 +56,19 @@ def cli(ctx, environment, target, upload_port,  # pylint: disable=R0913,R0914
         if not disable_auto_clean:
             try:
                 _clean_pioenvs_dir(util.get_pioenvs_dir())
-            except Exception:
-                raise exception.CleanPioenvsDirError(util.get_pioenvs_dir())
+            except:  # pylint: disable=bare-except
+                click.secho(
+                    "Can not remove temporary directory `%s`. Please remove "
+                    "`.pioenvs` directory from the project manually to avoid "
+                    "build issues" % util.get_pioenvs_dir(),
+                    fg="yellow"
+                )
+
+        env_default = None
+        if config.has_option("platformio", "env_default"):
+            env_default = [
+                e.strip()
+                for e in config.get("platformio", "env_default").split(",")]
 
         results = []
         for section in config.sections():
@@ -69,7 +80,9 @@ def cli(ctx, environment, target, upload_port,  # pylint: disable=R0913,R0914
                 raise exception.InvalidEnvName(section)
 
             envname = section[4:]
-            if environment and envname not in environment:
+            if ((environment and envname not in environment) or
+                    (not environment and env_default and
+                     envname not in env_default)):
                 # echo("Skipped %s environment" % style(envname, fg="yellow"))
                 continue
 
@@ -151,14 +164,14 @@ class EnvironmentProcessor(object):
         return result
 
     def _get_build_variables(self):
-        variables = ["PIOENV=" + self.name]
+        variables = {"pioenv": self.name}
         if self.upload_port:
-            variables.append("UPLOAD_PORT=%s" % self.upload_port)
+            variables['upload_port'] = self.upload_port
         for k, v in self.options.items():
-            k = k.upper()
-            if k == "TARGETS" or (k == "UPLOAD_PORT" and self.upload_port):
+            k = k.lower()
+            if k == "targets" or (k == "upload_port" and self.upload_port):
                 continue
-            variables.append("%s=%s" % (k, v))
+            variables[k] = v
         return variables
 
     def _get_build_targets(self):
@@ -201,8 +214,7 @@ def _autoinstall_libs(ctx, libids_list):
             click.confirm(
                 "The libraries with IDs '%s' have not been installed yet. "
                 "Would you like to install them now?" %
-                ", ".join([str(i) for i in not_intalled_libs])
-            )):
+                ", ".join([str(i) for i in not_intalled_libs]))):
         ctx.invoke(cmd_lib_install, libid=not_intalled_libs)
 
 
@@ -238,6 +250,6 @@ def calculate_project_hash():
         for root, _, files in walk(d):
             for f in files:
                 path = join(root, f)
-                if not any([s in path for s in (".git", ".svn")]):
+                if not any([s in path for s in (".git", ".svn", ".pioenvs")]):
                     structure.append(path)
     return sha1(",".join(sorted(structure))).hexdigest() if structure else ""

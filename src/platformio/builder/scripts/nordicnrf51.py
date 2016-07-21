@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,17 @@ from SCons.Script import (COMMAND_LINE_TARGETS, AlwaysBuild, Default,
 env = DefaultEnvironment()
 
 SConscript(env.subst(join("$PIOBUILDER_DIR", "scripts", "basearm.py")))
+
+if env.subst("$BOARD") == "rfduino":
+    env.Append(
+        CCFLAGS=["-fno-builtin"],
+        LINKFLAGS=["--specs=nano.specs"]
+    )
+    env.Replace(
+        UPLOADER=join("$PIOPACKAGES_DIR", "tool-rfdloader", "rfdloader"),
+        UPLOADERFLAGS=["-q", '"$UPLOAD_PORT"'],
+        UPLOADCMD='"$UPLOADER" $UPLOADERFLAGS $SOURCES'
+    )
 
 #
 # Target: Build executable and linkable firmware
@@ -51,7 +62,11 @@ AlwaysBuild(target_size)
 # Target: Upload by default .bin file
 #
 
-upload = env.Alias(["upload", "uploadlazy"], target_firm, env.UploadToDisk)
+if env.subst("$BOARD") == "rfduino":
+    upload = env.Alias(["upload", "uploadlazy"], target_firm,
+                       [env.AutodetectUploadPort, "$UPLOADCMD"])
+else:
+    upload = env.Alias(["upload", "uploadlazy"], target_firm, env.UploadToDisk)
 AlwaysBuild(upload)
 
 #

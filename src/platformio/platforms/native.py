@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ class NativePlatform(BasePlatform):
 
     """
     Native development platform is intended to be used for desktop OS.
-    This platform uses built-in tool chains (preferable based on GCC),
+    This platform uses built-in toolchains (preferable based on GCC),
     frameworks, libs from particular OS where it will be run.
 
-    http://platformio.org/#!/platforms/native
+    http://platformio.org/platforms/native
     """
 
     PACKAGES = {

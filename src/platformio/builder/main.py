@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,37 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=wrong-import-position,wrong-import-order,unused-import
-
-try:
-    from platformio import util
-except ImportError:
-    import sys
-    for p in sys.path:
-        _new_paths = []
-        for item in ("dist-packages", "site-packages"):
-            if not p.endswith(item) and item in p:
-                _new_paths.append(p[:p.rfind(item) + len(item)])
-        if "platformio" in p:
-            _new_paths.append(p[:p.rfind("platformio") - 1])
-
-        for _p in _new_paths:
-            if _p not in sys.path:
-                sys.path.insert(0, _p)
-        try:
-            from platformio import util
-            import lockfile  # NOQA
-            break
-        except ImportError:
-            pass
-
+import base64
 import json
+import sys
 from os import environ
-from os.path import isfile, join
+from os.path import join, normpath
 from time import time
 
 from SCons.Script import COMMAND_LINE_TARGETS, DefaultEnvironment, Variables
 
+from platformio import util
 from platformio.exception import UnknownBoard
 
 # AllowSubstExceptions()
@@ -64,6 +43,7 @@ commonvars.AddVariables(
     ("FRAMEWORK",),
     ("BUILD_FLAGS",),
     ("SRC_BUILD_FLAGS",),
+    ("BUILD_UNFLAGS",),
     ("SRC_FILTER",),
     ("LIB_DFCYCLIC",),
     ("LIB_IGNORE",),
@@ -73,12 +53,15 @@ commonvars.AddVariables(
     ("BOARD",),
     ("BOARD_MCU",),
     ("BOARD_F_CPU",),
+    ("BOARD_F_FLASH",),
+    ("BOARD_FLASH_MODE",),
 
     # upload options
     ("UPLOAD_PORT",),
     ("UPLOAD_PROTOCOL",),
     ("UPLOAD_SPEED",),
-    ("UPLOAD_FLAGS",)
+    ("UPLOAD_FLAGS",),
+    ("UPLOAD_RESETMETHOD",)
 )
 
 DefaultEnvironment(
@@ -99,6 +82,7 @@ DefaultEnvironment(
     PROJECT_DIR=util.get_project_dir(),
     PROJECTLIB_DIR=util.get_projectlib_dir(),
     PROJECTSRC_DIR=util.get_projectsrc_dir(),
+    PROJECTDATA_DIR=util.get_projectdata_dir(),
     PIOENVS_DIR=util.get_pioenvs_dir(),
 
     PIOBUILDER_DIR=join(util.get_source_dir(), "builder"),
@@ -110,10 +94,18 @@ DefaultEnvironment(
         "$PROJECTLIB_DIR",
         util.get_lib_dir(),
         join("$PLATFORMFW_DIR", "libraries")
-    ]
+    ],
+
+    PYTHONEXE=normpath(sys.executable)
 )
 
 env = DefaultEnvironment()
+
+# decode common variables
+for k in commonvars.keys():
+    if k in env:
+        env[k] = base64.b64decode(env[k])
+
 env.Prepend(LIBPATH=[join("$PIOPACKAGES_DIR", "ldscripts")])
 
 if "BOARD" in env:
@@ -122,24 +114,19 @@ if "BOARD" in env:
     except UnknownBoard as e:
         env.Exit("Error: %s" % str(e))
 
-    if "BOARD_MCU" not in env:
-        env.Replace(BOARD_MCU="${BOARD_OPTIONS['build']['mcu']}")
-    if "BOARD_F_CPU" not in env:
-        env.Replace(BOARD_F_CPU="${BOARD_OPTIONS['build']['f_cpu']}")
-    if "UPLOAD_PROTOCOL" not in env:
-        env.Replace(
-            UPLOAD_PROTOCOL="${BOARD_OPTIONS['upload'].get('protocol', None)}")
-    if "UPLOAD_SPEED" not in env:
-        env.Replace(
-            UPLOAD_SPEED="${BOARD_OPTIONS['upload'].get('speed', None)}")
+    for k in commonvars.keys():
+        if (k in env or
+                not any([k.startswith("BOARD_"), k.startswith("UPLOAD_")])):
+            continue
+        _opt, _val = k.lower().split("_", 1)
+        if _opt == "board":
+            _opt = "build"
+        if _val in env['BOARD_OPTIONS'][_opt]:
+            env.Replace(**{k: "${BOARD_OPTIONS['%s']['%s']}" % (_opt, _val)})
+
     if "ldscript" in env.get("BOARD_OPTIONS", {}).get("build", {}):
         env.Replace(
-            LDSCRIPT_PATH=(
-                env['BOARD_OPTIONS']['build']['ldscript']
-                if isfile(env['BOARD_OPTIONS']['build']['ldscript'])
-                else join("$PIOHOME_DIR", "packages", "ldscripts",
-                          "${BOARD_OPTIONS['build']['ldscript']}")
-            )
+            LDSCRIPT_PATH="${BOARD_OPTIONS['build']['ldscript']}"
         )
 
     if env['PLATFORM'] != env.get("BOARD_OPTIONS", {}).get("platform"):
@@ -160,6 +147,13 @@ if env.subst("$PIOPACKAGE_TOOLCHAIN"):
         env.subst(join("$PIOPACKAGES_DIR", "$PIOPACKAGE_TOOLCHAIN", "bin"))
     )
 
+# handle custom variable from system environment
+for var in ("BUILD_FLAGS", "SRC_BUILD_FLAGS", "SRC_FILTER", "EXTRA_SCRIPT",
+            "UPLOAD_PORT", "UPLOAD_FLAGS"):
+    k = "PLATFORMIO_%s" % var
+    if environ.get(k):
+        env[var] = environ.get(k)
+
 env.SConscriptChdir(0)
 env.SConsignFile(join("$PIOENVS_DIR", ".sconsign.dblite"))
 env.SConscript("$BUILD_SCRIPT")
@@ -167,9 +161,8 @@ env.SConscript("$BUILD_SCRIPT")
 if "UPLOAD_FLAGS" in env:
     env.Append(UPLOADERFLAGS=["$UPLOAD_FLAGS"])
 
-if environ.get("PLATFORMIO_EXTRA_SCRIPT", env.get("EXTRA_SCRIPT")):
-    env.SConscript(
-        environ.get("PLATFORMIO_EXTRA_SCRIPT", env.get("EXTRA_SCRIPT")))
+if env.get("EXTRA_SCRIPT"):
+    env.SConscript(env.get("EXTRA_SCRIPT"))
 
 if "envdump" in COMMAND_LINE_TARGETS:
     print env.Dump()

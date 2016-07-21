@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,14 @@ if env.get("BOARD_OPTIONS", {}).get("build", {}).get("core") == "teensy":
 elif env.get("BOARD_OPTIONS", {}).get("build", {}).get("core") == "teensy3":
     SConscript(env.subst(join("$PIOBUILDER_DIR", "scripts", "basearm.py")))
     env.Append(
-        LINKFLAGS=["-Wl,--defsym=__rtc_localtime=$UNIX_TIME"]
+        LINKFLAGS=[
+            "-Wl,--defsym=__rtc_localtime=$UNIX_TIME",
+            "-fsingle-precision-constant",
+            "--specs=nano.specs"
+        ],
+        CCFLAGS=[
+            "-fsingle-precision-constant"
+        ]
     )
 
 env.Append(
@@ -58,6 +65,8 @@ if isfile(env.subst(join(
     )
 else:
     env.Append(
+        REBOOTER=join(
+            "$PIOPACKAGES_DIR", "tool-teensy", "teensy_reboot"),
         UPLOADER=join(
             "$PIOPACKAGES_DIR", "tool-teensy", "teensy_post_compile"),
         UPLOADERFLAGS=[
@@ -94,7 +103,9 @@ AlwaysBuild(target_size)
 # Target: Upload by default firmware file
 #
 
-upload = env.Alias(["upload", "uploadlazy"], target_firm, "$UPLOADHEXCMD")
+upload = env.Alias(
+    ["upload", "uploadlazy"], target_firm,
+    ["$UPLOADHEXCMD"] + (["$REBOOTER"] if "REBOOTER" in env else []))
 AlwaysBuild(upload)
 
 #

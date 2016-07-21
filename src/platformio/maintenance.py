@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 
 import re
 import struct
-from os import remove
+from os import getenv, remove
 from os.path import isdir, isfile, join
 from shutil import rmtree
 from time import time
 
 import click
 
-from platformio import __version__, app, exception, telemetry
+from platformio import __version__, app, exception, telemetry, util
 from platformio.commands.lib import lib_update as cmd_libraries_update
 from platformio.commands.platforms import \
     platforms_install as cmd_platforms_install
@@ -33,18 +33,25 @@ from platformio.platforms.base import PlatformFactory
 from platformio.util import get_home_dir
 
 
+def in_silence(ctx):
+    ctx_args = ctx.args or []
+    return (ctx_args and
+            (ctx.args[0] == "upgrade" or "--json-output" in ctx_args))
+
+
 def on_platformio_start(ctx, force, caller):
     app.set_session_var("command_ctx", ctx)
     app.set_session_var("force_option", force)
     app.set_session_var("caller_id", caller)
     telemetry.on_command()
 
-    # skip any check operations when upgrade command
-    ctx_args = ctx.args or []
-    if ctx_args and (ctx.args[0] == "upgrade" or "--json-output" in ctx_args):
-        return
+    if not in_silence(ctx):
+        after_upgrade(ctx)
 
-    after_upgrade(ctx)
+
+def on_platformio_end(ctx, result):  # pylint: disable=W0613
+    if in_silence(ctx):
+        return
 
     try:
         check_platformio_upgrade()
@@ -53,10 +60,6 @@ def on_platformio_start(ctx, force, caller):
     except (exception.GetLatestVersionError, exception.APIRequestError):
         click.secho("Failed to check for PlatformIO upgrades. "
                     "Please check your Internet connection.", fg="red")
-
-
-def on_platformio_end(ctx, result):  # pylint: disable=W0613
-    pass
 
 
 def on_platformio_exception(e):
@@ -142,10 +145,21 @@ def after_upgrade(ctx):
         (click.style("follow", fg="cyan"),
          click.style("https://twitter.com/PlatformIO_Org", fg="cyan"))
     )
-    click.echo("- %s it on GitHub! > %s" % (
+    click.echo("- %s it on GitHub > %s" % (
         click.style("star", fg="cyan"),
         click.style("https://github.com/platformio/platformio", fg="cyan")
     ))
+    if not getenv("PLATFORMIO_IDE"):
+        click.echo("- %s PlatformIO IDE for IoT development > %s" % (
+            click.style("try", fg="cyan"),
+            click.style("http://platformio.org/platformio-ide", fg="cyan")
+        ))
+    if not util.is_ci():
+        click.echo("- %s to keep PlatformIO alive! > %s" % (
+            click.style("donate", fg="cyan"),
+            click.style("http://platformio.org/donate", fg="cyan")
+        ))
+
     click.echo("*" * terminal_width)
     click.echo("")
 
@@ -193,10 +207,16 @@ def check_platformio_upgrade():
     click.secho("There is a new version %s of PlatformIO available.\n"
                 "Please upgrade it via `" % latest_version,
                 fg="yellow", nl=False)
-    click.secho("platformio upgrade", fg="cyan", nl=False)
-    click.secho("` or `", fg="yellow", nl=False)
-    click.secho("pip install -U platformio", fg="cyan", nl=False)
-    click.secho("` command.\nChanges: ", fg="yellow", nl=False)
+    if getenv("PLATFORMIO_IDE"):
+        click.secho("PlatformIO IDE Menu: Upgrade PlatformIO",
+                    fg="cyan", nl=False)
+        click.secho("`.", fg="yellow")
+    else:
+        click.secho("platformio upgrade", fg="cyan", nl=False)
+        click.secho("` or `", fg="yellow", nl=False)
+        click.secho("pip install -U platformio", fg="cyan", nl=False)
+        click.secho("` command.", fg="yellow")
+    click.secho("Changes: ", fg="yellow", nl=False)
     click.secho("http://docs.platformio.org/en/latest/history.html",
                 fg="cyan")
     click.echo("*" * terminal_width)

@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@ from __future__ import absolute_import
 import atexit
 import re
 from glob import glob
+from os import environ, listdir, remove
+from os.path import isdir, isfile, join
 from os import environ, remove
 from os.path import basename, join
+
 
 from platformio.util import exec_command, where_is_program
 
@@ -114,7 +117,12 @@ class InoToCPPConverter(object):
 def ConvertInoToCpp(env):
 
     def delete_tmpcpp_file(file_):
-        remove(file_)
+        try:
+            remove(file_)
+        except:  # pylint: disable=bare-except
+            if isfile(file_):
+                print ("Warning: Could not remove temporary file '%s'. "
+                       "Please remove it manually." % file_)
 
     ino_nodes = (env.Glob(join("$PROJECTSRC_DIR", "*.ino")) +
                  env.Glob(join("$PROJECTSRC_DIR", "*.pde")))
@@ -133,43 +141,110 @@ def ConvertInoToCpp(env):
 
 
 def DumpIDEData(env):
+
+    BOARD_CORE = env.get("BOARD_OPTIONS", {}).get("build", {}).get("core")
+
+    def get_includes(env_):
+        includes = []
+        # includes from used framework and libs
+        for item in env_.get("VARIANT_DIRS", []):
+            if "$BUILDSRC_DIR" in item[0]:
+                continue
+            includes.append(env_.subst(item[1]))
+
+        # custom includes
+        for item in env_.get("CPPPATH", []):
+            if item.startswith("$BUILD_DIR"):
+                continue
+            includes.append(env_.subst(item))
+
+        # installed libs
+        for d in env_.get("LIBSOURCE_DIRS", []):
+            lsd_dir = env_.subst(d)
+            _append_lib_includes(env_, lsd_dir, includes)
+
+        # includes from toolchain
+        toolchain_dir = env_.subst(
+            join("$PIOPACKAGES_DIR", "$PIOPACKAGE_TOOLCHAIN"))
+        toolchain_incglobs = [
+            join(toolchain_dir, "*", "include*"),
+            join(toolchain_dir, "lib", "gcc", "*", "*", "include*")
+        ]
+        for g in toolchain_incglobs:
+            includes.extend(glob(g))
+
+        return includes
+
+    def _append_lib_includes(env_, libs_dir, includes):
+        if not isdir(libs_dir):
+            return
+        for name in env_.get("LIB_USE", []) + sorted(listdir(libs_dir)):
+            if not isdir(join(libs_dir, name)):
+                continue
+            # ignore user's specified libs
+            if name in env_.get("LIB_IGNORE", []):
+                continue
+            if name == "__cores__":
+                if isdir(join(libs_dir, name, BOARD_CORE)):
+                    _append_lib_includes(
+                        env_, join(libs_dir, name, BOARD_CORE), includes)
+                return
+
+            include = (
+                join(libs_dir, name, "src")
+                if isdir(join(libs_dir, name, "src"))
+                else join(libs_dir, name)
+            )
+            if include not in includes:
+                includes.append(include)
+
+    def get_defines(env_):
+        defines = []
+        # global symbols
+        for item in env_.get("CPPDEFINES", []):
+            if isinstance(item, list):
+                item = "=".join(item)
+            defines.append(env_.subst(item).replace('\\"', '"'))
+
+        # special symbol for Atmel AVR MCU
+        board = env_.get("BOARD_OPTIONS", {})
+        if board and board['platform'] == "atmelavr":
+            defines.append(
+                "__AVR_%s__" % board['build']['mcu'].upper()
+                .replace("ATMEGA", "ATmega")
+                .replace("ATTINY", "ATtiny")
+            )
+        return defines
+
+    LINTCCOM = "$CFLAGS $CCFLAGS $CPPFLAGS $_CPPDEFFLAGS"
+    LINTCXXCOM = "$CXXFLAGS $CCFLAGS $CPPFLAGS $_CPPDEFFLAGS"
+    env_ = env.Clone()
+
     data = {
-        "defines": [],
-        "includes": [],
+        "defines": get_defines(env_),
+        "includes": get_includes(env_),
+        "cc_flags": env_.subst(LINTCCOM),
+        "cxx_flags": env_.subst(LINTCXXCOM),
         "cxx_path": where_is_program(
-            env.subst("$CXX"), env.subst("${ENV['PATH']}"))
+            env_.subst("$CXX"), env_.subst("${ENV['PATH']}"))
     }
 
-    # includes from framework and libs
-    for item in env.get("VARIANT_DIRS", []):
-        if "$BUILDSRC_DIR" in item[0]:
-            continue
-        data['includes'].append(env.subst(item[1]))
-
-    # includes from toolchain
-    toolchain_dir = env.subst(
-        join("$PIOPACKAGES_DIR", "$PIOPACKAGE_TOOLCHAIN"))
-    toolchain_incglobs = [
-        join(toolchain_dir, "*", "include*"),
-        join(toolchain_dir, "lib", "gcc", "*", "*", "include*")
-    ]
-    for g in toolchain_incglobs:
-        data['includes'].extend(glob(g))
-
-    # global symbols
-    for item in env.get("CPPDEFINES", []):
+    # https://github.com/platformio/platformio-atom-ide/issues/34
+    _new_defines = []
+    for item in env_.get("CPPDEFINES", []):
         if isinstance(item, list):
             item = "=".join(item)
-        data['defines'].append(env.subst(item).replace('\\"', '"'))
+        item = item.replace('\\"', '"')
+        if " " in item:
+            _new_defines.append(item.replace(" ", "\\\\ "))
+        else:
+            _new_defines.append(item)
+    env_.Replace(CPPDEFINES=_new_defines)
 
-    # special symbol for Atmel AVR MCU
-    board = env.get("BOARD_OPTIONS", {})
-    if board and board['platform'] == "atmelavr":
-        data['defines'].append(
-            "__AVR_%s__" % board['build']['mcu'].upper()
-            .replace("ATMEGA", "ATmega")
-            .replace("ATTINY", "ATtiny")
-        )
+    data.update({
+        "cc_flags": env_.subst(LINTCCOM),
+        "cxx_flags": env_.subst(LINTCXXCOM)
+    })
 
     return data
 
@@ -184,9 +259,29 @@ def GetCompilerType(env):
     if result['returncode'] != 0:
         return None
     output = "".join([result['out'], result['err']]).lower()
-    for type_ in ("clang", "gcc"):
-        if type_ in output:
-            return type_
+    if "clang" in output and "LLVM" in output:
+        return "clang"
+    elif "gcc" in output:
+        return "gcc"
+    return None
+
+
+def GetActualLDScript(env):
+    script = None
+    for f in env.get("LINKFLAGS", []):
+        if f.startswith("-Wl,-T"):
+            script = env.subst(f[6:].replace('"', "").strip())
+            if isfile(script):
+                return script
+            for d in env.get("LIBPATH", []):
+                path = join(env.subst(d), script)
+                if isfile(path):
+                    return path
+
+    if script:
+        env.Exit("Error: Could not find '%s' LD script in LDPATH '%s'" % (
+            script, env.subst("$LIBPATH")))
+
     return None
 
 
@@ -198,4 +293,5 @@ def generate(env):
     env.AddMethod(ConvertInoToCpp)
     env.AddMethod(DumpIDEData)
     env.AddMethod(GetCompilerType)
+    env.AddMethod(GetActualLDScript)
     return env

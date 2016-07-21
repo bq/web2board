@@ -83,7 +83,7 @@ class PathsManager:
 
     @classmethod
     def get_sons_executable_path(cls):
-        return os.path.abspath(join(cls.RES_PATH, "Scons", "sconsScript.py"))
+        return join(PathsManager.get_platformio_packages_path(), "packages", "tool-scons", "script", "scons")
 
     @classmethod
     def get_platformio_packages_path(cls):
@@ -102,7 +102,6 @@ class PathsManager:
     @classmethod
     def get_copy_path_for_update(cls):
         return os.path.abspath(join(cls.MAIN_PATH, os.pardir, ".web2board_copy"))
-
 
     @classmethod
     def set_all_constants(cls):
@@ -144,11 +143,11 @@ class PathsManager:
         if os.path.exists(path):
             shutil.rmtree(path)
 
+
 # set working directory to src
 if utils.are_we_frozen():
     os.chdir(utils.get_module_path())
 else:
     os.chdir(join(utils.get_module_path(), os.path.pardir))
-
 
 PathsManager.set_all_constants()

@@ -99,6 +99,8 @@ def find_modules_for_pyinstaller(path, patterns):
 
 
 def extract_zip(origin, destination):
+    if isinstance(destination, str):
+        destination = destination.decode(sys.getfilesystemencoding())
     with zipfile.ZipFile(origin, "r") as z:
         return z.extractall(destination)
 
