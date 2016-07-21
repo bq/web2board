@@ -9,11 +9,53 @@ from libs.Config import Config
 from libs.Decorators.Asynchronous import asynchronous
 from libs.Downloader import Downloader
 from libs.PathsManager import PathsManager as pm
-from libs.Updaters.Updater import VersionInfo
 
 
 class UpdaterError(Exception):
     pass
+
+
+class VersionInfo:
+    def __init__(self, version, file_to_download_url="", libraries_names=list()):
+        self.version = version
+        """:type : str """
+        self.file_to_download_url = file_to_download_url
+        """:type : str | dict """
+        self.libraries_names = libraries_names
+        try:
+            self.__get_version_numbers()
+        except (ValueError, AttributeError):
+            raise Exception("bad format version: {}".format(version))
+
+    def __eq__(self, other):
+        return self.version == other.version
+
+    def __ne__(self, other):
+        return self.version != other.version
+
+    def __gt__(self, other):
+        zipped = zip(self.__get_version_numbers(), other.__get_version_numbers())
+        for s, o in zipped:
+            if s > o:
+                return True
+            if s < o:
+                return False
+        return False
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __le__(self, other):
+        return other >= self
+
+    def __lt__(self, other):
+        return other > self
+
+    def __get_version_numbers(self):
+        return [int(n) for n in self.version.split(".")]
+
+    def get_dictionary(self):
+        return self.__dict__
 
 
 class Web2BoardUpdater:

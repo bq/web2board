@@ -12,11 +12,12 @@ class TestLibsUpdater(unittest.TestCase):
         restore_test_resources("Updater")
         self.test_settings_path = os.path.join(PathsManager.TEST_SETTINGS_PATH, "Updater")
 
+        #Temporary version file that will be written when testing restore_current_version_if_necessary()
         PathsManager.VERSION_PATH = os.path.join(self.test_settings_path, "w2b.version")
 
         self.libs_updater = LibsUpdater()
         self.libs_updater.destination_path = os.path.join(self.test_settings_path,
-                                                          "newLibrariesPath")
+                                                          "destinationPath")
 
 
     def tearDown(self):
@@ -34,6 +35,8 @@ class TestLibsUpdater(unittest.TestCase):
     def test_restore_current_version_if_necessary_restoresLibsIfDestinationPathDoesNotExist(self):
         AppVersion.libs.url = "file:" + os.sep + os.sep + self.test_settings_path + os.sep + "bitbloqLibsV5.zip"
         self.assertTrue(self.libs_updater.restore_current_version_if_necessary())
+
+
         # TODO: ckeck that libraries have been downloaded and saved correctly
 
     # TODO: refactor this test for method restore_current_version_if_necessary()
