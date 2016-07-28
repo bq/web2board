@@ -51,7 +51,7 @@ scons: *** [.pioenvs/bt328/src/tmp_ino_to.o] Error 1"""
         error_info = [[True, dict(err=error_message)]]
         self.platformio_run_mock.should_receive("platformio_run").and_return(error_info)
 
-        result = self.compiler.compile("")
+        result = self.compiler.compile("void setup(){};void loop(){}")
 
         self.assertTrue(result[0])
         self.assertIsInstance(result[1]["err"], str)
