@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import json
+import yaml
 import logging
 import os
 import shutil
@@ -117,7 +118,7 @@ class CompilerUploader:
 
     def _parse_parallel_result(self, raw_result_str):
         result_str = raw_result_str.split("###RESULT###", 1)[1]
-        return json.loads(result_str)
+        return yaml.safe_load(result_str)
 
     def _get_parallel_working_space(self):
         while True:
@@ -152,7 +153,7 @@ class CompilerUploader:
         return format_compile_result(platformio_run(target=target, environment=(self.board,),
                                                     project_dir=work_space, upload_port=upload_port)[0])
 
-    def _run(self, code, upload=False, upload_port=None):
+    def _run(self, code, upload=False, upload_port=None, get_hex_string=False):
         start = time.time()
         self._check_board_configuration()
         upload_port = self.get_port() if upload and upload_port is None else upload_port
@@ -171,6 +172,12 @@ class CompilerUploader:
             process_args.append("parallelCompile")
 
             result = self._parse_parallel_result(subprocess.check_output(process_args))
+
+            if get_hex_string:
+                hex_path = os.path.join(current_work_space, ".pioenvs", self.board, "firmware.hex")
+                hex_data = open(hex_path).read()
+                result = (result, hex_data)
+
         finally:
             if os.path.exists(current_work_space):
                 utils.remove_folder(current_work_space)
