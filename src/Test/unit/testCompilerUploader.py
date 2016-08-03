@@ -1,4 +1,5 @@
 import unittest
+import json
 
 from flexmock import flexmock, flexmock_teardown
 
@@ -13,6 +14,7 @@ class TestCompilerUploader(unittest.TestCase):
     def setUp(self):
         self.compiler = CompilerUploader.CompilerUploader.construct()
         self.platformio_run_mock = flexmock(CompilerUploader)
+        self.parallel_compile_mock = flexmock(CompilerUploader)
 
     def tearDown(self):
         flexmock_teardown()
@@ -48,10 +50,15 @@ main.ino: In function 'int sum2()':
 main.ino:14:1: error: expected ';' before '}' token
 scons: *** [.pioenvs/bt328/src/tmp_ino_to.o] Error 1"""
 
-        error_info = [[True, dict(err=error_message)]]
-        self.platformio_run_mock.should_receive("platformio_run").and_return(error_info)
+        #error_info = [[True, dict(err=error_message)]]
+        #self.platformio_run_mock.should_receive("platformio_run").and_return(error_info)
 
-        result = self.compiler.compile("void setup(){};void loop(){}")
+        #When using parallel compilation, the process it's not the same as when web2board is running on a
+        #user's computer. We have to adapt the platformio mock to the calls used for parallel compilation.
+        error_info = [True, dict(err=error_message)]
+        self.parallel_compile_mock.should_receive("subprocess.check_output").and_return("###RESULT###" + json.dumps(error_info))
+
+        result = self.compiler.compile("")
 
         self.assertTrue(result[0])
         self.assertIsInstance(result[1]["err"], str)
