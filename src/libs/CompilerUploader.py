@@ -100,10 +100,10 @@ class CompilerUploader:
         return output, err
 
     @asynchronous()
-    def _check_port(self, port, mcu, baud_rate):
+    def _check_port(self, port, mcu, baud_rate, protocol="arduino"):
         try:
             log.debug("Checking port: {}".format(port))
-            args = "-P " + port + " -p " + mcu + " -b " + str(baud_rate) + " -c arduino"
+            args = "-P " + port + " -p " + mcu + " -b " + str(baud_rate) + " -c " + protocol
             output, err = self._call_avrdude(args)
             log.debug("{2}: {0}, {1}".format(output, err, port))
             return 'Device signature =' in output or 'Device signature =' in err
@@ -135,13 +135,14 @@ class CompilerUploader:
     def _search_board_port(self):
         mcu = self.build_options["boardData"]["build"]["mcu"]
         baud_rate = self.build_options["boardData"]["upload"]["speed"]
+        protocol = self.build_options["boardData"]["upload"]["protocol"]
         available_ports = self.get_available_ports()
         if len(available_ports) <= 0:
             return None
         log.info("Found available ports: {}".format(available_ports))
         port_futures_dict = {}
         for port in available_ports:
-            port_futures_dict[port] = self._check_port(port, mcu, baud_rate)
+            port_futures_dict[port] = self._check_port(port, mcu, baud_rate, protocol)
 
         watchdog = datetime.now()
         while datetime.now() - watchdog < timedelta(seconds=30) and len(port_futures_dict) > 0:
@@ -183,7 +184,8 @@ class CompilerUploader:
         port = upload_port if upload_port is not None else self.get_port()
         mcu = self.build_options["boardData"]["build"]["mcu"]
         baud_rate = str(self.build_options["boardData"]["upload"]["speed"])
-        args = "-V -P " + port + " -p " + mcu + " -b " + baud_rate + " -c arduino -D -U flash:w:" + hex_file_path + ":i"
+        protocol = self.build_options["boardData"]["upload"]["protocol"]
+        args = "-V -P " + port + " -p " + mcu + " -b " + baud_rate + " -c " + protocol + " -D -U flash:w:" + hex_file_path + ":i"
         output, err = self._call_avrdude(args)
         ok_text = "bytes of flash written"
         result_ok = ok_text in output or ok_text in err
