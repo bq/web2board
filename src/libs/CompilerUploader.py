@@ -124,13 +124,18 @@ class CompilerUploader:
         with open(os.path.join(main_ino_path, "main.ino"), 'w') as mainCppFile:
             mainCppFile.write(code)
 
-        run_result = platformio_run(target=target, environment=(self.board,),
-                                    project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0]
+        run_result = format_compile_result(platformio_run(target=target, environment=(self.board,),
+                                    project_dir=pm.PLATFORMIO_WORKSPACE_PATH, upload_port=upload_port)[0])
+
         if get_hex_string:
-            raise NotImplementedError()
-            # hexResult = self.__getHexString(pm.PLATFORMIO_WORKSPACE_PATH, self.board) if runResult[0] else None
-            # return runResult, hexResult
-        return format_compile_result(run_result)
+            if run_result[0]:
+                hex_path = os.path.join(pm.PLATFORMIO_WORKSPACE_PATH, ".pioenvs", self.board, "firmware.hex")
+                hex_data = open(hex_path).read()
+            else:
+                hex_data = None
+            run_result = (run_result, hex_data)
+
+        return run_result
 
     def _search_board_port(self):
         mcu = self.build_options["boardData"]["build"]["mcu"]

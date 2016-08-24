@@ -157,12 +157,13 @@ class HubsAPI(object):
                     return send_return_obj
                 return future
         
-            def get_hex_data(self, code):
+            def get_hex_data(self, code, board):
                 """
                 :rtype : Future
                 """
                 args = list()
                 args.append(code)
+                args.append(board)
                 id_ = self._get_next_message_id()
                 body = {"hub": self.hub_name, "function": "get_hex_data", "args": args, "ID": id_}
                 future = self.ws_client.get_future(id_)

@@ -50,9 +50,11 @@ class CodeHub(Hub):
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.is_compiling()
         compile_report = CompilerUploader.construct().compile(code)
+        log.info('#############################################################################')
+        log.info(compile_report)
         return self.__handle_compile_report(compile_report)
 
-    def get_hex_data(self, code, _sender):
+    def get_hex_data(self, code, board, _sender):
         """
         :type code: str
         :type _sender: ConnectedClientsGroup
@@ -60,8 +62,11 @@ class CodeHub(Hub):
         log.info("getting hexData from {}".format(_sender.ID))
         log.debug("Compiling code: {}".format(code.encode("utf-8")))
         _sender.is_compiling()
-        compileReport, hexData = CompilerUploader.construct().get_hex_data(code)
-        return self.__handle_compile_report(compileReport), hexData
+        compile_report, hex_data = CompilerUploader.construct(board).get_hex_data(code)
+        if hex_data is None:
+            return self.__handle_compile_report(compile_report)
+        else:
+            return self.__handle_compile_report(compile_report), hex_data
 
     def upload(self, code, board, _sender, port=None):
         """
