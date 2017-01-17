@@ -100,7 +100,7 @@ class CompilerUploader:
         return output, err
 
     @asynchronous()
-        def _check_port(self, port, mcu, baud_rate, protocol="arduino"):
+    def _check_port(self, port, mcu, baud_rate, protocol="arduino"):
         try:
             log.debug("Checking port: {}".format(port))
             args = "-P " + port + " -p " + mcu + " -b " + str(baud_rate) + " -c " + protocol
@@ -134,7 +134,7 @@ class CompilerUploader:
 
     def _search_board_port(self):
         mcu = self.build_options["boardData"]["build"]["mcu"]
-        protocol = options["boardData"]["upload"]["protocol"]
+        protocol = self.build_options["boardData"]["upload"]["protocol"]
         baud_rate = self.build_options["boardData"]["upload"]["speed"]
         available_ports = self.get_available_ports()
         if len(available_ports) <= 0:
