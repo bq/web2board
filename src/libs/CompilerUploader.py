@@ -5,6 +5,10 @@ import logging
 import os
 import subprocess
 from datetime import timedelta, datetime
+from UserList import UserList as _UserList
+from UserString import UserString as _UserString
+import UserList
+import UserString
 
 from libs import utils
 from libs.Decorators.Asynchronous import asynchronous
@@ -183,7 +187,7 @@ class CompilerUploader:
     def upload_avr_hex(self, hex_file_path, upload_port=None):
         port = upload_port if upload_port is not None else self.get_port()
         mcu = self.build_options["boardData"]["build"]["mcu"]
-        protocol = options["boardData"]["upload"]["protocol"]
+        protocol = self.build_options["boardData"]["upload"]["protocol"]
         baud_rate = str(self.build_options["boardData"]["upload"]["speed"])
         args = "-V -P " + port + " -p " + mcu + " -b " + baud_rate + " -c " + protocol + " -D -U flash:w:" + hex_file_path + ":i"
         output, err = self._call_avrdude(args)
