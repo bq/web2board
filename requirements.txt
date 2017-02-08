@@ -3,7 +3,6 @@ wshubsapi>=0.8.1
 glob2
 pyserial
 flexmock
-xmlrunner
 pyinstaller==3.0.0; sys_platform != 'darwin'
 pyinstaller==3.1.1; sys_platform == 'darwin'
 setuptools==19.2; sys_platform != 'darwin'

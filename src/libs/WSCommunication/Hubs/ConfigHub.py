@@ -4,7 +4,7 @@ import shutil
 import urllib2
 from copy import deepcopy
 
-import sys
+import time
 from wshubsapi.hub import Hub
 from libs.Config import Config
 from libs import utils
@@ -49,7 +49,7 @@ class ConfigHub(Hub):
         utils.set_log_level(log_level)
 
     def set_libraries_path(self, lib_dir):
-        Config.set_platformio_lib_dir(lib_dir.encode(sys.getfilesystemencoding()))
+        Config.set_platformio_lib_dir(lib_dir)
         PathsManager.clean_pio_envs()
 
     def get_libraries_path(self):
