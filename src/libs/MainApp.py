@@ -32,7 +32,7 @@ class MainApp:
         Version.read_version_values()
         Config.read_config_file()
         self.w2b_server = None
-        self.consoleHandler = None
+        self.consoleHandler = ConsoleHandler()
 
     @staticmethod
     def __handle_testing_options(testing):
@@ -168,7 +168,6 @@ class MainApp:
 
     def start_listening_console(self):
         log.info("listening console...")
-        self.consoleHandler = ConsoleHandler()
         self.consoleHandler.listener_loop()
 
     def start_main(self):
