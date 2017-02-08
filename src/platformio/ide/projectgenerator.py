@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
 import json
 import os
 import re
-import sys
-from os.path import (abspath, basename, expanduser, isdir, join, normpath,
-                     relpath)
+from os.path import abspath, basename, expanduser, isdir, join, relpath
 
 import bottle
-import click  # pylint: disable=wrong-import-order
+import click
 
-from platformio import app, exception, util
+from platformio import exception, util
 
 
 class ProjectGenerator(object):
@@ -66,21 +64,19 @@ class ProjectGenerator(object):
         envdata = self.get_project_env()
         if "env_name" not in envdata:
             return data
-        cmd = [normpath(sys.executable), "-m", "platformio", "-f"]
-        if app.get_session_var("caller_id"):
-            cmd.extend(["-c", app.get_session_var("caller_id")])
-        cmd.extend(["run", "-t", "idedata", "-e", envdata['env_name']])
-        cmd.extend(["-d", self.project_dir])
-        result = util.exec_command(cmd)
+        result = util.exec_command(
+            ["platformio", "-f", "run", "-t", "idedata",
+             "-e", envdata['env_name'], "-d", self.project_dir]
+        )
 
         if result['returncode'] != 0 or '"includes":' not in result['out']:
             raise exception.PlatformioException(
                 "\n".join([result['out'], result['err']]))
 
         output = result['out']
-        start_index = output.index('{"')
+        start_index = output.index('\n{"')
         stop_index = output.rindex('}')
-        data = json.loads(output[start_index:stop_index + 1])
+        data = json.loads(output[start_index + 1:stop_index + 1])
 
         return data
 
@@ -94,6 +90,14 @@ class ProjectGenerator(object):
                 for f in files:
                     result.append(relpath(join(root, f)))
         return result
+
+    @staticmethod
+    def get_main_src_file(src_files):
+        for f in src_files:
+            for ext in ("c", "cpp"):
+                if f.endswith(".%s" % ext):
+                    return f
+        return None
 
     def get_tpls(self):
         tpls = []
@@ -128,9 +132,9 @@ class ProjectGenerator(object):
 
     def _gather_tplvars(self):
         src_files = self.get_src_files()
+        main_src_file = self.get_main_src_file(src_files)
 
-        if (not any([f.endswith((".c", ".cpp")) for f in src_files]) and
-                self.ide == "clion"):
+        if not main_src_file and self.ide == "clion":
             click.secho(
                 "Warning! Can not find main source file (*.c, *.cpp). So, "
                 "code auto-completion is disabled. Please add source files "
@@ -143,6 +147,7 @@ class ProjectGenerator(object):
         self._tplvars.update({
             "project_name": self.get_project_name(),
             "src_files": src_files,
+            "main_src_file": main_src_file,
             "user_home_dir": abspath(expanduser("~")),
             "project_dir": self.project_dir,
             "systype": util.get_systype(),

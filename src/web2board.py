@@ -50,15 +50,11 @@ click.confirm = click_confirm
 
 def run_scons_script():
     pprint.pprint(sys.path)
-    sys.argv.pop(0)
     platformio_path = sys.argv.pop(-1)
     path_diff = os.path.relpath(os.path.dirname(PathsManager.SCONS_EXECUTABLE_PATH), platformio_path)
     os.chdir(platformio_path)
-    sys.path.extend([os.path.join(path_diff, os.path.pardir, "engine")])
-    try:
-        execfile(path_diff + os.sep + "scons")
-    except Exception as e:
-        print e
+    sys.path.extend([path_diff + os.sep + 'sconsFiles'])
+    execfile(path_diff + os.sep + "sconsFiles" + os.sep + "scons.py")
 
 if "-Q" in sys.argv:
     run_scons_script()

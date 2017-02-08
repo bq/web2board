@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
     Builder for ST STM32 Series ARM microcontrollers.
 """
 
+import platform
 from os.path import isfile, join
 
 from SCons.Script import (COMMAND_LINE_TARGETS, AlwaysBuild, Default,
-                          DefaultEnvironment, SConscript)
+                          DefaultEnvironment, Exit, SConscript)
 
 env = DefaultEnvironment()
 
@@ -27,8 +28,8 @@ SConscript(env.subst(join("$PIOBUILDER_DIR", "scripts", "basearm.py")))
 
 if env.subst("$UPLOAD_PROTOCOL") == "gdb":
     if not isfile(join(env.subst("$PROJECT_DIR"), "upload.gdb")):
-        env.Exit(
-            "Error: You are using GDB as firmware uploader. "
+        Exit(
+            "You are using GDB as firmware uploader. "
             "Please specify upload commands in upload.gdb "
             "file in project directory!"
         )
@@ -99,8 +100,12 @@ AlwaysBuild(target_size)
 # Target: Upload by default .bin file
 #
 
-if "mbed" in env.subst("$FRAMEWORK") and not env.subst("$UPLOAD_PROTOCOL"):
-    upload = env.Alias(["upload", "uploadlazy"], target_firm, env.UploadToDisk)
+disable_msd = (
+    (platform.system() == "Darwin" and platform.release().startswith("14.")) or
+    env.subst("$UPLOAD_PROTOCOL"))
+if "mbed" in env.subst("$FRAMEWORK") and not disable_msd:
+    upload = env.Alias(["upload", "uploadlazy"],
+                       target_firm, env.UploadToDisk)
 else:
     upload = env.Alias(["upload", "uploadlazy"], target_firm, "$UPLOADCMD")
 AlwaysBuild(upload)

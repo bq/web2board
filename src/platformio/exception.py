@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -129,6 +129,12 @@ class UnknownEnvNames(PlatformioException):
     MESSAGE = "Unknown environment names '{0}'. Valid names are '{1}'"
 
 
+class CleanPioenvsDirError(PlatformioException):
+
+    MESSAGE = "Can not remove temporary directory `{0}`. "\
+        "Please remove it manually"
+
+
 class GetSerialPortsError(PlatformioException):
 
     MESSAGE = "No implementation for your platform ('{0}') available"
@@ -183,6 +189,14 @@ class CIBuildEnvsEmpty(PlatformioException):
     MESSAGE = "Can't find PlatformIO build environments.\n"\
         "Please specify `--board` or path to `platformio.ini` with "\
         "predefined environments using `--project-conf` option"
+
+
+class SConsNotInstalledError(PlatformioException):
+
+    MESSAGE = "SCons is not installed in your system. "\
+        "More details in FAQ/Troubleshooting section: "\
+        "http://docs.platformio.org/en/latest/faq.html"\
+        "#scons-is-not-installed-in-your-system"
 
 
 class UpgradeError(PlatformioException):

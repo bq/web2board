@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,9 +102,8 @@ class PackageManager(object):
             dlpath = self.download(info['url'], pkg_dir, info['sha1'])
         except (requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
-                requests.exceptions.SSLError,
                 exception.FDUnrecognizedStatusCode, StopIteration):
-            if not info['url'].startswith("http://dl.platformio.org"):
+            if info['url'].startswith("http://sourceforge.net"):
                 dlpath = self.download(
                     "http://dl.platformio.org/packages/%s" %
                     basename(info['url']), pkg_dir, info['sha1'])
@@ -127,8 +126,7 @@ class PackageManager(object):
             click.secho("Not installed", fg="yellow")
             return False
 
-        if isdir(join(self._package_dir, name)):
-            rmtree(join(self._package_dir, name))
+        rmtree(join(self._package_dir, name))
         self._unregister(name)
         click.echo("[%s]" % click.style("OK", fg="green"))
 

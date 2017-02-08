@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import re
 import sys
 import xml.etree.ElementTree as ElementTree
 from binascii import crc32
-from os import walk
+from os import getenv, walk
 from os.path import basename, isfile, join, normpath
 
 from SCons.Script import DefaultEnvironment
@@ -49,7 +49,6 @@ MBED_VARIANTS = {
     "blueboard_lpc11u24": "LPC11U24",
     "dipcortexm0": "LPC11U24",
     "seeeduinoArchPro": "ARCH_PRO",
-    "seeedArchMax": "ARCH_MAX",
     "ubloxc027": "UBLOX_C027",
     "lpc1114fn28": "LPC1114",
     "lpc11u35": "LPC11U35_401",
@@ -70,8 +69,7 @@ MBED_VARIANTS = {
     "dfcm_nnn40": "DELTA_DFCM_NNN40",
     "samr21_xpro": "SAMR21G18A",
     "saml21_xpro_b": "SAML21J18A",
-    "samd21_xpro": "SAMD21J18A",
-    "bbcmicrobit": "NRF51_MICROBIT"
+    "samd21_xpro": "SAMD21J18A"
 }
 
 MBED_LIBS_MAP = {
@@ -124,7 +122,7 @@ def add_mbedlib(libname, libar):
     lib_dir = join(env.subst("$PLATFORMFW_DIR"), "libs", libname)
     if not isfile(join(lib_dir, "TARGET_%s" % variant,
                        "TOOLCHAIN_GCC_ARM", "lib%s.a" % libar)):
-        print(
+        print (
             "Warning: %s board doesn't have native support for '%s' library!" %
             (env.get("BOARD"), libname), file=sys.stderr)
         return
@@ -145,27 +143,10 @@ def add_mbedlib(libname, libar):
         "lwip-sys"
     )
 
-    target_map = {
-        "nxplpc": "NXP",
-        "freescalekinetis": "Freescale",
-        "ststm32": "STM"
-    }
-
-    target_includes = (
-        "TARGET_%s" % target_map.get(env.subst("$PLATFORM"), ""),
-        "TARGET_%s" % variant,
-        "TARGET_CORTEX_M"
-    )
-
     for root, _, files in walk(lib_dir):
         if (not any(f.endswith(".h") for f in files) and
                 basename(root) not in sysincdirs):
             continue
-
-        if "TARGET_" in root:
-            if all([p not in root.upper() for p in target_includes]):
-                continue
-
         var_dir = join("$BUILD_DIR", "FrameworkMbed%sInc%d" %
                        (libname.upper(), crc32(root)))
         if var_dir in env.get("CPPPATH"):
@@ -200,11 +181,6 @@ def parse_eix_file(filename):
             result[key].append(
                 node.get(_nkeys[0]) if len(_nkeys) == 1 else node.attrib)
 
-    if "LINKFLAGS" in result:
-        for i, flag in enumerate(result["LINKFLAGS"]):
-            if flag.startswith("-u "):
-                result["LINKFLAGS"][i] = result["LINKFLAGS"][i].split(" ")
-
     return result
 
 
@@ -212,34 +188,25 @@ def get_build_flags(data):
     flags = {}
     cflags = set(data.get("CFLAGS", []))
     cxxflags = set(data.get("CXXFLAGS", []))
-    ccflags = set(cflags & cxxflags)
-    flags['CCFLAGS'] = list(ccflags)
-    flags['CXXFLAGS'] = list(cxxflags - ccflags)
-    flags['CFLAGS'] = list(cflags - ccflags)
+    cppflags = set(cflags & cxxflags)
+    flags['CPPFLAGS'] = list(cppflags)
+    flags['CXXFLAGS'] = list(cxxflags - cppflags)
+    flags['CFLAGS'] = list(cflags - cppflags)
     return flags
 
 
-def _mbed_whole_archive_hook(libs_):
-    if (not isinstance(libs_, list) or
-            env.subst("$PLATFORM") == "nordicnrf51"):
-        return libs_
+def _mbed_whole_archive_hook(flags):
+    if (not isinstance(flags, list) or
+            env.get("BOARD_OPTIONS", {}).get("platform") != "ststm32"):
+        return flags
 
-    _dynlibs = []
-    _stlibs = []
-    for l_ in libs_:
-        if isinstance(l_, basestring):
-            _stlibs.append(l_)
-        else:
-            _dynlibs.append(l_)
+    for pos, flag in enumerate(flags[:]):
+        if isinstance(flag, basestring):
+            continue
+        flags.insert(pos, "-Wl,-whole-archive")
+        flags.insert(pos + 2, "-Wl,-no-whole-archive")
 
-    libs_ = []
-    if _dynlibs:
-        libs_.append("-Wl,-whole-archive")
-        libs_.extend(_dynlibs)
-        libs_.append("-Wl,-no-whole-archive")
-    libs_.extend(_stlibs)
-
-    return libs_
+    return flags
 
 
 board_type = env.subst("$BOARD")
@@ -254,7 +221,7 @@ variant_dir = join("$PLATFORMFW_DIR", "variant", variant)
 env.Replace(
     _mbed_whole_archive_hook=_mbed_whole_archive_hook,
     _LIBFLAGS="${_mbed_whole_archive_hook(%s)}" % env.get("_LIBFLAGS")[2:-1],
-    CCFLAGS=build_flags.get("CCFLAGS", []),
+    CPPFLAGS=build_flags.get("CPPFLAGS", []),
     CFLAGS=build_flags.get("CFLAGS", []),
     CXXFLAGS=build_flags.get("CXXFLAGS", []),
     LINKFLAGS=eixdata.get("LINKFLAGS", []),
@@ -265,12 +232,10 @@ env.Replace(
 
 # restore external build flags
 env.ProcessFlags([
-    env.get("BOARD_OPTIONS", {}).get("build", {}).get("extra_flags")
+    env.get("BOARD_OPTIONS", {}).get("build", {}).get("extra_flags"),
+    env.get("BUILD_FLAGS"),
+    getenv("PLATFORMIO_BUILD_FLAGS"),
 ])
-# remove base flags
-env.ProcessUnFlags(env.get("BUILD_UNFLAGS"))
-# apply user flags
-env.ProcessFlags([env.get("BUILD_FLAGS")])
 
 # Hook for K64F and K22F
 if board_type in ("frdm_k22f", "frdm_k64f"):
@@ -293,7 +258,7 @@ env.Append(
 # Target: Build mbed Library
 #
 
-libs = [l for l in eixdata.get("STDLIBS", []) if l not in env.get("LIBS", [])]
+libs = [l for l in eixdata.get("STDLIBS", []) if l not in env.get("LIBS")]
 libs.extend(["mbed", "c", "gcc"])
 
 libs.append(env.Library(
@@ -302,7 +267,7 @@ libs.append(env.Library(
      for f in eixdata.get("OBJFILES", [])]
 ))
 
-env.Prepend(LIBS=libs)
+env.Append(LIBS=libs)
 
 for _libname, _libdata in get_used_mbedlibs().iteritems():
     for _libar in _libdata['ar']:

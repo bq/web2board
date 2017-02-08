@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ from shutil import copyfile
 
 import click
 
-from platformio import app, exception, util
+from platformio import app, exception
 from platformio.commands.platforms import \
     platforms_install as cli_platforms_install
 from platformio.ide.projectgenerator import ProjectGenerator
@@ -75,12 +75,26 @@ def cli(ctx, project_dir, board, ide,  # pylint: disable=R0913
             not click.confirm("Do you want to continue?")):
         raise exception.AbortedByUser()
 
-    init_base_project(project_dir)
+    project_file = join(project_dir, "platformio.ini")
+    src_dir = join(project_dir, "src")
+    lib_dir = join(project_dir, "lib")
+
+    for d in (src_dir, lib_dir):
+        if not isdir(d):
+            makedirs(d)
+
+    init_lib_readme(lib_dir)
+    init_ci_conf(project_dir)
+    init_cvs_ignore(project_dir)
+
+    if not isfile(project_file):
+        copyfile(join(get_source_dir(), "projectconftpl.ini"),
+                 project_file)
 
     if board:
         fill_project_envs(
-            ctx, join(project_dir, "platformio.ini"), board,
-            enable_auto_uploading, env_prefix, ide is not None
+            ctx, project_file, board, enable_auto_uploading, env_prefix,
+            ide is not None
         )
 
     if ide:
@@ -112,25 +126,58 @@ def cli(ctx, project_dir, board, ide,  # pylint: disable=R0913
     )
 
 
-def init_base_project(project_dir):
-    platformio_ini = join(project_dir, "platformio.ini")
-    if not isfile(platformio_ini):
-        copyfile(join(get_source_dir(), "projectconftpl.ini"),
-                 platformio_ini)
+def fill_project_envs(  # pylint: disable=too-many-arguments,too-many-locals
+        ctx, project_file, board_types, enable_auto_uploading,
+        env_prefix, force_download):
+    builtin_boards = get_boards()
+    content = []
+    used_envs = []
+    used_platforms = []
 
-    lib_dir = join(project_dir, "lib")
-    src_dir = join(project_dir, "src")
-    config = util.get_project_config(platformio_ini)
-    if config.has_option("platformio", "src_dir"):
-        src_dir = join(project_dir, config.get("platformio", "src_dir"))
+    with open(project_file) as f:
+        used_envs = [l.strip() for l in f.read().splitlines() if
+                     l.strip().startswith("[env:")]
 
-    for d in (src_dir, lib_dir):
-        if not isdir(d):
-            makedirs(d)
+    for type_ in board_types:
+        data = builtin_boards[type_]
+        used_platforms.append(data['platform'])
+        env_name = "[env:%s%s]" % (env_prefix, type_)
 
-    init_lib_readme(lib_dir)
-    init_ci_conf(project_dir)
-    init_cvs_ignore(project_dir)
+        if env_name in used_envs:
+            continue
+
+        content.append("")
+        content.append(env_name)
+        content.append("platform = %s" % data['platform'])
+
+        # find default framework for board
+        frameworks = data.get("frameworks")
+        if frameworks:
+            content.append("framework = %s" % frameworks[0])
+
+        content.append("board = %s" % type_)
+        if enable_auto_uploading:
+            content.append("targets = upload")
+
+    if force_download and used_platforms:
+        _install_dependent_platforms(ctx, used_platforms)
+
+    if not content:
+        return
+
+    with open(project_file, "a") as f:
+        content.append("")
+        f.write("\n".join(content))
+
+
+def _install_dependent_platforms(ctx, platforms):
+    installed_platforms = PlatformFactory.get_platforms(installed=True).keys()
+    if set(platforms) <= set(installed_platforms):
+        return
+    ctx.invoke(
+        cli_platforms_install,
+        platforms=list(set(platforms) - set(installed_platforms))
+    )
 
 
 def init_lib_readme(lib_dir):
@@ -144,7 +191,7 @@ PlatformIO will compile them to static libraries and link to executable file.
 The source code of each library should be placed in separate directory, like
 "lib/private_lib/[here are source files]".
 
-For example, see how can be organized `Foo` and `Bar` libraries:
+For example, see how can be organised `Foo` and `Bar` libraries:
 
 |--lib
 |  |--Bar
@@ -255,59 +302,3 @@ def init_cvs_ignore(project_dir):
         return
     with open(join(project_dir, ".gitignore"), "w") as f:
         f.write(".pioenvs")
-
-
-def fill_project_envs(  # pylint: disable=too-many-arguments,too-many-locals
-        ctx, platformio_ini, board_types, enable_auto_uploading,
-        env_prefix, force_download):
-    builtin_boards = get_boards()
-    content = []
-    used_boards = []
-    used_platforms = []
-
-    config = util.get_project_config(platformio_ini)
-    for section in config.sections():
-        if not all([section.startswith("env:"),
-                    config.has_option(section, "board")]):
-            continue
-        used_boards.append(config.get(section, "board"))
-
-    for type_ in board_types:
-        data = builtin_boards[type_]
-        used_platforms.append(data['platform'])
-
-        if type_ in used_boards:
-            continue
-
-        content.append("")
-        content.append("[env:%s%s]" % (env_prefix, type_))
-        content.append("platform = %s" % data['platform'])
-
-        # find default framework for board
-        frameworks = data.get("frameworks")
-        if frameworks:
-            content.append("framework = %s" % frameworks[0])
-
-        content.append("board = %s" % type_)
-        if enable_auto_uploading:
-            content.append("targets = upload")
-
-    if force_download and used_platforms:
-        _install_dependent_platforms(ctx, used_platforms)
-
-    if not content:
-        return
-
-    with open(platformio_ini, "a") as f:
-        content.append("")
-        f.write("\n".join(content))
-
-
-def _install_dependent_platforms(ctx, platforms):
-    installed_platforms = PlatformFactory.get_platforms(installed=True).keys()
-    if set(platforms) <= set(installed_platforms):
-        return
-    ctx.invoke(
-        cli_platforms_install,
-        platforms=list(set(platforms) - set(installed_platforms))
-    )

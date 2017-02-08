@@ -14,8 +14,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 131072,
-            "maximum_size": 1048576,
-            "protocol": "stlink"
+            "maximum_size": 1048576
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF252419",
         "vendor": "ST"
@@ -35,8 +34,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 16384,
-            "maximum_size": 131072,
-            "protocol": "stlink"
+            "maximum_size": 131072
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF258515",
         "vendor": "ST"
@@ -56,8 +54,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 49152,
-            "maximum_size": 262144,
-            "protocol": "stlink"
+            "maximum_size": 262144
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF254044",
         "vendor": "ST"
@@ -73,8 +70,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 8192,
-            "maximum_size": 131072,
-            "protocol": "stlink"
+            "maximum_size": 131072
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF250863",
         "vendor": "ST"
@@ -90,8 +86,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 8192,
-            "maximum_size": 65536,
-            "protocol": "stlink"
+            "maximum_size": 65536
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF253215",
         "vendor": "ST"
@@ -107,8 +102,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 16384,
-            "maximum_size": 65536,
-            "protocol": "stlink"
+            "maximum_size": 65536
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF260318",
         "vendor": "ST"
@@ -124,8 +118,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 65536,
-            "maximum_size": 262144,
-            "protocol": "stlink"
+            "maximum_size": 262144
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF259098",
         "vendor": "ST"
@@ -141,8 +134,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 262144,
-            "maximum_size": 2097152,
-            "protocol": "stlink"
+            "maximum_size": 2097152
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1848/PF259090",
         "vendor": "ST"
@@ -281,14 +273,14 @@
     "nucleo_f401re": {
         "build": {
             "core": "stm32",
-            "extra_flags": "-DSTM32F4 -DSTM32F401xE -DSTM32F40_41xxx",
+            "extra_flags": "-DSTM32F4 -DSTM32F401xE",
             "f_cpu": "84000000L",
             "ldscript": "stm32f401xe.ld",
             "cpu": "cortex-m4",
             "mcu": "stm32f401ret6",
             "variant": "stm32f401xe"
         },
-        "frameworks": ["mbed", "cmsis", "spl"],
+        "frameworks": ["cmsis", "mbed"],
         "name": "ST Nucleo F401RE",
         "platform": "ststm32",
         "upload": {
@@ -433,8 +425,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 8192,
-            "maximum_size": 65536,
-            "protocol": "stlink"
+            "maximum_size": 65536
         },
         "url": "http://www.st.com/web/en/catalog/tools/PF260319",
         "vendor": "ST"
@@ -450,8 +441,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 12288,
-            "maximum_size": 65536,
-            "protocol": "stlink"
+            "maximum_size": 65536
         },
         "url": "http://www.st.com/web/en/catalog/tools/PF260318",
         "vendor": "ST"
@@ -467,8 +457,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 393216,
-            "maximum_size": 1048576,
-            "protocol": "stlink"
+            "maximum_size": 1048576
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/CL1620/SC959/SS1532/LN1848/PF262395",
         "vendor": "ST"
@@ -484,8 +473,7 @@
         "platform": "ststm32",
         "upload": {
             "maximum_ram_size": 131072,
-            "maximum_size": 1048576,
-            "protocol": "stlink"
+            "maximum_size": 1048576
         },
         "url": "http://www.st.com/web/catalog/tools/FM116/CL1620/SC959/SS1532/LN1848/PF261635",
         "vendor": "ST"
@@ -553,101 +541,5 @@
         },
         "url": "https://developer.mbed.org/platforms/ST-Nucleo-L476RG/",
         "vendor": "ST"
-    },
-    "nucleo_f410rb": {
-        "build": {
-            "f_cpu": "100000000L",
-            "cpu": "cortex-m4",
-            "mcu": "stm32f410rbt6"
-        },
-        "frameworks": ["mbed"],
-        "name": "ST Nucleo F410RB",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 32768,
-            "maximum_size": 131072
-        },
-        "url": "https://developer.mbed.org/platforms/ST-Nucleo-F410RB/",
-        "vendor": "ST"
-    },
-    "nucleo_l073rz": {
-        "build": {
-            "f_cpu": "32000000L",
-            "cpu": "cortex-m0plus",
-            "mcu": "stm32l073rz"
-        },
-        "frameworks": ["mbed"],
-        "name": "ST Nucleo L073RZ",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 20480,
-            "maximum_size": 196608
-        },
-        "url": "https://developer.mbed.org/platforms/ST-Nucleo-L073RZ/",
-        "vendor": "ST"
-    },
-    "nucleo_l031k6": {
-        "build": {
-            "f_cpu": "32000000L",
-            "cpu": "cortex-m0plus",
-            "mcu": "stm32l031k6t6"
-        },
-        "frameworks": ["mbed"],
-        "name": "ST Nucleo L031K6",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 8192,
-            "maximum_size": 32768
-        },
-        "url": "https://developer.mbed.org/platforms/ST-Nucleo-L031K6/",
-        "vendor": "ST"
-    },
-    "seeedArchMax": {
-        "build": {
-            "f_cpu": "168000000L",
-            "cpu": "cortex-m4",
-            "mcu": "stm32f407vet6"
-        },
-        "frameworks": ["mbed"],
-        "name": "SeeedStudio Arch Max",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 196608,
-            "maximum_size": 524288
-        },
-        "url": "https://developer.mbed.org/platforms/Seeed-Arch-Max/",
-        "vendor": "SeeedStudio"
-    },
-    "b96b_f446ve": {
-        "build": {
-            "f_cpu": "168000000L",
-            "cpu": "cortex-m4",
-            "mcu": "stm32f446vet6"
-        },
-        "frameworks": ["mbed"],
-        "name": "96Boards B96B-F446VE",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 131072,
-            "maximum_size": 524288
-        },
-        "url": "https://developer.mbed.org/platforms/ST-B96B-F446VE/",
-        "vendor": "96Boards"
-    },
-    "mts_mdot_f411re": {
-        "build": {
-            "f_cpu": "100000000L",
-            "cpu": "cortex-m4",
-            "mcu": "stm32f411ret6"
-        },
-        "frameworks": ["mbed"],
-        "name": "MultiTech mDot F411",
-        "platform": "ststm32",
-        "upload": {
-            "maximum_ram_size": 131072,
-            "maximum_size": 524288
-        },
-        "url": "https://developer.mbed.org/platforms/MTS-mDot-F411/",
-        "vendor": "MultiTech"
     }
 }

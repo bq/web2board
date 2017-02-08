@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from time import mktime
 import click
 import requests
 
-from platformio import app, util
+from platformio import util
 from platformio.exception import (FDSHASumMismatch, FDSizeMismatch,
                                   FDUnrecognizedStatusCode)
 
@@ -56,21 +56,18 @@ class FileDownloader(object):
         return self._request.headers['last-modified']
 
     def get_size(self):
-        if "content-length" not in self._request.headers:
-            return -1
         return int(self._request.headers['content-length'])
 
     def start(self):
         itercontent = self._request.iter_content(chunk_size=self.CHUNK_SIZE)
         f = open(self._destination, "wb")
+        chunks = int(ceil(self.get_size() / float(self.CHUNK_SIZE)))
 
-        if app.is_disabled_progressbar() or self.get_size() == -1:
+        if util.is_ci():
             click.echo("Downloading...")
-            for chunk in itercontent:
-                if chunk:
-                    f.write(chunk)
+            for _ in range(0, chunks):
+                f.write(next(itercontent))
         else:
-            chunks = int(ceil(self.get_size() / float(self.CHUNK_SIZE)))
             with click.progressbar(length=chunks, label="Downloading") as pb:
                 for _ in pb:
                     f.write(next(itercontent))
@@ -81,7 +78,7 @@ class FileDownloader(object):
 
     def verify(self, sha1=None):
         _dlsize = getsize(self._destination)
-        if self.get_size() != -1 and _dlsize != self.get_size():
+        if _dlsize != self.get_size():
             raise FDSizeMismatch(_dlsize, self._fname, self.get_size())
 
         if not sha1:
@@ -91,12 +88,12 @@ class FileDownloader(object):
         try:
             result = util.exec_command(["sha1sum", self._destination])
             dlsha1 = result['out']
-        except (OSError, ValueError):
+        except OSError:
             try:
                 result = util.exec_command(
                     ["shasum", "-a", "1", self._destination])
                 dlsha1 = result['out']
-            except (OSError, ValueError):
+            except OSError:
                 pass
 
         if dlsha1:

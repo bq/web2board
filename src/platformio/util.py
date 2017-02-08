@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from glob import glob
 from os.path import (abspath, basename, dirname, expanduser, isdir, isfile,
-                     join, splitdrive)
+                     join, realpath)
 from platform import system, uname
 from threading import Thread
 
 from libs import utils
 from libs.PathsManager import PathsManager
-from platformio import __apiip__, __apiurl__, __version__, exception
+from platformio import __apiurl__, __version__, exception
 
 # pylint: disable=wrong-import-order
 try:
@@ -126,11 +127,6 @@ def singleton(cls):
     return get_instance
 
 
-def load_json(file_path):
-    with open(file_path, "r") as f:
-        return json.load(f)
-
-
 def get_systype():
     data = uname()
     type_ = data[0].lower()
@@ -169,12 +165,6 @@ def get_home_dir():
         "home_dir",
         join(expanduser("~"), ".platformio")
     )
-
-    if "windows" in get_systype():
-        try:
-            home_dir.encode("utf8")
-        except UnicodeDecodeError:
-            home_dir = splitdrive(home_dir)[0] + "\\.platformio"
 
     if not isdir(home_dir):
         os.makedirs(home_dir)
@@ -217,20 +207,12 @@ def get_pioenvs_dir():
     )
 
 
-def get_projectdata_dir():
-    return _get_projconf_option_dir(
-        "data_dir",
-        join(get_project_dir(), "data")
-    )
-
-
-def get_project_config(ini_path=None):
-    if not ini_path:
-        ini_path = join(get_project_dir(), "platformio.ini")
-    if not isfile(ini_path):
+def get_project_config():
+    path = join(get_project_dir(), "platformio.ini")
+    if not isfile(path):
         raise exception.NotPlatformProject(get_project_dir())
     cp = ConfigParser()
-    cp.read(ini_path)
+    cp.read(path)
     return cp
 
 
@@ -249,9 +231,15 @@ def exec_command(*args, **kwargs):
         "returncode": None
     }
 
+    tempPath = tempfile.gettempdir() + os.sep + "w2bInAuxiliary.w2b" # [JORGE_GARCIA] modified for non console in windows
+    with open(tempPath, "w"):
+        pass
+
+
     default = dict(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        stdin=open(tempPath, "r"),  # [JORGE_GARCIA] modified for non console in windows
         shell=system() == "Windows"
     )
     default.update(kwargs)
@@ -284,22 +272,12 @@ def get_serialports():
         from serial.tools.list_ports import comports
     except ImportError:
         raise exception.GetSerialPortsError(os.name)
-
-    result = []
-    for p, d, h in comports():
-        if not p:
-            continue
-        if system() == "Windows":
-            try:
-                d = unicode(d, errors="ignore")
-            except TypeError:
-                pass
-        result.append({"port": p, "description": d, "hwid": h})
-
+    result = [{"port": p, "description": d, "hwid": h}
+              for p, d, h in comports() if p]
     # fix for PySerial
     if not result and system() == "Darwin":
         for p in glob("/dev/tty.*"):
-            result.append({"port": p, "description": "n/a", "hwid": "n/a"})
+            result.append({"port": p, "description": "", "hwid": ""})
     return result
 
 
@@ -307,7 +285,7 @@ def get_logicaldisks():
     disks = []
     if system() == "Windows":
         result = exec_command(
-            ["wmic", "logicaldisk", "get", "name,VolumeName"]).get("out", "")
+            ["wmic", "logicaldisk", "get", "name,VolumeName"]).get("out")
         disknamere = re.compile(r"^([A-Z]{1}\:)\s*(\S+)?")
         for line in result.split("\n"):
             match = disknamere.match(line.strip())
@@ -333,38 +311,28 @@ def get_request_defheaders():
     )}
 
 
-def get_api_result(path, params=None, data=None, skipdns=False):
+def get_api_result(path, params=None, data=None):
     import requests
     result = None
     r = None
 
-    headers = get_request_defheaders()
-    url = __apiurl__
-    if skipdns:
-        url = "http://%s" % __apiip__
-        headers['host'] = __apiurl__[__apiurl__.index("://")+3:]
-
     try:
         if data:
-            r = requests.post(
-                url + path, params=params, data=data, headers=headers)
+            r = requests.post(__apiurl__ + path, params=params, data=data,
+                              headers=get_request_defheaders())
         else:
-            r = requests.get(url + path, params=params, headers=headers)
-        r.raise_for_status()
+            r = requests.get(__apiurl__ + path, params=params,
+                             headers=get_request_defheaders())
         result = r.json()
+        r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         if result and "errors" in result:
             raise exception.APIRequestError(result['errors'][0]['title'])
         else:
             raise exception.APIRequestError(e)
-    except (requests.exceptions.ConnectionError,
-            requests.exceptions.ConnectTimeout,
-            requests.exceptions.ReadTimeout):
-        if not skipdns:
-            return get_api_result(path, params, data, skipdns=True)
+    except requests.exceptions.ConnectionError:
         raise exception.APIRequestError(
-            "Could not connect to PlatformIO Registry Service. "
-            "Please try later.")
+            "Could not connect to PlatformIO Registry Service")
     except ValueError:
         raise exception.APIRequestError(
             "Invalid response: %s" % r.text.encode("utf-8"))
@@ -372,6 +340,54 @@ def get_api_result(path, params=None, data=None, skipdns=False):
         if r:
             r.close()
     return result
+
+
+def test_scons():
+    try:
+        r = exec_command(["scons", "--version"])
+        if "ImportError: No module named SCons.Script" in r['err']:
+            _PYTHONPATH = []
+            for p in sys.path:
+                if not p.endswith("-packages"):
+                    continue
+                for item in glob(join(p, "scons*")):
+                    if isdir(join(item, "SCons")) and item not in sys.path:
+                        _PYTHONPATH.append(item)
+                        sys.path.insert(0, item)
+            if _PYTHONPATH:
+                _PYTHONPATH = str(os.pathsep).join(_PYTHONPATH)
+                if os.getenv("PYTHONPATH"):
+                    os.environ['PYTHONPATH'] += os.pathsep + _PYTHONPATH
+                else:
+                    os.environ['PYTHONPATH'] = _PYTHONPATH
+                r = exec_command(["scons", "--version"])
+        assert r['returncode'] == 0
+        return True
+    except (OSError, AssertionError):
+        for p in sys.path:
+            try:
+                r = exec_command([join(p, "scons"), "--version"])
+                assert r['returncode'] == 0
+                os.environ['PATH'] += os.pathsep + p
+                return True
+            except (OSError, AssertionError):
+                pass
+    return False
+
+
+def install_scons():
+    r = exec_command(["pip", "install", "-U", "scons"])
+    if r['returncode'] != 0:
+        r = exec_command(["pip", "install", "--egg", "scons",
+                          '--install-option="--no-install-man"'])
+    return r['returncode'] == 0
+
+
+def scons_in_pip():
+    r = exec_command(["pip", "list"])
+    if r['returncode'] != 0:
+        return False
+    return "scons (" in r['out'].lower()
 
 
 @memoized
@@ -385,7 +401,8 @@ def _lookup_boards():
         for json_file in sorted(os.listdir(bdir)):
             if not json_file.endswith(".json"):
                 continue
-            boards.update(load_json(join(bdir, json_file)))
+            with open(join(bdir, json_file)) as f:
+                boards.update(json.load(f))
     return boards
 
 

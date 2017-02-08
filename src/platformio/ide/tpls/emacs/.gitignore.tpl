@@ -1,2 +1,0 @@
-.pioenvs
-.clang_complete

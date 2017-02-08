@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ class Windows_x86Platform(BasePlatform):
         Using host OS (Windows, Linux 32/64 or Mac OS X) you can build native
         application for Windows x86 platform.
 
-        http://platformio.org/platforms/windows_x86
+        http://platformio.org/#!/platforms/windows_x86
     """
 
     PACKAGES = {

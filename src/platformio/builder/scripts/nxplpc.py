@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Ivan Kravets <me@ikravets.com>
+# Copyright 2014-2015 Ivan Kravets <me@ikravets.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,9 +17,18 @@
 """
 
 from os.path import join
+from shutil import copyfile
 
 from SCons.Script import (COMMAND_LINE_TARGETS, AlwaysBuild, Default,
                           DefaultEnvironment, SConscript)
+
+
+def UploadToDisk(target, source, env):  # pylint: disable=W0613,W0621
+    env.AutodetectUploadPort()
+    copyfile(join(env.subst("$BUILD_DIR"), "firmware.bin"),
+             join(env.subst("$UPLOAD_PORT"), "firmware.bin"))
+    print ("Firmware has been successfully uploaded.\n"
+           "Please restart your board.")
 
 env = DefaultEnvironment()
 
@@ -51,7 +60,7 @@ AlwaysBuild(target_size)
 # Target: Upload by default .bin file
 #
 
-upload = env.Alias(["upload", "uploadlazy"], target_firm, env.UploadToDisk)
+upload = env.Alias(["upload", "uploadlazy"], target_firm, UploadToDisk)
 AlwaysBuild(upload)
 
 #

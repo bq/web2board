@@ -15,14 +15,12 @@ import os
 
 import click
 import click.globals
-
-from libs.PathsManager import PathsManager
 from platformio import exception, util
 from platformio.commands.run import EnvironmentProcessor, _clean_pioenvs_dir
 
 
 def run(ctx=None, environment=(), target=(), upload_port=None,  # pylint: disable=R0913,R0914
-        project_dir=PathsManager.PLATFORMIO_WORKSPACE_PATH, verbose=3, disable_auto_clean=False):
+        project_dir=os.getcwd(), verbose=3, disable_auto_clean=False):
     with util.cd(project_dir):
         config = util.get_project_config()
 
@@ -34,25 +32,14 @@ def run(ctx=None, environment=(), target=(), upload_port=None,  # pylint: disabl
         unknown = set(environment) - known
         if unknown:
             raise exception.UnknownEnvNames(
-                ", ".join(unknown), ", ".join(known))
+                    ", ".join(unknown), ", ".join(known))
 
         # clean obsolete .pioenvs dir
         if not disable_auto_clean:
             try:
                 _clean_pioenvs_dir(util.get_pioenvs_dir())
-            except:  # pylint: disable=bare-except
-                click.secho(
-                    "Can not remove temporary directory `%s`. Please remove "
-                    "`.pioenvs` directory from the project manually to avoid "
-                    "build issues" % util.get_pioenvs_dir(),
-                    fg="yellow"
-                )
-
-        env_default = None
-        if config.has_option("platformio", "env_default"):
-            env_default = [
-                e.strip()
-                for e in config.get("platformio", "env_default").split(",")]
+            except Exception:
+                raise exception.CleanPioenvsDirError(util.get_pioenvs_dir())
 
         results = []
         for section in config.sections():
@@ -64,9 +51,7 @@ def run(ctx=None, environment=(), target=(), upload_port=None,  # pylint: disabl
                 raise exception.InvalidEnvName(section)
 
             envname = section[4:]
-            if ((environment and envname not in environment) or
-                    (not environment and env_default and
-                             envname not in env_default)):
+            if environment and envname not in environment:
                 # echo("Skipped %s environment" % style(envname, fg="yellow"))
                 continue
 
@@ -78,10 +63,10 @@ def run(ctx=None, environment=(), target=(), upload_port=None,  # pylint: disabl
                 options[k] = v
 
             ep = EnvironmentProcessor(
-                ctx, envname, options, target, upload_port, verbose)
-            results.append(ep.process())
-        return results
+                    ctx, envname, options, target, upload_port, verbose)
+            results.append(ep.process()) # [JORGE_GARCIA] modified to get process description
 
+        return results
 
 
 
