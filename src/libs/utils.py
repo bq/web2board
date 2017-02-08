@@ -1,4 +1,3 @@
-# coding=mbcs
 import inspect
 import logging
 import os
@@ -95,7 +94,7 @@ def find_modules_for_pyinstaller(path, patterns):
         return module[:-3]  # removing .py
 
     list_modules = [get_module_from_file(f) for f in files if
-                    os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
+                   os.path.isfile(f) and f.endswith(".py") and not f.endswith("__init__.py")]
     return list(set(list_modules))
 
 
@@ -166,17 +165,15 @@ def set_log_level(log_level):
 def open_file(file_path):
     if isinstance(file_path, str):
         file_path = file_path.decode(sys.getfilesystemencoding())
-    original_working_path = os.getcwd()
-    try:
-        os.chdir(os.path.dirname(file_path))
-        exe_name = os.path.basename(file_path)
-        if sys.platform == "win32":
-            template = u'"{0}" {1}'
+    # file_path.encode(sys.getfilesystemencoding())
+    if sys.platform == "win32":
+        template = u'"{0}" {1}'
+    else:
+        if file_path[0] == "/":
+            template = u"'{0}' {1}"
         else:
             template = u"'./{0}' {1}"
-        os.popen(template.format(exe_name, " ".join(sys.argv[1:])).encode(sys.getfilesystemencoding()))
-    finally:
-        os.chdir(original_working_path)
+    os.popen(u'"{0}" {1}'.format(file_path, " ".join(sys.argv[1:])).encode(sys.getfilesystemencoding()))
 
 
 def set_proxy(proxy):

@@ -9,7 +9,7 @@ from libs.PathsManager import PathsManager
 from Scripts import TestRunner
 
 hidden_imports = ['libs.LoggingUtils', 'libs.WSCommunication.Hubs', 'UserList', 'UserString', 'ConfigParser']
-hidden_imports.extend(TestRunner.get_module_string('Test/**/test*.py'))
+hidden_imports = hidden_imports.extend(TestRunner.get_module_string('Test/**/test*.py'))
 
 pathEx = os.getcwd()
 block_cipher = None
