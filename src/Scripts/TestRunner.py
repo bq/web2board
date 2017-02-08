@@ -5,7 +5,6 @@ import sys
 import unittest
 
 import glob2
-import xmlrunner
 
 
 def get_module_path():
@@ -45,10 +44,7 @@ def __run_test(suite, report_title="report"):
     from Test.HTMLTestRunner import HTMLTestRunner
     from libs.PathsManager import PathsManager
     report_path = PathsManager.RES_PATH + os.sep + report_title + '.html'
-    if "xmlrunner" in sys.argv:
-        runner = xmlrunner.XMLTestRunner(output='test-reports')
-    else:
-        runner = HTMLTestRunner(stream=file(report_path, 'wb'), title=" Web2Board " + report_title, verbosity=1)
+    runner = HTMLTestRunner(stream=file(report_path, 'wb'), title=" Web2Board " + report_title, verbosity=1)
     runner.run(suite)
 
 
